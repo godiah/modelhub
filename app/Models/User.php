@@ -29,4 +29,32 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function jobs()
+    {
+        return $this->hasMany(ModelJob::class);
+    }
+
+    // Get User Initials
+    public function getInitials()
+    {
+        $name = $this->name;
+        if (empty($name)) {
+            return '';
+        }
+
+        // Split name into words
+        $words = explode(' ', $name);
+        $initials = '';
+
+        // Take first letter of each word
+        foreach ($words as $word) {
+            if (!empty(trim($word))) {
+                $initials .= strtoupper($word[0]);
+            }
+        }
+
+        // Limit to 2-3 initials for display
+        return substr($initials, 0, 3);
+    }
 }
