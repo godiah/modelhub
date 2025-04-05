@@ -164,7 +164,7 @@ class JobApplicationController extends Controller
         }
 
         $message = $isDraft ? 'Application saved as draft' : 'Application submitted successfully';
-        $redirectRoute = $isDraft ? 'my.drafts' : 'my.applications';
+        $redirectRoute = $isDraft ? 'applications.drafts' : 'applications.my';
 
         // Flash data for SweetAlert
         return redirect()->route($redirectRoute)->with([
@@ -180,19 +180,19 @@ class JobApplicationController extends Controller
     /**
      * Load a draft application for editing
      */
-    public function continueDraft($id)
+    public function continueDraft($slug)
     {
-        // Find the draft application
-        $application = JobApplication::where('id', $id)
+        // Get the job by slug
+        $job = ModelJob::where('slug', $slug)->firstOrFail();
+
+        // Find the draft application for this job and current user
+        $application = JobApplication::where('job_id', $job->id)
             ->where('applicant_id', Auth::id())
             ->where('status', 'draft')
             ->firstOrFail();
 
-        // Load the job details
-        $job = ModelJob::findOrFail($application->job_id);
-
         // Pass the data to the view
-        return view('jobBoard.applications-continue', compact('application', 'job'));
+        return view('jobBoard.applications.continue-draft', compact('application', 'job'));
     }
 
     /**
@@ -205,7 +205,7 @@ class JobApplicationController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('jobBoard.my-applications', compact('applications'));
+        return view('jobBoard.applications.index', compact('applications'));
     }
 
     /**
@@ -219,7 +219,7 @@ class JobApplicationController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('jobBoard.my-drafts', compact('drafts'));
+        return view('jobBoard.applications.drafts', compact('drafts'));
     }
 
     /**
@@ -243,7 +243,7 @@ class JobApplicationController extends Controller
 
         $application->delete();
 
-        return redirect()->route('my.drafts')->with('success', 'Application deleted successfully');
+        return redirect()->route('applications.drafts')->with('success', 'Application deleted successfully');
     }
 
     /**
@@ -260,7 +260,7 @@ class JobApplicationController extends Controller
             ->where('applicant_id', $user->id)
             ->firstOrFail();
 
-        return view('jobBoard.applications-show', compact('application'));
+        return view('jobBoard.applications.show', compact('application'));
     }
 
     /**
@@ -283,15 +283,15 @@ class JobApplicationController extends Controller
      * 2.
      * Display applications for a  job.
      */
-    public function getJobApplications($id)
+    public function getJobApplications($slug)
     {
         // Check if the job belongs to the authenticated user
-        $job = ModelJob::where('id', $id)
+        $job = ModelJob::where('slug', $slug)
             ->where('user_id', Auth::id())
             ->with('applications.applicant') // Eager load applications and applicants
             ->firstOrFail();
 
-        return view('jobBoard.posted.job-applications', [
+        return view('jobBoard.posted.applications.index', [
             'job' => $job,
             'applications' => $job->applications
         ]);
@@ -304,11 +304,11 @@ class JobApplicationController extends Controller
     public function showApplications(JobApplication $application)
     {
         // Ensure the current user is the owner of this job posting
-        if (auth()->user()->id !== $application->job->user_id) {
+        if (Auth::user()->id !== $application->job->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        return view('jobBoard.posted.show-application', [
+        return view('jobBoard.posted.applications.show', [
             'application' => $application,
             'job' => $application->job
         ]);
@@ -321,7 +321,7 @@ class JobApplicationController extends Controller
     public function updateStatus(Request $request, JobApplication $application)
     {
         // Ensure the current user is the owner of this job posting
-        if (auth()->user()->id !== $application->job->user_id) {
+        if (Auth::user()->id !== $application->job->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -349,7 +349,7 @@ class JobApplicationController extends Controller
     public function sendMessage(Request $request, JobApplication $application)
     {
         // Ensure the current user is the owner of this job posting
-        if (auth()->user()->id !== $application->job->user_id) {
+        if (Auth::user()->id !== $application->job->user_id) {
             abort(403, 'Unauthorized action.');
         }
 

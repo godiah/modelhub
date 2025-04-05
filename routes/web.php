@@ -14,64 +14,50 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-// JobBoard
-// Job Home Page
-Route::get('/jobs', [JobController::class, 'index'])->name('job.home');
-// Show the new job form
-Route::get('/jobs/new', [JobController::class, 'new'])->name('job.new');
-// List all available jobs
-Route::get('/jobs/browse', [JobController::class, 'browseJobs'])->name('jobs.browse');
-// Show a single job
-Route::get('/jobs/{job:slug}', [JobController::class, 'show'])->name('job.show');
-// Save a new job
-Route::post('/jobs/create', [JobController::class, 'store'])->name('job.store');
+// Job Public Routes (No auth)
+Route::prefix('jobs')->name('jobs.')->group(function () {
+    Route::get('/', [JobController::class, 'index'])->name('index'); // job.home
+    Route::get('/browse', [JobController::class, 'browseJobs'])->name('browse');
+    Route::get('/create', [JobController::class, 'new'])->name('create'); // job.new
+    Route::post('/', [JobController::class, 'store'])->name('store'); // job.store
+    Route::get('/{job:slug}', [JobController::class, 'show'])->name('show');
+    Route::get('/{job:slug}/apply', [JobController::class, 'apply'])->name('apply');
+
+    Route::get('/{job:slug}/edit', [JobController::class, 'edit'])->middleware('auth')->name('edit');
+    Route::patch('/{job:slug}', [JobController::class, 'update'])->middleware('auth')->name('update');
+});
+
 // Check if a job title already exists
-Route::get('/check-title', [JobController::class, 'checkTitle']);
-// Apply for a job: show application form
-Route::get('/jobs/browse/{job:slug}/apply', [JobController::class, 'apply'])
-    ->name('jobs.apply');
+Route::get('/check-title', [JobController::class, 'checkTitle'])->name('jobs.check-title');
 
+// Application Routes (User Applications)
+Route::middleware(['auth'])->prefix('applications')->name('applications.')->group(function () {
+    Route::post('/', [JobApplicationController::class, 'store'])->name('store');
+    Route::get('/continue/{slug}', [JobApplicationController::class, 'continueDraft'])->name('continue');
+    Route::delete('/{id}', [JobApplicationController::class, 'destroy'])->name('destroy');
+    Route::get('/submitted/{job:slug}', [JobApplicationController::class, 'show'])->name('show');
+});
+
+// My Applications
 Route::middleware(['auth'])->group(function () {
-    // Store a new application (draft or submitted)
-    Route::post('/applications', [JobApplicationController::class, 'store'])->name('applications.store');
-
-    // Submit a draft application
-    Route::get('/applications/continue/{id}', [JobApplicationController::class, 'continueDraft'])->name('applications.continue');
-
-    // Get all user's applications
-    Route::get('/my-applications', [JobApplicationController::class, 'getUserApplications'])->name('my.applications');
-
-    // Get user's draft applications
-    Route::get('/my-drafts', [JobApplicationController::class, 'getDraftApplications'])->name('my.drafts');
-
-    // Delete an application
-    Route::delete('/applications/{id}', [JobApplicationController::class, 'destroy'])->name('applications.destroy');
-
-    // View Submitted Application Details
-    Route::get('/submitted/applications/{job:slug}', [JobApplicationController::class, 'show'])->name('applications.show');
+    Route::get('/my-applications', [JobApplicationController::class, 'getUserApplications'])->name('applications.my');
+    Route::get('/my-drafts', [JobApplicationController::class, 'getDraftApplications'])->name('applications.drafts');
 });
 
-/** Posted Jobs Routes */
-Route::middleware(['auth'])->prefix('my-jobs')->group(function () {
-    // View jobs posted by the user
-    Route::get('/', [JobApplicationController::class, 'getUserPostedJobs'])->name('my.posted.jobs');
+// My Posted Jobs and Applications Management
+Route::middleware(['auth'])->prefix('my-jobs')->name('my-jobs.')->group(function () {
+    Route::get('/', [JobApplicationController::class, 'getUserPostedJobs'])->name('index');
 
-    // View applications for a posted job
-    Route::get('/{id}/applications', [JobApplicationController::class, 'getJobApplications'])->name('jobs.applications');
 
-    // View application details
-    Route::get('/applications/{application}/details', [JobApplicationController::class, 'showApplications'])->name('show-applications');
-
-    // Update application status
-    Route::patch('/applications/{application}/status', [JobApplicationController::class, 'updateStatus'])->name('applications.update-status');
-
-    // Send message to applicant
-    Route::post('/applications/{application}/message', [JobApplicationController::class, 'sendMessage'])->name('applications.send-message');
-
-    // Edit and update a job
-    Route::get('/jobs/{job:slug}/edit', [JobController::class, 'edit'])->name('jobs.edit');
-    Route::patch('/jobs/{job:slug}', [JobController::class, 'update'])->name('jobs.update');
+    Route::prefix('applications')->name('applications.')->group(function () {
+        Route::get('/{slug}', [JobApplicationController::class, 'getJobApplications'])->name('index');
+        Route::get('/{application}/details', [JobApplicationController::class, 'showApplications'])->name('show');
+        Route::patch('/{application}/status', [JobApplicationController::class, 'updateStatus'])->name('update-status');
+        Route::post('/{application}/message', [JobApplicationController::class, 'sendMessage'])->name('send-message');
+    });
 });
+
+
 
 
 

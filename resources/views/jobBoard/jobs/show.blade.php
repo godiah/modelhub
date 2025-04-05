@@ -23,7 +23,7 @@
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M1 9l4-4-4-4" />
                         </svg>
-                        <a href="{{ route('job.home') }}"
+                        <a href="{{ route('jobs.index') }}"
                             class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700 md:ml-2">
                             Modelling Jobs
                         </a>
@@ -243,7 +243,7 @@
                 <!-- Footer Actions -->
                 <div
                     class="bg-gradient-to-r from-neutral-50 to-neutral-100 p-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-neutral-200">
-                    <a href="{{ route('job.home') }}"
+                    <a href="{{ route('jobs.index') }}"
                         class="group text-tertiary hover:text-primary font-medium flex items-center transition-all py-2 px-4 rounded-lg hover:bg-white hover:shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-5 w-5 mr-2 text-secondary group-hover:text-primary transition-colors"
@@ -267,7 +267,7 @@
                             Preview
                         </a> --}}
 
-                        <a href="{{ route('job.new') }}"
+                        <a href="{{ route('jobs.create') }}"
                             class="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-5 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center font-tertiary focus:ring-2 focus:ring-accent/50">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">

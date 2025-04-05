@@ -51,7 +51,7 @@
                             to your unique modeling challenges and ensuring your project's success.
                         </p>
                         <div class="pt-4">
-                            <a href="{{ route('job.new') }}"
+                            <a href="{{ route('jobs.create') }}"
                                 class="inline-block px-8 py-4 bg-accent text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition duration-300 ease-in-out">
                                 Post Project
                             </a>
@@ -124,7 +124,7 @@
                     </div>
 
                     <div class="text-center mt-16">
-                        <a href="{{ route('job.new') }}"
+                        <a href="{{ route('jobs.create') }}"
                             class="inline-block px-8 py-4 bg-accent text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition duration-300 ease-in-out">
                             Post Project
                         </a>
@@ -216,7 +216,7 @@
                     </div>
 
                     <div class="text-center mt-16">
-                        <a href="{{ route('job.new') }}"
+                        <a href="{{ route('jobs.create') }}"
                             class="inline-block px-8 py-4 bg-accent text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition duration-300 ease-in-out">
                             Post Project
                         </a>
@@ -232,7 +232,7 @@
                         Submit your project at no cost and discover how effortlessly you can solve your next modeling
                         challenge with 3D Projects
                     </p>
-                    <a href="{{ route('job.new') }}"
+                    <a href="{{ route('jobs.create') }}"
                         class="inline-block px-8 py-4 bg-accent text-white font-semibold rounded-lg shadow-lg hover:bg-amber-600 transition duration-300 ease-in-out">
                         Post Project
                     </a>

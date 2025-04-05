@@ -4,7 +4,7 @@
             <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
                 {{ __('Applications for') }}: <span class="text-secondary">{{ $job->title }}</span>
             </h2>
-            <a href="{{ route('my.posted.jobs') }}"
+            <a href="{{ route('my-jobs.index', ['slug' => $job->slug]) }}"
                 class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -224,7 +224,7 @@
                                                     class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-neutral-200">
                                                     <div class="py-1">
                                                         <form method="POST"
-                                                            action="{{ route('applications.update-status', $application->id) }}">
+                                                            action="{{ route('my-jobs.applications.update-status', $application->id) }}">
                                                             @csrf
                                                             @method('PATCH')
                                                             <input type="hidden" name="status" value="reviewed">
@@ -245,7 +245,7 @@
                                                         </form>
 
                                                         <form method="POST"
-                                                            action="{{ route('applications.update-status', $application->id) }}">
+                                                            action="{{ route('my-jobs.applications.update-status', $application->id) }}">
                                                             @csrf
                                                             @method('PATCH')
                                                             <input type="hidden" name="status" value="hired">
@@ -266,7 +266,7 @@
                                                         </form>
 
                                                         <form method="POST"
-                                                            action="{{ route('applications.update-status', $application->id) }}">
+                                                            action="{{ route('my-jobs.applications.update-status', $application->id) }}">
                                                             @csrf
                                                             @method('PATCH')
                                                             <input type="hidden" name="status" value="rejected">
@@ -411,7 +411,7 @@
 
                                                 <!-- Actions -->
                                                 <div class="mt-4">
-                                                    <a href="{{ route('show-applications', ['application' => $application->id]) }}"
+                                                    <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"
                                                         class="block w-full text-center px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90 transition shadow-sm">
                                                         View Full Details
                                                     </a>

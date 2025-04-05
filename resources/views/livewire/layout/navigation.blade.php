@@ -64,12 +64,12 @@ new class extends Component {
                         </x-dropdown-link>
 
                         <!-- My Applications Link -->
-                        <x-dropdown-link :href="route('my.applications')" wire:navigate>
+                        <x-dropdown-link :href="route('applications.my')" wire:navigate>
                             {{ __('My Applications') }}
                         </x-dropdown-link>
 
                         <!-- Posted Jobs Link -->
-                        <x-dropdown-link :href="route('my.posted.jobs')" wire:navigate>
+                        <x-dropdown-link :href="route('my-jobs.index')" wire:navigate>
                             {{ __('Jobs Posted') }}
                         </x-dropdown-link>
 
@@ -127,12 +127,12 @@ new class extends Component {
                 </x-responsive-nav-link>
 
                 <!-- Mobile My Applications Link -->
-                <x-responsive-nav-link :href="route('my.applications')" wire:navigate>
+                <x-responsive-nav-link :href="route('applications.my')" wire:navigate>
                     {{ __('My Applications') }}
                 </x-responsive-nav-link>
 
                 <!-- Mobile Posted Jobs Link -->
-                <x-responsive-nav-link :href="route('my.posted.jobs')" wire:navigate>
+                <x-responsive-nav-link :href="route('my-jobs.index')" wire:navigate>
                     {{ __('Jobs Posted') }}
                 </x-responsive-nav-link>
 

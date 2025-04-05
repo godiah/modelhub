@@ -2,7 +2,7 @@
     <section class="bg-neutral-50">
         <div class="container mx-auto max-w-5xl px-4 py-8">
             <!-- Back Navigation -->
-            <a href="{{ route('my.applications') }}"
+            <a href="{{ route('applications.my') }}"
                 class="inline-flex items-center text-tertiary hover:text-primary transition-colors mb-6 font-main">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">

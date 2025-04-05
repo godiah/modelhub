@@ -44,7 +44,7 @@
 
             <!-- Navigation -->
             <nav class="hidden lg:flex items-center space-x-6">
-                <a href="{{ route('job.home') }}"
+                <a href="{{ route('jobs.index') }}"
                     class="font-secondary font-medium text-neutral-700 hover:text-secondary transition-colors duration-300">3D
                     MODELS</a>
                 <a href="#"

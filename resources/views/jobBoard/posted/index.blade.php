@@ -4,7 +4,7 @@
             <h2 class="font-tertiary font-semibold text-2xl text-primary leading-tight">
                 {{ __('Jobs Posted') }}
             </h2>
-            <a href="{{ route('job.new') }}"
+            <a href="{{ route('jobs.create') }}"
                 class="inline-flex items-center px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
@@ -27,7 +27,7 @@
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <p class="mt-6 text-neutral-500 font-main text-lg">You haven't posted any jobs yet.</p>
-                        <a href="{{ route('job.new') }}"
+                        <a href="{{ route('jobs.create') }}"
                             class="mt-4 inline-flex items-center px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg transition-colors duration-200">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
                                 fill="currentColor">
@@ -195,7 +195,7 @@
                                             </svg>
                                             Edit
                                         </a>
-                                        <a href="{{ route('jobs.applications', ['id' => $job->id]) }}"
+                                        <a href="{{ route('my-jobs.applications.index', ['slug' => $job->slug]) }}"
                                             class="inline-flex items-center px-3 py-1.5 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors shadow-sm">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">

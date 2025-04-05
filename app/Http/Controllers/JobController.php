@@ -21,7 +21,7 @@ class JobController extends Controller
      */
     public function index()
     {
-        return view('jobBoard.home');
+        return view('jobBoard.jobs.index');
     }
 
     /**
@@ -32,7 +32,7 @@ class JobController extends Controller
         $skills = Skill::where('is_active', true)->get();
         $software = Software::where('is_active', true)->get();
 
-        return view('jobBoard.new', [
+        return view('jobBoard.jobs.new', [
             'skills' => $skills,
             'software' => $software
         ]);
@@ -100,7 +100,7 @@ class JobController extends Controller
         // // Check if user has permission to edit this job
         // $this->authorize('update', $job);
 
-        return view('jobBoard.posted.edit-job', [
+        return view('jobBoard.jobs.edit', [
             'job' => $job,
             'skills' => Skill::where('is_active', true)->get(),
             'software' => Software::where('is_active', true)->get()
@@ -155,7 +155,7 @@ class JobController extends Controller
      */
     public function show(ModelJob $job)
     {
-        return view('jobBoard.show', compact('job'));
+        return view('jobBoard.jobs.show', compact('job'));
     }
 
     /**
@@ -219,7 +219,7 @@ class JobController extends Controller
             'sort' => $request->sort ?? 'newest'
         ];
 
-        return view('jobBoard.browse-jobs', compact('jobs', 'filters'));
+        return view('jobBoard.jobs.browse', compact('jobs', 'filters'));
     }
 
     /**
@@ -235,7 +235,7 @@ class JobController extends Controller
         // Eager load the user relationship to prevent N+1 queries
         $job->loadMissing('user');
 
-        return view('jobBoard.apply-jobs', compact('job'));
+        return view('jobBoard.jobs.apply', compact('job'));
     }
 
     // Check if project title exists

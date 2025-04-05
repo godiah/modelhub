@@ -4,7 +4,7 @@
             <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
                 Application details
             </h2>
-            <a href="{{ route('jobs.applications', ['id' => $job->id]) }}"
+            <a href="{{ route('my-jobs.applications.index', ['slug' => $job->slug]) }}"
                 class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
@@ -454,7 +454,7 @@
                             </div>
 
                             <form
-                                action="{{ route('applications.update-status', ['application' => $application->id]) }}"
+                                action="{{ route('my-jobs.applications.update-status', ['application' => $application->id]) }}"
                                 method="POST">
                                 @csrf
                                 @method('PATCH')
@@ -556,7 +556,7 @@
                             </div>
 
                             <form
-                                action="{{ route('applications.send-message', ['application' => $application->id]) }}"
+                                action="{{ route('my-jobs.applications.send-message', ['application' => $application->id]) }}"
                                 method="POST">
                                 @csrf
 

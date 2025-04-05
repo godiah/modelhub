@@ -25,7 +25,7 @@
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                                     stroke-width="2" d="M1 9l4-4-4-4" />
                             </svg>
-                            <a href="{{ route('job.home') }}"
+                            <a href="{{ route('jobs.index') }}"
                                 class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700 md:ml-2">
                                 Modelling Jobs
                             </a>

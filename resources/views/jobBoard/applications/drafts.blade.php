@@ -79,7 +79,7 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex items-center space-x-3">
-                                    <a href="{{ route('applications.continue', ['id' => $draft->id]) }}"
+                                    <a href="{{ route('applications.continue', ['slug' => $draft->job->slug]) }}"
                                         class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-main text-sm font-medium">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
