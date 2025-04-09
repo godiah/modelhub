@@ -1,35 +1,41 @@
 <x-app-layout>
-    <section class="bg-neutral-50">
-        <div class="container mx-auto max-w-5xl px-4 py-8">
-            <!-- Back Navigation -->
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
+                Application details
+            </h2>
             <a href="{{ route('applications.my') }}"
-                class="inline-flex items-center text-tertiary hover:text-primary transition-colors mb-6 font-main">
+                class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Back to My Applications
+                Back to Applications
             </a>
+        </div>
+    </x-slot>
 
+    <section class="bg-neutral-50">
+        <div class="container mx-auto max-w-7xl px-4 py-8">
             <!-- Application Status Banner -->
             <div
                 class="mb-6 rounded-lg p-4 {{ $application->status === 'submitted'
-                    ? 'bg-green-100 border-l-4 border-green-500'
-                    : ($application->status === 'accepted'
+                    ? 'bg-yellow-100 border-l-4 border-yellow-500'
+                    : ($application->status === 'reviewed'
                         ? 'bg-blue-100 border-l-4 border-blue-500'
                         : ($application->status === 'rejected'
                             ? 'bg-red-100 border-l-4 border-red-500'
-                            : 'bg-neutral-100 border-l-4 border-neutral-500')) }}">
+                            : 'bg-green-100 border-l-4 border-green-500')) }}">
                 <div class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-6 w-6 mr-3 {{ $application->status === 'submitted'
-                            ? 'text-green-500'
-                            : ($application->status === 'accepted'
+                            ? 'text-yellow-500'
+                            : ($application->status === 'reviewed'
                                 ? 'text-blue-500'
                                 : ($application->status === 'rejected'
                                     ? 'text-red-500'
-                                    : 'text-neutral-500')) }}"
+                                    : 'text-green-500')) }}"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -38,12 +44,12 @@
                         <p class="font-medium text-neutral-800">
                             Application Status: <span
                                 class="font-bold {{ $application->status === 'submitted'
-                                    ? 'text-green-700'
-                                    : ($application->status === 'accepted'
+                                    ? 'text-yellow-700'
+                                    : ($application->status === 'reviewed'
                                         ? 'text-blue-700'
                                         : ($application->status === 'rejected'
                                             ? 'text-red-700'
-                                            : 'text-neutral-700')) }}">{{ ucfirst($application->status) }}</span>
+                                            : 'text-green-700')) }}">{{ ucfirst($application->status) }}</span>
                         </p>
                         <p class="text-sm text-neutral-600">
                             Applied on {{ $application->created_at->format('F d, Y') }}
@@ -101,7 +107,7 @@
                         </div>
 
                         <div class="mt-4 flex">
-                            <div class="bg-neutral-100 rounded-lg px-4 py-3 text-center">
+                            <div class="bg-neutral-100 rounded-lg px-5 py-3 text-center">
                                 <p class="text-sm text-neutral-500">Job Budget</p>
                                 <p class="text-base font-bold text-primary mt-1">
                                     Ksh{{ number_format($application->job->budget) }}</p>
@@ -131,7 +137,7 @@
 
                         <div class="bg-white rounded-lg p-4 border border-neutral-200">
                             <p class="text-sm text-neutral-500 mb-1">You'll Receive</p>
-                            <p class="text-xl font-bold text-accent">
+                            <p class="text-xl font-bold text-secondary">
                                 Ksh{{ number_format($application->net_amount, 2) }}
                             </p>
                         </div>
@@ -143,13 +149,13 @@
                     <h2 class="text-lg font-semibold text-neutral-800 mb-4 font-secondary">Your Proposal</h2>
 
                     @if ($application->proposal)
-                        <div class="bg-white rounded-lg p-4 border border-neutral-200">
-                            <div class="prose max-w-none">
+                        <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-100 text-justify">
+                            <div class="prose prose-sm max-w-none text-neutral-700">
                                 {!! nl2br(e($application->proposal)) !!}
                             </div>
                         </div>
                     @else
-                        <div class="bg-white rounded-lg p-4 border border-neutral-200 flex items-center gap-3">
+                        <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-100 flex items-center gap-3">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-400" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"

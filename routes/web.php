@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\MessageTemplateController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -16,10 +18,10 @@ Route::view('profile', 'profile')
 
 // Job Public Routes (No auth)
 Route::prefix('jobs')->name('jobs.')->group(function () {
-    Route::get('/', [JobController::class, 'index'])->name('index'); // job.home
+    Route::get('/', [JobController::class, 'index'])->name('index');
     Route::get('/browse', [JobController::class, 'browseJobs'])->name('browse');
-    Route::get('/create', [JobController::class, 'new'])->name('create'); // job.new
-    Route::post('/', [JobController::class, 'store'])->name('store'); // job.store
+    Route::get('/create', [JobController::class, 'new'])->name('create');
+    Route::post('/', [JobController::class, 'store'])->name('store');
     Route::get('/{job:slug}', [JobController::class, 'show'])->name('show');
     Route::get('/{job:slug}/apply', [JobController::class, 'apply'])->name('apply');
 
@@ -56,6 +58,24 @@ Route::middleware(['auth'])->prefix('my-jobs')->name('my-jobs.')->group(function
         Route::post('/{application}/message', [JobApplicationController::class, 'sendMessage'])->name('send-message');
     });
 });
+
+// Message Templates
+Route::get('/my-jobs/message-templates', [MessageTemplateController::class, 'index'])
+    ->middleware(['auth'])->name('my-jobs.message-templates');
+Route::post('/my-jobs/message-templates', [MessageTemplateController::class, 'store'])
+    ->middleware(['auth'])->name('my-jobs.message-templates.store');
+Route::delete('/my-jobs/message-templates/{template}', [MessageTemplateController::class, 'destroy'])
+    ->middleware(['auth'])->name('my-jobs.message-templates.destroy');
+
+// Notifications
+Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::get('/{id}/read', [NotificationController::class, 'markAsRead'])->name('read');
+    Route::post('/read-all', [NotificationController::class, 'markAllAsRead'])->name('read-all');
+    Route::delete('/{id}', [NotificationController::class, 'destroy'])->name('delete');
+    Route::delete('/', [NotificationController::class, 'destroyAll'])->name('delete-all');
+});
+
 
 
 

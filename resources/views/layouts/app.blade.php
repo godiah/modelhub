@@ -26,7 +26,7 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-            <header class="bg-white shadow">
+            <header class="bg-white shadow fixed-page-header">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
@@ -34,9 +34,11 @@
         @endif
 
         <!-- Page Content -->
-        <main>
-            {{ $slot }}
-        </main>
+        <div class="flex flex-col min-h-screen">
+            <main class="flex-grow content-with-fixed-header">
+                {{ $slot }}
+            </main>
+        </div>
 
     </div>
     <script>
@@ -62,6 +64,12 @@
             @endif
         });
     </script>
+    <!-- Check User Notifications -->
+    @auth
+        <script>
+            window.userId = {{ auth()->id() }};
+        </script>
+    @endauth
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script src="../path/to/flowbite/dist/flowbite.min.js"></script>
 </body>

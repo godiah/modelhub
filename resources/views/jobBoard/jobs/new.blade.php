@@ -1,54 +1,31 @@
 <x-app-layout>
+
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
+                    {{ __('New Project') }}
+                </h2>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ route('my-jobs.index') }}"
+                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="h-5 w-5 mr-2">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z" />
+                    </svg>
+                    Project Dashboard
+                </a>
+            </div>
+        </div>
+    </x-slot>
+
     <section class="font-main">
         <!-- Main Container -->
         <div class="container mx-auto max-w-7xl">
-            <!-- Breadcrumb -->
-            <nav class="flex max-w-xl  p-8" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 md:space-x-2">
-                    <!-- First Link -->
-                    <li class="inline-flex items-center">
-                        <a href="{{ route('home') }}"
-                            class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700">
-                            <svg class="w-3 h-3 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M19.707 9.293l-2-2-7-7a1 1 0 00-1.414 0l-7 7-2 2a1 1 0 001.414 1.414L2 10.414V18a2 2 0 002 2h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-7.586l.293.293a1 1 0 001.414-1.414z" />
-                            </svg>
-                            ModelHub
-                        </a>
-                    </li>
-                    <!-- Second Link -->
-                    <li>
-                        <div class="flex items-center">
-                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="M1 9l4-4-4-4" />
-                            </svg>
-                            <a href="{{ route('jobs.index') }}"
-                                class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700 md:ml-2">
-                                Modelling Jobs
-                            </a>
-                        </div>
-                    </li>
-                    <!-- Active Link -->
-                    <li aria-current="page">
-                        <div class="flex items-center">
-                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="M1 9l4-4-4-4" />
-                            </svg>
-                            <span class="ml-1 text-sm font-medium text-black md:ml-2">
-                                Start a Project
-                            </span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
-
             <!-- Create Job Form -->
-            <div class="pb-14">
+            <div class="py-14 px-4 sm:px-6 lg:px-8">
                 <div
                     class="rounded-2xl shadow-xl overflow-hidden bg-white transition-all duration-300 hover:shadow-2xl border border-neutral-200">
                     <!-- Form Header -->
@@ -76,7 +53,7 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="/jobs/create" class="p-8" enctype="multipart/form-data"
+                    <form method="POST" action="{{ route('jobs.store') }}" class="p-8" enctype="multipart/form-data"
                         id="projectForm">
                         @csrf
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8">
@@ -138,43 +115,106 @@
                                         class="block text-sm font-medium text-primary mb-2 after:content-['*'] after:ml-1 after:text-red-500 font-tertiary">
                                         Upload Preview Image
                                     </label>
+
                                     @error('image')
                                         <p class="text-red-500 text-xs italic">{{ $message }}</p>
                                     @enderror
-                                    <input type="file" name="image" id="imageUpload" accept="image/*"
-                                        class="hidden">
-                                    <input type="hidden" name="old_image" id="old-image-input"
-                                        value="{{ old('old_image', session('old_image')) }}">
-                                    <div id="dropzone"
-                                        class="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center cursor-pointer hover:border-secondary transition-all duration-300 relative min-h-[180px] flex flex-col items-center justify-center bg-neutral-50">
-                                        <div id="dropzone-text"
-                                            class="text-neutral-500 flex flex-col items-center space-y-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-12 w-12 text-secondary/50 mb-2" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    stroke-width="1.5"
-                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            <p class="text-sm font-medium text-neutral-600">Drag and drop your
-                                                image here</p>
-                                            <p class="text-xs text-neutral-500">or</p>
-                                            <span
-                                                class="px-4 py-2 bg-secondary/10 text-secondary rounded-lg text-sm font-medium hover:bg-secondary/20 transition-colors">
-                                                Browse Files
-                                            </span>
-                                            <p class="text-xs text-neutral-500 mt-2">Supported formats: JPG, PNG,
-                                                GIF (Max 5MB)</p>
+
+                                    <div class="mt-3 rounded-lg border border-neutral-200 p-4 bg-neutral-50">
+                                        <div class="mb-3">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <label for="imageUpload"
+                                                    class="block text-sm font-medium text-primary font-tertiary">
+                                                    Select Preview Image
+                                                </label>
+                                                <span id="previewFileStatus" class="text-xs text-neutral-500">No image
+                                                    selected</span>
+                                            </div>
+
+                                            <div class="flex items-center">
+                                                <button id="selectPreviewBtn" type="button"
+                                                    class="mr-3 py-2 px-4 rounded-lg border border-dashed border-secondary 
+                                        text-sm font-medium text-secondary hover:bg-secondary/5 focus:outline-none 
+                                        transition-colors duration-200">
+                                                    Select Image
+                                                </button>
+                                                <span class="text-xs text-neutral-500">
+                                                    Accepted formats: JPG, PNG, JPEG (Max: 5MB)
+                                                </span>
+                                            </div>
+
+                                            <input type="file" name="image" id="imageUpload" accept="image/*"
+                                                class="hidden">
+                                            <input type="hidden" name="old_image" id="old-image-input"
+                                                value="{{ old('old_image', session('old_image')) }}">
+                                        </div>
+
+                                        <!-- Image preview container -->
+                                        <div id="preview-container" class="mt-3">
+                                            <!-- Preview thumbnail will be added here -->
+                                        </div>
+
+                                        <!-- Empty state message -->
+                                        <div id="previewEmptyState"
+                                            class="flex justify-center items-center h-24 border border-dashed border-neutral-300 rounded-lg bg-neutral-50 text-neutral-500 text-sm">
+                                            No preview image selected
                                         </div>
                                     </div>
+                                </div>
 
-                                    <!-- Separate Image Preview Container -->
-                                    <div id="image-preview"
-                                        class="mt-4 border border-neutral-200 rounded-lg p-4 bg-white hidden">
-                                        <div class="flex items-center justify-between mb-2">
-                                            <h3 class="text-sm font-medium text-neutral-700">Preview</h3>
+                                <!-- Additional Images Section -->
+                                <div class="mb-4">
+                                    <!-- Toggle Checkbox -->
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <input type="checkbox" id="toggleAdditional"
+                                            class="form-checkbox h-4 w-4 text-secondary focus:ring-secondary rounded">
+                                        <label for="toggleAdditional"
+                                            class="text-sm text-neutral-700 font-medium flex items-center">
+                                            <span>Add additional images</span>
+                                            <span class="ml-1 text-xs text-neutral-500">(optional, max 5)</span>
+                                        </label>
+                                    </div>
+
+                                    <!-- Additional Images Upload Section (initially hidden) -->
+                                    <div id="additionalImagesSection"
+                                        class="mt-3 rounded-lg border border-neutral-200 p-4 bg-neutral-50"
+                                        style="display: none;">
+                                        <div class="mb-3">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <label for="additionalImages"
+                                                    class="block text-sm font-medium text-primary font-tertiary">
+                                                    Upload Additional Images
+                                                </label>
+                                                <span id="fileCounter" class="text-xs text-neutral-500">0/5
+                                                    images</span>
+                                            </div>
+
+                                            <div class="flex items-center">
+                                                <button id="selectImagesBtn" type="button"
+                                                    class="mr-3 py-2 px-4 rounded-lg border border-dashed border-secondary 
+                                                        text-sm font-medium text-secondary hover:bg-secondary/5 focus:outline-none 
+                                                        transition-colors duration-200">
+                                                    Select Images
+                                                </button>
+                                                <span class="text-xs text-neutral-500">
+                                                    Accepted formats: JPG, PNG, JPEG(Max: 5MB each)
+                                                </span>
+                                            </div>
+
+                                            <input type="file" id="additionalImages" name="additional_images[]"
+                                                accept="image/jpeg,image/png,image/jpg" multiple class="hidden">
                                         </div>
-                                        <div id="preview-container" class="flex items-center justify-center">
+
+                                        <!-- Image preview grid -->
+                                        <div id="imagePreviewGrid"
+                                            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 mt-3">
+                                            <!-- Thumbnails will be added here -->
+                                        </div>
+
+                                        <!-- Empty state message -->
+                                        <div id="emptyStateMessage"
+                                            class="flex justify-center items-center h-24 border border-dashed border-neutral-300 rounded-lg bg-neutral-50 text-neutral-500 text-sm">
+                                            No images selected
                                         </div>
                                     </div>
                                 </div>
@@ -353,10 +393,10 @@
                                         class="w-full pl-16 px-4 py-3 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all duration-200 font-secondary appearance-none"
                                         value="{{ old('budget') }}">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="#14b8a6" stroke="currentColor"
+                                            class="h-5 w-5 text-neutral-400" viewBox="0 0 512 512">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
                                         </svg>
                                     </div>
                                 </div>
@@ -405,6 +445,10 @@
                                 Start Project
                             </button>
                         </div>
+
+                        <!-- Additional Images -->
+                        <input type="file" id="additionalImages" name="additional_images[]"
+                            accept="image/jpeg,image/png,image/jpg" multiple class="hidden">
                     </form>
                 </div>
             </div>

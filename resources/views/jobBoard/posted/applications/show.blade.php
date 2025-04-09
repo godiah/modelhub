@@ -16,7 +16,7 @@
         </div>
     </x-slot>
 
-    <section class="bg-neutral-50 min-h-screen py-12">
+    <section class="bg-neutral-50 min-h-screen py-10">
         <div class="container max-w-7xl mx-auto px-4">
             <!-- Application Details Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -66,12 +66,12 @@
                                     </div>
                                     <div
                                         class="absolute inset-1 bg-white rounded-full flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                                clip-rule="evenodd" />
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor" class="h-8 w-8 text-primary">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                                         </svg>
+
                                     </div>
                                 </div>
 
@@ -89,17 +89,6 @@
                                             </svg>
                                             <span class="text-sm">{{ $application->applicant->email }}</span>
                                         </div>
-
-                                        @if ($application->phone)
-                                            <div class="flex items-center text-tertiary">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                    viewBox="0 0 20 20" fill="currentColor">
-                                                    <path
-                                                        d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                                                </svg>
-                                                <span class="text-sm">{{ $application->phone }}</span>
-                                            </div>
-                                        @endif
 
                                         <div class="flex items-center text-tertiary">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
@@ -121,13 +110,10 @@
                     <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
                         <div class="px-6 py-5">
                             <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-secondary">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-secondary"
-                                    viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
-                                        clip-rule="evenodd" />
+                                <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="#14b8a6"
+                                    class="h-5 w-5 mr-2 text-secondary" viewBox="0 0 512 512">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
                                 </svg>
                                 Financial Details
                             </h2>
@@ -150,7 +136,7 @@
                                     <div class="text-sm text-tertiary mb-1 font-main">Service Fee (10%)</div>
                                     <div class="text-xl font-bold text-red-500 font-secondary">
                                         @if ($application->service_fee)
-                                            Ksh{{ number_format($application->service_fee) }}
+                                            Ksh{{ number_format($application->service_fee, 2) }}
                                         @else
                                             <span class="text-tertiary text-base font-normal">Not applicable</span>
                                         @endif
@@ -162,7 +148,7 @@
                                     <div class="text-sm text-blue-700 mb-1 font-main">Net Amount</div>
                                     <div class="text-xl font-bold text-blue-700 font-secondary">
                                         @if ($application->net_amount)
-                                            Ksh{{ number_format($application->net_amount) }}
+                                            Ksh{{ number_format($application->net_amount, 2) }}
                                         @else
                                             <span class="text-blue-400 text-base font-normal">Not applicable</span>
                                         @endif
@@ -195,12 +181,13 @@
                             @else
                                 <div
                                     class="mt-4 flex flex-col items-center justify-center py-8 bg-neutral-50 rounded-lg border border-dashed border-neutral-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-neutral-300 mb-2"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor"
+                                        class="h-12 w-12 text-neutral-300 mb-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                                     </svg>
-                                    <p class="text-neutral-500 font-secondary">No proposal provided</p>
+                                    <p class="text-neutral-500 font-secondary">No proposal provided by applicant</p>
                                 </div>
                             @endif
                         </div>
@@ -389,17 +376,17 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <h3 class="font-semibold text-lg text-neutral-800 font-secondary">
+                                        <h3 class="font-semibold text-sm text-neutral-800 font-secondary line-clamp-2">
                                             {{ $application->job->title }}
                                         </h3>
                                         <div class="flex items-center mt-1.5">
                                             <span
                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor"
+                                                    fill="#1e3a8a" class="h-3.5 w-3.5 mr-1" viewBox="0 0 512 512">
                                                     <path stroke-linecap="round" stroke-linejoin="round"
                                                         stroke-width="2"
-                                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
                                                 </svg>
                                                 Ksh {{ number_format($application->job->budget) }}
                                             </span>
@@ -431,7 +418,7 @@
                                             Applicants
                                         </div>
                                         <div class="font-medium text-neutral-700">
-                                            {{ $application->job->applications_count ?? '3' }}</div>
+                                            {{ $application->job->applicants_count }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -465,8 +452,8 @@
                                         <div class="mr-2 text-sm font-medium text-neutral-600">Current Status:</div>
                                         @php
                                             $statusColors = [
-                                                'submitted' => 'bg-blue-100 text-blue-800',
-                                                'reviewed' => 'bg-purple-100 text-purple-800',
+                                                'submitted' => 'bg-yellow-100 text-yellow-800',
+                                                'reviewed' => 'bg-blue-100 text-blue-800',
                                                 'hired' => 'bg-green-100 text-green-800',
                                                 'rejected' => 'bg-red-100 text-red-800',
                                             ];
@@ -487,7 +474,7 @@
                                             Status</label>
                                         <div class="relative">
                                             <select name="status" id="status"
-                                                class="w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main appearance-none">
+                                                class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main appearance-none">
                                                 <option value="submitted"
                                                     {{ $application->status === 'submitted' ? 'selected' : '' }}>
                                                     Submitted</option>
@@ -520,7 +507,7 @@
                                             class="block text-sm font-medium text-neutral-700 mb-2 font-main">Internal
                                             Notes</label>
                                         <textarea id="notes" name="notes" rows="3"
-                                            class="w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main resize-none"
+                                            class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main resize-none"
                                             placeholder="Add your private notes about this applicant...">{{ $application->additional_notes ?? '' }}</textarea>
                                     </div>
 
@@ -562,15 +549,20 @@
 
                                 <div class="space-y-5">
                                     <!-- Quick Templates Button -->
-                                    <div class="flex mb-3">
+                                    <div class="flex mb-2">
                                         <button type="button" id="showTemplates"
                                             class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20 transition-colors">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2" />
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="3" width="18" height="18" rx="2"
+                                                    ry="2" />
+                                                <line x1="3" y1="9" x2="21" y2="9" />
+                                                <line x1="9" y1="21" x2="9" y2="9" />
+                                                <path d="M13 13h4" />
+                                                <path d="M13 17h4" />
                                             </svg>
-                                            Quick Templates
+                                            <span class="ml-1">Quick Templates</span>
                                         </button>
                                     </div>
 
@@ -591,7 +583,7 @@
                                             </div>
                                             <input type="text" id="subject" name="subject"
                                                 placeholder="Re: Your application for {{ $application->job->title }}"
-                                                class="w-full py-3 pl-10 pr-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-secondary focus:border-secondary font-main">
+                                                class="text-sm w-full py-3 pl-10 pr-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-secondary focus:border-secondary font-main">
                                         </div>
                                     </div>
 
@@ -600,7 +592,7 @@
                                         <label for="message"
                                             class="block text-sm font-medium text-neutral-700 mb-2 font-main">Message</label>
                                         <textarea id="message" name="message" rows="4" placeholder="Write your message to the applicant..."
-                                            class="w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-secondary focus:border-secondary font-main"></textarea>
+                                            class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-secondary focus:border-secondary font-main"></textarea>
                                     </div>
 
                                     <!-- Submit Button -->
@@ -637,7 +629,7 @@
                                 <!-- Timeline Items -->
                                 <div class="relative">
                                     <div class="absolute -left-7 mt-0.5">
-                                        <div class="h-4 w-4 rounded-full bg-primary border-2 border-white"></div>
+                                        <div class="h-4 w-4 rounded-full bg-yellow-500 border-2 border-white"></div>
                                     </div>
                                     <div>
                                         <p class="text-sm font-medium text-neutral-800">Application Submitted</p>
@@ -649,7 +641,7 @@
                                 @if ($application->status !== 'submitted')
                                     <div class="relative">
                                         <div class="absolute -left-7 mt-0.5">
-                                            <div class="h-4 w-4 rounded-full bg-purple-500 border-2 border-white">
+                                            <div class="h-4 w-4 rounded-full bg-blue-500 border-2 border-white">
                                             </div>
                                         </div>
                                         <div>

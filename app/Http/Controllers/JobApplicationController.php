@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ApplicationMessage;
+use App\Models\ApplicantMessage;
 use App\Models\JobApplication;
 use App\Models\ModelJob;
 use App\Models\Skill;
 use App\Models\Software;
+use App\Notifications\NewApplicationMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -51,11 +55,13 @@ class JobApplicationController extends Controller
         // Remove the action field since we don't need to store it
         $request->request->remove('action');
 
-        // Check if the job exists and is active (only for submission)
+        // Check if the job exists and is active
         $job = ModelJob::findOrFail($request->job_id);
-        if (!$isDraft && !$job->isActive()) {
-            return redirect()->back()->withErrors(['message' => 'This job is no longer accepting applications']);
+        if (!$job->is_active || !$job->isActive()) {
+            return redirect()->back()
+                ->withErrors(['message' => 'This job is no longer accepting new applications']);
         }
+
 
         // Check if the user is authorized to apply
         if ($request->applicant_id != Auth::id()) {
@@ -202,8 +208,9 @@ class JobApplicationController extends Controller
     {
         $applications = JobApplication::with('job')
             ->where('applicant_id', Auth::id())
+            ->where('status', '!=', 'draft')
             ->latest()
-            ->paginate(10);
+            ->paginate(2);
 
         return view('jobBoard.applications.index', compact('applications'));
     }
@@ -274,7 +281,7 @@ class JobApplicationController extends Controller
     public function getUserPostedJobs()
     {
         // Get jobs posted by the authenticated user
-        $postedJobs = ModelJob::where('user_id', Auth::id())->get();
+        $postedJobs = ModelJob::where('user_id', Auth::id())->paginate(2);
 
         return view('jobBoard.posted.index', compact('postedJobs'));
     }
@@ -359,14 +366,29 @@ class JobApplicationController extends Controller
             'message' => 'required|string|max:5000',
         ]);
 
-        // Here you would typically:
-        // 1. Store the message in your database
-        // 2. Send an email notification to the applicant
-        // 3. Potentially create a notification in your system
+        // 1. Store the message in the database
+        $message = ApplicantMessage::create([
+            'job_application_id' => $application->id,
+            'sender_id' => Auth::id(),
+            'recipient_id' => $application->applicant_id,
+            'subject' => $validated['subject'],
+            'message' => $validated['message'],
+        ]);
 
-        // Example of sending an email (pseudocode)
-        // Mail::to($application->user->email)->send(new ApplicationMessage($validated['subject'], $validated['message']));
+        // 2. Send email notification (queued)
+        Mail::to($application->applicant->email)
+            ->queue(new ApplicationMessage($message, $application));
 
-        return redirect()->back()->with('success', 'Message sent successfully.');
+        // 3. Create in-app notification
+        $application->applicant->notify(new NewApplicationMessage($message));
+
+        return redirect()->back()->with([
+            'success' => 'Message sent successfully.',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Message sent successfully.',
+                'text' => 'Message sent successfully.',
+            ]
+        ]);
     }
 }

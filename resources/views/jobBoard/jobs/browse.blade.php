@@ -1,57 +1,32 @@
 <x-app-layout>
+
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
+                    {{ __('Browse Available Jobs') }}
+                </h2>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ route('jobs.index') }}"
+                    class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                    <svg class="h-5 w-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                        viewBox="0 0 20 20">
+                        <path
+                            d="M19.707 9.293l-2-2-7-7a1 1 0 00-1.414 0l-7 7-2 2a1 1 0 001.414 1.414L2 10.414V18a2 2 0 002 2h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-7.586l.293.293a1 1 0 001.414-1.414z" />
+                    </svg>
+                    Home
+                </a>
+            </div>
+        </div>
+    </x-slot>
+
     <section>
         <div class="container mx-auto max-w-7xl">
-            <!-- Breadcrumb -->
-            <nav class="flex max-w-xl  p-8" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 md:space-x-2">
-                    <!-- First Link -->
-                    <li class="inline-flex items-center">
-                        <a href="{{ route('home') }}"
-                            class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700">
-                            <svg class="w-3 h-3 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M19.707 9.293l-2-2-7-7a1 1 0 00-1.414 0l-7 7-2 2a1 1 0 001.414 1.414L2 10.414V18a2 2 0 002 2h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-7.586l.293.293a1 1 0 001.414-1.414z" />
-                            </svg>
-                            ModelHub
-                        </a>
-                    </li>
-                    <!-- Second Link -->
-                    <li>
-                        <div class="flex items-center">
-                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="M1 9l4-4-4-4" />
-                            </svg>
-                            <a href="{{ route('jobs.index') }}"
-                                class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700 md:ml-2">
-                                Modelling Jobs
-                            </a>
-                        </div>
-                    </li>
-                    <!-- Active Link -->
-                    <li aria-current="page">
-                        <div class="flex items-center">
-                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="M1 9l4-4-4-4" />
-                            </svg>
-                            <span class="ml-1 text-sm font-medium text-black md:ml-2">
-                                Browse
-                            </span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
-
             <!-- Jobs Grid -->
-            <div class="font-main px-4 sm:px-6 lg:px-8 pb-24">
+            <div class="font-main px-4 sm:px-6 lg:px-8 py-14">
                 <!-- Header Section -->
                 <div class="max-w-7xl mx-auto mb-8 px-4">
-                    <h1 class="text-2xl md:text-3xl font-bold text-neutral-800 mb-6">Browse Available Jobs</h1>
-
                     <!-- Search and Filters -->
                     <div class="space-y-4">
                         <!-- Search Bar -->
@@ -211,9 +186,8 @@
                                 </div>
 
                                 <!-- Middle: Description -->
-                                <div class="h-auto md:h-10">
-                                    <div
-                                        class="[&>p]:text-sm [&>p]:text-justify [&>p]:line-clamp-4 md:[&>p]:line-clamp-2">
+                                <div class="h-auto md:h-10 text-ellipsis">
+                                    <div class="text-sm text-justify line-clamp-3 md:line-clamp-2 overflow-hidden">
                                         {!! Str::markdown($job->description) !!}
                                     </div>
                                 </div>
@@ -280,6 +254,9 @@
                             </div>
                         </div>
                     @endforeach
+                    <div class="mt-6">
+                        {{ $jobs->links() }}
+                    </div>
                 </div>
 
                 <!-- Empty State (if no jobs found) -->
@@ -303,6 +280,8 @@
                     </div>
                 @endif
             </div>
+
+
         </div>
 
         <!-- Footer -->

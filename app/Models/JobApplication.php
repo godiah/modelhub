@@ -19,7 +19,7 @@ class JobApplication extends Model
         'proposal',
         'portfolio',
         'terms_accepted',
-        'status', // 'draft', 'submitted', 'hired, 'rejected', etc.
+        'status', // 'draft', 'submitted', 'hired, 'rejected', 'reviewed' 
         'additional_notes',
     ];
 
@@ -60,9 +60,4 @@ class JobApplication extends Model
     {
         return $query->where('status', 'submitted');
     }
-
-    // public function getRouteKeyName()
-    // {
-    //     return 'slug';
-    // }
 }

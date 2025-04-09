@@ -1,5 +1,6 @@
 import "flowbite";
 import "./bootstrap";
+import "./templates";
 
 /**
  * Creating a new project/job
@@ -205,6 +206,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initial population
     populateDropdown();
+    skillsDropdown.classList.add("hidden");
 });
 
 /**
@@ -384,176 +386,266 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Initial population
     populateSoftwareDropdown();
+    softwareSkillsDropdown.classList.add("hidden");
 });
 
 /**
  * Creating a new project/job
- * Image Upload
+ * Preview Image Upload
  */
 document.addEventListener("DOMContentLoaded", () => {
     const imageUpload = document.getElementById("imageUpload");
-    const dropzone = document.getElementById("dropzone");
-    const dropzoneText = document.getElementById("dropzone-text");
+    const selectPreviewBtn = document.getElementById("selectPreviewBtn");
     const previewContainer = document.getElementById("preview-container");
-    const imagePreview = document.getElementById("image-preview");
+    const previewEmptyState = document.getElementById("previewEmptyState");
+    const previewFileStatus = document.getElementById("previewFileStatus");
     const oldImageInput = document.getElementById("old-image-input");
 
-    // Trigger file input when dropzone is clicked
-    dropzone.addEventListener("click", () => {
+    // Trigger file input when the select button is clicked
+    selectPreviewBtn.addEventListener("click", () => {
         imageUpload.click();
     });
-
-    // Prevent default drag behaviors
-    ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-        dropzone.addEventListener(eventName, preventDefaults, false);
-        document.body.addEventListener(eventName, preventDefaults, false);
-    });
-
-    // Highlight dropzone when dragging
-    ["dragenter", "dragover"].forEach((eventName) => {
-        dropzone.addEventListener(eventName, highlight, false);
-    });
-
-    ["dragleave", "drop"].forEach((eventName) => {
-        dropzone.addEventListener(eventName, unhighlight, false);
-    });
-
-    // Handle dropped files
-    dropzone.addEventListener("drop", handleDrop, false);
 
     // Handle selected files
     imageUpload.addEventListener("change", handleFiles, false);
 
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    function highlight() {
-        dropzone.classList.add("border-secondary", "bg-secondary/10");
-    }
-
-    function unhighlight() {
-        dropzone.classList.remove("border-secondary", "bg-secondary/10");
-    }
-
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        handleFiles(files);
-    }
-
     function handleFiles(e) {
-        const files = e.target ? e.target.files : e;
-        previewContainer.innerHTML = ""; // Clear previous previews
-        imagePreview.classList.remove("hidden");
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
 
-        if (files.length > 0) {
-            const file = files[0];
-            if (!file.type.startsWith("image/")) return;
+        const file = files[0];
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                // Create preview wrapper
-                const previewWrapper = document.createElement("div");
-                previewWrapper.className = "relative inline-block";
-
-                // Remove button
-                const removeButton = document.createElement("button");
-                removeButton.innerHTML = "&times;";
-                removeButton.className =
-                    "absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg z-10 remove-btn hover:bg-red-600 transition-colors";
-                removeButton.addEventListener("click", () => {
-                    previewContainer.innerHTML = ""; // Clear preview
-                    imagePreview.classList.add("hidden");
-                    imageUpload.value = ""; // Clear file input
-                    oldImageInput.value = ""; // Clear old image input
-                });
-
-                // Image preview
-                const previewImage = document.createElement("img");
-                previewImage.src = e.target.result;
-                previewImage.className =
-                    "w-64 h-48 object-cover rounded-lg mb-2";
-
-                // File details
-                const fileDetailsWrapper = document.createElement("div");
-                fileDetailsWrapper.className = "text-center mt-2";
-
-                const fileName = document.createElement("p");
-                fileName.textContent = file.name;
-                fileName.className =
-                    "text-sm font-medium text-neutral-700 truncate max-w-64";
-
-                const fileSize = document.createElement("p");
-                fileSize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
-                fileSize.className = "text-xs text-neutral-500";
-
-                // Assemble the preview
-                previewWrapper.appendChild(removeButton);
-                previewWrapper.appendChild(previewImage);
-                fileDetailsWrapper.appendChild(fileName);
-                fileDetailsWrapper.appendChild(fileSize);
-                previewWrapper.appendChild(fileDetailsWrapper);
-
-                previewContainer.appendChild(previewWrapper);
-                imagePreview.classList.remove("hidden");
-                oldImageInput.value = e.target.result; // Store image data URL
-            };
-            reader.readAsDataURL(file);
-        } else {
-            imagePreview.classList.add("hidden");
+        // Validate file type
+        if (!file.type.startsWith("image/")) {
+            alert("Please select a valid image file (JPG, JPEG, PNG)");
+            return;
         }
+
+        // Validate file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024;
+        if (file.size > maxSize) {
+            alert("File size should not exceed 5MB");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            renderPreview(e.target.result, file);
+            oldImageInput.value = e.target.result; // Store image data URL
+        };
+        reader.readAsDataURL(file);
     }
 
-    // Initially hide the preview container
-    imagePreview.classList.add("hidden");
+    // Function to render the preview
+    function renderPreview(src, file = null) {
+        // Clear previous preview
+        previewContainer.innerHTML = "";
 
-    // Restore uploaded image if validation fails
-    const oldImage = oldImageInput.value;
-    if (oldImage) {
+        // Create preview wrapper
         const previewWrapper = document.createElement("div");
-        previewWrapper.className = "relative inline-block";
-
-        // Remove button
-        const removeButton = document.createElement("button");
-        removeButton.innerHTML = "&times;";
-        removeButton.className =
-            "absolute top-2 right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-lg z-10 remove-btn hover:bg-red-600 transition-colors";
-        removeButton.addEventListener("click", () => {
-            previewContainer.innerHTML = ""; // Clear preview
-            imagePreview.classList.add("hidden");
-            imageUpload.value = ""; // Clear file input
-            oldImageInput.value = ""; // Clear old image input
-        });
+        previewWrapper.className = "relative border rounded-lg overflow-hidden";
+        previewWrapper.style.width = "150px";
+        previewWrapper.style.height = "150px";
 
         // Image preview
         const previewImage = document.createElement("img");
-        previewImage.src = oldImage;
-        previewImage.className = "w-64 h-48 object-cover rounded-lg mb-2";
+        previewImage.src = src;
+        previewImage.className = "w-full h-full object-cover";
+        previewImage.alt = "Preview Image";
 
-        // File details
-        const fileDetailsWrapper = document.createElement("div");
-        fileDetailsWrapper.className = "text-center mt-2";
+        // Remove button
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.className =
+            "absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors";
+        removeButton.innerHTML =
+            '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>';
 
-        const fileName = document.createElement("p");
-        fileName.textContent = "Previously Uploaded Image";
-        fileName.className =
-            "text-sm font-medium text-neutral-700 truncate max-w-64";
+        removeButton.addEventListener("click", () => {
+            previewContainer.innerHTML = ""; // Clear preview
+            imageUpload.value = ""; // Clear file input
+            oldImageInput.value = ""; // Clear old image input
+            previewEmptyState.style.display = "flex";
+            previewFileStatus.textContent = "No image selected";
+        });
 
-        const fileSize = document.createElement("p");
-        fileSize.textContent = "N/A";
-        fileSize.className = "text-xs text-neutral-500";
+        // File details (optional, under the image)
+        if (file) {
+            // Update file status
+            previewFileStatus.textContent = `${file.name} (${(
+                file.size / 1024
+            ).toFixed(1)} KB)`;
+        } else {
+            previewFileStatus.textContent = "Existing image";
+        }
 
         // Assemble the preview
-        previewWrapper.appendChild(removeButton);
         previewWrapper.appendChild(previewImage);
-        fileDetailsWrapper.appendChild(fileName);
-        fileDetailsWrapper.appendChild(fileSize);
-        previewWrapper.appendChild(fileDetailsWrapper);
-
+        previewWrapper.appendChild(removeButton);
         previewContainer.appendChild(previewWrapper);
-        imagePreview.classList.remove("hidden");
+
+        // Show preview, hide empty state
+        previewEmptyState.style.display = "none";
+    }
+
+    // Initialize with any existing image if present
+    const oldImage = oldImageInput.value;
+    if (oldImage && oldImage.trim() !== "") {
+        renderPreview(oldImage);
+    } else {
+        // Make sure empty state is visible
+        previewEmptyState.style.display = "flex";
+    }
+});
+
+/**
+ * Upload additional images
+ */
+document.addEventListener("DOMContentLoaded", function () {
+    // Configuration
+    const MAX_FILES = 5;
+    const MAX_SIZE_MB = 5;
+
+    // Elements
+    const toggleCheckbox = document.getElementById("toggleAdditional");
+    const uploadSection = document.getElementById("additionalImagesSection");
+    const fileInput = document.getElementById("additionalImages");
+    const selectButton = document.getElementById("selectImagesBtn");
+    const fileCounter = document.getElementById("fileCounter");
+    const previewGrid = document.getElementById("imagePreviewGrid");
+    const emptyState = document.getElementById("emptyStateMessage");
+
+    // State
+    let files = [];
+
+    // Event Listeners
+    toggleCheckbox.addEventListener("change", function () {
+        uploadSection.style.display = this.checked ? "block" : "none";
+    });
+
+    selectButton.addEventListener("click", function () {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener("change", function (event) {
+        const newFiles = Array.from(event.target.files);
+        const dataTransfer = new DataTransfer();
+
+        // Add existing files to DataTransfer
+        files.forEach((f) => dataTransfer.items.add(f.file));
+
+        // Check file limit
+        if (dataTransfer.items.length + newFiles.length > MAX_FILES) {
+            alert(`Maximum ${MAX_FILES} images allowed`);
+            fileInput.files = dataTransfer.files;
+            return;
+        }
+
+        newFiles.forEach((file) => {
+            // Validate file type
+            if (!file.type.startsWith("image/")) {
+                alert(`${file.name} is not an image`);
+                return;
+            }
+
+            // Validate file size
+            const fileSizeMB = file.size / 1024;
+            if (fileSizeMB > MAX_SIZE_MB * 1024) {
+                alert(
+                    `${file.name} exceeds ${MAX_SIZE_MB}MB (${
+                        MAX_SIZE_MB * 1024
+                    } KB)`
+                );
+                return;
+            }
+
+            // Add to DataTransfer and state
+            dataTransfer.items.add(file);
+            files.push({
+                id: Date.now() + Math.random().toString(36).substr(2, 9),
+                name: file.name,
+                size: fileSizeMB.toFixed(2),
+                url: URL.createObjectURL(file),
+                file: file,
+            });
+        });
+
+        // Update previews and sync input
+        fileInput.files = dataTransfer.files;
+        updatePreviews();
+        updateFileCounter();
+        toggleEmptyState();
+    });
+
+    // Functions
+    function updatePreviews() {
+        previewGrid.innerHTML = "";
+        files.forEach((file) => {
+            const thumbnail = document.createElement("div");
+            thumbnail.className = "relative group";
+            thumbnail.innerHTML = `
+                <div class="rounded-lg overflow-hidden border border-neutral-200 bg-white">
+                    <div class="aspect-square bg-neutral-100 overflow-hidden flex items-center justify-center">
+                        <img src="${file.url}" alt="${file.name}" class="h-full w-full object-cover">
+                    </div>
+                    <div class="p-2 text-xs">
+                        <div class="truncate font-medium">${file.name}</div>
+                        <div class="text-neutral-500">${file.size} KB</div>
+                    </div>
+                </div>
+                <button data-id="${file.id}" class="remove-btn absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            `;
+
+            thumbnail
+                .querySelector(".remove-btn")
+                .addEventListener("click", () => removeFile(file.id));
+            previewGrid.appendChild(thumbnail);
+        });
+    }
+
+    function removeFile(id) {
+        // Update files array
+        files = files.filter((f) => f.id !== id);
+
+        // Sync with file input
+        const dataTransfer = new DataTransfer();
+        files.forEach((f) => dataTransfer.items.add(f.file));
+        fileInput.files = dataTransfer.files;
+
+        updatePreviews();
+        updateFileCounter();
+        toggleEmptyState();
+    }
+
+    function updateFileCounter() {
+        fileCounter.textContent = `${files.length}/${MAX_FILES} images`;
+        const isMaxReached = files.length >= MAX_FILES;
+        selectButton.disabled = isMaxReached;
+        selectButton.classList.toggle("opacity-50", isMaxReached);
+        selectButton.classList.toggle("cursor-not-allowed", isMaxReached);
+    }
+
+    function toggleEmptyState() {
+        if (files.length === 0) {
+            emptyState.style.display = "flex";
+        } else {
+            emptyState.style.setProperty("display", "none", "important");
+        }
+    }
+
+    // Form submission handler
+    const form = document.querySelector("form");
+    if (form) {
+        form.addEventListener("submit", function () {
+            // Final sync before submission
+            const dataTransfer = new DataTransfer();
+            files.forEach((f) => dataTransfer.items.add(f.file));
+            fileInput.files = dataTransfer.files;
+        });
     }
 });
 
@@ -818,6 +910,9 @@ document.addEventListener("DOMContentLoaded", function () {
     submitBtn.classList.add("opacity-50", "cursor-not-allowed");
 });
 
+/**
+ * Apply Filters/Search in browsing jobs
+ */
 document.addEventListener("DOMContentLoaded", function () {
     // Get all filter elements
     const skillsFilter = document.getElementById("skills-filter");
@@ -879,6 +974,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+/**
+ * Switch Post and Find Jobs Tabs
+ */
 document.addEventListener("DOMContentLoaded", function () {
     function showTab(tabName) {
         // Hide all tab contents

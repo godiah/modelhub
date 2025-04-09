@@ -16,7 +16,7 @@
         </div>
     </x-slot>
 
-    <div class="py-8">
+    <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Job Summary Card -->
             <div class="mb-6 bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
@@ -46,12 +46,12 @@
                                     @endif
                                 </p>
                                 <p class="text-sm text-neutral-500 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-primary"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="#1e3a8a"
+                                        class="h-4 w-4 mr-1 text-primary" viewBox="0 0 512 512">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
                                     </svg>
-                                    Budget: <span class="font-medium">Ksh{{ number_format($job->budget) }}</span>
+                                    Budget: <span class="font-medium">Ksh.{{ number_format($job->budget) }}</span>
                                 </p>
                             </div>
                         </div>
@@ -63,15 +63,33 @@
                         </span>
                     </div>
 
-                    <div class="mt-4 bg-neutral-50 rounded-lg p-4 border border-neutral-100">
-                        <div
-                            class="prose prose-sm max-w-none text-neutral-700 [&>p]:line-clamp-4 [&>p]:text-sm md:[&>p]:line-clamp-2">
+                    <div x-data="{ expanded: false, shouldShowMore: false }" x-init="$nextTick(() => {
+                        const el = $refs.content;
+                        shouldShowMore = el.scrollHeight > (window.innerWidth < 768 ? 80 : 40); // Approximate 5rem/2.5rem in pixels
+                    })"
+                        class="mt-4 bg-neutral-50 rounded-lg p-4 border border-neutral-100">
+
+                        <!-- Markdown content div with reference -->
+                        <div x-ref="content"
+                            class="prose prose-sm max-w-none text-neutral-700 text-sm transition-all duration-300 overflow-hidden
+                                        [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-1 
+                                        [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-1
+                                        [&>blockquote]:border-l-4 [&>blockquote]:border-neutral-200 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-2
+                                        [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h1]:mt-3
+                                        [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-1.5 [&>h2]:mt-2.5
+                                        [&>h3]:text-sm [&>h3]:font-bold [&>h3]:mb-1 [&>h3]:mt-2
+                                        [&>h4,&>h5,&>h6]:text-sm [&>h4,&>h5,&>h6]:font-semibold [&>h4,&>h5,&>h6]:mb-1 [&>h4,&>h5,&>h6]:mt-2
+                                        [&>p]:mb-1"
+                            :class="expanded ? 'max-h-none' : 'max-h-[5rem] md:max-h-[2.5rem]'">
                             {!! Str::markdown($job->description) !!}
                         </div>
-                        <button class="mt-2 text-secondary text-sm font-medium hover:text-primary transition">
-                            Read more
-                        </button>
+
+                        <!-- Toggle button that only shows when needed -->
+                        <button x-show="shouldShowMore" x-on:click="expanded = !expanded"
+                            class="mt-2 text-secondary text-sm font-medium hover:text-primary transition"
+                            x-text="expanded ? 'Show less' : 'Read more'"></button>
                     </div>
+
                 </div>
             </div>
 
@@ -133,7 +151,7 @@
                                 recently posted or it hasn't gained visibility yet.
                             </p>
                             <div class="space-x-4 pt-2">
-                                <a href=""
+                                <a href="{{ route('jobs.edit', ['job' => $job->slug]) }}"
                                     class="px-4 py-2 text-sm font-medium text-primary bg-white border border-primary rounded-md shadow-sm hover:bg-primary hover:text-white transition">
                                     Edit Job Details
                                 </a>
@@ -306,25 +324,20 @@
                                                     </svg>
                                                     Proposal
                                                 </h4>
-                                                <div class="mt-2 text-sm">
+                                                <div class="mt-2 mb-2 text-sm">
                                                     @if ($application->proposal)
                                                         <div
                                                             class="text-neutral-700 text-justify bg-neutral-50 p-4 rounded-md border border-neutral-100 max-h-32 overflow-y-auto">
                                                             {!! nl2br(e($application->proposal)) !!}
                                                         </div>
-                                                        <button
-                                                            class="mt-2 text-xs text-secondary font-medium hover:text-primary transition">
-                                                            Show more
-                                                        </button>
                                                     @else
                                                         <div
                                                             class="flex items-center justify-center py-6 text-neutral-400 bg-neutral-50 rounded-md border border-neutral-100">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-6 w-6 mr-2" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                                viewBox="0 0 24 24" stroke-width="1.5"
+                                                                stroke="currentColor" class="h-6 w-6 mr-2">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M12 6V4m0 2a2 2 0 100 4m0-4 2 2m-2-2 2 2m5 6H9m0 2a2 2 0 100-4m0 4h2m-2 2l2 2m-2-2-2 2" />
+                                                                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                                                             </svg>
                                                             <span class="text-sm">No proposal provided by the
                                                                 applicant</span>
@@ -344,11 +357,12 @@
                                                         <h4
                                                             class="text-sm font-secondary font-medium text-neutral-800 flex items-center">
                                                             <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-4 w-4 mr-1 text-accent" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                                stroke="currentColor" fill="#f59e0b"
+                                                                class="h-4 w-4 mr-1.5 text-accent"
+                                                                viewBox="0 0 512 512">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     stroke-width="2"
-                                                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
                                                             </svg>
                                                             Bid Amount
                                                         </h4>
@@ -410,7 +424,7 @@
                                                 @endif
 
                                                 <!-- Actions -->
-                                                <div class="mt-4">
+                                                <div class="mt-3">
                                                     <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"
                                                         class="block w-full text-center px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90 transition shadow-sm">
                                                         View Full Details
@@ -434,4 +448,6 @@
             </div>
         </div>
     </div>
+
+    @include('partials\footer-secondary')
 </x-app-layout>

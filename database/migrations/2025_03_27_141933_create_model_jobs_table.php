@@ -21,7 +21,7 @@ return new class extends Migration
             $table->json('software')->nullable();
             $table->string('images')->nullable();
             $table->date('deadline')->nullable();
-            $table->boolean('no_deadline')->default(false);
+            $table->boolean('no_deadline')->nullable()->default(false);
             $table->decimal('budget', 10, 2);
             $table->boolean('is_active')->default(true);
             $table->timestamps();

@@ -35,8 +35,27 @@ new class extends Component {
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
+            <!-- Settings Dropdown and Notifications -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <!-- Notifications -->
+                <div class="mr-4">
+                    <a href="{{ route('notifications.index') }}" class="relative text-gray-500 hover:text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+
+                        @if (auth()->user()->unreadNotifications->count() > 0)
+                            <span
+                                class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs px-1.5 py-0.5">
+                                {{ auth()->user()->unreadNotifications->count() }}
+                            </span>
+                        @endif
+                    </a>
+                </div>
+
+                <!-- User Dropdown -->
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
@@ -85,6 +104,25 @@ new class extends Component {
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
+                <!-- Mobile Notifications -->
+                <div class="mr-2">
+                    <a href="{{ route('notifications.index') }}"
+                        class="relative p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        </svg>
+
+                        @if (auth()->user()->unreadNotifications->count() > 0)
+                            <span
+                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full text-xs px-1.5 py-0.5">
+                                {{ auth()->user()->unreadNotifications->count() }}
+                            </span>
+                        @endif
+                    </a>
+                </div>
+
                 <button @click="open = ! open"
                     class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -104,6 +142,15 @@ new class extends Component {
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <!-- Mobile Notifications Link -->
+            <x-responsive-nav-link :href="route('notifications.index')" wire:navigate class="flex justify-between items-center">
+                <span>{{ __('Notifications') }}</span>
+                @if (auth()->user()->unreadNotifications->count() > 0)
+                    <span class="bg-red-500 text-white rounded-full text-xs px-1.5 py-0.5">
+                        {{ auth()->user()->unreadNotifications->count() }}
+                    </span>
+                @endif
             </x-responsive-nav-link>
         </div>
 

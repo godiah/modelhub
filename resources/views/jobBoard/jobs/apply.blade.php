@@ -1,65 +1,24 @@
 <x-app-layout>
-    <section>
-        <div class="container mx-auto max-w-7xl px-4 mb-24">
-            <!-- Breadcrumb -->
-            <nav class="max-w-xl p-4" aria-label="Breadcrumb">
-                <ol class="inline-flex items-center space-x-1 md:space-x-2">
-                    <!-- First Link -->
-                    <li class="inline-flex items-center">
-                        <a href="{{ route('home') }}"
-                            class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700">
-                            <svg class="w-3 h-3 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                fill="currentColor" viewBox="0 0 20 20">
-                                <path
-                                    d="M19.707 9.293l-2-2-7-7a1 1 0 00-1.414 0l-7 7-2 2a1 1 0 001.414 1.414L2 10.414V18a2 2 0 002 2h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-7.586l.293.293a1 1 0 001.414-1.414z" />
-                            </svg>
-                            ModelHub
-                        </a>
-                    </li>
-                    <!-- Second Link -->
-                    <li>
-                        <div class="flex items-center">
-                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="M1 9l4-4-4-4" />
-                            </svg>
-                            <a href="{{ route('jobs.index') }}"
-                                class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700 md:ml-2">
-                                Modelling Jobs
-                            </a>
-                        </div>
-                    </li>
-                    <!-- Third Link -->
-                    <li>
-                        <div class="flex items-center">
-                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="M1 9l4-4-4-4" />
-                            </svg>
-                            <a href="{{ route('jobs.browse') }}"
-                                class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700 md:ml-2">
-                                Browse
-                            </a>
-                        </div>
-                    </li>
-                    <!-- Active Link -->
-                    <li aria-current="page">
-                        <div class="flex items-center">
-                            <svg class="rtl:rotate-180 w-3 h-3 text-gray-400 mx-1" aria-hidden="true"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="M1 9l4-4-4-4" />
-                            </svg>
-                            <span class="ml-1 text-sm font-medium text-black md:ml-2">
-                                Apply to 3D Project
-                            </span>
-                        </div>
-                    </li>
-                </ol>
-            </nav>
 
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
+                {{ __('3D Project Application') }}
+            </h2>
+            <a href="{{ route('jobs.browse') }}"
+                class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Browse More Jobs
+            </a>
+        </div>
+    </x-slot>
+
+    <section>
+        <div class="container mx-auto max-w-7xl px-4 mb-24 pt-16">
             <!-- Main Content Container -->
             <div class="space-y-8">
                 <!-- Job Details Card -->
@@ -160,7 +119,8 @@
                                                     class="text-xs uppercase tracking-wider text-neutral-500 font-main font-medium">
                                                     Applicants</p>
                                                 <div class="flex items-center mt-1">
-                                                    <p class="text-neutral-800 font-secondary font-bold">12</p>
+                                                    <p class="text-neutral-800 font-secondary font-bold">
+                                                        {{ $job->applicants_count }}</p>
                                                     <span class="text-neutral-600 ml-1 font-main">applied</span>
                                                 </div>
                                             </div>
@@ -381,44 +341,89 @@
                             </h2>
 
                             <!-- Image Container -->
-                            <div class="pt-2 sm:pt-4 px-4 pb-4 sm:pb-6 sm:px-6 flex justify-start">
-                                @if ($job->images)
-                                    <div class="relative group inline-block">
-                                        <div
-                                            class="overflow-hidden border border-neutral-200 shadow-sm group-hover:shadow-md transition-all duration-300 w-48 h-48 rounded-lg">
-                                            <img src="{{ asset('storage/' . $job->images) }}"
-                                                alt="{{ $job->title }}"
-                                                class="w-full h-full object-cover transform group-hover:scale-[1.02] transition-transform duration-500">
-                                        </div>
+                            <div class="pt-2 sm:pt-4 px-4 pb-4 sm:pb-6 sm:px-6">
+                                @if ($job->images || $job->jobImages->isNotEmpty())
+                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                        <!-- Main Preview Image -->
+                                        @if ($job->images)
+                                            <div class="relative group">
+                                                <div
+                                                    class="overflow-hidden border border-neutral-200 shadow-sm group-hover:shadow-md transition-all duration-300 w-full aspect-square rounded-lg">
+                                                    <img src="{{ asset('storage/' . $job->images) }}"
+                                                        alt="{{ $job->title }} preview"
+                                                        class="w-full h-full object-cover transform group-hover:scale-[1.02] transition-transform duration-500">
+                                                </div>
 
-                                        <!-- Zoom/Expand Button - More Compact -->
-                                        <button
-                                            class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-neutral-100 text-neutral-700 hover:text-primary transition-colors duration-200"
-                                            onclick="openImageModal('{{ asset('storage/' . $job->images) }}')">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                            </svg>
-                                        </button>
+                                                <!-- Zoom Button -->
+                                                <button
+                                                    class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-neutral-100 text-neutral-700 hover:text-primary transition-colors duration-200"
+                                                    onclick="openImageModal('{{ asset('storage/' . $job->images) }}')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                                    </svg>
+                                                </button>
 
-                                        <!-- Download Button - More Compact -->
-                                        <div class="mt-3">
-                                            <button
-                                                class="w-48 flex items-center justify-center px-3 py-1.5 bg-primary text-white rounded-lg shadow-sm hover:bg-primary-dark transition-colors duration-200 text-sm"
-                                                onclick="downloadImage('{{ asset('storage/' . $job->images) }}')">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                </svg>
-                                                Download Sample
-                                            </button>
-                                        </div>
+                                                <!-- Download Button -->
+                                                <div class="mt-3">
+                                                    <button
+                                                        class="w-full flex items-center justify-center px-3 py-1.5 bg-primary text-white rounded-lg shadow-sm hover:bg-primary-dark transition-colors duration-200 text-sm"
+                                                        onclick="downloadImage('{{ asset('storage/' . $job->images) }}')">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                        </svg>
+                                                        Download Sample
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <!-- Additional Images -->
+                                        @foreach ($job->jobImages as $image)
+                                            <div class="relative group">
+                                                <div
+                                                    class="overflow-hidden border border-neutral-200 shadow-sm group-hover:shadow-md transition-all duration-300 w-full aspect-square rounded-lg">
+                                                    <img src="{{ asset('storage/' . $image->image_path) }}"
+                                                        alt="Additional project image"
+                                                        class="w-full h-full object-cover transform group-hover:scale-[1.02] transition-transform duration-500">
+                                                </div>
+
+                                                <!-- Zoom Button -->
+                                                <button
+                                                    class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-neutral-100 text-neutral-700 hover:text-primary transition-colors duration-200"
+                                                    onclick="openImageModal('{{ asset('storage/' . $image->image_path) }}')">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                                                    </svg>
+                                                </button>
+
+                                                <!-- Download Button -->
+                                                <div class="mt-3">
+                                                    <button
+                                                        class="w-full flex items-center justify-center px-3 py-1.5 bg-primary text-white rounded-lg shadow-sm hover:bg-primary-dark transition-colors duration-200 text-sm"
+                                                        onclick="downloadImage('{{ asset('storage/' . $image->image_path) }}')">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                        </svg>
+                                                        Download Image
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
                                     </div>
                                 @else
-                                    <!-- No Image Placeholder - More Compact -->
+                                    <!-- No Images Placeholder -->
                                     <div
                                         class="bg-neutral-100 rounded-lg border border-neutral-200 flex items-center justify-center p-6 w-48 h-48">
                                         <div class="text-center">
@@ -431,20 +436,6 @@
                                             <p class="text-neutral-500 font-main text-sm mb-1">No preview</p>
                                             <p class="text-neutral-400 font-main text-xs">No project visuals</p>
                                         </div>
-
-                                        <!-- Download Button Placeholder -->
-                                        <div class="absolute mt-32 pt-16">
-                                            <button disabled
-                                                class="w-48 flex items-center justify-center px-3 py-1.5 bg-neutral-300 text-white rounded-lg shadow-sm text-sm cursor-not-allowed">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                </svg>
-                                                No Sample Available
-                                            </button>
-                                        </div>
                                     </div>
                                 @endif
                             </div>
@@ -452,23 +443,24 @@
 
                         <!-- Image Modal for Full-Screen View -->
                         <div id="imageModal"
-                            class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
-                            <div class="relative max-w-5xl w-full h-">
-                                <!-- Close Button -->
-                                <button
-                                    class="absolute -top-12 right-0 text-white hover:text-accent transition-colors duration-200"
-                                    onclick="closeImageModal()">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
+                            class="fixed inset-0 bg-black/90 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+                            <!-- Close Button - Always visible -->
+                            <button
+                                class="fixed top-4 right-4 z-50 p-2 text-white hover:text-accent transition-colors duration-200 bg-black/50 rounded-full backdrop-blur-sm"
+                                onclick="closeImageModal()">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                <span class="sr-only">Close modal</span>
+                            </button>
 
-                                <!-- Image Container -->
-                                <div class="bg-white p-2 rounded-xl">
+                            <!-- Image Container -->
+                            <div class="relative w-full h-full flex justify-center items-center">
+                                <div class="max-w-full max-h-full overflow-y-auto rounded-lg shadow-2xl">
                                     <img id="modalImage" src="" alt="Full size preview"
-                                        class="w-full h-auto rounded-lg">
+                                        class="block mx-auto object-contain p-4 bg-white" style="max-height: 95vh;">
                                 </div>
                             </div>
                         </div>
@@ -633,6 +625,117 @@
                     </form>
                 </div>
             </div>
+
+            <!-- Similar Jobs -->
+            @if ($similarJobs->isNotEmpty())
+                <section class="pt-20 pb-12 border-t border-neutral-200">
+                    <div class="container mx-auto">
+                        <!-- Section Header -->
+                        <div class="flex justify-between items-center mb-8">
+                            <h2 class="text-2xl font-bold text-primary font-tertiary flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-secondary"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                Similar Projects
+                            </h2>
+                        </div>
+
+                        <!-- Projects Grid -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            @foreach ($similarJobs as $similarJob)
+                                <div
+                                    class="bg-white rounded-2xl shadow-sm hover:shadow-md border border-neutral-100 hover:border-secondary overflow-hidden transition-all duration-300 flex flex-col h-full">
+                                    <!-- Image -->
+                                    <div class="relative aspect-[4/3] overflow-hidden">
+                                        @if ($similarJob->images)
+                                            <img src="{{ asset('storage/' . $similarJob->images) }}"
+                                                alt="{{ $similarJob->title }}" class="w-full h-full object-cover">
+                                        @else
+                                            <div
+                                                class="bg-gradient-to-br from-neutral-50 to-neutral-100 w-full h-full flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                    class="h-12 w-12 text-neutral-300" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="1.5"
+                                                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                                                </svg>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- Content -->
+                                    <div class="p-5 flex flex-col flex-grow">
+                                        <!-- Stats Row -->
+                                        <div class="flex items-center justify-between mb-2 text-xs">
+                                            <!-- Posted Date -->
+                                            <div class="flex items-center text-neutral-500 font-tertiary font-medium">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span>Posted {{ $similarJob->created_at->diffForHumans() }}</span>
+                                            </div>
+
+                                            <!-- Applicants -->
+                                            <span
+                                                class="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium font-tertiary">
+                                                {{ $similarJob->applicants_count }} applied
+                                            </span>
+                                        </div>
+
+                                        <!-- Title -->
+                                        <h3
+                                            class="font-main font-semibold text-neutral-800 text-lg mb-2 line-clamp-1 hover:text-primary transition-colors">
+                                            {{ $similarJob->title }}
+                                        </h3>
+
+                                        <!-- Budget -->
+                                        <div class="mb-2">
+                                            <span class="text-secondary font-semibold font-tertiary text-sm">
+                                                Ksh.{{ number_format($similarJob->budget, 0) }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Deadline -->
+                                        <div class="flex items-center text-sm text-neutral-600 mt-auto mb-4">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-tertiary"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            @if ($similarJob->no_deadline)
+                                                <span class="text-neutral-500 font-tertiary font-medium">No
+                                                    Deadline</span>
+                                            @else
+                                                <span
+                                                    class="{{ $similarJob->deadline->isPast() ? 'text-red-500' : '' }} text-neutral-500 font-tertiary font-medium">
+                                                    Deadline: {{ $similarJob->deadline->format('M j, Y') }}
+                                                </span>
+                                            @endif
+                                        </div>
+
+                                        <!-- Action Button -->
+                                        <a href="{{ route('jobs.apply', $similarJob->slug) }}"
+                                            class="w-full flex items-center justify-center px-4 py-3 bg-white border-2 border-secondary text-secondary hover:bg-secondary hover:text-white rounded-xl transition-all duration-300 font-medium">
+                                            View Details
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </section>
+            @endif
         </div>
 
         <!-- Footer -->
@@ -741,13 +844,16 @@
 
                 modalImage.src = imageSrc;
                 modal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Prevent body scrolling
+                document.body.classList.add('overflow-hidden');
+
+                // Focus the modal for better keyboard navigation
+                modal.focus();
             }
 
             function closeImageModal() {
                 const modal = document.getElementById('imageModal');
                 modal.classList.add('hidden');
-                document.body.style.overflow = 'auto'; // Restore body scrolling
+                document.body.classList.remove('overflow-hidden');
             }
 
             // Close modal on escape key

@@ -52,7 +52,7 @@
             <p>Hi {{ $job->user->name }},</p>
             <p>Your project titled <strong>{{ $job->title }}</strong> has been posted successfully.</p>
             <p>You can view your project details by clicking the button below:</p>
-            <p><a href="{{ route('job.show', $job->id) }}" class="btn">View Project</a></p>
+            <p><a href="{{ route('jobs.show', $job->id) }}" class="btn">View Project</a></p>
         </div>
         <div class="footer">
             <p>If you have any questions, please contact support.</p>
