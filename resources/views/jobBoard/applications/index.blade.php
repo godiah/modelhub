@@ -146,6 +146,7 @@
                                             'reviewed' => 'bg-blue-50 text-blue-700 border-blue-200',
                                             'hired' => 'bg-green-50 text-green-700 border-green-200',
                                             'rejected' => 'bg-red-50 text-red-700 border-red-200',
+                                            'withdrawn' => 'bg-rose-100 text-rose-800',
                                         ];
 
                                         $dotClasses = [
@@ -153,6 +154,7 @@
                                             'reviewed' => 'bg-blue-500',
                                             'hired' => 'bg-green-500',
                                             'rejected' => 'bg-red-500',
+                                            'withdrawn' => 'bg-rose-500',
                                         ];
 
                                         $statusClass =

@@ -32,8 +32,28 @@ if (window.userId) {
                 counter.classList.remove("hidden");
             }
 
+            // Customize toast message based on notification type
+            let message = "New notification received";
+
+            if (
+                notification.type &&
+                notification.type.includes("NewApplicationMessage")
+            ) {
+                message = `New message: ${notification.subject}`;
+            } else if (
+                notification.type &&
+                notification.type.includes("HiredNotification")
+            ) {
+                message = `Congratulations! You've been hired for ${notification.job_title}`;
+            } else if (
+                notification.type &&
+                notification.type.includes("EngagementResponseNotification")
+            ) {
+                message = `New engagement response: ${notification.subject}`;
+            }
+
             // Show a toast notification
-            showToast(`New message: ${notification.subject}`);
+            showToast(message);
         }
     );
 }

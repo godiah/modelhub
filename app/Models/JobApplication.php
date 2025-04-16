@@ -19,7 +19,7 @@ class JobApplication extends Model
         'proposal',
         'portfolio',
         'terms_accepted',
-        'status', // 'draft', 'submitted', 'hired, 'rejected', 'reviewed' 
+        'status', // 'draft', 'submitted', 'hired, 'rejected', 'reviewed' , 'withdrawn'
         'additional_notes',
     ];
 
@@ -49,6 +49,18 @@ class JobApplication extends Model
         return $this->belongsTo(User::class, 'poster_id');
     }
 
+    // Relationship with job engagement
+    public function engagement()
+    {
+        return $this->hasOne(JobEngagement::class, 'application_id');
+    }
+
+    // Check if this application has been converted to an engagement
+    public function hasEngagement()
+    {
+        return $this->engagement()->exists();
+    }
+
     // Scope to get draft applications
     public function scopeDraft($query)
     {
@@ -59,5 +71,23 @@ class JobApplication extends Model
     public function scopeSubmitted($query)
     {
         return $query->where('status', 'submitted');
+    }
+
+    // Scope to get hired applications
+    public function scopeHired($query)
+    {
+        return $query->where('status', 'hired');
+    }
+
+    // Scope to get rejected applications
+    public function scopeRejected($query)
+    {
+        return $query->where('status', 'rejected');
+    }
+
+    // Scope to get reviewed applications
+    public function scopeReviewed($query)
+    {
+        return $query->where('status', 'reviewed');
     }
 }

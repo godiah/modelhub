@@ -59,7 +59,7 @@
                             class="px-3 py-1.5 text-xs font-medium rounded-full inline-flex items-center {{ $job->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                             <span
                                 class="h-2 w-2 rounded-full {{ $job->is_active ? 'bg-green-500' : 'bg-red-500' }} mr-1.5"></span>
-                            {{ $job->is_active ? 'Active' : 'Inactive' }}
+                            {{ $job->is_active ? 'Active' : 'Closed' }}
                         </span>
                     </div>
 
@@ -194,7 +194,13 @@
                                         <!-- Application Status -->
                                         <div class="flex items-center mt-4 sm:mt-0">
                                             <span class="mr-3 flex items-center">
-                                                @if ($application->status === 'submitted')
+                                                @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active && $application->status !== 'hired')
+                                                    <span
+                                                        class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                                        <span class="h-2 w-2 rounded-full bg-amber-500 mr-2"></span>
+                                                        Position Filled
+                                                    </span>
+                                                @elseif ($application->status === 'submitted')
                                                     <span
                                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
                                                         <span class="h-2 w-2 rounded-full bg-yellow-500 mr-2"></span>
@@ -218,6 +224,12 @@
                                                         <span class="h-2 w-2 rounded-full bg-red-500 mr-2"></span>
                                                         Rejected
                                                     </span>
+                                                @elseif($application->status === 'withdrawn')
+                                                    <span
+                                                        class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-neutral-100 text-rose-800 border border-neutral-200">
+                                                        <span class="h-2 w-2 rounded-full bg-rose-500 mr-2"></span>
+                                                        Withdrawn
+                                                    </span>
                                                 @else
                                                     <span
                                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
@@ -226,86 +238,92 @@
                                                     </span>
                                                 @endif
                                             </span>
+                                            @if (!$application->job->hasAcceptedEngagement() && !$application->job->is_active && $application->status !== 'hired')
+                                                <div x-data="{ open: false }" class="relative">
+                                                    <button @click="open = !open"
+                                                        class="p-1 rounded-full hover:bg-neutral-100">
+                                                        <svg class="h-5 w-5 text-neutral-400 hover:text-primary"
+                                                            fill="currentColor" viewBox="0 0 20 20">
+                                                            <path
+                                                                d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z">
+                                                            </path>
+                                                        </svg>
+                                                    </button>
 
-                                            <div x-data="{ open: false }" class="relative">
-                                                <button @click="open = !open"
-                                                    class="p-1 rounded-full hover:bg-neutral-100">
-                                                    <svg class="h-5 w-5 text-neutral-400 hover:text-primary"
-                                                        fill="currentColor" viewBox="0 0 20 20">
-                                                        <path
-                                                            d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z">
-                                                        </path>
-                                                    </svg>
-                                                </button>
+                                                    <div x-show="open" @click.away="open = false"
+                                                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-neutral-200">
+                                                        <div class="py-1">
+                                                            <form method="POST"
+                                                                action="{{ route('my-jobs.applications.update-status', $application->id) }}">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <input type="hidden" name="status"
+                                                                    value="reviewed">
+                                                                <button type="submit"
+                                                                    class="block w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">
+                                                                    <span class="flex items-center">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="h-4 w-4 mr-2 text-blue-500"
+                                                                            fill="none" viewBox="0 0 24 24"
+                                                                            stroke="currentColor">
+                                                                            <path stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                        </svg>
+                                                                        Mark as Reviewed
+                                                                    </span>
+                                                                </button>
+                                                            </form>
 
-                                                <div x-show="open" @click.away="open = false"
-                                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-neutral-200">
-                                                    <div class="py-1">
-                                                        <form method="POST"
-                                                            action="{{ route('my-jobs.applications.update-status', $application->id) }}">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <input type="hidden" name="status" value="reviewed">
-                                                            <button type="submit"
-                                                                class="block w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">
-                                                                <span class="flex items-center">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-4 w-4 mr-2 text-blue-500"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                    Mark as Reviewed
-                                                                </span>
-                                                            </button>
-                                                        </form>
+                                                            <form method="POST"
+                                                                action="{{ route('my-jobs.applications.update-status', $application->id) }}">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <input type="hidden" name="status" value="hired">
+                                                                <button type="submit"
+                                                                    class="block w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">
+                                                                    <span class="flex items-center">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="h-4 w-4 mr-2 text-green-500"
+                                                                            fill="none" viewBox="0 0 24 24"
+                                                                            stroke="currentColor">
+                                                                            <path stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                        </svg>
+                                                                        Mark as Hired
+                                                                    </span>
+                                                                </button>
+                                                            </form>
 
-                                                        <form method="POST"
-                                                            action="{{ route('my-jobs.applications.update-status', $application->id) }}">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <input type="hidden" name="status" value="hired">
-                                                            <button type="submit"
-                                                                class="block w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">
-                                                                <span class="flex items-center">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-4 w-4 mr-2 text-green-500"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                    Mark as Hired
-                                                                </span>
-                                                            </button>
-                                                        </form>
-
-                                                        <form method="POST"
-                                                            action="{{ route('my-jobs.applications.update-status', $application->id) }}">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <input type="hidden" name="status" value="rejected">
-                                                            <button type="submit"
-                                                                class="block w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">
-                                                                <span class="flex items-center">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-4 w-4 mr-2 text-red-500"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M6 18L18 6M6 6l12 12" />
-                                                                    </svg>
-                                                                    Mark as Rejected
-                                                                </span>
-                                                            </button>
-                                                        </form>
+                                                            <form method="POST"
+                                                                action="{{ route('my-jobs.applications.update-status', $application->id) }}">
+                                                                @csrf
+                                                                @method('PATCH')
+                                                                <input type="hidden" name="status"
+                                                                    value="rejected">
+                                                                <button type="submit"
+                                                                    class="block w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary">
+                                                                    <span class="flex items-center">
+                                                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                                                            class="h-4 w-4 mr-2 text-red-500"
+                                                                            fill="none" viewBox="0 0 24 24"
+                                                                            stroke="currentColor">
+                                                                            <path stroke-linecap="round"
+                                                                                stroke-linejoin="round"
+                                                                                stroke-width="2"
+                                                                                d="M6 18L18 6M6 6l12 12" />
+                                                                        </svg>
+                                                                        Mark as Rejected
+                                                                    </span>
+                                                                </button>
+                                                            </form>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @endif
                                         </div>
                                     </div>
 
@@ -425,14 +443,32 @@
 
                                                 <!-- Actions -->
                                                 <div class="mt-3">
-                                                    <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"
-                                                        class="block w-full text-center px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90 transition shadow-sm">
-                                                        View Full Details
-                                                    </a>
-                                                    <a href="#"
-                                                        class="block w-full text-center px-4 py-2 text-sm font-medium bg-white text-primary border border-primary rounded mt-2 hover:bg-primary/5 transition">
-                                                        Contact Applicant
-                                                    </a>
+                                                    @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active)
+                                                        @if ($application->status === 'hired')
+                                                            <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"
+                                                                class="block w-full text-center px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90 transition shadow-sm">
+                                                                View Full Details
+                                                            </a>
+                                                            <a href="#"
+                                                                class="block w-full text-center px-4 py-2 text-sm font-medium bg-white text-primary border border-primary rounded mt-2 hover:bg-primary/5 transition">
+                                                                Contact Freelancer
+                                                            </a>
+                                                        @else
+                                                            <button disabled
+                                                                class="block w-full text-center px-4 py-2 text-sm font-medium bg-neutral-100 text-neutral-400 rounded cursor-not-allowed border border-neutral-200">
+                                                                Position Filled
+                                                            </button>
+                                                        @endif
+                                                    @else
+                                                        <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"
+                                                            class="block w-full text-center px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90 transition shadow-sm">
+                                                            View Full Details
+                                                        </a>
+                                                        <a href="#"
+                                                            class="block w-full text-center px-4 py-2 text-sm font-medium bg-white text-primary border border-primary rounded mt-2 hover:bg-primary/5 transition">
+                                                            Contact Applicant
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>

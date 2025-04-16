@@ -48,12 +48,24 @@ class ModelJob extends Model
     public function applications()
     {
         return $this->hasMany(JobApplication::class, 'job_id')
-            ->where('status', 'submitted');
+            ->where('status', '!=', 'drafted');
     }
 
     public function jobImages()
     {
         return $this->hasMany(JobImage::class, 'model_job_id');
+    }
+
+    /**
+     * Check if the job has any accepted engagement
+     */
+    public function hasAcceptedEngagement()
+    {
+        return $this->applications()
+            ->whereHas('engagement', function ($query) {
+                $query->whereIn('status', ['applicant_accepted', 'active', 'completed']);
+            })
+            ->exists();
     }
 
     /**

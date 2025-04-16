@@ -27,6 +27,11 @@ class NotificationController extends Controller
                     'success' => true,
                     'fullMessage' => $message ? $message->message : 'Message not found'
                 ]);
+            } elseif ($notification->type === 'App\Notifications\EngagementResponseNotification') {
+                return response()->json([
+                    'success' => true,
+                    'fullMessage' => $notification->data['notes'] ?? 'No additional notes provided.'
+                ]);
             }
             return response()->json(['success' => true]);
         }
@@ -35,6 +40,14 @@ class NotificationController extends Controller
         if ($notification->type === 'App\Notifications\NewApplicationMessage') {
             $jobSlug = $notification->data['job_slug'];
             return redirect()->route('applications.show', $jobSlug);
+        } elseif ($notification->type === 'App\Notifications\HiredNotification') {
+            $applicationId = $notification->data['application_id'];
+            $jobSlug = $notification->data['job_slug'];
+            return redirect()->route('engagements.response-form', $applicationId);
+        } elseif ($notification->type === 'App\Notifications\EngagementResponseNotification') {
+            $applicationId = $notification->data['application_id'];
+            $jobSlug = $notification->data['job_slug'];
+            return redirect()->route('engagements.index');
         }
 
         return redirect()->back()->with([

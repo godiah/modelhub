@@ -26,7 +26,9 @@
                         ? 'bg-blue-100 border-l-4 border-blue-500'
                         : ($application->status === 'rejected'
                             ? 'bg-red-100 border-l-4 border-red-500'
-                            : 'bg-green-100 border-l-4 border-green-500')) }}">
+                            : ($application->status === 'withdrawn'
+                                ? 'bg-rose-100 border-l-4 border-rose-500'
+                                : 'bg-green-100 border-l-4 border-green-500'))) }}">
                 <div class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
                         class="h-6 w-6 mr-3 {{ $application->status === 'submitted'
@@ -35,7 +37,9 @@
                                 ? 'text-blue-500'
                                 : ($application->status === 'rejected'
                                     ? 'text-red-500'
-                                    : 'text-green-500')) }}"
+                                    : ($application->status === 'withdrawn'
+                                        ? 'text-rose-500'
+                                        : 'text-green-500'))) }}"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -49,7 +53,10 @@
                                         ? 'text-blue-700'
                                         : ($application->status === 'rejected'
                                             ? 'text-red-700'
-                                            : 'text-green-700')) }}">{{ ucfirst($application->status) }}</span>
+                                            : ($application->status === 'withdrawn'
+                                                ? 'text-rose-700'
+                                                : 'text-green-700'))) }}">
+                                {{ ucfirst($application->status) }}</span>
                         </p>
                         <p class="text-sm text-neutral-600">
                             Applied on {{ $application->created_at->format('F d, Y') }}

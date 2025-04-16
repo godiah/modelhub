@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\JobDeliverableController;
+use App\Http\Controllers\JobEngagementController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +58,7 @@ Route::middleware(['auth'])->prefix('my-jobs')->name('my-jobs.')->group(function
         Route::get('/{application}/details', [JobApplicationController::class, 'showApplications'])->name('show');
         Route::patch('/{application}/status', [JobApplicationController::class, 'updateStatus'])->name('update-status');
         Route::post('/{application}/message', [JobApplicationController::class, 'sendMessage'])->name('send-message');
+        Route::post('/{application}/confirm-hire', [JobApplicationController::class, 'confirmHire'])->name('confirm-hire');
     });
 });
 
@@ -76,8 +79,24 @@ Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->gr
     Route::delete('/', [NotificationController::class, 'destroyAll'])->name('delete-all');
 });
 
+// Job Engagements
+Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(function () {
+    Route::get('/', [JobEngagementController::class, 'index'])->name('index');
 
+    Route::middleware(['verify-engagement-ownership'])->group(function () {
+        Route::get('/{applicationId}/respond', [JobEngagementController::class, 'showResponseForm'])->name('response-form');
+        Route::post('/{engagement}/respond', [JobEngagementController::class, 'respondToOffer'])->name('respond');
+    });
 
+    // Deliverable routes
+    Route::prefix('deliverables')->name('deliverables.')->group(function () {
+        Route::post('/{deliverable}/approve', [JobDeliverableController::class, 'approve'])->name('approve');
+        Route::post('/{deliverable}/reject', [JobDeliverableController::class, 'reject'])->name('reject');
+        Route::patch('/{deliverable}', [JobDeliverableController::class, 'update'])->name('update');
+        Route::delete('/{deliverable}', [JobDeliverableController::class, 'destroy'])->name('destroy');
+        Route::post('/{engagement}/store', [JobDeliverableController::class, 'store'])->name('store');
+    });
+});
 
 
 

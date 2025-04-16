@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewHireEvent;
+use App\Mail\ApplicationHired;
 use App\Mail\ApplicationMessage;
 use App\Models\ApplicantMessage;
 use App\Models\JobApplication;
+use App\Models\JobDeliverable;
+use App\Models\JobEngagement;
 use App\Models\ModelJob;
 use App\Models\Skill;
 use App\Models\Software;
+use App\Notifications\HiredNotification;
 use App\Notifications\NewApplicationMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -266,7 +271,6 @@ class JobApplicationController extends Controller
             ->where('job_id', $job->id)
             ->where('applicant_id', $user->id)
             ->firstOrFail();
-
         return view('jobBoard.applications.show', compact('application'));
     }
 
@@ -281,7 +285,7 @@ class JobApplicationController extends Controller
     public function getUserPostedJobs()
     {
         // Get jobs posted by the authenticated user
-        $postedJobs = ModelJob::where('user_id', Auth::id())->paginate(2);
+        $postedJobs = ModelJob::where('user_id', Auth::id())->latest()->paginate(5);
 
         return view('jobBoard.posted.index', compact('postedJobs'));
     }
@@ -295,7 +299,9 @@ class JobApplicationController extends Controller
         // Check if the job belongs to the authenticated user
         $job = ModelJob::where('slug', $slug)
             ->where('user_id', Auth::id())
-            ->with('applications.applicant') // Eager load applications and applicants
+            ->with(['applications' => function ($query) {
+                $query->latest(); // Orders by created_at DESC by default
+            }, 'applications.applicant'])
             ->firstOrFail();
 
         return view('jobBoard.posted.applications.index', [
@@ -317,7 +323,7 @@ class JobApplicationController extends Controller
 
         return view('jobBoard.posted.applications.show', [
             'application' => $application,
-            'job' => $application->job
+            'job' => $application->job,
         ]);
     }
 
@@ -334,9 +340,16 @@ class JobApplicationController extends Controller
 
         // Validate the request
         $validated = $request->validate([
-            'status' => 'required|in:submitted,reviewed,interviewing,hired,rejected',
+            'status' => 'required|in:submitted,reviewed,hired,rejected',
             'notes' => 'nullable|string|max:1000',
         ]);
+
+        // If status is being changed to hired
+        if ($validated['status'] === 'hired' && $application->status !== 'hired') {
+            return redirect()->back()
+                ->with('show_hire_confirmation', true)
+                ->withInput();
+        }
 
         // Update the application
         $application->status = $validated['status'];
@@ -348,6 +361,60 @@ class JobApplicationController extends Controller
         // Optionally, notify the applicant about the status change
 
         return redirect()->back()->with('success', 'Application status updated successfully.');
+    }
+    /**
+     * Confirm hire and create engagement
+     */
+    public function confirmHire(Request $request, JobApplication $application)
+    {
+        $request->validate([
+            'deliverables' => 'sometimes|array',
+            'deliverables.*.title' => 'required|string|max:255',
+            'deliverables.*.description' => 'nullable|string',
+            'deliverables.*.due_date' => 'nullable|date',
+        ]);
+
+        // Create engagement
+        $engagement = JobEngagement::create([
+            'application_id' => $application->id,
+            'status' => 'employer_accepted',
+            'agreed_amount' => $application->offer_amount,
+            'service_fee' => $application->service_fee,
+            'net_amount' => $application->net_amount,
+            'employer_accepted_at' => now(),
+        ]);
+
+        // Create deliverables
+        if ($request->has('deliverables')) {
+            foreach ($request->deliverables as $deliverable) {
+                JobDeliverable::create([
+                    'engagement_id' => $engagement->id,
+                    'title' => $deliverable['title'],
+                    'description' => $deliverable['description'],
+                    'due_date' => $deliverable['due_date'],
+                    'status' => 'pending',
+                ]);
+            }
+        }
+
+        // Update application status
+        $application->update(['status' => 'hired']);
+
+        // Send email notification (queued) to applicant
+        Mail::to($application->applicant->email)
+            ->queue(new ApplicationHired($application, $engagement));
+
+        // Create in-app notification
+        $application->applicant->notify(new HiredNotification($application, $engagement));
+
+        return redirect()->back()->with([
+            'success' => 'Hire confirmed and applicant notified',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Hire confirmed and applicant notified',
+                'text' => 'Hire confirmed and applicant notified',
+            ]
+        ]);
     }
 
     /**

@@ -126,6 +126,37 @@
                                                                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                         </svg>
                                                     </div>
+                                                @elseif ($notification->type === 'App\Notifications\HiredNotification')
+                                                    <div class="p-2 bg-green-100 text-green-600 rounded-lg">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                    </div>
+                                                @elseif ($notification->type === 'App\Notifications\EngagementResponseNotification')
+                                                    @if ($notification->data['response'] === 'accepted')
+                                                        <div class="p-2 bg-green-100 text-green-600 rounded-lg">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                        </div>
+                                                    @else
+                                                        <div class="p-2 bg-red-100 text-red-600 rounded-lg">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                                fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                        </div>
+                                                    @endif
                                                 @else
                                                     <div class="p-2 bg-primary/10 text-primary rounded-lg">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
@@ -141,6 +172,14 @@
                                             <h3 class="font-medium text-lg text-neutral-800">
                                                 @if ($notification->type === 'App\Notifications\NewApplicationMessage')
                                                     {{ $notification->data['subject'] ?? 'New message' }}
+                                                @elseif ($notification->type === 'App\Notifications\HiredNotification')
+                                                    You've been hired!
+                                                @elseif ($notification->type === 'App\Notifications\EngagementResponseNotification')
+                                                    @if ($notification->data['response'] === 'accepted')
+                                                        Offer Accepted
+                                                    @else
+                                                        Offer Declined
+                                                    @endif
                                                 @else
                                                     {{ class_basename($notification->type) }}
                                                 @endif
@@ -173,6 +212,21 @@
                                                 {{ $notification->data['message_preview'] ?? 'You received a new message' }}
                                                 regarding job: <span
                                                     class="font-medium text-neutral-800">{{ $notification->data['job_title'] ?? 'a job posting' }}</span>
+                                            @elseif ($notification->type === 'App\Notifications\HiredNotification')
+                                                You've been hired for job: <span
+                                                    class="font-medium text-neutral-800">{{ $notification->data['job_title'] ?? 'a job posting' }}</span>
+                                                with an agreed amount of
+                                                {{ config('app.currency_symbol') }}{{ number_format($notification->data['agreed_amount'], 2) }}
+                                            @elseif ($notification->type === 'App\Notifications\EngagementResponseNotification')
+                                                <span
+                                                    class="font-medium text-neutral-800">{{ $notification->data['applicant_name'] ?? 'An applicant' }}</span>
+                                                has {{ $notification->data['response'] }}
+                                                your offer for job: <span
+                                                    class="font-medium text-neutral-800">{{ $notification->data['job_title'] ?? 'a job posting' }}</span>
+                                                @if ($notification->data['response'] === 'accepted')
+                                                    with an agreed amount of
+                                                    {{ config('app.currency_symbol') }}{{ number_format($notification->data['agreed_amount'], 2) }}
+                                                @endif
                                             @else
                                                 {{ $notification->data['message'] ?? 'You have a new notification' }}
                                             @endif
@@ -206,6 +260,40 @@
                                                             d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                     </svg>
                                                     View application
+                                                </a>
+                                            @endif
+                                        @elseif ($notification->type === 'App\Notifications\HiredNotification')
+                                            @if (isset($notification->data['job_slug']))
+                                                <a href="{{ route('notifications.read', $notification->id) }}"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-green-100 text-green-600 rounded-lg text-sm font-medium hover:bg-green-200 transition">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                    </svg>
+                                                    View details
+                                                </a>
+                                            @endif
+                                        @elseif ($notification->type === 'App\Notifications\EngagementResponseNotification')
+                                            <button @click="toggleMessage"
+                                                class="inline-flex items-center px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition"
+                                                x-text="loading ? 'Loading...' : (expanded ? 'Hide notes' : 'View notes')"
+                                                type="button">
+                                            </button>
+
+                                            @if (isset($notification->data['job_slug']))
+                                                <a href="{{ route('notifications.read', $notification->id) }}"
+                                                    class="inline-flex items-center px-3 py-1.5 {{ $notification->data['response'] === 'accepted' ? 'bg-green-100 text-green-600 hover:bg-green-200' : 'bg-red-100 text-red-600 hover:bg-red-200' }} rounded-lg text-sm font-medium transition">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
+                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                    View details
                                                 </a>
                                             @endif
                                         @else

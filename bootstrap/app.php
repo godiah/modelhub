@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\DeactivateExpiredJobs;
+use App\Http\Middleware\VerifyJobEngagementOwnership;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'verify-engagement-ownership' => \App\Http\Middleware\VerifyJobEngagementOwnership::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

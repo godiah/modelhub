@@ -49,7 +49,7 @@
                             class="rounded-lg border-neutral-300 text-neutral-700 text-sm focus:ring-primary focus:border-primary">
                             <option>All Jobs</option>
                             <option>Active Jobs</option>
-                            <option>Inactive Jobs</option>
+                            <option>Closed Jobs</option>
                         </select>
                         <select
                             class="rounded-lg border-neutral-300 text-neutral-700 text-sm focus:ring-primary focus:border-primary">
@@ -74,7 +74,7 @@
                                                 {{ $job->title }}</h3>
                                             <span
                                                 class="ml-3 px-3 py-1 text-xs font-medium rounded-full {{ $job->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                {{ $job->is_active ? 'Active' : 'Inactive' }}
+                                                {{ $job->is_active ? 'Active' : 'Closed' }}
                                             </span>
                                         </div>
 
