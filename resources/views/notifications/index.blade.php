@@ -206,7 +206,7 @@
                                     </div>
 
                                     <!-- Notification content -->
-                                    <div class="mt-3 ml-10">
+                                    <div class="mt-3 ml-10 font-main">
                                         <p class="text-neutral-600">
                                             @if ($notification->type === 'App\Notifications\NewApplicationMessage')
                                                 {{ $notification->data['message_preview'] ?? 'You received a new message' }}
@@ -224,8 +224,10 @@
                                                 your offer for job: <span
                                                     class="font-medium text-neutral-800">{{ $notification->data['job_title'] ?? 'a job posting' }}</span>
                                                 @if ($notification->data['response'] === 'accepted')
-                                                    with an agreed amount of
-                                                    {{ config('app.currency_symbol') }}{{ number_format($notification->data['agreed_amount'], 2) }}
+                                                    <a href="{{ route('engagements.index') }}"
+                                                        class="text-primary hover:underline font-tertiary text-sm">Proceed
+                                                        to
+                                                        set-up payment.</a>
                                                 @endif
                                             @else
                                                 {{ $notification->data['message'] ?? 'You have a new notification' }}

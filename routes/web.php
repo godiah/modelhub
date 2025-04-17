@@ -90,6 +90,7 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
 
     // Deliverable routes
     Route::prefix('deliverables')->name('deliverables.')->group(function () {
+        Route::post('/{deliverable}/submit', [JobDeliverableController::class, 'submit'])->name('submit');
         Route::post('/{deliverable}/approve', [JobDeliverableController::class, 'approve'])->name('approve');
         Route::post('/{deliverable}/reject', [JobDeliverableController::class, 'reject'])->name('reject');
         Route::patch('/{deliverable}', [JobDeliverableController::class, 'update'])->name('update');

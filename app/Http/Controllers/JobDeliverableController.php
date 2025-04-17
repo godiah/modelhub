@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\DeliverableSubmitted;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
 use Carbon\Carbon;
@@ -10,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class JobDeliverableController extends Controller
@@ -178,6 +181,78 @@ class JobDeliverableController extends Controller
                 'Something went wrong. Please try again.'
             );
         }
+    }
+
+    /**
+     * Submit deliverable files and notes
+     */
+    public function submit(Request $request, JobDeliverable $deliverable)
+    {
+        // Prevent submission if approved
+        if ($deliverable->approved_at) {
+            return redirect()->back()->withErrors(['message' => 'Approved deliverables cannot be modified.']);
+        }
+
+        // Check if the deliverable is rejected and allow resubmission
+        if ($deliverable->rejected_at) {
+            // Delete previously submitted files
+            if (!empty($deliverable->submission_files)) {
+                foreach ($deliverable->submission_files as $file) {
+                    Storage::disk('public')->delete($file['path']);
+                }
+            }
+
+            // Reset previous submission data
+            $deliverable->update([
+                'submission_files' => [],
+                'submission_notes' => null,
+                'rejected_at' => null,
+                'feedback' => null,
+            ]);
+        }
+
+        $request->validate([
+            'submission_files' => 'array|max:5', // Limit to 5 files
+            'submission_files.*' => 'file|max:10240', // 10MB max per file
+            'submission_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $submissionFiles = [];
+
+        if ($request->hasFile('submission_files')) {
+            foreach ($request->file('submission_files') as $file) {
+                // Store all files in one main folder instead of per-deliverable subfolders
+                $path = $file->store('deliverable-submissions', 'public');
+
+                $submissionFiles[] = [
+                    'name' => $file->getClientOriginalName(),
+                    'path' => $path,
+                    'size' => $file->getSize(),
+                    'mime' => $file->getMimeType(),
+                ];
+            }
+        }
+
+        // Update the deliverable
+        $deliverable->update([
+            'submission_files' => $submissionFiles,
+            'submission_notes' => $request->submission_notes,
+            'submitted_at' => now(),
+            'status' => 'submitted',
+            'rejected_at' => null // Reset rejected_at if it was set
+        ]);
+
+        // Send notification email to the job poster
+        if ($deliverable->engagement->job->user) {
+            Mail::to($deliverable->engagement->job->user->email)
+                ->queue(new DeliverableSubmitted($deliverable));
+        }
+
+        return $this->respondWithSuccess(
+            'Deliverable Submitted.',
+            'Deliverable Submitted Successfully',
+            'The deliverable has been submitted successfully.'
+        );
     }
 
     /**
