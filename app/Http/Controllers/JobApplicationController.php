@@ -9,6 +9,7 @@ use App\Models\ApplicantMessage;
 use App\Models\JobApplication;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
+use App\Models\JobReview;
 use App\Models\ModelJob;
 use App\Models\Skill;
 use App\Models\Software;
@@ -321,9 +322,48 @@ class JobApplicationController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        // Get reviews for this applicant
+        $reviews = JobReview::where('reviewee_id', $application->applicant_id)
+            ->with(['reviewer', 'engagement.application.job'])
+            ->public()
+            ->latest()
+            ->paginate(5);
+
+        // Calculate stats
+        $totalReviews = JobReview::where('reviewee_id', $application->applicant_id)->public()->count();
+        $averageRating = JobReview::where('reviewee_id', $application->applicant_id)->public()->avg('rating') ?? 0;
+
+        // Find top skill/tag
+        $topSkill = null;
+        if ($totalReviews > 0) {
+            $allTags = JobReview::where('reviewee_id', $application->applicant_id)
+                ->public()
+                ->get()
+                ->pluck('tags')
+                ->flatten()
+                ->filter();
+
+            $tagCounts = collect();
+            foreach ($allTags as $tag) {
+                $tagCounts[$tag] = ($tagCounts[$tag] ?? 0) + 1;
+            }
+
+            if ($tagCounts->count() > 0) {
+                $topSkill = $tagCounts->sortDesc()->keys()->first();
+            }
+        }
+
+        // Default filter is 'all'
+        $ratingFilter = 'all';
+
         return view('jobBoard.posted.applications.show', [
             'application' => $application,
             'job' => $application->job,
+            'reviews' => $reviews,
+            'totalReviews' => $totalReviews,
+            'averageRating' => $averageRating,
+            'topSkill' => $topSkill,
+            'ratingFilter' => $ratingFilter
         ]);
     }
 
@@ -362,6 +402,7 @@ class JobApplicationController extends Controller
 
         return redirect()->back()->with('success', 'Application status updated successfully.');
     }
+
     /**
      * Confirm hire and create engagement
      */

@@ -97,6 +97,9 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
         Route::delete('/{deliverable}', [JobDeliverableController::class, 'destroy'])->name('destroy');
         Route::post('/{engagement}/store', [JobDeliverableController::class, 'store'])->name('store');
     });
+
+    // Review routes
+    Route::post('/engagements/{engagement}/review', [JobEngagementController::class, 'leaveReview'])->name('review');
 });
 
 

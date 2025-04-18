@@ -27,7 +27,7 @@
             <!-- Application Details Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Left Column - Applicant Information -->
-                <div class="lg:col-span-2 space-y-6">
+                <div class="font-main lg:col-span-2 space-y-6">
                     <!-- Applicant Profile Card -->
                     <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
                         <div class="relative px-6 pt-6 pb-4">
@@ -88,7 +88,7 @@
                                 </div>
 
                                 <div class="flex-1">
-                                    <h1 class="text-2xl font-bold text-neutral-800 font-secondary">
+                                    <h1 class="text-2xl font-bold text-neutral-800 font-main">
                                         {{ $application->applicant->name }}
                                     </h1>
                                     <div class="flex flex-wrap items-center gap-3 mt-1">
@@ -121,7 +121,7 @@
                     <!-- Financial Card -->
                     <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
                         <div class="px-6 py-5">
-                            <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-secondary">
+                            <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-main">
                                 <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="#14b8a6"
                                     class="h-5 w-5 mr-2 text-secondary" viewBox="0 0 512 512">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -173,7 +173,7 @@
                     <!-- Proposal Section -->
                     <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
                         <div class="px-6 py-5">
-                            <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-secondary">
+                            <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-main">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-secondary"
                                     viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd"
@@ -199,7 +199,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round"
                                             d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
                                     </svg>
-                                    <p class="text-neutral-500 font-secondary">No proposal provided by applicant</p>
+                                    <p class="text-neutral-500 font-main">No proposal provided by applicant</p>
                                 </div>
                             @endif
                         </div>
@@ -208,7 +208,7 @@
                     <!-- Portfolio Section -->
                     <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
                         <div class="px-6 py-5">
-                            <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-secondary">
+                            <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-main">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-secondary"
                                     viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd"
@@ -335,8 +335,99 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                    <p class="text-neutral-500 font-secondary">No portfolio items or attachments
+                                    <p class="text-neutral-500 font-main">No portfolio items or attachments
                                         provided</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Reviews Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                        <div class="px-6 py-5 border-b border-neutral-200">
+                            <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-main">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-secondary"
+                                    viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                Applicant Reviews
+                            </h2>
+                        </div>
+
+                        <!-- Summary Stats -->
+                        <div class="bg-neutral-50 px-6 py-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Average Rating -->
+                                <div
+                                    class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm">
+                                    <span class="text-neutral-500 text-sm mb-1">Average Rating</span>
+                                    <div class="flex items-center">
+                                        <span
+                                            class="text-3xl font-bold text-neutral-800 mr-2">{{ number_format($averageRating, 1) }}</span>
+                                        <x-jobs.star-rating :rating="$averageRating" size="md" :showNumber="false" />
+                                    </div>
+                                </div>
+
+                                <!-- Total Reviews -->
+                                <div
+                                    class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm">
+                                    <span class="text-neutral-500 text-sm mb-1">Total Reviews</span>
+                                    <div class="flex items-center">
+                                        <span class="text-3xl font-bold text-neutral-800">{{ $totalReviews }}</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor"
+                                            class="h-7 w-7 ml-2 text-accent">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
+                                        </svg>
+
+                                    </div>
+                                </div>
+
+                                <!-- Top Skill -->
+                                <div
+                                    class="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm">
+                                    <span class="text-neutral-500 text-sm mb-1">Most Recognized For</span>
+                                    <div class="flex items-center justify-center">
+                                        @if ($topSkill)
+                                            <span
+                                                class="px-3 py-1.5 bg-secondary/10 text-secondary font-medium rounded-full text-sm">{{ $topSkill }}</span>
+                                        @else
+                                            <span class="text-neutral-500 italic text-sm">No tags yet</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reviews List -->
+                        <div class="px-6 py-5 bg-neutral-50">
+                            @if ($reviews->count() > 0)
+                                <div class="space-y-4">
+                                    @foreach ($reviews as $review)
+                                        <x-jobs.review-card :review="$review" />
+                                    @endforeach
+                                </div>
+
+                                <!-- Pagination -->
+                                <div class="mt-6">
+                                    {{ $reviews->links() }}
+                                </div>
+                            @else
+                                <div class="text-center py-12">
+                                    <div
+                                        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neutral-100 mb-4">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-accent"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                            stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-medium text-neutral-700">No Reviews Yet</h3>
+                                    <p class="text-neutral-500 mt-1">This applicant hasn't received any reviews yet.
+                                    </p>
                                 </div>
                             @endif
                         </div>
@@ -1071,44 +1162,4 @@
             </div>
         </div>
     </section>
-    {{-- <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('statusUpdateForm', () => ({
-                submitDeliverables() {
-                    // Get the hire form
-                    const hireForm = document.getElementById('hireForm');
-                    const inputContainer = document.getElementById('deliverables-input-container');
-
-                    // Clear previous inputs
-                    inputContainer.innerHTML = '';
-
-                    // Add each deliverable as hidden inputs
-                    this.deliverables.forEach((deliverable, index) => {
-                        const titleInput = document.createElement('input');
-                        titleInput.type = 'hidden';
-                        titleInput.name = `deliverables[${index}][title]`;
-                        titleInput.value = deliverable.title;
-
-                        const descInput = document.createElement('input');
-                        descInput.type = 'hidden';
-                        descInput.name = `deliverables[${index}][description]`;
-                        descInput.value = deliverable.description || '';
-
-                        const dateInput = document.createElement('input');
-                        dateInput.type = 'hidden';
-                        dateInput.name = `deliverables[${index}][due_date]`;
-                        dateInput.value = deliverable.due_date || '';
-
-                        inputContainer.appendChild(titleInput);
-                        inputContainer.appendChild(descInput);
-                        inputContainer.appendChild(dateInput);
-                    });
-
-                    // Submit the form
-                    hireForm.submit();
-                    this.showDeliverablesForm = false;
-                }
-            }));
-        });
-    </script> --}}
 </x-app-layout>

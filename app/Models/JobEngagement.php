@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class JobEngagement extends Model
 {
@@ -79,10 +80,10 @@ class JobEngagement extends Model
     /**
      * Get the reviews for this engagement
      */
-    // public function reviews()
-    // {
-    //     return $this->hasMany(JobReview::class, 'engagement_id');
-    // }
+    public function reviews()
+    {
+        return $this->hasMany(JobReview::class, 'engagement_id');
+    }
 
     /**
      * Check if the engagement has been accepted by the applicant
@@ -150,5 +151,13 @@ class JobEngagement extends Model
 
         $completed = $this->deliverables->where('status', 'approved')->count();
         return ($completed / $total) * 100;
+    }
+
+    // Check for existing review
+    public function hasBeenReviewedByCurrentUser()
+    {
+        return $this->reviews()
+            ->where('reviewer_id', Auth::id())
+            ->exists();
     }
 }

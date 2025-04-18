@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Events\EngagementResponseEvent;
 use App\Models\JobApplication;
 use App\Models\JobEngagement;
+use App\Models\JobReview;
+use App\Models\User;
 use App\Notifications\EngagementResponseNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class JobEngagementController extends Controller
 {
@@ -130,4 +133,175 @@ class JobEngagementController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Leave a review for a completed job
+     */
+    public function leaveReview(JobEngagement $engagement, Request $request)
+    {
+        // Check if the job is completed
+        if ($engagement->status !== 'completed') {
+            return redirect()->back()->with([
+                'error' => 'You can only review completed jobs',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Review Not Allowed',
+                    'text' => 'You can only leave reviews for completed jobs.',
+                ]
+            ]);
+        }
+
+        $application = $engagement->application;
+        $authUser = Auth::user();
+
+        // Determine reviewer and reviewee roles
+        if ($authUser->id === $application->poster_id) {
+            $reviewer_id = $application->poster_id;
+            $reviewee_id = $application->applicant_id;
+            $reviewerType = 'employer';
+        } elseif ($authUser->id === $application->applicant_id) {
+            $reviewer_id = $application->applicant_id;
+            $reviewee_id = $application->poster_id;
+            $reviewerType = 'freelancer';
+        } else {
+            return redirect()->back()->with([
+                'error' => 'Unauthorized',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Access Denied',
+                    'text' => 'You are not authorized to leave a review for this job.',
+                ]
+            ]);
+        }
+
+        // Check if a review already exists
+        $existingReview = JobReview::where([
+            'engagement_id' => $engagement->id,
+            'reviewer_id' => $reviewer_id,
+        ])->first();
+
+        if ($existingReview) {
+            return redirect()->back()->with([
+                'error' => 'You have already reviewed this job',
+                'alert' => [
+                    'type' => 'warning',
+                    'title' => 'Review Already Submitted',
+                    'text' => 'You have already submitted a review for this job.',
+                ]
+            ]);
+        }
+
+        try {
+            // Validate request
+            $validated = $request->validate([
+                'rating' => 'required|integer|min:1|max:5',
+                'review' => 'required|string|min:10',
+                'tags' => 'nullable|array',
+                'is_public' => 'nullable|boolean',
+            ]);
+
+            // Set is_public to true if not provided
+            $isPublic = isset($validated['is_public']) ? (bool)$validated['is_public'] : true;
+
+            // Create review
+            $review = JobReview::create([
+                'engagement_id' => $engagement->id,
+                'reviewer_id' => $reviewer_id,
+                'reviewee_id' => $reviewee_id,
+                'rating' => $validated['rating'],
+                'review' => $validated['review'],
+                'tags' => $validated['tags'] ?? [],
+                'is_public' => $isPublic,
+            ]);
+
+            // DEBUG: Log created review
+            Log::info('Created review:', $review->toArray());
+
+            // Get reviewee name for personalized message
+            $reviewee = User::find($reviewee_id);
+            $revieweeName = $reviewee ? $reviewee->name : 'the ' . ($reviewerType === 'employer' ? 'freelancer' : 'client');
+
+            return redirect()->route('engagements.index', $engagement)->with([
+                'hasReviewed' => $existingReview,
+                'success' => 'Review submitted successfully',
+                'alert' => [
+                    'type' => 'success',
+                    'title' => 'Review Submitted',
+                    'text' => "Thank you for reviewing $revieweeName. Your feedback helps build trust in our community.",
+                ]
+            ]);
+        } catch (\Exception $e) {
+            // DEBUG: Log any exceptions
+            Log::error('Error saving review: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return redirect()->back()->with([
+                'error' => 'Failed to submit review',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Error',
+                    'text' => 'There was a problem submitting your review. Please try again.',
+                ]
+            ]);
+        }
+    }
+
+    /**
+     * Cancel an engagement- work on this
+     
+    public function cancelEngagement(JobEngagement $engagement, Request $request)
+    {
+        // Authorization checks
+        $application = $engagement->application;
+        $authUser = Auth::user();
+
+        if ($authUser->id !== $application->poster_id && $authUser->id !== $application->applicant_id) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Only allow cancellation before completion
+        if ($engagement->status === 'completed') {
+            return response()->json(['error' => 'Cannot cancel a completed engagement'], 400);
+        }
+
+        // Validate request
+        $request->validate([
+            'cancellation_reason' => 'required|string',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // Handle refunds if payment was escrowed
+            if ($engagement->isPaymentEscrowed()) {
+                // Implement your refund logic here
+                // ...
+            }
+
+            // Update engagement
+            $engagement->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'notes' => $request->cancellation_reason,
+            ]);
+
+            DB::commit();
+
+            // Determine who to notify
+            $userToNotify = ($authUser->id === $application->poster_id)
+                ? $application->applicant
+                : $application->poster;
+
+            // Create and use a notification class for cancellations
+            // $userToNotify->notify(new EngagementCancelled($engagement));
+
+            return response()->json([
+                'message' => 'Engagement cancelled successfully',
+                'engagement' => $engagement->refresh()
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Failed to cancel engagement: ' . $e->getMessage()], 500);
+        }
+    }
+     */
 }
