@@ -15,6 +15,7 @@ use App\Models\Skill;
 use App\Models\Software;
 use App\Notifications\HiredNotification;
 use App\Notifications\NewApplicationMessage;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +25,8 @@ use Illuminate\Support\Facades\Validator;
 
 class JobApplicationController extends Controller
 {
+    use AuthorizesRequests;
+
     // Service fee percentage as a constant
     const SERVICE_FEE_PERCENTAGE = 0.10; // 10%
 
@@ -210,16 +213,48 @@ class JobApplicationController extends Controller
     /**
      * Get all applications by the current user
      */
-    public function getUserApplications()
+    public function getUserApplications(Request $request)
     {
-        $applications = JobApplication::with('job')
+        $query = JobApplication::with('job', 'engagement', 'jobEngagements')
             ->where('applicant_id', Auth::id())
             ->where('status', '!=', 'draft')
-            ->latest()
-            ->paginate(2);
+            ->active();
 
-        return view('jobBoard.applications.index', compact('applications'));
+        $activeFilters = [
+            'status' => $request->filled('status') && $request->status !== 'all'
+                ? $request->status
+                : 'all',
+            'sort'   => $request->filled('sort')
+                ? $request->sort
+                : 'date_desc',
+        ];
+
+        if ($activeFilters['status'] !== 'all') {
+            $query->where('status', $activeFilters['status']);
+        }
+
+        switch ($activeFilters['sort']) {
+            case 'date_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'status':
+                $query->orderBy('status', 'asc');
+                break;
+            case 'date_desc':
+            default:
+                $query->latest();
+        }
+
+        $applications = $query->paginate(7)->withQueryString();
+
+        if ($request->ajax()) {
+            return view('jobBoard.applications.partials.applications-list', compact('applications', 'activeFilters'))
+                ->render();
+        }
+
+        return view('jobBoard.applications.index', compact('applications', 'activeFilters'));
     }
+
 
     /**
      * Get user's draft applications
@@ -238,26 +273,39 @@ class JobApplicationController extends Controller
     /**
      * Delete an application or draft
      */
-    public function destroy($id)
-    {
-        $application = JobApplication::findOrFail($id);
+    // public function destroy(JobApplication $application)
+    // {
+    //     // 1) Authorization
+    //     if ($application->applicant_id !== Auth::id()) {
+    //         return redirect()->back()->with([
+    //             'alert' => [
+    //                 'type'  => 'error',
+    //                 'title' => 'Unauthorized Action',
+    //                 'text'  => 'You do not have permission to delete this application.',
+    //             ]
+    //         ]);
+    //     }
 
-        // Check if the user is authorized to delete this application
-        if ($application->applicant_id != Auth::id()) {
-            return response()->json(['message' => 'Unauthorized action'], 403);
-        }
+    //     // 2) Remove any portfolio files from disk
+    //     if (!empty($application->portfolio) && is_array($application->portfolio)) {
+    //         foreach ($application->portfolio as $filePath) {
+    //             Storage::disk('public')->delete($filePath);
+    //         }
+    //     }
 
-        // Delete portfolio files if any
-        if (!empty($application->portfolio)) {
-            foreach ($application->portfolio as $file) {
-                Storage::disk('public')->delete($file);
-            }
-        }
+    //     // 3) Delete the application record
+    //     $application->delete();
 
-        $application->delete();
-
-        return redirect()->route('applications.drafts')->with('success', 'Application deleted successfully');
-    }
+    //     // 4) Redirect back (or to a named route) with SweetAlert data
+    //     return redirect()->route('applications.my')->with([
+    //         'success' => 'Application deleted successfully.',
+    //         'alert'   => [
+    //             'type'  => 'success',
+    //             'title' => 'Deleted!',
+    //             'text'  => 'Your application has been removed.',
+    //         ]
+    //     ]);
+    // }
 
     /**
      * Display the specific job application details     *
@@ -276,6 +324,79 @@ class JobApplicationController extends Controller
     }
 
     /**
+     * View Archived Job Applications
+     */
+    public function archived()
+    {
+        $applications = JobApplication::with(['job', 'applicant', 'poster'])
+            ->where('applicant_id', Auth::id())
+            ->archived()
+            ->latest()
+            ->paginate(10);
+
+        return view('jobBoard.applications.archived', compact('applications'));
+    }
+
+    /**
+     * Archive an application
+     */
+    public function archive(JobApplication $application)
+    {
+        $this->authorize('update', $application);
+
+        if (!$application->canBeArchived()) {
+            return back()->with('error', 'This application cannot be archived at this time.');
+        }
+
+        $application->update(['is_archived' => true]);
+
+        return back()->with([
+            'success' => 'Application archived successfully.',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Application Archived!',
+                'text' => 'Application archived successfully.'
+            ]
+        ]);
+    }
+
+    public function restore(JobApplication $application)
+    {
+        $this->authorize('update', $application);
+
+        $application->update(['is_archived' => false]);
+
+        return back()->with([
+            'success' => 'Application restored successfully.',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Application Restored!',
+                'text' => 'Application restored successfully.'
+            ]
+        ]);
+    }
+
+    public function destroy(JobApplication $application)
+    {
+        $this->authorize('delete', $application);
+
+        if (!$application->is_archived) {
+            return back()->with('error', 'You can only delete archived applications.');
+        }
+
+        $application->delete(); // Soft delete
+
+        return back()->with([
+            'success' => 'Application deleted successfully.',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Application Deleted!',
+                'text' => 'Application deleted successfully.'
+            ]
+        ]);
+    }
+
+    /**
      * My Posted Jobs Routes
      */
 
@@ -283,31 +404,98 @@ class JobApplicationController extends Controller
      * 1.
      * Display jobs the user has posted.
      */
-    public function getUserPostedJobs()
+    public function getUserPostedJobs(Request $request)
     {
-        // Get jobs posted by the authenticated user
-        $postedJobs = ModelJob::where('user_id', Auth::id())->latest()->paginate(5);
+        // Start with jobs posted by the authenticated user
+        $query = ModelJob::where('user_id', Auth::id())
+            ->Unarchived();
 
-        return view('jobBoard.posted.index', compact('postedJobs'));
+        // Apply status filter if selected
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('is_active', $request->status === 'active');
+        }
+
+        // Apply sorting
+        if ($request->has('sort')) {
+            switch ($request->sort) {
+                case 'newest':
+                    $query->orderBy('created_at', 'desc');
+                    break;
+                case 'deadline':
+                    $query->orderBy('deadline', 'asc');
+                    break;
+                case 'budget_high':
+                    $query->orderBy('budget', 'desc');
+                    break;
+                case 'budget_low':
+                    $query->orderBy('budget', 'asc');
+                    break;
+                default:
+                    $query->latest();
+            }
+        } else {
+            $query->latest();
+        }
+
+        $postedJobs = $query->paginate(5)->withQueryString();
+
+        // Check if filters are active
+        $hasFilters = $request->has('status') && $request->status !== 'all' || $request->has('sort');
+
+        // If this is an AJAX request, return only the jobs grid
+        if ($request->ajax()) {
+            return view('jobBoard.posted.partials.jobs-grid', compact('postedJobs', 'hasFilters'))->render();
+        }
+
+        return view('jobBoard.posted.index', compact('postedJobs', 'hasFilters'));
     }
 
     /**
      * 2.
      * Display applications for a  job.
      */
-    public function getJobApplications($slug)
+    public function getJobApplications(Request $request, $slug)
     {
         // Check if the job belongs to the authenticated user
         $job = ModelJob::where('slug', $slug)
             ->where('user_id', Auth::id())
-            ->with(['applications' => function ($query) {
-                $query->latest(); // Orders by created_at DESC by default
-            }, 'applications.applicant'])
             ->firstOrFail();
+
+        // Build the base query
+        $query = $job->applications()->with('applicant');
+
+        // Search filter
+        if ($request->has('search') && !empty($request->search)) {
+            $query->whereHas('applicant', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Status filter
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Get paginated results
+        $applications = $query->latest()->paginate(10)->withQueryString();
+
+        // Check if filters are active
+        $hasFilters = ($request->has('search') && !empty($request->search)) ||
+            ($request->has('status') && $request->status !== 'all');
+
+        if ($request->ajax()) {
+            return view('jobBoard.posted.applications.partials.applications-list', [
+                'applications' => $applications,
+                'job' => $job,
+                'hasFilters' => $hasFilters
+            ])->render();
+        }
 
         return view('jobBoard.posted.applications.index', [
             'job' => $job,
-            'applications' => $job->applications
+            'applications' => $applications,
+            'hasFilters' => $hasFilters
         ]);
     }
 
@@ -498,5 +686,107 @@ class JobApplicationController extends Controller
                 'text' => 'Message sent successfully.',
             ]
         ]);
+    }
+
+    /**
+     * View Archived Posted Jobs
+     */
+    public function archivedJobs()
+    {
+        $archivedJobs = ModelJob::where('user_id', Auth::id())
+            ->archived()
+            ->with(['applications', 'jobImages'])
+            ->withCount('applications')
+            ->latest()
+            ->paginate(10);
+
+        return view('jobBoard.posted.archived', compact('archivedJobs'));
+    }
+
+    /**
+     * Archive a job
+     */
+    public function archiveJob(ModelJob $job)
+    {
+        if ($job->user_id !== Auth::id()) {
+            return redirect()->back()->with([
+                'error' => 'Unauthorized Action',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Unauthorized Action',
+                    'text' => 'Unauthorized Action'
+                ]
+            ]);
+        }
+
+        $job->archive();
+
+        return redirect()->back()->with([
+            'success' => 'Job has been archived successfully.',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Job Archived!',
+                'text' => 'Job archived successfully.'
+            ]
+        ]);
+    }
+
+    /**
+     * Restore an archived job
+     */
+    public function restoreJob(ModelJob $job)
+    {
+        if ($job->user_id !== Auth::id()) {
+            return redirect()->back()->with([
+                'error' => 'Unauthorized Action',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Unauthorized Action',
+                    'text' => 'Unauthorized Action'
+                ]
+            ]);
+        }
+
+        $job->unarchive();
+
+        return redirect()->back()->with([
+            'success' => 'Job restored successfully.',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Job Restored!',
+                'text' => 'Job restored successfully.'
+            ]
+        ]);
+    }
+
+    /**
+     * View archived job details
+     */
+    public function showArchivedJob(ModelJob $job)
+    {
+        // Check if the user is authorized to view this job
+        if ($job->user_id !== Auth::id()) {
+            return redirect()->back()->with([
+                'error' => 'Unauthorized Action',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Unauthorized Action',
+                    'text' => 'Unauthorized Action'
+                ]
+            ]);
+        }
+
+        // Load applications with their related applicant data
+        $job->load([
+            'applications' => function ($query) {
+                $query->with('applicant'); // Eager load applicant data for each application
+            }
+        ]);
+
+        // Count the total applications
+        $job->loadCount('applications');
+
+        // Return the view with the job data
+        return view('jobBoard.posted.showArchived', compact('job'));
     }
 }

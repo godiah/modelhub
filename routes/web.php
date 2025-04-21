@@ -38,7 +38,10 @@ Route::get('/check-title', [JobController::class, 'checkTitle'])->name('jobs.che
 Route::middleware(['auth'])->prefix('applications')->name('applications.')->group(function () {
     Route::post('/', [JobApplicationController::class, 'store'])->name('store');
     Route::get('/continue/{slug}', [JobApplicationController::class, 'continueDraft'])->name('continue');
-    Route::delete('/{id}', [JobApplicationController::class, 'destroy'])->name('destroy');
+    Route::get('/applications/archived', [JobApplicationController::class, 'archived'])->name('archived');
+    Route::post('/applications/{application}/archive', [JobApplicationController::class, 'archive'])->name('archive');
+    Route::post('/applications/{application}/restore', [JobApplicationController::class, 'restore'])->name('restore');
+    Route::delete('/applications/{application}', [JobApplicationController::class, 'destroy'])->name('destroy');
     Route::get('/submitted/{job:slug}', [JobApplicationController::class, 'show'])->name('show');
 });
 
@@ -60,6 +63,14 @@ Route::middleware(['auth'])->prefix('my-jobs')->name('my-jobs.')->group(function
         Route::post('/{application}/message', [JobApplicationController::class, 'sendMessage'])->name('send-message');
         Route::post('/{application}/confirm-hire', [JobApplicationController::class, 'confirmHire'])->name('confirm-hire');
     });
+
+    Route::prefix('archived')->name('archived.')->group(function () {
+        Route::get('/', [JobApplicationController::class, 'archivedJobs'])->name('posted-jobs');
+        Route::patch('/{job}/restore', [JobApplicationController::class, 'restoreJob'])->name('restore');
+        Route::get('/{job}', [JobApplicationController::class, 'showArchivedJob'])->name('show');
+    });
+
+    Route::patch('/{job}/archive', [JobApplicationController::class, 'archiveJob'])->name('archive');
 });
 
 // Message Templates

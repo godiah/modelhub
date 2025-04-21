@@ -890,7 +890,20 @@
 
         <!-- Portfolio Uploads -->
         <script>
-            // Function to show SweetAlert for file limit exceeded
+            // Maximum number of files allowed
+            const MAX_FILES = 5;
+            // Maximum file size in bytes (10MB)
+            const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+            // Master list of File objects
+            let selectedFiles = [];
+
+            // Element refs
+            const fileInput = document.getElementById('file-upload');
+            const previewContainer = document.getElementById('preview-container');
+            const filePreview = document.getElementById('file-preview');
+
+            // Alerts (unchanged)
             function showMaxFilesAlert() {
                 Swal.fire({
                     icon: 'error',
@@ -899,16 +912,14 @@
                 });
             }
 
-            // Function to show SweetAlert for file size exceeded
             function showFileSizeAlert() {
                 Swal.fire({
                     icon: 'error',
                     title: 'File Size Limit Exceeded',
-                    text: `File size should not exceed ${MAX_FILE_SIZE / (1024 * 1024)}MB.`,
+                    text: `File size should not exceed ${MAX_FILE_SIZE/(1024*1024)}MB.`,
                 });
             }
 
-            // Function to show SweetAlert for invalid file type
             function showFileTypeAlert() {
                 Swal.fire({
                     icon: 'error',
@@ -917,99 +928,92 @@
                 });
             }
 
-            // Maximum number of files allowed
-            const MAX_FILES = 5;
-            // Maximum file size in bytes (10MB)
-            const MAX_FILE_SIZE = 10 * 1024 * 1024;
+            // Whenever the user selects via “browse”
+            fileInput.addEventListener('change', handleFileSelect);
 
-            // Get references to the elements
-            const fileInput = document.getElementById('file-upload');
-            const previewContainer = document.getElementById('preview-container');
-            const filePreview = document.getElementById('file-preview');
-
-            // Function to handle file selection
             function handleFileSelect(event) {
-                const files = event.target.files;
-                const currentFiles = previewContainer.querySelectorAll('.file-item');
+                const newFiles = Array.from(event.target.files);
 
-                // Check if adding new files will exceed the maximum limit
-                if (currentFiles.length + files.length > MAX_FILES) {
+                // 1) Check total count
+                if (selectedFiles.length + newFiles.length > MAX_FILES) {
                     showMaxFilesAlert();
                     return;
                 }
 
-                // Process each selected file
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-
-                    // Check file type
-                    if (!file.type.match('image/jpeg') && !file.type.match('image/png') && !file.type.match(
-                            'application/pdf')) {
+                newFiles.forEach(file => {
+                    // 2) Type & size checks
+                    if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
                         showFileTypeAlert();
-                        continue;
+                        return;
                     }
-
-                    // Check file size
                     if (file.size > MAX_FILE_SIZE) {
                         showFileSizeAlert();
-                        continue;
+                        return;
                     }
 
-                    // Create a file preview item
+                    // 3) Add to our master list
+                    selectedFiles.push(file);
+
+                    // 4) Render preview
                     const fileItem = document.createElement('div');
                     fileItem.className = 'file-item flex items-center p-2 bg-white rounded border border-neutral-200';
                     fileItem.innerHTML = `
-                            <div class="w-12 h-12 rounded overflow-hidden mr-3">
-                                <img src="" alt="Preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm text-neutral-700 truncate">${file.name}</p>
-                                <p class="text-xs text-neutral-500">Size ${formatFileSize(file.size)}</p>
-                            </div>
-                            <button type="button" class="text-neutral-400 hover:text-red-500 ml-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        `;
-
-                    // Add remove functionality
-                    const removeButton = fileItem.querySelector('button');
-                    removeButton.addEventListener('click', function() {
-                        fileItem.remove();
-                        if (previewContainer.children.length === 0) {
-                            filePreview.classList.add('hidden');
-                        }
-                    });
-
-                    // Add to preview container
+        <div class="w-12 h-12 rounded overflow-hidden mr-3">
+          <img src="" alt="Preview" class="w-full h-full object-cover">
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm text-neutral-700 truncate">${file.name}</p>
+          <p class="text-xs text-neutral-500">Size ${formatFileSize(file.size)}</p>
+        </div>
+        <button type="button" class="text-neutral-400 hover:text-red-500 ml-2">&times;</button>
+      `;
                     previewContainer.appendChild(fileItem);
 
-                    // Create image preview
+                    // Populate image preview
                     const img = fileItem.querySelector('img');
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        img.src = e.target.result;
-                    };
+                    reader.onload = e => img.src = e.target.result;
                     reader.readAsDataURL(file);
-                }
 
-                // Show preview area if there are files
-                if (previewContainer.children.length > 0) {
+                    // 5) Remove handler
+                    const removeBtn = fileItem.querySelector('button');
+                    removeBtn.addEventListener('click', () => {
+                        // Remove from DOM
+                        fileItem.remove();
+                        // Remove from master list
+                        selectedFiles = selectedFiles.filter(f => !(f.name === file.name && f.size === file
+                            .size));
+                        // Rebuild the FileList
+                        updateFileList();
+                    });
+                });
+
+                // 6) Always rebuild FileList after adding
+                updateFileList();
+            }
+
+            // Rebuild input.files from selectedFiles
+            function updateFileList() {
+                const dt = new DataTransfer();
+                selectedFiles.forEach(f => dt.items.add(f));
+                fileInput.files = dt.files;
+
+                if (selectedFiles.length > 0) {
                     filePreview.classList.remove('hidden');
+                } else {
+                    filePreview.classList.add('hidden');
                 }
             }
 
-            // Function to format file size
+            // Helper to format bytes
             function formatFileSize(bytes) {
                 if (bytes < 1024) return `${bytes} B`;
-                if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-                return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+                if (bytes < 1024 * 1024) return `${(bytes/1024).toFixed(1)} KB`;
+                return `${(bytes/(1024*1024)).toFixed(1)} MB`;
             }
-
-            // Add event listener to file input
-            fileInput.addEventListener('change', handleFileSelect);
         </script>
+
+
         <!-- Tracking Proposal Characters -->
         <script>
             // Maximum character limit

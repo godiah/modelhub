@@ -17,21 +17,61 @@ class JobEngagementController extends Controller
     /**
      * Display a listing of the user's job engagements.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
-        // Get engagements where the user is either the applicant or the poster
-        $engagements = JobEngagement::with(['application.job', 'application.poster', 'application.applicant', 'deliverables'])
-            ->whereHas('application', function ($query) use ($user) {
-                $query->where('applicant_id', $user->id)
+        // 1) build a base query for all engagements the user is involved in
+        $query = JobEngagement::with([
+            'application.job',
+            'application.poster',
+            'application.applicant',
+            'deliverables',
+        ])
+            ->whereHas('application', function ($q) use ($user) {
+                $q->where('applicant_id', $user->id)
                     ->orWhere('poster_id', $user->id);
-            })
-            ->latest()
-            ->get();
+            });
 
-        return view('jobBoard.engagements.index', compact('engagements'));
+        // 2) apply search scope
+        if ($request->filled('search')) {
+            $term = $request->search;
+            $query->where(function ($q) use ($term) {
+                // example: search by job title, poster name, applicant name...
+                $q->whereHas('application.job', fn($q2) =>
+                $q2->where('title', 'like', "%{$term}%"))
+                    ->orWhereHas('application.applicant', fn($q2) =>
+                    $q2->where('name', 'like', "%{$term}%"))
+                    ->orWhereHas('application.poster', fn($q2) =>
+                    $q2->where('name', 'like', "%{$term}%"));
+            });
+        }
+
+        // 3) apply status filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // 4) paginate & keep query string
+        $engagements = $query->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        // 5) flag if any filters are active
+        $hasFilters = $request->filled('search')
+            || ($request->filled('status') && $request->status !== 'all');
+
+        // 6) support AJAX refresh
+        if ($request->ajax()) {
+            return view('jobBoard.engagements.partials.engagements-list', [
+                'engagements' => $engagements,
+                'hasFilters'  => $hasFilters,
+            ])->render();
+        }
+
+        return view('jobBoard.engagements.index', compact('engagements', 'hasFilters'));
     }
+
 
     /**
      * Show response form for the job engagement.

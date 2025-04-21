@@ -4,7 +4,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                    {{ __('New Project') }}: <span class="text-secondary">{{ $job->title }}</span>
+                    {{ __('Project') }}: <span class="text-secondary">{{ $job->title }}</span>
                 </h2>
             </div>
             <div class="flex space-x-3">
@@ -271,7 +271,7 @@
                 <!-- Footer Actions -->
                 <div
                     class="bg-gradient-to-r from-neutral-50 to-neutral-100 p-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-neutral-200">
-                    <a href="{{ route('jobs.index') }}"
+                    <a href="{{ route('my-jobs.index') }}"
                         class="group text-tertiary hover:text-primary font-medium flex items-center transition-all py-2 px-4 rounded-lg hover:bg-white hover:shadow-sm">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="h-5 w-5 mr-2 text-secondary group-hover:text-primary transition-colors"
@@ -279,22 +279,10 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        Back to Jobs
+                        Back to My Jobs
                     </a>
 
                     <div class="flex items-center gap-3">
-                        {{-- <a href="#"
-                            class="border border-accent text-accent hover:bg-accent/10 font-medium py-2 px-4 rounded-lg transition-all flex items-center font-tertiary">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                            Preview
-                        </a> --}}
-
                         <a href="{{ route('jobs.create') }}"
                             class="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-5 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center font-tertiary focus:ring-2 focus:ring-accent/50">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
@@ -304,60 +292,6 @@
                             </svg>
                             Create New Project
                         </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Related Jobs Section -->
-            <div class="mt-8 text-center">
-                <div
-                    class="inline-flex items-center px-4 py-2 rounded-full bg-white shadow-md text-sm text-tertiary font-medium">
-                    <span class="h-2.5 w-2.5 rounded-full bg-secondary animate-pulse mr-2"></span>
-                    <a href="#" class="text-secondary hover:text-primary hover:underline ml-1 font-semibold">
-                        Want to see more jobs like this?
-                    </a>
-                </div>
-
-                <!-- Related Jobs Section -->
-                <div class="mt-12">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-primary font-tertiary flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-secondary"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            Similar Projects
-                        </h2>
-                        <a href="#"
-                            class="text-secondary hover:text-primary font-tertiary font-medium text-sm flex items-center">
-                            View All
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                    </div>
-
-                    <!-- Related Jobs Cards - Example placeholder -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Placeholder cards with skeleton loading effect -->
-                        @for ($i = 0; $i < 3; $i++)
-                            <div
-                                class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden border border-neutral-200">
-                                <div class="h-32 bg-gradient-to-r from-neutral-200 to-neutral-300 animate-pulse"></div>
-                                <div class="p-5">
-                                    <div class="h-6 bg-neutral-200 rounded animate-pulse mb-3 w-3/4"></div>
-                                    <div class="h-4 bg-neutral-200 rounded animate-pulse mb-2 w-1/2"></div>
-                                    <div class="h-4 bg-neutral-200 rounded animate-pulse mb-4 w-5/6"></div>
-                                    <div class="flex justify-between items-center pt-2">
-                                        <div class="h-8 bg-neutral-200 rounded-full animate-pulse w-24"></div>
-                                        <div class="h-8 bg-neutral-200 rounded-full animate-pulse w-20"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endfor
                     </div>
                 </div>
             </div>

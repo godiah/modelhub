@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class JobApplication extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'job_id',
@@ -21,6 +23,7 @@ class JobApplication extends Model
         'terms_accepted',
         'status', // 'draft', 'submitted', 'hired, 'rejected', 'reviewed' , 'withdrawn'
         'additional_notes',
+        'is_archived',
     ];
 
     protected $casts = [
@@ -29,6 +32,7 @@ class JobApplication extends Model
         'offer_amount' => 'decimal:2',
         'service_fee' => 'decimal:2',
         'net_amount' => 'decimal:2',
+        'is_archived' => 'boolean',
     ];
 
     // Relationship with the job
@@ -59,6 +63,58 @@ class JobApplication extends Model
     public function hasEngagement()
     {
         return $this->engagement()->exists();
+    }
+
+    /**
+     * All engagements for _any_ application of this same job.
+     */
+    public function jobEngagements()
+    {
+        return $this->hasManyThrough(
+            JobEngagement::class,
+            self::class,
+            'job_id',
+            'application_id',
+            'job_id',
+            'id'
+        );
+    }
+
+    /**
+     * “You got hired”: an engagement exists for *this* application.
+     */
+    public function hasOwnEngagement(): bool
+    {
+        return (bool) $this->engagement;
+    }
+
+    /**
+     * “Filled by someone else”: 
+     *  there’s an engagement on the same job, but _not_ for this application.
+     */
+    public function hasOtherEngagement(): bool
+    {
+        return $this->jobEngagements()
+            ->where('application_id', '!=', $this->id)
+            ->exists();
+    }
+
+    // Scope for active (non-archived) applications
+    public function scopeActive($query)
+    {
+        return $query->where('is_archived', false);
+    }
+
+    // Scope for archived applications
+    public function scopeArchived($query)
+    {
+        return $query->where('is_archived', true);
+    }
+
+    // Check if application should show archive option
+    public function canBeArchived()
+    {
+        return in_array($this->status, ['hired', 'rejected']) || $this->hasOtherEngagement();
     }
 
     // Scope to get draft applications
