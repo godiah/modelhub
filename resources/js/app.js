@@ -1,6 +1,7 @@
 import "flowbite";
 import "./bootstrap";
 import "./templates";
+import "./search-history";
 
 /**
  * Creating a new project/job

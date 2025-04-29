@@ -1,25 +1,27 @@
 <x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
+                    {{ __('My Drafts') }}
+                </h2>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ route('jobs.browse') }}"
+                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-main text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Browse Jobs
+                </a>
+            </div>
+        </div>
+    </x-slot>
+
     <section class=" bg-neutral-50">
         <div class="container mx-auto max-w-7xl px-4 py-8 min-h-screen">
-            <!-- Header Section -->
-            <div class="flex justify-between items-center mb-8">
-                <div>
-                    <h1 class="text-3xl font-bold text-primary font-tertiary">My Drafts</h1>
-                    <p class="text-tertiary mt-2 font-main">Resume your incomplete applications</p>
-                </div>
-                <div>
-                    <a href="{{ route('jobs.browse') }}"
-                        class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-main text-sm font-medium">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        Browse Jobs
-                    </a>
-                </div>
-            </div>
-
             <!-- Drafts Container -->
             @if ($drafts->isEmpty())
                 <div class="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
@@ -88,7 +90,7 @@
                                         </svg>
                                         Continue
                                     </a>
-                                    <form action="{{ route('applications.destroy', ['id' => $draft->id]) }}"
+                                    <form action="{{ route('destroy.drafts', ['application' => $draft->id]) }}"
                                         method="POST" class="inline-block" id="delete-form-{{ $draft->id }}">
                                         @csrf
                                         @method('DELETE')

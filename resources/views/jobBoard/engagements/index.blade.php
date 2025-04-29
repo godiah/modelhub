@@ -65,14 +65,31 @@
             </div>
 
             <div class="flex gap-3">
-                <select id="statusEngagementFilter" name="status"
-                    class="font-tertiary block w-full border-neutral-300 rounded-lg focus:ring-primary focus:border-primary py-2.5 pl-3 pr-10 text-sm">
-                    <option value="all">All Status</option>
-                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="completed"{{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                    <option value="withdrawn"{{ request('status') == 'withdrawn' ? 'selected' : '' }}>Withdrawn</option>
-                </select>
+                <div>
+                    <select id="statusEngagementFilter" name="status"
+                        class="font-tertiary block w-full border-neutral-300 rounded-lg focus:ring-primary focus:border-primary py-2.5 pl-3 pr-10 text-sm">
+                        <option value="all">All Status</option>
+                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="completed"{{ request('status') == 'completed' ? 'selected' : '' }}>Completed
+                        </option>
+                        <option value="cancelled"{{ request('status') == 'cancelled' ? 'selected' : '' }}>Withdrawn
+                        </option>
+                    </select>
+                </div>
+                <div>
+                    @if ($hasArchivedEngagements)
+                        <a href="{{ route('engagements.archived') }}"
+                            class="inline-flex items-center px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-tertiary text-sm font-medium shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                            </svg>
+                            View Archived
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
         <div id="engagementsContainer">
@@ -91,8 +108,8 @@
                         the moment. Apply to job posts to receive offers.</p>
                     <a href="{{ route('jobs.browse') }}"
                         class="inline-flex items-center px-5 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 transition-all">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                         </svg>
@@ -103,6 +120,7 @@
                 @include('jobBoard.engagements.partials.engagements-list', [
                     'engagements' => $engagements,
                     'hasFilters' => $hasFilters,
+                    'hasArchivedEngagements' => $hasArchivedEngagements,
                 ])
             @endif
         </div>

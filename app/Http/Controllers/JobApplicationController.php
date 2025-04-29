@@ -50,7 +50,6 @@ class JobApplicationController extends Controller
         // Add stricter validation for submission (not for draft)
         if (!$isDraft) {
             $validationRules['offer'] = 'required|numeric|min:1';
-            // $validationRules['proposal'] = 'required|string|max:2500';
             $validationRules['terms'] = 'required|accepted';
         } else {
             // For drafts, make offer optional
@@ -71,39 +70,79 @@ class JobApplicationController extends Controller
                 ->withErrors(['message' => 'This job is no longer accepting new applications']);
         }
 
-
         // Check if the user is authorized to apply
         if ($request->applicant_id != Auth::id()) {
             return redirect()->back()->withErrors(['message' => 'Unauthorized action']);
         }
 
-        if (!$isDraft) {
-            $existingSubmittedApplication = JobApplication::where('job_id', $request->job_id)
-                ->where('applicant_id', $request->applicant_id)
-                ->where('status', 'submitted')
-                ->exists();
+        // Check for existing applications (including soft deleted ones)
+        $existingApplicationWithDeleted = JobApplication::withTrashed()
+            ->where('job_id', $request->job_id)
+            ->where('applicant_id', $request->applicant_id)
+            ->first();
 
-            if ($existingSubmittedApplication) {
+        // Check for existing active application (excluding soft deleted)
+        $existingApplication = JobApplication::where('job_id', $request->job_id)
+            ->where('applicant_id', $request->applicant_id)
+            ->first();
+
+        // Prevent creating drafts for previously submitted/processed applications
+        if ($existingApplication && $isDraft) {
+            // If we're trying to save as draft but an application already exists with certain statuses
+            $prohibitedStatuses = ['submitted', 'reviewed', 'rejected', 'hired', 'withdrawn'];
+
+            if (in_array($existingApplication->status, $prohibitedStatuses)) {
                 return redirect()->back()->with([
-                    'info' => 'You have already submitted an application for this job',
+                    'error' => 'Cannot create a draft for this application',
                     'alert' => [
-                        'type' => 'info',
-                        'title' => 'Your Application Already Exists',
-                        'text' => 'You have already submitted an application for this job. Your previous application is still pending review.'
+                        'type' => 'error',
+                        'title' => 'Action Not Allowed',
+                        'text' => 'Your application has already been ' . $existingApplication->status . '. You cannot create a draft version of it.'
                     ]
                 ]);
             }
+        }
+
+        // Prevent multiple draft applications for the same job
+        if ($isDraft && $existingApplication && $existingApplication->status === 'draft') {
+            return redirect()->back()->with([
+                'info' => 'A draft application already exists for this job',
+                'alert' => [
+                    'type' => 'info',
+                    'title' => 'Existing Draft',
+                    'text' => 'You already have a draft application for this job. Please edit the existing draft or submit it.'
+                ]
+            ]);
+        }
+
+        // Prevent reapplying to a job after deletion
+        if ($existingApplicationWithDeleted && $existingApplicationWithDeleted->deleted_at) {
+            return redirect()->back()->with([
+                'error' => 'You cannot reapply to this job after deleting your application',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Reapplication Not Allowed',
+                    'text' => 'You have previously deleted your application for this job and cannot apply again.'
+                ]
+            ]);
+        }
+
+        // Check for existing submitted application
+        if (!$isDraft && $existingApplication && $existingApplication->status === 'submitted') {
+            return redirect()->back()->with([
+                'info' => 'You have already submitted an application for this job',
+                'alert' => [
+                    'type' => 'info',
+                    'title' => 'Your Application Already Exists',
+                    'text' => 'You have already submitted an application for this job. Your previous application is still pending review.'
+                ]
+            ]);
         }
 
         // Calculate service fee and net amount (only if offer is provided)
         $offerAmount = $request->offer ?? 0;
         $serviceFee = $offerAmount * self::SERVICE_FEE_PERCENTAGE;
         $netAmount = $offerAmount - $serviceFee;
-
-        // Check if the user has already applied to this job (draft or submitted)
-        $existingApplication = JobApplication::where('job_id', $request->job_id)
-            ->where('applicant_id', $request->applicant_id)
-            ->first();
 
         // Start with existing portfolio files if any
         $portfolioFiles = [];
@@ -163,8 +202,9 @@ class JobApplicationController extends Controller
             $applicationData['terms_accepted'] = true;
         }
 
-        if ($existingApplication) {
-            // Update existing application
+        // Only allow updating existing applications if they are drafts
+        if ($existingApplication && $existingApplication->status === 'draft') {
+            // Update existing draft application
             $existingApplication->update($applicationData);
             $application = $existingApplication;
         } else {
@@ -247,12 +287,17 @@ class JobApplicationController extends Controller
 
         $applications = $query->paginate(7)->withQueryString();
 
+        // Check if user has any draft applications
+        $draftCount = JobApplication::draft()
+            ->where('applicant_id', Auth::id())
+            ->count();
+
         if ($request->ajax()) {
-            return view('jobBoard.applications.partials.applications-list', compact('applications', 'activeFilters'))
+            return view('jobBoard.applications.partials.applications-list', compact('applications', 'activeFilters', 'draftCount'))
                 ->render();
         }
 
-        return view('jobBoard.applications.index', compact('applications', 'activeFilters'));
+        return view('jobBoard.applications.index', compact('applications', 'activeFilters', 'draftCount'));
     }
 
 
@@ -273,39 +318,39 @@ class JobApplicationController extends Controller
     /**
      * Delete an application or draft
      */
-    // public function destroy(JobApplication $application)
-    // {
-    //     // 1) Authorization
-    //     if ($application->applicant_id !== Auth::id()) {
-    //         return redirect()->back()->with([
-    //             'alert' => [
-    //                 'type'  => 'error',
-    //                 'title' => 'Unauthorized Action',
-    //                 'text'  => 'You do not have permission to delete this application.',
-    //             ]
-    //         ]);
-    //     }
+    public function destroyDraft(JobApplication $application)
+    {
+        // 1) Authorization
+        if ($application->applicant_id !== Auth::id()) {
+            return redirect()->back()->with([
+                'alert' => [
+                    'type'  => 'error',
+                    'title' => 'Unauthorized Action',
+                    'text'  => 'You do not have permission to delete this application.',
+                ]
+            ]);
+        }
 
-    //     // 2) Remove any portfolio files from disk
-    //     if (!empty($application->portfolio) && is_array($application->portfolio)) {
-    //         foreach ($application->portfolio as $filePath) {
-    //             Storage::disk('public')->delete($filePath);
-    //         }
-    //     }
+        // 2) Remove any portfolio files from disk
+        if (!empty($application->portfolio) && is_array($application->portfolio)) {
+            foreach ($application->portfolio as $filePath) {
+                Storage::disk('public')->delete($filePath);
+            }
+        }
 
-    //     // 3) Delete the application record
-    //     $application->delete();
+        // 3) Delete the application record
+        $application->delete();
 
-    //     // 4) Redirect back (or to a named route) with SweetAlert data
-    //     return redirect()->route('applications.my')->with([
-    //         'success' => 'Application deleted successfully.',
-    //         'alert'   => [
-    //             'type'  => 'success',
-    //             'title' => 'Deleted!',
-    //             'text'  => 'Your application has been removed.',
-    //         ]
-    //     ]);
-    // }
+        // 4) Redirect back (or to a named route) with SweetAlert data
+        return redirect()->route('applications.my')->with([
+            'success' => 'Application deleted successfully.',
+            'alert'   => [
+                'type'  => 'success',
+                'title' => 'Deleted!',
+                'text'  => 'Your application has been removed.',
+            ]
+        ]);
+    }
 
     /**
      * Display the specific job application details     *

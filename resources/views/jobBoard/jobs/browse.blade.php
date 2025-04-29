@@ -31,27 +31,36 @@
                     <div class="space-y-4">
                         <!-- Search Bar -->
                         <div class="relative">
-                            <form action="{{ route('jobs.browse') }}" method="GET">
-                                <div class="flex">
-                                    <div class="relative flex-grow">
-                                        <input type="text" name="search" placeholder="Search for jobs..."
-                                            value="{{ request()->get('search') }}"
-                                            class="w-full h-12 pl-4 pr-10 rounded-l-lg border border-neutral-300 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none">
-                                        <div
-                                            class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                            </svg>
+                            <div class="flex">
+                                <div class="relative flex-grow">
+                                    <input type="text" id="search-input" name="search"
+                                        placeholder="Search for jobs..." value="{{ request()->get('search') }}"
+                                        class="w-full h-12 pl-4 pr-10 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none"
+                                        autocomplete="off">
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+
+                                    <!-- Search history dropdown -->
+                                    <div id="search-history"
+                                        class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg hidden">
+                                        <div class="py-1 text-sm text-gray-700">
+                                            <div class="px-4 py-2 flex justify-between items-center">
+                                                <span class="text-xs text-gray-500">Recent Searches</span>
+                                                <button id="clear-history"
+                                                    class="text-xs text-red-500 hover:text-red-700">Clear All</button>
+                                            </div>
+                                            <div id="search-history-items" class="max-h-48 overflow-y-auto">
+                                                <!-- This will be populated via JS -->
+                                            </div>
                                         </div>
                                     </div>
-                                    <button type="submit"
-                                        class="bg-secondary hover:bg-secondary/90 text-white px-6 font-medium rounded-r-lg transition-colors">
-                                        Search
-                                    </button>
                                 </div>
-                            </form>
+                            </div>
                         </div>
 
                         <!-- Filters -->
@@ -61,7 +70,7 @@
                                 <label for="skills-filter"
                                     class="block text-sm font-medium text-neutral-700 mb-1">Filter by Skills</label>
                                 <select id="skills-filter" name="skills"
-                                    class="w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
+                                    class="filter-select w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
                                     <option value="">All Skills</option>
                                     @foreach (App\Models\Skill::where('is_active', true)->get() as $skill)
                                         <option value="{{ $skill->id }}"
@@ -77,7 +86,7 @@
                                 <label for="software-filter"
                                     class="block text-sm font-medium text-neutral-700 mb-1">Filter by Software</label>
                                 <select id="software-filter" name="software"
-                                    class="w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
+                                    class="filter-select w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
                                     <option value="">All Software</option>
                                     @foreach (App\Models\Software::where('is_active', true)->get() as $software)
                                         <option value="{{ $software->id }}"
@@ -93,195 +102,48 @@
                                 <label for="sort-by" class="block text-sm font-medium text-neutral-700 mb-1">Sort
                                     By</label>
                                 <select id="sort-by" name="sort"
-                                    class="w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
+                                    class="filter-select w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
                                     <option value="newest"
                                         {{ request()->get('sort') == 'newest' || !request()->has('sort') ? 'selected' : '' }}>
-                                        Newest First</option>
+                                        Newest First
+                                    </option>
                                     <option value="budget_high"
-                                        {{ request()->get('sort') == 'budget_high' ? 'selected' : '' }}>Budget (High to
-                                        Low)</option>
+                                        {{ request()->get('sort') == 'budget_high' ? 'selected' : '' }}>
+                                        Budget (High to Low)
+                                    </option>
                                     <option value="budget_low"
-                                        {{ request()->get('sort') == 'budget_low' ? 'selected' : '' }}>Budget (Low to
-                                        High)</option>
+                                        {{ request()->get('sort') == 'budget_low' ? 'selected' : '' }}>
+                                        Budget (Low to High)
+                                    </option>
                                     <option value="deadline"
-                                        {{ request()->get('sort') == 'deadline' ? 'selected' : '' }}>Deadline (Soonest)
+                                        {{ request()->get('sort') == 'deadline' ? 'selected' : '' }}>
+                                        Deadline (Soonest)
                                     </option>
                                 </select>
                             </div>
                         </div>
 
-                        <!-- Filter Apply/Reset Button -->
-                        <div class="flex justify-end space-x-3">
+                        <!-- Filter Reset Button -->
+                        <div class="flex justify-end">
                             <button id="reset-filters"
                                 class="px-4 py-2 text-neutral-600 border border-neutral-300 hover:bg-neutral-100 rounded-lg transition-colors text-sm font-medium">
                                 Reset Filters
                             </button>
-                            <button id="apply-filters"
-                                class="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors text-sm font-medium">
-                                Apply Filters
-                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="space-y-4 max-w-7xl mx-auto px-4">
-                    @foreach ($jobs as $job)
-                        <div
-                            class="bg-white rounded-xl shadow-lg overflow-hidden border border-neutral-200 hover:shadow-xl transition-all duration-300 
-                                        md:flex md:h-40">
-
-                            <!-- Job Image Section (Top on mobile, Left on desktop) -->
-                            <div class="relative h-auto w-full md:w-40 md:min-w-40 md:h-full">
-                                @if ($job->images)
-                                    <img src="{{ asset('storage/' . $job->images) }}" alt="{{ $job->title }}"
-                                        class="w-full h-full object-cover">
-                                @else
-                                    <div
-                                        class="w-full h-full bg-gradient-to-r from-primary/90 to-primary/70 flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white/80"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Job Content Section (Bottom on mobile, Right on desktop) -->
-                            <div class="flex-grow p-4 flex flex-col overflow-hidden">
-                                <!-- Top Row: Title and Deadline -->
-                                <div
-                                    class="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:items-start sm:space-y-0 mb-2">
-                                    <!-- Left Side: Title and Posted Date -->
-                                    <div class="flex flex-col">
-                                        <h2 class="text-base font-semibold text-neutral-800 pr-2">
-                                            {{ $job->title }}
-                                        </h2>
-                                        <p class="text-xs text-gray-500 mt-0.5">
-                                            Posted on {{ $job->created_at->format('M d, Y') }}
-                                        </p>
-                                    </div>
-
-                                    <!-- Right Side: Deadline Badge -->
-                                    <div class="flex-shrink-0">
-                                        @if ($job->no_deadline)
-                                            <span
-                                                class="bg-accent text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-                                                No Fixed Deadline
-                                            </span>
-                                        @else
-                                            <span
-                                                class="bg-secondary text-white font-semibold px-2 py-0.5 rounded-full md:flex md:items-center text-xs">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="hidden md:block h-3 w-3 mr-0.5" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                                {{ $job->deadline->format('M d') }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <!-- Middle: Description -->
-                                <div class="h-auto md:h-10 text-ellipsis">
-                                    <div class="text-sm text-justify line-clamp-3 md:line-clamp-2 overflow-hidden">
-                                        {!! Str::markdown($job->description) !!}
-                                    </div>
-                                </div>
-
-                                <!-- Bottom Row: Skills, Budget and CTA -->
-                                <div
-                                    class="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mt-3">
-                                    <!-- Skills Tags -->
-                                    <div class="overflow-hidden">
-                                        <div class="flex flex-wrap gap-1">
-                                            @php
-                                                // Combine skills and software into a single array
-                                                $allTags = [];
-                                                if ($job->skills) {
-                                                    $allTags = array_merge($allTags, $job->skills);
-                                                }
-                                                if ($job->software) {
-                                                    $allTags = array_merge($allTags, $job->software);
-                                                }
-
-                                                // Limit to 3 items on very small screens, 5 on larger
-                                                $displayCount = 5;
-                                                $totalCount = count($allTags);
-                                                $displayTags = array_slice($allTags, 0, $displayCount);
-                                                $remainingCount = max(0, $totalCount - $displayCount);
-                                            @endphp
-
-                                            @foreach ($displayTags as $tag)
-                                                <span
-                                                    class="px-1.5 py-0.5 bg-neutral-100 text-neutral-700 text-xs rounded">
-                                                    {{ $tag }}
-                                                </span>
-                                            @endforeach
-
-                                            @if ($remainingCount > 0)
-                                                <span
-                                                    class="px-1.5 py-0.5 bg-neutral-200 text-neutral-600 text-xs rounded">
-                                                    +{{ $remainingCount }}
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </div>
-
-                                    <!-- Budget and CTA -->
-                                    <div
-                                        class="flex items-center justify-between sm:justify-end sm:space-x-3 flex-shrink-0">
-                                        <div>
-                                            <p class="text-xs text-neutral-500 font-tertiary">Budget</p>
-                                            <p class="text-primary font-secondary font-bold text-sm whitespace-nowrap">
-                                                Ksh. {{ number_format($job->budget) }}
-                                            </p>
-                                        </div>
-                                        <a href="{{ route('jobs.apply', $job->slug) }}"
-                                            class="inline-flex items-center px-3 py-1.5 bg-secondary hover:bg-secondary/90 text-white rounded transition-colors text-xs font-semibold whitespace-nowrap">
-                                            Apply
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                            </svg>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                    <div class="mt-6">
-                        {{ $jobs->links() }}
-                    </div>
+                <!-- Loading indicator -->
+                <div id="loading-indicator" class="text-center py-8 hidden">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <p class="mt-4 text-sm text-neutral-600">Loading jobs...</p>
                 </div>
 
-                <!-- Empty State (if no jobs found) -->
-                @if (count($jobs) === 0)
-                    <div class="bg-white rounded-xl shadow p-6 text-center max-w-2xl mx-auto">
-                        <div
-                            class="mx-auto w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-400" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-base font-semibold text-neutral-700 mb-1">No jobs found</h3>
-                        <p class="text-sm text-neutral-500 mb-3">Try adjusting your search filters or check back later
-                        </p>
-                        <a href="{{ route('jobs.browse') }}"
-                            class="text-secondary font-semibold hover:underline text-sm">
-                            Clear filters
-                        </a>
-                    </div>
-                @endif
+                <!-- Jobs listing container -->
+                <div id="jobs-container" class="space-y-4 max-w-7xl mx-auto px-4">
+                    @include('jobBoard.jobs.partials.jobs-list', ['jobs' => $jobs])
+                </div>
             </div>
-
-
         </div>
 
         <!-- Footer -->
@@ -289,16 +151,87 @@
     </section>
 
     <!-- JavaScript for enhanced interactivity -->
-    @push('scripts')
-        <script>
-            // Format currency
-            document.addEventListener('DOMContentLoaded', function() {
-                const budgetElements = document.querySelectorAll('.budget');
-                budgetElements.forEach(element => {
-                    const amount = parseFloat(element.textContent.replace('$', ''));
-                    element.textContent = '$' + amount.toLocaleString();
-                });
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            const skillsFilter = document.getElementById('skills-filter');
+            const softwareFilter = document.getElementById('software-filter');
+            const sortBy = document.getElementById('sort-by');
+            const resetButton = document.getElementById('reset-filters');
+            const jobsContainer = document.getElementById('jobs-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+
+            let searchTimeout;
+
+            // Function to update jobs based on filters
+            function updateJobs() {
+                const searchValue = searchInput.value;
+                const skillsValue = skillsFilter.value;
+                const softwareValue = softwareFilter.value;
+                const sortValue = sortBy.value;
+
+                // Show loading indicator
+                loadingIndicator.classList.remove('hidden');
+                jobsContainer.style.opacity = '0.5';
+
+                // Create URL with query parameters
+                const params = new URLSearchParams();
+                if (searchValue) params.append('search', searchValue);
+                if (skillsValue) params.append('skills', skillsValue);
+                if (softwareValue) params.append('software', softwareValue);
+                if (sortValue) params.append('sort', sortValue);
+
+                // Make AJAX request
+                fetch(`${window.location.pathname}?${params.toString()}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        jobsContainer.innerHTML = html;
+                        jobsContainer.style.opacity = '1';
+                        loadingIndicator.classList.add('hidden');
+
+                        // Update URL without page reload
+                        window.history.pushState({}, '', `${window.location.pathname}?${params.toString()}`);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        loadingIndicator.classList.add('hidden');
+                        jobsContainer.style.opacity = '1';
+                    });
+            }
+
+            // Search input with debounce
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(updateJobs, 300);
             });
-        </script>
-    @endpush
+
+            // Instant filter changes
+            [skillsFilter, softwareFilter, sortBy].forEach(element => {
+                element.addEventListener('change', updateJobs);
+            });
+
+            // Reset filters
+            resetButton.addEventListener('click', function() {
+                searchInput.value = '';
+                skillsFilter.value = '';
+                softwareFilter.value = '';
+                sortBy.value = 'newest';
+                updateJobs();
+            });
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function() {
+                const params = new URLSearchParams(window.location.search);
+                searchInput.value = params.get('search') || '';
+                skillsFilter.value = params.get('skills') || '';
+                softwareFilter.value = params.get('software') || '';
+                sortBy.value = params.get('sort') || 'newest';
+                updateJobs();
+            });
+        });
+    </script>
 </x-app-layout>

@@ -137,6 +137,119 @@
 
                 <!-- Expandable Content -->
                 <div x-show="open" x-collapse x-cloak class="border-t border-neutral-200 bg-neutral-50">
+                    <!-- Engagement Details Row -->
+                    <div
+                        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 mx-auto bg-gradient-to-r from-neutral-50 to-neutral-100 border border-neutral-200">
+                        <!-- Started Date -->
+                        <div
+                            class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
+                            <div
+                                class="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-neutral-500 font-main">Started on</p>
+                                <p class="font-medium text-neutral-800">
+                                    {{ $engagement->started_at ? $engagement->started_at->format('M d, Y') : 'Not started yet' }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Agreed Amount -->
+                        <div
+                            class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
+                            <div
+                                class="flex-shrink-0 h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-secondary">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-neutral-500 font-main">Agreed amount</p>
+                                <p class="font-medium text-neutral-800">
+                                    Ksh{{ number_format($engagement->net_amount, 2) }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Payment Status -->
+                        <div
+                            class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
+                            <div
+                                class="flex-shrink-0 h-10 w-10 rounded-full 
+                                    @if ($engagement->isPaymentEscrowed()) bg-secondary/10 
+                                    @elseif($engagement->payment_released_at) 
+                                        bg-green-100 
+                                    @else 
+                                        bg-neutral-200 @endif
+                                    flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5 
+                                        @if ($engagement->isPaymentEscrowed()) text-secondary 
+                                        @elseif($engagement->payment_released_at) 
+                                            text-green-600 
+                                        @else 
+                                        text-neutral-500 @endif"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-neutral-500 font-main">Payment status</p>
+                                <p
+                                    class="font-medium 
+                                        @if ($engagement->isPaymentEscrowed()) text-secondary 
+                                        @elseif($engagement->payment_released_at) 
+                                            text-green-600 
+                                        @else 
+                                            text-neutral-600 @endif">
+                                    @if ($engagement->isPaymentEscrowed())
+                                        Escrowed
+                                    @elseif($engagement->payment_released_at)
+                                        Released
+                                    @else
+                                        Not processed
+                                    @endif
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Message Action -->
+                        <div
+                            class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
+                            <div
+                                class="flex-shrink-0 h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-xs text-neutral-500 font-main">Communication</p>
+                                @if ($engagement->status === 'active')
+                                    <button
+                                        class="mt-1 inline-flex items-center px-3 py-1 text-xs font-medium rounded-full text-accent bg-accent/10 hover:bg-accent/20 transition-colors border border-accent/20">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        Message
+                                    </button>
+                                @else
+                                    <p class="font-medium text-neutral-600">Not available</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
                     @if ($isApplicant)
                         <div class="p-6">
                             <h4 class="font-tertiary font-semibold text-primary mb-4 flex items-center">
@@ -2235,21 +2348,52 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-start bg-neutral-50 p-4 rounded-lg transition-all hover:shadow-sm">
-                                <div class="bg-primary/10 p-2 rounded-lg mr-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor"
-                                        fill="currentColor" class="h-5 w-5  text-primary" viewBox="0 0 512 512">
-                                        <path
-                                            d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
-                                    </svg>
+                            <!-- Cancel Engagement or Budget Card -->
+                            @if ($engagement->status !== 'completed' && $engagement->status !== 'cancelled')
+                                <!-- Cancel Engagement Card (Redesigned) -->
+                                <div
+                                    class="flex items-start bg-red-50 p-4 rounded-lg transition-all hover:shadow-md border border-red-100">
+                                    <div class="bg-red-100 p-2 rounded-lg mr-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-red-500 mb-1">Engagement Actions</p>
+                                        <button type="button"
+                                            class="text-sm font-medium text-red-600 flex items-center hover:text-red-800 transition-colors"
+                                            onclick="document.getElementById('cancelEngagementModal').classList.remove('hidden')">
+                                            <span>Cancel Engagement</span>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    stroke-width="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-xs text-neutral-500 mb-1">Budget</p>
-                                    <p class="text-sm font-medium text-neutral-700">
-                                        Ksh{{ number_format($engagement->agreed_amount, 2) }}
-                                    </p>
+                            @else
+                                <!-- Budget Card -->
+                                <div
+                                    class="flex items-start bg-neutral-50 p-4 rounded-lg transition-all hover:shadow-sm">
+                                    <div class="bg-primary/10 p-2 rounded-lg mr-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor"
+                                            fill="currentColor" class="h-5 w-5  text-primary"
+                                            viewBox="0 0 512 512">
+                                            <path
+                                                d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-neutral-500 mb-1">Budget</p>
+                                        <p class="text-sm font-medium text-neutral-700">
+                                            Ksh{{ number_format($engagement->agreed_amount, 2) }}
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
+                            @endif
                         </div>
 
                         <!-- Action buttons -->
@@ -2267,11 +2411,15 @@
                             </div>
                         @endif
 
-                        <!-- Leave Review Button -->
-                        @if ($engagement->isCompleted())
-                            <div class="pt-2 flex justify-end">
+                        <div class="pt-2 flex justify-end gap-2">
+                            <!-- Leave Review Button -->
+                            @if ($engagement->isCompleted() || $engagement->isCancelled())
                                 @if (!$engagement->hasBeenReviewedByCurrentUser())
-                                    <button @click="$dispatch('open-review-modal')"
+                                    <button
+                                        @click="$dispatch('open-review-modal', { 
+                                          id: {{ $engagement->id }}, 
+                                          status: '{{ $engagement->status }}'
+                                        })"
                                         class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2"
                                             fill="none" viewBox="0 0 24 24" stroke="currentColor"
@@ -2282,23 +2430,190 @@
                                         Leave a Review
                                     </button>
                                 @else
-                                    <span
-                                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 bg-green-100 rounded-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-1">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                                        </svg>
-                                        Already Reviewed
-                                    </span>
+                                    <div class="w-full flex justify-between items-center">
+                                        <!-- Archive Button -->
+                                        <button
+                                            @click="$dispatch('open-archive-modal', { id: {{ $engagement->id }} })"
+                                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-200">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                class="h-5 w-5 mr-1">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                            </svg>
+                                            Archive
+                                        </button>
+
+                                        <span
+                                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-green-700 bg-green-100 rounded-lg">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                                                class="h-5 w-5 mr-1">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                                            </svg>
+                                            Already Reviewed
+                                        </span>
+                                    </div>
                                 @endif
+                            @endif
+                            <!-- Reopen Job Section (for clients only) -->
+                            @if ($engagement->isCancelled() && Auth::id() === $engagement->application->poster_id && !$engagement->job->is_active)
+                                <form action="{{ route('engagements.reopen-job', $engagement) }}" method="POST">
+                                    @csrf
+                                    <button type="submit"
+                                        class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium  text-sm shadow-sm rounded-lg transition duration-200 inline-flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2"
+                                            viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd"
+                                                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                                                clip-rule="evenodd" />
+                                        </svg>
+                                        Reopen Job
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <div x-data="{
+                    open: false,
+                    engagementId: null,
+                    loading: false
+                }"
+                    x-on:open-archive-modal.window="
+                        open = true;
+                        engagementId = $event.detail.id;
+                    "
+                    @keydown.escape.window="open = false" x-show="open" x-cloak
+                    class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="archive-modal" role="dialog"
+                    aria-modal="true" style="display: none;">
+
+                    <!-- Overlay -->
+                    <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0" @click="open = false"
+                        class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm">
+                    </div>
+
+                    <!-- Modal Content -->
+                    <div class="fixed inset-0 flex items-center justify-center p-4">
+                        <div x-show="open" x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95" @click.outside="open = false"
+                            class="relative bg-white dark:bg-neutral-800 rounded-xl overflow-hidden shadow-2xl w-full max-w-xl transform transition-all">
+
+                            <!-- Modal Pattern Background -->
+                            <div class="absolute inset-0 opacity-5">
+                                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                                    <defs>
+                                        <pattern id="archivePattern" x="0" y="0" width="20" height="20"
+                                            patternUnits="userSpaceOnUse">
+                                            <path d="M0 10 L10 0 L20 10 L10 20 Z" fill="currentColor" />
+                                        </pattern>
+                                    </defs>
+                                    <rect width="100%" height="100%" fill="url(#archivePattern)" />
+                                </svg>
                             </div>
-                        @endif
+
+                            <!-- Modal Header -->
+                            <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 relative">
+                                <div class="flex items-center">
+                                    <div
+                                        class="flex-shrink-0 p-2 rounded-full bg-gradient-to-br from-accent to-accent/70">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                                        </svg>
+                                    </div>
+                                    <h3
+                                        class="ml-3 text-lg font-semibold font-tertiary text-neutral-800 dark:text-white">
+                                        Archive Engagement
+                                    </h3>
+                                </div>
+
+                                <!-- Close Button -->
+                                <button @click="open = false"
+                                    class="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Modal Body -->
+                            <div class="px-6 py-4 relative">
+                                <p class="text-neutral-600 dark:text-neutral-300 text-sm font-main">
+                                    You're about to archive this engagement. Archived engagements will be moved to your
+                                    archive section and can be retrieved later if needed. This helps keep your active
+                                    engagements organized and your dashboard clean.
+                                </p>
+
+                                <div
+                                    class="mt-4 p-4 bg-gradient-to-r from-accent/10 to-accent/5 rounded-lg border border-accent/20">
+                                    <div class="flex items-start">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="h-5 w-5 text-accent flex-shrink-0 mr-2 mt-0.5" fill="none"
+                                            viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p class="text-sm text-white font-medium font-secondary">
+                                            Note: The other party will still have access to view this engagement in
+                                            their archive section.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modal Footer -->
+                            <div
+                                class="px-6 py-4 bg-neutral-50 dark:bg-neutral-800/50 flex flex-col sm:flex-row-reverse gap-2 relative">
+                                <form action="{{ route('engagements.archive') }}" method="POST"
+                                    x-data="{ loading: false, engagementId: null }"
+                                    x-on:open-archive-modal.window="engagementId = $event.detail.id"
+                                    x-on:submit="loading = true">
+                                    @csrf
+                                    <input type="hidden" name="engagement_id" :value="engagementId" />
+
+                                    <button type="submit" :disabled="loading"
+                                        class="inline-flex justify-center items-center rounded-lg px-4 py-2.5 bg-gradient-to-r from-accent to-accent/80 text-white font-medium text-sm shadow transition-all hover:from-accent/90 hover:to-accent/70 focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                                        <span x-show="!loading">Archive Engagement</span>
+                                        <span x-show="loading" class="inline-flex items-center">
+                                            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                                xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                    stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                                </path>
+                                            </svg>
+                                            Processing...
+                                        </span>
+                                    </button>
+                                </form>
+
+                                <button type="button" @click="open = false"
+                                    class="w-full sm:w-auto inline-flex justify-center items-center rounded-lg px-4 py-2.5 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 font-medium text-sm shadow-sm hover:bg-neutral-50 dark:hover:bg-neutral-600 focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 transition-all">
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Review Modal -->
-                <div x-data="{ open: false, rating: 0, reviewText: '', tags: [], isPublic: true }" x-on:open-review-modal.window="open = true" class="relative z-50"
+                <div x-data="{ open: false, rating: 0, reviewText: '', tags: [], isPublic: true, engagement: null }"
+                    x-on:open-review-modal.window="engagement = $event.detail; open = true" class="relative z-50"
                     x-cloak>
 
                     <!-- Modal Backdrop -->
@@ -2318,7 +2633,7 @@
                         x-transition:leave-end="opacity-0 translate-y-4"
                         class="fixed inset-0 flex items-center justify-center p-4">
 
-                        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto overflow-hidden"
+                        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-auto overflow-hidden max-h-[90vh] overflow-y-auto"
                             @click.outside="open = false">
                             <!-- Modal Header -->
                             <div class="bg-gradient-to-r from-primary to-primary/90 p-5">
@@ -2344,14 +2659,37 @@
                             </div>
 
                             <!-- Modal Body -->
-                            <div class="p-6">
+                            <div class="p-6 font-main">
                                 <form id="reviewForm" action="{{ route('engagements.review', $engagement) }}"
                                     method="POST">
                                     @csrf
 
+                                    <template x-if="engagement.status === 'cancelled'">
+                                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+                                            <div class="flex">
+                                                <div class="flex-shrink-0">
+                                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                                        class="h-5 w-5 text-yellow-400" fill="none"
+                                                        viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm text-yellow-700">
+                                                        Although this engagement was cancelled, your feedback helps
+                                                        maintain a high-quality marketplace for everyone. Reviews are a
+                                                        vital part of our community's trust system.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+
                                     <!-- Rating Section -->
-                                    <div class="mb-6">
-                                        <label class="block text-neutral-700 font-medium mb-3">Your
+                                    <div class="mb-3">
+                                        <label class="block text-neutral-700 font-medium mb-1">Your
                                             Rating</label>
                                         <div class="flex items-center justify-center">
                                             <template x-for="i in 5" :key="i">
@@ -2375,9 +2713,9 @@
                                     </div>
 
                                     <!-- Review Text -->
-                                    <div class="mb-6">
+                                    <div class="mb-3">
                                         <label for="review"
-                                            class="block text-neutral-700 font-medium mb-2">Review</label>
+                                            class="block text-neutral-700 font-medium mb-1">Review</label>
                                         <textarea id="review" name="review" x-model="reviewText" rows="4"
                                             class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors"
                                             placeholder="Share your experience working on this project..." required></textarea>
@@ -2391,8 +2729,8 @@
                                     </div>
 
                                     <!-- Tags Section -->
-                                    <div class="mb-6">
-                                        <label class="block text-neutral-700 font-medium mb-2">Highlight
+                                    <div class="mb-3">
+                                        <label class="block text-neutral-700 font-medium mb-1">Highlight
                                             Skills/Qualities</label>
                                         <div class="flex flex-wrap gap-2">
                                             @foreach (['Communication', 'Quality', 'Expertise', 'Timeliness', 'Collaboration', 'Problem-solving'] as $tag)
@@ -2411,7 +2749,7 @@
                                     </div>
 
                                     <!-- Visibility Toggle -->
-                                    <div class="mb-6">
+                                    <div class="mb-3">
                                         <label class="flex items-center">
                                             <input type="checkbox" name="is_public" value="1"
                                                 :checked="isPublic" @change="isPublic = !isPublic"
@@ -2423,7 +2761,7 @@
                                     </div>
 
                                     <!-- Action Buttons -->
-                                    <div class="flex justify-end space-x-3 mt-8">
+                                    <div class="flex justify-end space-x-3 mt-4">
                                         <button type="button" @click="open = false"
                                             class="px-5 py-2.5 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors">
                                             Cancel
@@ -2440,6 +2778,150 @@
                                     </div>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancellation Modal -->
+                <div id="cancelEngagementModal"
+                    class="fixed inset-0 bg-neutral-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+                        <div class="px-6 py-4 border-b border-neutral-200">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-lg font-semibold text-neutral-800 font-tertiary">Cancel Engagement
+                                </h3>
+                                <button
+                                    onclick="document.getElementById('cancelEngagementModal').classList.add('hidden')"
+                                    class="text-neutral-500 hover:text-neutral-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            <div class="bg-amber-50 border-l-4 border-accent p-4 mb-6">
+                                <div class="flex">
+                                    <div class="flex-shrink-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent"
+                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-3">
+                                        <p class="text-sm text-amber-800 font-medium">Important Information</p>
+                                        <ul class="mt-2 text-sm text-amber-700 list-disc list-inside">
+                                            <li>Cancellation may affect future opportunities on the platform</li>
+                                            <li>Partial work completed may still be eligible for payment</li>
+                                            <li>All submitted deliverables will remain accessible</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <form action="{{ route('engagements.cancel', $engagement) }}" method="POST">
+                                @csrf
+
+                                <div class="space-y-6">
+                                    <!-- Cancellation Type -->
+                                    <div>
+                                        <label for="cancellation_type"
+                                            class="block text-sm font-medium text-neutral-700 mb-1">Cancellation
+                                            Type</label>
+                                        <select id="cancellation_type" name="cancellation_type" required
+                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-neutral-300 focus:outline-none focus:ring-secondary focus:border-secondary rounded-md shadow-sm font-main">
+                                            <option value="mutual">Mutual Agreement</option>
+                                            <option value="client_initiated">Client Initiated</option>
+                                            <option value="freelancer_initiated">Freelancer Initiated</option>
+                                            <option value="dispute">Dispute (Requires Review)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Reason Category -->
+                                    <div>
+                                        <label for="reason_category"
+                                            class="block text-sm font-medium text-neutral-700 mb-1">Reason
+                                            Category</label>
+                                        <select id="reason_category" name="reason_category" required
+                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-neutral-300 focus:outline-none focus:ring-secondary focus:border-secondary rounded-md shadow-sm font-main">
+                                            <option value="schedule_conflict">Schedule Conflict</option>
+                                            <option value="project_scope_change">Project Scope Changed</option>
+                                            <option value="communication_issues">Communication Issues</option>
+                                            <option value="quality_concerns">Quality Concerns</option>
+                                            <option value="financial_reasons">Financial Reasons</option>
+                                            <option value="personal_reasons">Personal Reasons</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Detailed Reason -->
+                                    <div>
+                                        <label for="cancellation_reason"
+                                            class="block text-sm font-medium text-neutral-700 mb-1">Please provide
+                                            details</label>
+                                        <textarea id="cancellation_reason" name="cancellation_reason" rows="4" required
+                                            class="shadow-sm block w-full focus:ring-secondary focus:border-secondary border-neutral-300 rounded-md font-main"
+                                            placeholder="Please explain your reasons for cancellation in detail..."></textarea>
+                                    </div>
+
+                                    @if (
+                                        $engagement->deliverables->where('status', 'approved')->count() > 0 ||
+                                            $engagement->deliverables->where('status', 'submitted')->count() > 0)
+                                        <!-- Payment for Partial Work -->
+                                        <div
+                                            class="bg-neutral-50 p-4 rounded-md border border-neutral-200 font-main text-sm">
+                                            <h4 class="font-medium text-neutral-800 mb-2">Payment for Completed Work
+                                            </h4>
+                                            <p class="text-sm text-neutral-600 mb-3">Some work has been submitted or
+                                                approved. Please indicate if you want to process payment for completed
+                                                work:</p>
+
+                                            <div class="flex items-center">
+                                                <input id="process_payment" name="process_payment" type="checkbox"
+                                                    value="1"
+                                                    class="h-4 w-4 text-secondary focus:ring-secondary border-neutral-300 rounded">
+                                                <label for="process_payment"
+                                                    class="ml-2 block text-sm text-neutral-700">
+                                                    Process payment for completed deliverables
+                                                </label>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <!-- Terms Acceptance -->
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="terms" name="terms" type="checkbox" required
+                                                value="1"
+                                                class="h-4 w-4 text-secondary focus:ring-secondary border-neutral-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm font-main">
+                                            <label for="terms" class="font-medium text-neutral-700">I understand
+                                                and agree</label>
+                                            <p class="text-neutral-500">I have read and understand the <a
+                                                    href="#"
+                                                    class="text-secondary hover:text-primary underline">cancellation
+                                                    policy</a> and terms of service.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 flex flex-col sm:flex-row sm:space-x-4">
+                                    <button type="button"
+                                        onclick="document.getElementById('cancelEngagementModal').classList.add('hidden')"
+                                        class="w-full sm:w-auto mb-3 sm:mb-0 inline-flex justify-center items-center px-4 py-2 border border-neutral-300 shadow-sm text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">
+                                        Keep Engagement Active
+                                    </button>
+                                    <button type="submit"
+                                        class="w-full sm:w-auto inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                        Confirm Cancellation
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

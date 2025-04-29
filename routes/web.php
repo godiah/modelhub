@@ -49,12 +49,12 @@ Route::middleware(['auth'])->prefix('applications')->name('applications.')->grou
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-applications', [JobApplicationController::class, 'getUserApplications'])->name('applications.my');
     Route::get('/my-drafts', [JobApplicationController::class, 'getDraftApplications'])->name('applications.drafts');
+    Route::delete('/my-drafts/{application}', [JobApplicationController::class, 'destroyDraft'])->name('destroy.drafts');
 });
 
 // My Posted Jobs and Applications Management
 Route::middleware(['auth'])->prefix('my-jobs')->name('my-jobs.')->group(function () {
     Route::get('/', [JobApplicationController::class, 'getUserPostedJobs'])->name('index');
-
 
     Route::prefix('applications')->name('applications.')->group(function () {
         Route::get('/{slug}', [JobApplicationController::class, 'getJobApplications'])->name('index');
@@ -94,6 +94,13 @@ Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->gr
 Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(function () {
     Route::get('/', [JobEngagementController::class, 'index'])->name('index');
 
+    // Archive functionality
+    Route::prefix('archive')->group(function () {
+        Route::post('/', [JobEngagementController::class, 'archive'])->name('archive');
+        Route::get('/archived', [JobEngagementController::class, 'archivedEngagements'])->name('archived');
+        Route::post('/restore', [JobEngagementController::class, 'restore'])->name('restore');
+    });
+
     Route::middleware(['verify-engagement-ownership'])->group(function () {
         Route::get('/{applicationId}/respond', [JobEngagementController::class, 'showResponseForm'])->name('response-form');
         Route::post('/{engagement}/respond', [JobEngagementController::class, 'respondToOffer'])->name('respond');
@@ -111,6 +118,12 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
 
     // Review routes
     Route::post('/engagements/{engagement}/review', [JobEngagementController::class, 'leaveReview'])->name('review');
+
+    // Cancellation routes
+    Route::get('/{engagement}/cancel', [JobEngagementController::class, 'showCancellationForm'])->name('cancel.form');
+    Route::post('/{engagement}/cancel', [JobEngagementController::class, 'cancelEngagement'])->name('cancel');
+    Route::post('/{engagement}/partial-payment', [JobEngagementController::class, 'processPartialPayment'])->name('partial-payment');
+    Route::post('/{engagement}/reopen-job', [JobEngagementController::class, 'reopenJob'])->name('reopen-job');
 });
 
 

@@ -163,6 +163,17 @@ class JobController extends Controller
      */
     public function show(ModelJob $job)
     {
+        if ($job->user_id !== Auth::id()) {
+            return redirect()->back()->with([
+                'error' => 'Unauthorized Action',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Unauthorized Action',
+                    'text' => 'Unauthorized Action'
+                ]
+            ]);
+        }
+
         $jobUrl = url("/jobs/{$job->slug}");
         return view('jobBoard.jobs.show', compact('job', 'jobUrl'));
     }
@@ -184,15 +195,19 @@ class JobController extends Controller
         }
 
         // Filter by skills
-        if ($request->has('skills') && !empty($request->skills)) {
-            $skillId = $request->skills;
-            $query->whereJsonContains('skills', $skillId);
+        if ($id = $request->query('skills')) {
+            $skill = Skill::find((int) $id);
+            if ($skill) {
+                $query->whereJsonContains('skills', $skill->name);
+            }
         }
 
         // Filter by software
-        if ($request->has('software') && !empty($request->software)) {
-            $softwareId = $request->software;
-            $query->whereJsonContains('software', $softwareId);
+        if ($id = $request->query('software')) {
+            $software = Software::find((int) $id);
+            if ($software) {
+                $query->whereJsonContains('software', $software->name);
+            }
         }
 
         // Sorting
@@ -219,6 +234,11 @@ class JobController extends Controller
         }
 
         $jobs = $query->paginate(5);
+
+        // If it's an AJAX request, return only the jobs list partial
+        if ($request->ajax()) {
+            return view('jobBoard.jobs.partials.jobs-list', compact('jobs'));
+        }
 
         // Pass the current filters to the view for maintaining state
         $filters = [

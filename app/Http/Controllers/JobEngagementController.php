@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\EngagementResponseNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class JobEngagementController extends Controller
@@ -31,7 +32,8 @@ class JobEngagementController extends Controller
             ->whereHas('application', function ($q) use ($user) {
                 $q->where('applicant_id', $user->id)
                     ->orWhere('poster_id', $user->id);
-            });
+            })
+            ->activeForUser($user->id); // Pass the user ID here
 
         // 2) apply search scope
         if ($request->filled('search')) {
@@ -61,15 +63,19 @@ class JobEngagementController extends Controller
         $hasFilters = $request->filled('search')
             || ($request->filled('status') && $request->status !== 'all');
 
-        // 6) support AJAX refresh
+        // 6) Update this to use the new archiving system
+        $hasArchivedEngagements = \App\Models\JobEngagement::archivedForUser($user->id)->exists();
+
+        // 7) support AJAX refresh
         if ($request->ajax()) {
             return view('jobBoard.engagements.partials.engagements-list', [
                 'engagements' => $engagements,
                 'hasFilters'  => $hasFilters,
+                'hasArchivedEngagements' => $hasArchivedEngagements
             ])->render();
         }
 
-        return view('jobBoard.engagements.index', compact('engagements', 'hasFilters'));
+        return view('jobBoard.engagements.index', compact('engagements', 'hasFilters', 'hasArchivedEngagements'));
     }
 
 
@@ -180,7 +186,8 @@ class JobEngagementController extends Controller
     public function leaveReview(JobEngagement $engagement, Request $request)
     {
         // Check if the job is completed
-        if ($engagement->status !== 'completed') {
+
+        if (! in_array($engagement->status, ['completed', 'cancelled'])) {
             return redirect()->back()->with([
                 'error' => 'You can only review completed jobs',
                 'alert' => [
@@ -286,62 +293,312 @@ class JobEngagementController extends Controller
         }
     }
 
+
     /**
-     * Cancel an engagement- work on this
-     
-    public function cancelEngagement(JobEngagement $engagement, Request $request)
+     * Show the cancellation form
+     */
+    public function showCancellationForm(JobEngagement $engagement)
     {
-        // Authorization checks
+        // Authorization check - only the client or freelancer can cancel
         $application = $engagement->application;
         $authUser = Auth::user();
 
         if ($authUser->id !== $application->poster_id && $authUser->id !== $application->applicant_id) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return back()->with('error', 'Unauthorized Action.');
+        }
+
+        return view('engagements.cancel', compact('engagement'));
+    }
+
+    /**
+     * Process engagement cancellation
+     */
+    public function cancelEngagement(JobEngagement $engagement, Request $request)
+    {
+        // Authorization check - only the client or freelancer can cancel
+        $application = $engagement->application;
+        $authUser = Auth::user();
+
+        if ($authUser->id !== $application->poster_id && $authUser->id !== $application->applicant_id) {
+            return back()->with('error', 'You are not authorized to cancel this engagement.');
         }
 
         // Only allow cancellation before completion
         if ($engagement->status === 'completed') {
-            return response()->json(['error' => 'Cannot cancel a completed engagement'], 400);
+            return back()->with('error', 'Cannot cancel a completed engagement.');
         }
 
         // Validate request
-        $request->validate([
-            'cancellation_reason' => 'required|string',
+        $validated = $request->validate([
+            'cancellation_type' => 'required|string|in:mutual,client_initiated,freelancer_initiated,dispute',
+            'reason_category' => 'required|string',
+            'cancellation_reason' => 'required|string|min:10',
+            'process_payment' => 'nullable|boolean',
+            'terms' => 'required|accepted',
         ]);
 
         DB::beginTransaction();
         try {
-            // Handle refunds if payment was escrowed
-            if ($engagement->isPaymentEscrowed()) {
-                // Implement your refund logic here
-                // ...
+            // Determine the initiator and recipient
+            $isClient = $authUser->id === $application->poster_id;
+            $initiator = $isClient ? 'client' : 'freelancer';
+
+            // Create cancellation record
+            $cancellation = $engagement->cancellation()->create([
+                'initiator_id' => $authUser->id,
+                'cancellation_type' => $validated['cancellation_type'],
+                'reason_category' => $validated['reason_category'],
+                'reason_details' => $validated['cancellation_reason'],
+                'process_payment_for_work' => $request->has('process_payment'),
+                'is_dispute' => $validated['cancellation_type'] === 'dispute',
+            ]);
+
+            // Handle payment processing for partial work if requested
+            if ($request->has('process_payment') && $validated['process_payment']) {
+                // Get approved deliverables
+                $approvedDeliverables = $engagement->deliverables()->where('status', 'approved')->get();
+
+                if ($approvedDeliverables->count() > 0) {
+                    // Calculate partial payment based on approved deliverables
+                    // This is a simple example - you may want a more sophisticated approach
+                    $totalDeliverables = $engagement->deliverables->count();
+                    $approvedCount = $approvedDeliverables->count();
+
+                    if ($totalDeliverables > 0) {
+                        $paymentPercentage = $approvedCount / $totalDeliverables;
+                        $partialAmount = $engagement->agreed_amount * $paymentPercentage;
+
+                        // Record partial payment
+                        $cancellation->update([
+                            'partial_payment_amount' => $partialAmount,
+                            'payment_calculated_at' => now(),
+                        ]);
+
+                        // Here you'd typically call your payment processing service
+                        // processPartialPayment($engagement, $partialAmount);
+                    }
+                }
             }
 
-            // Update engagement
+            // Update engagement status
             $engagement->update([
                 'status' => 'cancelled',
                 'cancelled_at' => now(),
                 'notes' => $request->cancellation_reason,
             ]);
 
+            // If it's a dispute, notify administrators
+            // if ($validated['cancellation_type'] === 'dispute') {
+            //     // Notify admins about dispute
+            //     // You would add your admin users or roles here
+            //     $adminUsers = \App\Models\User::where('role', 'admin')->get();
+            //     Notification::send($adminUsers, new DisputeCreated($engagement, $cancellation));
+            // }
+
             DB::commit();
 
             // Determine who to notify
-            $userToNotify = ($authUser->id === $application->poster_id)
-                ? $application->applicant
-                : $application->poster;
+            // $userToNotify = ($authUser->id === $application->poster_id)
+            //     ? $application->applicant
+            //     : $application->poster;
 
-            // Create and use a notification class for cancellations
-            // $userToNotify->notify(new EngagementCancelled($engagement));
+            // Send in-app notification
+            /// $userToNotify->notify(new EngagementCancelled($engagement, $cancellation));
 
-            return response()->json([
-                'message' => 'Engagement cancelled successfully',
-                'engagement' => $engagement->refresh()
+            // Send email notification
+            // Mail::to($userToNotify->email)->send(new EngagementCancellationConfirmation($engagement, $cancellation));
+
+            return redirect()->route('engagements.index', $engagement)->with([
+                'success' => 'Engagement cancelled successfully. All parties have been notified.',
+                'alert' => [
+                    'type' => 'success',
+                    'title' => 'Engagement cancelled successfully.',
+                    'text' => "Engagement cancelled successfully.",
+                ]
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['error' => 'Failed to cancel engagement: ' . $e->getMessage()], 500);
+            return back()->with('error', 'Failed to cancel engagement: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Reopen a job after cancellation
      */
+    public function reopenJob(JobEngagement $engagement, Request $request)
+    {
+        // Authorization check - only the client can reopen the job
+        $application = $engagement->application;
+
+        if (Auth::id() !== $application->poster_id) {
+            return back()->with('error', 'Only the job poster can reopen this job.');
+        }
+
+        // Make sure the engagement is cancelled
+        if ($engagement->status !== 'cancelled') {
+            return back()->with('error', 'Only cancelled engagements can have their jobs reopened.');
+        }
+
+        try {
+            $job = $engagement->job;
+
+            $job->update([
+                'is_active' => true,
+            ]);
+
+            return redirect()->route('engagements.index')->with([
+                'success' => 'Job has been reopened successfully',
+                'alert' => [
+                    'type' => 'success',
+                    'title' => 'Job has been reopened successfully',
+                    'text' => "Job has been reopened successfully",
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to reopen job: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Display a listing of archived engagements
+     */
+    public function archivedEngagements()
+    {
+        $user = Auth::user();
+
+        $archivedEngagements = JobEngagement::archivedForUser($user->id)
+            ->with(['application.job', 'application.applicant', 'application.poster'])
+            ->latest()
+            ->paginate(10);
+
+        return view('jobBoard.engagements.archived', compact('archivedEngagements'));
+    }
+
+    /**
+     * Archive an engagement
+     */
+    public function archive(Request $request)
+    {
+        $engagement = JobEngagement::findOrFail($request->engagement_id);
+
+        // Check authorization - user must be either the applicant or poster
+        $user = Auth::user();
+        $applicantId = $engagement->application->applicant_id;
+        $posterId = $engagement->application->poster_id;
+
+        // Determine which field to update based on the user's role
+        if ($user->id === $applicantId) {
+            $engagement->is_archived_by_applicant = true;
+        } elseif ($user->id === $posterId) {
+            $engagement->is_archived_by_poster = true;
+        } else {
+            return back()->with([
+                'error' => 'You are not authorized to archive this engagement.',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Authorization Error',
+                    'text' => "You don't have permission to archive this engagement.",
+                ]
+            ]);
+        }
+
+        $engagement->save();
+
+        return back()->with([
+            'success' => 'Engagement archived successfully.',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Engagement archived successfully',
+                'text' => "Engagement archived successfully",
+            ]
+        ]);
+    }
+
+    /**
+     * Restore an archived engagement
+     */
+    public function restore(Request $request)
+    {
+        $engagement = JobEngagement::findOrFail($request->engagement_id);
+
+        // Check authorization - user must be either the applicant or poster
+        $user = Auth::user();
+        $applicantId = $engagement->application->applicant_id;
+        $posterId = $engagement->application->poster_id;
+
+        // Determine which field to update based on the user's role
+        if ($user->id === $applicantId) {
+            $engagement->is_archived_by_applicant = false;
+        } elseif ($user->id === $posterId) {
+            $engagement->is_archived_by_poster = false;
+        } else {
+            return back()->with([
+                'error' => 'You are not authorized to unarchive this engagement.',
+                'alert' => [
+                    'type' => 'error',
+                    'title' => 'Authorization Error',
+                    'text' => "You don't have permission to unarchive this engagement.",
+                ]
+            ]);
+        }
+
+        $engagement->save();
+
+        return back()->with([
+            'success' => 'Engagement unarchived successfully.',
+            'alert' => [
+                'type' => 'success',
+                'title' => 'Engagement unarchived successfully',
+                'text' => "Engagement unarchived successfully",
+            ]
+        ]);
+    }
+
+    /**
+     * Process partial payment for cancelled engagement
+     */
+    // public function processPartialPayment(JobEngagement $engagement, Request $request)
+    // {
+    //     // Authorization check - only the client can process payments
+
+
+    //     // Validate the request
+    //     $validated = $request->validate([
+    //         'payment_amount' => 'required|numeric|min:0',
+    //         'payment_notes' => 'nullable|string',
+    //     ]);
+
+    //     DB::beginTransaction();
+    //     try {
+    //         // Record the partial payment
+    //         $engagement->partialPayments()->create([
+    //             'amount' => $validated['payment_amount'],
+    //             'notes' => $validated['payment_notes'] ?? null,
+    //             'processed_by' => Auth::id(),
+    //             'processed_at' => now(),
+    //         ]);
+
+    //         // Here you would integrate with your payment processor
+    //         // processPayment($engagement, $validated['payment_amount']);
+
+    //         // Update the cancellation record if it exists
+    //         if ($engagement->cancellation) {
+    //             $engagement->cancellation->update([
+    //                 'partial_payment_processed' => true,
+    //                 'partial_payment_processed_at' => now(),
+    //             ]);
+    //         }
+
+    //         DB::commit();
+
+    //         // Notify the freelancer about the payment
+    //         // $engagement->application->applicant->notify(new PaymentProcessed($engagement, $validated['payment_amount']));
+
+    //         return redirect()->route('engagements.show', $engagement)
+    //             ->with('success', 'Payment for partial work has been processed successfully.');
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return back()->with('error', 'Failed to process payment: ' . $e->getMessage());
+    //     }
+    // }
 }

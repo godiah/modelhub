@@ -1,11 +1,30 @@
 <x-app-layout>
+    <x-slot name="header">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
+                    {{ __('Resume Application') }}
+                </h2>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ route('applications.drafts') }}"
+                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-main text-sm font-medium">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Draft Applications
+                </a>
+            </div>
+        </div>
+    </x-slot>
+
     <section>
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-lg p-6 shadow">
-                <h1 class="text-2xl font-semibold text-primary mb-6">Continue Your Application</h1>
-
-                <form id="job-application-form" class="space-y-8" action="{{ route('applications.store') }}" method="POST"
-                    enctype="multipart/form-data">
+                <form id="job-application-form" class="space-y-8" action="{{ route('applications.store') }}"
+                    method="POST" enctype="multipart/form-data">
                     @csrf
 
                     <input type="hidden" name="job_id" value="{{ $job->id }}">
@@ -317,155 +336,163 @@
 
         <!-- Portfolio Uploads -->
         <script>
-            // Function to show SweetAlert for file limit exceeded
+            // config
+            const MAX_FILES = 5;
+            const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+            // DOM refs
+            const fileInput = document.getElementById('file-upload');
+            const previewContainer = document.getElementById('preview-container');
+            const filePreview = document.getElementById('file-preview');
+            const removedFilesCtr = document.getElementById('removed-files-container');
+
+            // internal list of new File objects
+            let newFiles = [];
+
+            // helper alerts (you already have these)
             function showMaxFilesAlert() {
                 Swal.fire({
                     icon: 'error',
                     title: 'File Limit Exceeded',
-                    text: `You can upload a maximum of ${MAX_FILES} files.`,
+                    text: `You can upload a maximum of ${MAX_FILES} files.`
                 });
             }
 
-            // Function to show SweetAlert for file size exceeded
             function showFileSizeAlert() {
                 Swal.fire({
                     icon: 'error',
                     title: 'File Size Limit Exceeded',
-                    text: `File size should not exceed ${MAX_FILE_SIZE / (1024 * 1024)}MB.`,
+                    text: `File size should not exceed ${MAX_FILE_SIZE/(1024*1024)} MB.`
                 });
             }
 
-            // Function to show SweetAlert for invalid file type
             function showFileTypeAlert() {
                 Swal.fire({
                     icon: 'error',
                     title: 'Invalid File Type',
-                    text: 'Only JPG, JPEG, PNG, and PDF files are allowed.',
+                    text: 'Only JPG, JPEG, PNG, and PDF files are allowed.'
                 });
             }
 
-            // Maximum number of files allowed
-            const MAX_FILES = 5;
-            // Maximum file size in bytes (10MB)
-            const MAX_FILE_SIZE = 10 * 1024 * 1024;
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return `${bytes} B`;
+                if (bytes < 1024 * 1024) return `${(bytes/1024).toFixed(1)} KB`;
+                return `${(bytes/(1024*1024)).toFixed(1)} MB`;
+            }
 
-            // Get references to the elements
-            const fileInput = document.getElementById('file-upload');
-            const previewContainer = document.getElementById('preview-container');
-            const filePreview = document.getElementById('file-preview');
+            // each time the user selects files
+            fileInput.addEventListener('change', handleFileSelect);
 
-            // Set up event handlers for removing existing files
-            const removeButtons = document.querySelectorAll('.remove-file');
-            removeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const fileItem = this.closest('.file-item');
-                    const filePath = this.getAttribute('data-file-path');
+            function handleFileSelect(e) {
+                const picked = Array.from(e.target.files);
+                const existingCount = document.querySelectorAll('input[name="existing_portfolio[]"]').length;
 
-                    // Create a hidden field to track removed files
-                    const removedFileInput = document.createElement('input');
-                    removedFileInput.type = 'hidden';
-                    removedFileInput.name = 'removed_files[]';
-                    removedFileInput.value = filePath;
-
-                    // Add it to the container
-                    document.getElementById('removed-files-container').appendChild(removedFileInput);
-
-                    // Remove the file item from the UI
-                    fileItem.remove();
-
-                    // Hide the preview container if no files left
-                    if (document.querySelectorAll('.file-item').length === 0) {
-                        document.getElementById('file-preview').classList.add('hidden');
+                for (let file of picked) {
+                    // avoid duplicates by name+size
+                    if (newFiles.some(f => f.name === file.name && f.size === file.size)) {
+                        continue;
                     }
-                });
-            });
-
-            // Function to handle file selection
-            function handleFileSelect(event) {
-                const files = event.target.files;
-                const currentFiles = previewContainer.querySelectorAll('.file-item');
-
-                // Get count of both existing files and new ones
-                const existingFilesCount = document.querySelectorAll('input[name="existing_portfolio[]"]').length;
-                const remainingSlots = MAX_FILES - existingFilesCount;
-
-                // Check if adding new files will exceed the maximum limit
-                if (files.length > remainingSlots) {
-                    showMaxFilesAlert();
-                    return;
-                }
-
-                // Process each selected file
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-
-                    // Check file type
-                    if (!file.type.match('image/jpeg') && !file.type.match('image/png') && !file.type.match(
-                            'application/pdf')) {
+                    // check overall count
+                    if (existingCount + newFiles.length + 1 > MAX_FILES) {
+                        showMaxFilesAlert();
+                        break;
+                    }
+                    // type & size checks
+                    if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
                         showFileTypeAlert();
                         continue;
                     }
-
-                    // Check file size
                     if (file.size > MAX_FILE_SIZE) {
                         showFileSizeAlert();
                         continue;
                     }
+                    newFiles.push(file);
+                }
 
-                    // Create a file preview item
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item flex items-center p-2 bg-white rounded border border-neutral-200';
-                    fileItem.innerHTML = `
-                            <div class="w-12 h-12 rounded overflow-hidden mr-3">
-                                <img src="" alt="Preview" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <p class="text-sm text-neutral-700 truncate">${file.name}</p>
-                                <p class="text-xs text-neutral-500">Size ${formatFileSize(file.size)}</p>
-                            </div>
-                            <button type="button" class="text-neutral-400 hover:text-red-500 ml-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        `;
+                updateFileInput();
+                renderNewPreviews();
+            }
 
-                    // Add remove functionality
-                    const removeButton = fileItem.querySelector('button');
-                    removeButton.addEventListener('click', function() {
-                        fileItem.remove();
-                        if (previewContainer.children.length === 0) {
-                            filePreview.classList.add('hidden');
-                        }
+            // sync our `newFiles[]` into the actual <input>
+            function updateFileInput() {
+                const dt = new DataTransfer();
+                newFiles.forEach(f => dt.items.add(f));
+                fileInput.files = dt.files;
+            }
+
+            // render only the “new” files (give them a class so we can clear them)
+            function renderNewPreviews() {
+                // clear previous new-file nodes
+                previewContainer.querySelectorAll('.file-item-new').forEach(el => el.remove());
+
+                // show/hide the entire preview wrapper
+                if (newFiles.length || previewContainer.querySelectorAll('.file-item-existing').length) {
+                    filePreview.classList.remove('hidden');
+                } else {
+                    filePreview.classList.add('hidden');
+                }
+
+                // append each new file
+                newFiles.forEach((file, idx) => {
+                    const item = document.createElement('div');
+                    item.className =
+                        'file-item file-item-new flex items-center p-2 bg-white rounded border border-neutral-200';
+                    item.innerHTML = `
+                        <div class="w-12 h-12 rounded overflow-hidden mr-3">
+                          <img src="" alt="Preview" class="w-full h-full object-cover">
+                        </div>
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm text-neutral-700 truncate">${file.name}</p>
+                          <p class="text-xs text-neutral-500">Size ${formatFileSize(file.size)}</p>
+                        </div>
+                        <button type="button" class="text-neutral-400 hover:text-red-500 ml-2 remove-new-file">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                               viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      `;
+
+                    // wire up the removal of this new file
+                    item.querySelector('.remove-new-file').addEventListener('click', () => {
+                        newFiles.splice(idx, 1);
+                        updateFileInput();
+                        renderNewPreviews();
                     });
 
-                    // Add to preview container
-                    previewContainer.appendChild(fileItem);
-
-                    // Create image preview
-                    const img = fileItem.querySelector('img');
+                    // load thumbnail
+                    const img = item.querySelector('img');
                     const reader = new FileReader();
-                    reader.onload = function(e) {
-                        img.src = e.target.result;
-                    };
+                    reader.onload = e => img.src = e.target.result;
                     reader.readAsDataURL(file);
-                }
 
-                // Show preview area if there are files
-                if (previewContainer.children.length > 0) {
-                    filePreview.classList.remove('hidden');
-                }
+                    previewContainer.appendChild(item);
+                });
             }
 
-            // Function to format file size
-            function formatFileSize(bytes) {
-                if (bytes < 1024) return `${bytes} B`;
-                if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-                return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-            }
+            // existing‐file remove (you already had this—but ensure it's after the DOM is ready)
+            document.querySelectorAll('.remove-file').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const fileItem = this.closest('.file-item');
+                    const filePath = this.dataset.filePath;
 
-            // Add event listener to file input
-            fileInput.addEventListener('change', handleFileSelect);
+                    // track for server deletion
+                    const removed = document.createElement('input');
+                    removed.type = 'hidden';
+                    removed.name = 'removed_files[]';
+                    removed.value = filePath;
+                    removedFilesCtr.appendChild(removed);
+
+                    fileItem.remove();
+
+                    // hide preview if nothing left
+                    if (!previewContainer.querySelector('.file-item')) {
+                        filePreview.classList.add('hidden');
+                    }
+                });
+            });
         </script>
+
     </section>
 </x-app-layout>

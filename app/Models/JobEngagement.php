@@ -23,6 +23,8 @@ class JobEngagement extends Model
         'net_amount',
         'payment_escrowed_at',
         'payment_released_at',
+        'is_archived_by_applicant',
+        'is_archived_by_poster',
     ];
 
     protected $casts = [
@@ -35,6 +37,8 @@ class JobEngagement extends Model
         'agreed_amount' => 'decimal:2',
         'service_fee' => 'decimal:2',
         'net_amount' => 'decimal:2',
+        'is_archived_by_applicant' => 'boolean',
+        'is_archived_by_poster' => 'boolean',
     ];
 
     /**
@@ -159,5 +163,78 @@ class JobEngagement extends Model
         return $this->reviews()
             ->where('reviewer_id', Auth::id())
             ->exists();
+    }
+
+    /**
+     * Get the cancellation record for this engagement
+     */
+    public function cancellation()
+    {
+        return $this->hasOne(JobCancellation::class, 'engagement_id');
+    }
+
+    /**
+     * Get partial payments for this engagement
+     */
+    public function partialPayments()
+    {
+        return $this->hasMany(JobPartialPayment::class, 'engagement_id');
+    }
+
+    /**
+     * Determine if user can cancel this engagement
+     */
+    public function canBeCancelled()
+    {
+        return !in_array($this->status, ['completed', 'cancelled']);
+    }
+
+    /**
+     * Check if the current user can process payment
+     */
+    public function canProcessPayment()
+    {
+        $user = Auth::user();
+        if (!$user) return false;
+
+        return $user->id === $this->application->poster_id && $this->isCancelled();
+    }
+
+    // // Scope for active (non-archived) engagements
+    // public function scopeActive($query)
+    // {
+    //     return $query->where('is_archived', false);
+    // }
+
+    // // Scope for archived
+    // public function scopeArchived($query)
+    // {
+    //     return $query->where('is_archived', true);
+    // }
+
+    public function scopeActiveForUser($query, $userId)
+    {
+        return $query->whereHas('application', function ($q) use ($userId) {
+            $q->where(function ($subQuery) use ($userId) {
+                $subQuery->where('applicant_id', $userId)
+                    ->where('job_engagements.is_archived_by_applicant', false);
+            })->orWhere(function ($subQuery) use ($userId) {
+                $subQuery->where('poster_id', $userId)
+                    ->where('job_engagements.is_archived_by_poster', false);
+            });
+        });
+    }
+
+    public function scopeArchivedForUser($query, $userId)
+    {
+        return $query->whereHas('application', function ($q) use ($userId) {
+            $q->where(function ($subQuery) use ($userId) {
+                $subQuery->where('applicant_id', $userId)
+                    ->where('job_engagements.is_archived_by_applicant', true);
+            })->orWhere(function ($subQuery) use ($userId) {
+                $subQuery->where('poster_id', $userId)
+                    ->where('job_engagements.is_archived_by_poster', true);
+            });
+        });
     }
 }
