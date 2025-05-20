@@ -322,12 +322,6 @@ class JobDeliverableController extends Controller
      */
     public function reject(Request $request, JobDeliverable $deliverable)
     {
-        // Validate request
-        $validated = $request->validate([
-            'feedback' => 'required|string|max:1000',
-        ]);
-
-        // Check if the user has permission to reject the deliverable
         $engagement = $deliverable->engagement;
 
         // Ensure user is the employer/poster of this job
@@ -348,10 +342,18 @@ class JobDeliverableController extends Controller
             );
         }
 
+        // Conditional validation: feedback is required if engagement is not cancelled
+        $rules = [];
+        if ($engagement->status !== 'cancelled') {
+            $rules['feedback'] = 'required|string|max:1000';
+        }
+
+        $validated = Validator::make($request->all(), $rules)->validate();
+
         // Reject the deliverable
         $deliverable->update([
             'status' => 'rejected',
-            'feedback' => $validated['feedback'],
+            'feedback' => $validated['feedback'] ?? null,
             'rejected_at' => now(),
             'approved_at' => null, // Ensure it's not approved
         ]);
@@ -362,6 +364,7 @@ class JobDeliverableController extends Controller
             'Deliverable has been rejected. The freelancer will be notified.'
         );
     }
+
 
     /**
      * Check if all deliverables are approved and mark engagement as completed if so

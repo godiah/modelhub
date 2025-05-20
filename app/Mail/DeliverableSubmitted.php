@@ -21,7 +21,10 @@ class DeliverableSubmitted extends Mailable implements ShouldQueue
      */
     public function __construct(JobDeliverable $deliverable)
     {
-        $this->deliverable = $deliverable;
+        $this->deliverable = $deliverable->load(
+            'engagement.applicant',
+            'engagement.job.user'
+        );
     }
 
     /**

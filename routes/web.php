@@ -6,6 +6,8 @@ use App\Http\Controllers\JobDeliverableController;
 use App\Http\Controllers\JobEngagementController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PartialPaymentController;
+use App\Http\Controllers\PolicyManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -93,6 +95,11 @@ Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->gr
 // Job Engagements
 Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(function () {
     Route::get('/', [JobEngagementController::class, 'index'])->name('index');
+    Route::get('/{id}', [JobEngagementController::class, 'showCancelledEngagement'])->name('show-cancelled');
+    Route::post('/{id}/process-payment', [PartialPaymentController::class, 'processPartialPayment'])->name('process-partial-payment');
+    Route::post('/partial-payments/{id}/accept', [PartialPaymentController::class, 'acceptPartialPayment'])->name('accept-partial-payment');
+    Route::get('/partial-payments/{id}/dispute', [PartialPaymentController::class, 'disputePartialPayment'])->name('dispute-form');
+    Route::post('/partial-payments/{id}/process-dispute', [PartialPaymentController::class, 'processDisputePartialPayment'])->name('process-dispute-partial-payment');
 
     // Archive functionality
     Route::prefix('archive')->group(function () {
@@ -122,8 +129,10 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     // Cancellation routes
     Route::get('/{engagement}/cancel', [JobEngagementController::class, 'showCancellationForm'])->name('cancel.form');
     Route::post('/{engagement}/cancel', [JobEngagementController::class, 'cancelEngagement'])->name('cancel');
-    Route::post('/{engagement}/partial-payment', [JobEngagementController::class, 'processPartialPayment'])->name('partial-payment');
     Route::post('/{engagement}/reopen-job', [JobEngagementController::class, 'reopenJob'])->name('reopen-job');
+
+    // Policy routes
+    Route::get('/policy', [PolicyManagementController::class, 'index'])->name('policy');
 });
 
 

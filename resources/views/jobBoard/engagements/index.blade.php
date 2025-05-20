@@ -126,64 +126,6 @@
         </div>
     </div>
 
-    <!-- Create new deliverable script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const openModalBtn = document.getElementById('openDeliverableModal');
-            const closeModalBtn = document.getElementById('closeDeliverableModal');
-            const cancelBtn = document.getElementById('cancelDeliverableBtn');
-            const modal = document.getElementById('deliverableModal');
-            const backdrop = document.getElementById('deliverableModalBackdrop');
-
-            // Set minimum date for due_date to tomorrow
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const dueDateInput = document.getElementById('due_date');
-            dueDateInput.min = tomorrow.toISOString().split('T')[0];
-
-            // Open modal function
-            function openModal() {
-                backdrop.classList.remove('hidden');
-                document.body.style.overflow = 'hidden'; // Prevent scrolling
-            }
-
-            // Close modal function
-            function closeModal() {
-                backdrop.classList.add('hidden');
-                document.body.style.overflow = ''; // Enable scrolling
-            }
-
-            // Event listeners
-            openModalBtn.addEventListener('click', openModal);
-            closeModalBtn.addEventListener('click', closeModal);
-            cancelBtn.addEventListener('click', closeModal);
-
-            // Close modal when clicking outside
-            backdrop.addEventListener('click', function(event) {
-                if (event.target === backdrop) {
-                    closeModal();
-                }
-            });
-
-            // Close modal with ESC key
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape' && !backdrop.classList.contains('hidden')) {
-                    closeModal();
-                }
-            });
-
-            // Show the modal automatically if there are validation errors
-            @if ($errors->any())
-                openModal();
-            @endif
-
-            // Show the modal automatically if returning after form submission with an error
-            @if (session('error'))
-                openModal();
-            @endif
-        });
-    </script>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchEngagements');

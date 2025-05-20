@@ -7,14 +7,25 @@ use App\Models\JobApplication;
 use App\Models\JobEngagement;
 use App\Models\JobReview;
 use App\Models\User;
+use App\Notifications\DisputeCreatedNotification;
+use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
+use App\Services\PartialPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class JobEngagementController extends Controller
 {
+    protected $partialPaymentService;
+
+    public function __construct(PartialPaymentService $partialPaymentService)
+    {
+        $this->partialPaymentService = $partialPaymentService;
+    }
+
     /**
      * Display a listing of the user's job engagements.
      */
@@ -77,7 +88,6 @@ class JobEngagementController extends Controller
 
         return view('jobBoard.engagements.index', compact('engagements', 'hasFilters', 'hasArchivedEngagements'));
     }
-
 
     /**
      * Show response form for the job engagement.
@@ -164,10 +174,6 @@ class JobEngagementController extends Controller
             $request->notes
         ));
 
-        // Send email notification if needed
-        // Mail::to($jobPoster->email)
-        //    ->queue(new EngagementResponseMail($engagement, $request->response, $request->notes));
-
         return redirect()->route('engagements.index')->with([
             'success' => $message,
             'alert' => [
@@ -186,8 +192,7 @@ class JobEngagementController extends Controller
     public function leaveReview(JobEngagement $engagement, Request $request)
     {
         // Check if the job is completed
-
-        if (! in_array($engagement->status, ['completed', 'cancelled'])) {
+        if (! in_array($engagement->status, ['completed', 'cancelled', 'settled'])) {
             return redirect()->back()->with([
                 'error' => 'You can only review completed jobs',
                 'alert' => [
@@ -222,12 +227,7 @@ class JobEngagementController extends Controller
         }
 
         // Check if a review already exists
-        $existingReview = JobReview::where([
-            'engagement_id' => $engagement->id,
-            'reviewer_id' => $reviewer_id,
-        ])->first();
-
-        if ($existingReview) {
+        if ($engagement->hasBeenReviewedByUser($reviewer_id)) {
             return redirect()->back()->with([
                 'error' => 'You have already reviewed this job',
                 'alert' => [
@@ -237,6 +237,7 @@ class JobEngagementController extends Controller
                 ]
             ]);
         }
+
 
         try {
             // Validate request
@@ -261,9 +262,6 @@ class JobEngagementController extends Controller
                 'is_public' => $isPublic,
             ]);
 
-            // DEBUG: Log created review
-            Log::info('Created review:', $review->toArray());
-
             // Get reviewee name for personalized message
             $reviewee = User::find($reviewee_id);
             $revieweeName = $reviewee ? $reviewee->name : 'the ' . ($reviewerType === 'employer' ? 'freelancer' : 'client');
@@ -280,7 +278,6 @@ class JobEngagementController extends Controller
         } catch (\Exception $e) {
             // DEBUG: Log any exceptions
             Log::error('Error saving review: ' . $e->getMessage());
-            Log::error($e->getTraceAsString());
 
             return redirect()->back()->with([
                 'error' => 'Failed to submit review',
@@ -333,7 +330,6 @@ class JobEngagementController extends Controller
             'cancellation_type' => 'required|string|in:mutual,client_initiated,freelancer_initiated,dispute',
             'reason_category' => 'required|string',
             'cancellation_reason' => 'required|string|min:10',
-            'process_payment' => 'nullable|boolean',
             'terms' => 'required|accepted',
         ]);
 
@@ -343,42 +339,23 @@ class JobEngagementController extends Controller
             $isClient = $authUser->id === $application->poster_id;
             $initiator = $isClient ? 'client' : 'freelancer';
 
+            $cancellationExists = $engagement->cancellation()
+                ->where('initiator_id', $authUser->id)
+                ->exists();
+
+            if ($cancellationExists) {
+                return back()->with('error', 'You have already submitted a cancellation for this engagement.');
+            }
+
+
             // Create cancellation record
             $cancellation = $engagement->cancellation()->create([
                 'initiator_id' => $authUser->id,
                 'cancellation_type' => $validated['cancellation_type'],
                 'reason_category' => $validated['reason_category'],
                 'reason_details' => $validated['cancellation_reason'],
-                'process_payment_for_work' => $request->has('process_payment'),
                 'is_dispute' => $validated['cancellation_type'] === 'dispute',
             ]);
-
-            // Handle payment processing for partial work if requested
-            if ($request->has('process_payment') && $validated['process_payment']) {
-                // Get approved deliverables
-                $approvedDeliverables = $engagement->deliverables()->where('status', 'approved')->get();
-
-                if ($approvedDeliverables->count() > 0) {
-                    // Calculate partial payment based on approved deliverables
-                    // This is a simple example - you may want a more sophisticated approach
-                    $totalDeliverables = $engagement->deliverables->count();
-                    $approvedCount = $approvedDeliverables->count();
-
-                    if ($totalDeliverables > 0) {
-                        $paymentPercentage = $approvedCount / $totalDeliverables;
-                        $partialAmount = $engagement->agreed_amount * $paymentPercentage;
-
-                        // Record partial payment
-                        $cancellation->update([
-                            'partial_payment_amount' => $partialAmount,
-                            'payment_calculated_at' => now(),
-                        ]);
-
-                        // Here you'd typically call your payment processing service
-                        // processPartialPayment($engagement, $partialAmount);
-                    }
-                }
-            }
 
             // Update engagement status
             $engagement->update([
@@ -388,25 +365,23 @@ class JobEngagementController extends Controller
             ]);
 
             // If it's a dispute, notify administrators
-            // if ($validated['cancellation_type'] === 'dispute') {
-            //     // Notify admins about dispute
-            //     // You would add your admin users or roles here
-            //     $adminUsers = \App\Models\User::where('role', 'admin')->get();
-            //     Notification::send($adminUsers, new DisputeCreated($engagement, $cancellation));
-            // }
+            if ($validated['cancellation_type'] === 'dispute') {
+                // Get all users with admin role
+                $adminUsers = User::role('admin')->get();
 
-            DB::commit();
+                // Notify admins about dispute
+                Notification::send($adminUsers, new DisputeCreatedNotification($engagement, $cancellation));
+            }
 
             // Determine who to notify
-            // $userToNotify = ($authUser->id === $application->poster_id)
-            //     ? $application->applicant
-            //     : $application->poster;
+            $userToNotify = ($authUser->id === $application->poster_id)
+                ? $application->applicant
+                : $application->poster;
 
-            // Send in-app notification
-            /// $userToNotify->notify(new EngagementCancelled($engagement, $cancellation));
+            // Send in-app notification and mail
+            $userToNotify->notify(new EngagementCancelledNotification($engagement, $cancellation));
 
-            // Send email notification
-            // Mail::to($userToNotify->email)->send(new EngagementCancellationConfirmation($engagement, $cancellation));
+            DB::commit();
 
             return redirect()->route('engagements.index', $engagement)->with([
                 'success' => 'Engagement cancelled successfully. All parties have been notified.',
@@ -423,6 +398,38 @@ class JobEngagementController extends Controller
     }
 
     /**
+     * Display a cancelled engagement
+     */
+    public function showCancelledEngagement($id)
+    {
+        $engagement = JobEngagement::findOrFail($id);
+        $application = $engagement->application;
+        $authUser = Auth::user();
+
+        // Check if the user is the poster or applicant
+        if ($authUser->id !== $application->poster_id && $authUser->id !== $application->applicant_id && !$authUser->hasRole('admin')) {
+            return back()->with('error', 'Unauthorized Access.');
+        }
+
+        // Allow access only if the engagement is cancelled, settled, or disputed
+        if (!in_array($engagement->status, ['cancelled', 'settled', 'disputed'])) {
+            return back()->with('error', 'Unauthorized Action');
+        }
+
+
+        // Get payment information from the service
+        $paymentInfo = $this->partialPaymentService->canProcessPayment($engagement);
+        $latestPayment = $engagement->partialPayments()->latest()->first();
+
+        return view('jobBoard.engagements.cancelled-engagements', [
+            'engagement' => $engagement,
+            'paymentInfo' => $paymentInfo,
+            'canProcess' => $paymentInfo['can_process'],
+            'payment' => $latestPayment,
+        ]);
+    }
+
+    /**
      * Reopen a job after cancellation
      */
     public function reopenJob(JobEngagement $engagement, Request $request)
@@ -434,10 +441,11 @@ class JobEngagementController extends Controller
             return back()->with('error', 'Only the job poster can reopen this job.');
         }
 
-        // Make sure the engagement is cancelled
-        if ($engagement->status !== 'cancelled') {
-            return back()->with('error', 'Only cancelled engagements can have their jobs reopened.');
+        // Make sure the engagement is either cancelled or settled
+        if (!in_array($engagement->status, ['cancelled', 'settled'])) {
+            return back()->with('error', 'Only cancelled or settled engagements can have their jobs reopened.');
         }
+
 
         try {
             $job = $engagement->job;

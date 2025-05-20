@@ -6,6 +6,7 @@ use App\Mail\JobPostedMail;
 use App\Models\ModelJob;
 use App\Models\Skill;
 use App\Models\Software;
+use App\Notifications\JobPostedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -104,8 +105,8 @@ class JobController extends Controller
                 }
             }
 
-            // Send an email notification to the user
-            Mail::to(Auth::user()->email)->send(new JobPostedMail($job));
+            // Send a notification to the user
+            Auth::user()->notify(new JobPostedNotification($job));
 
             return $job;
         });

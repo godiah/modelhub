@@ -588,419 +588,456 @@
                                     this.showDeliverablesForm = false;
                                 }
                             }" x-cloak>
-                                <!-- Main Status Update Form -->
-                                <form id="statusUpdateForm"
-                                    action="{{ route('my-jobs.applications.update-status', ['application' => $application->id]) }}"
-                                    method="POST" @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>
-                                    @csrf
-                                    @method('PATCH')
+                                <!-- Withdrawn Application Notice -->
+                                @if ($application->status === 'withdrawn')
+                                    <div class="bg-red-100 border border-red-200 rounded-lg p-4 mb-4">
+                                        <div class="flex">
+                                            <div class="flex-shrink-0">
+                                                <svg class="h-5 w-5 text-red-800" xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd"
+                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                                        clip-rule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <div class="ml-3">
+                                                <h3 class="text-sm font-medium text-gray-800">Application
+                                                    Withdrawn</h3>
+                                                <div class="mt-2 text-sm text-gray-700">
+                                                    <p>This applicant has withdrawn their application. Status
+                                                        updates are no longer available.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @else
+                                    <!-- Main Status Update Form -->
+                                    <form id="statusUpdateForm"
+                                        action="{{ route('my-jobs.applications.update-status', ['application' => $application->id]) }}"
+                                        method="POST" @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>
+                                        @csrf
+                                        @method('PATCH')
 
-                                    <div class="space-y-5">
-                                        <!-- Position Filled Notice -->
-                                        @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active)
-                                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
-                                                <div class="flex">
-                                                    <div class="flex-shrink-0">
-                                                        <svg class="h-5 w-5 text-amber-400"
+                                        <div class="space-y-5">
+                                            <!-- Position Filled Notice -->
+                                            @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active)
+                                                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                                                    <div class="flex">
+                                                        <div class="flex-shrink-0">
+                                                            <svg class="h-5 w-5 text-amber-400"
+                                                                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                                                fill="currentColor">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                        </div>
+                                                        <div class="ml-3">
+                                                            <h3 class="text-sm font-medium text-amber-800">Position
+                                                                Filled
+                                                            </h3>
+                                                            <div class="mt-2 text-sm text-amber-700">
+                                                                <p>This position has been filled. Status updates are no
+                                                                    longer available.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            <!-- Current Status Display -->
+                                            <div class="flex items-center mb-4">
+                                                <div class="mr-2 text-sm font-medium text-neutral-600">Current Status:
+                                                </div>
+                                                @php
+                                                    $statusColors = [
+                                                        'submitted' => 'bg-yellow-100 text-yellow-800',
+                                                        'reviewed' => 'bg-blue-100 text-blue-800',
+                                                        'hired' => 'bg-green-100 text-green-800',
+                                                        'rejected' => 'bg-red-100 text-red-800',
+                                                        'withdrawn' => 'bg-rose-100 text-rose-800',
+                                                    ];
+                                                    $statusColor =
+                                                        $statusColors[$application->status] ??
+                                                        'bg-neutral-100 text-neutral-800';
+                                                @endphp
+                                                <span
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
+                                                    {{ ucfirst($application->status) }}
+                                                </span>
+                                            </div>
+
+                                            <!-- Status Selection -->
+                                            <div>
+                                                <label for="status"
+                                                    class="block text-sm font-medium text-neutral-700 mb-2 font-main">
+                                                    Update Status
+                                                </label>
+                                                <div class="relative">
+                                                    <select name="status" id="status" x-model="selectedStatus"
+                                                        @change="if(selectedStatus === 'hired') { showHireModal = true; } else { showHireModal = false; }"
+                                                        class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main appearance-none"
+                                                        @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>
+                                                        <option value="submitted"
+                                                            :selected="selectedStatus === 'submitted'">Submitted
+                                                        </option>
+                                                        <option value="reviewed"
+                                                            :selected="selectedStatus === 'reviewed'">Reviewed</option>
+                                                        <option value="hired"
+                                                            :selected="selectedStatus === 'hired'">
+                                                            Hired</option>
+                                                        <option value="rejected"
+                                                            :selected="selectedStatus === 'rejected'">Rejected</option>
+                                                    </select>
+                                                    <div
+                                                        class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                                        <svg class="h-5 w-5 text-neutral-400"
                                                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                                             fill="currentColor">
                                                             <path fill-rule="evenodd"
-                                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
+                                                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
                                                                 clip-rule="evenodd" />
                                                         </svg>
                                                     </div>
-                                                    <div class="ml-3">
-                                                        <h3 class="text-sm font-medium text-amber-800">Position Filled
-                                                        </h3>
-                                                        <div class="mt-2 text-sm text-amber-700">
-                                                            <p>This position has been filled. Status updates are no
-                                                                longer available.</p>
-                                                        </div>
-                                                    </div>
                                                 </div>
                                             </div>
-                                        @endif
 
-                                        <!-- Current Status Display -->
-                                        <div class="flex items-center mb-4">
-                                            <div class="mr-2 text-sm font-medium text-neutral-600">Current Status:
+                                            <!-- Notes Field -->
+                                            <div>
+                                                <label for="notes"
+                                                    class="block text-sm font-medium text-neutral-700 mb-2 font-main">
+                                                    Internal Notes
+                                                </label>
+                                                <textarea id="notes" name="notes" rows="3"
+                                                    class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main resize-none"
+                                                    placeholder="Add your private notes about this applicant..." @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>{{ $application->additional_notes ?? '' }}</textarea>
                                             </div>
-                                            @php
-                                                $statusColors = [
-                                                    'submitted' => 'bg-yellow-100 text-yellow-800',
-                                                    'reviewed' => 'bg-blue-100 text-blue-800',
-                                                    'hired' => 'bg-green-100 text-green-800',
-                                                    'rejected' => 'bg-red-100 text-red-800',
-                                                    'withdrawn' => 'bg-rose-100 text-rose-800',
-                                                ];
-                                                $statusColor =
-                                                    $statusColors[$application->status] ??
-                                                    'bg-neutral-100 text-neutral-800';
-                                            @endphp
-                                            <span
-                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
-                                                {{ ucfirst($application->status) }}
-                                            </span>
+
+                                            <!-- Submit Button -->
+                                            <button type="submit" x-show="selectedStatus !== 'hired'"
+                                                class="w-full py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors flex items-center justify-center 
+                                            @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) opacity-50 cursor-not-allowed @endif"
+                                                @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
+                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                                Update Status
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Hidden Hire Confirmation Form -->
+                                    <form id="hireForm"
+                                        action="{{ route('my-jobs.applications.confirm-hire', ['application' => $application->id]) }}"
+                                        method="POST" class="hidden">
+                                        @csrf
+                                        <!-- This will be populated by the deliverables form -->
+                                        <div id="deliverables-input-container"></div>
+                                    </form>
+
+                                    <!-- Hire Confirmation Modal -->
+                                    <div x-show="showHireModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
+                                        x-transition:enter="transition ease-out duration-300"
+                                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                        x-transition:leave="transition ease-in duration-200"
+                                        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+                                        <!-- Modal backdrop -->
+                                        <div
+                                            class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
                                         </div>
 
-                                        <!-- Status Selection -->
-                                        <div>
-                                            <label for="status"
-                                                class="block text-sm font-medium text-neutral-700 mb-2 font-main">
-                                                Update Status
-                                            </label>
-                                            <div class="relative">
-                                                <select name="status" id="status" x-model="selectedStatus"
-                                                    @change="if(selectedStatus === 'hired') { showHireModal = true; } else { showHireModal = false; }"
-                                                    class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main appearance-none"
-                                                    @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>
-                                                    <option value="submitted"
-                                                        :selected="selectedStatus === 'submitted'">Submitted</option>
-                                                    <option value="reviewed"
-                                                        :selected="selectedStatus === 'reviewed'">Reviewed</option>
-                                                    <option value="hired" :selected="selectedStatus === 'hired'">
-                                                        Hired</option>
-                                                    <option value="rejected"
-                                                        :selected="selectedStatus === 'rejected'">Rejected</option>
-                                                </select>
-                                                <div
-                                                    class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                                                    <svg class="h-5 w-5 text-neutral-400"
-                                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                                                        fill="currentColor">
+                                        <!-- Modal container -->
+                                        <div class="flex min-h-screen items-center justify-center p-4">
+                                            <div class="relative w-full max-w-2xl transform overflow-hidden rounded-xl bg-white shadow-xl transition-all"
+                                                x-transition:enter="transition ease-out duration-300"
+                                                x-transition:enter-start="opacity-0 translate-y-4"
+                                                x-transition:enter-end="opacity-100 translate-y-0"
+                                                x-transition:leave="transition ease-in duration-200"
+                                                x-transition:leave-start="opacity-100 translate-y-0"
+                                                x-transition:leave-end="opacity-0 translate-y-4">
+
+                                                <!-- Close button -->
+                                                <button
+                                                    @click="showHireModal = false; selectedStatus = '{{ $application->status }}'"
+                                                    class="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                        viewBox="0 0 20 20" fill="currentColor">
                                                         <path fill-rule="evenodd"
-                                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
                                                             clip-rule="evenodd" />
                                                     </svg>
-                                                </div>
-                                            </div>
-                                        </div>
+                                                </button>
 
-                                        <!-- Notes Field -->
-                                        <div>
-                                            <label for="notes"
-                                                class="block text-sm font-medium text-neutral-700 mb-2 font-main">
-                                                Internal Notes
-                                            </label>
-                                            <textarea id="notes" name="notes" rows="3"
-                                                class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main resize-none"
-                                                placeholder="Add your private notes about this applicant..." @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>{{ $application->additional_notes ?? '' }}</textarea>
-                                        </div>
-
-                                        <!-- Submit Button -->
-                                        <button type="submit" x-show="selectedStatus !== 'hired'"
-                                            class="w-full py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors flex items-center justify-center 
-                      @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) opacity-50 cursor-not-allowed @endif"
-                                            @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            Update Status
-                                        </button>
-                                    </div>
-                                </form>
-
-                                <!-- Hidden Hire Confirmation Form -->
-                                <form id="hireForm"
-                                    action="{{ route('my-jobs.applications.confirm-hire', ['application' => $application->id]) }}"
-                                    method="POST" class="hidden">
-                                    @csrf
-                                    <!-- This will be populated by the deliverables form -->
-                                    <div id="deliverables-input-container"></div>
-                                </form>
-
-                                <!-- Hire Confirmation Modal -->
-                                <div x-show="showHireModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
-                                    x-transition:enter="transition ease-out duration-300"
-                                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                    x-transition:leave="transition ease-in duration-200"
-                                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-
-                                    <!-- Modal backdrop -->
-                                    <div
-                                        class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
-                                    </div>
-
-                                    <!-- Modal container -->
-                                    <div class="flex min-h-screen items-center justify-center p-4">
-                                        <div class="relative w-full max-w-2xl transform overflow-hidden rounded-xl bg-white shadow-xl transition-all"
-                                            x-transition:enter="transition ease-out duration-300"
-                                            x-transition:enter-start="opacity-0 translate-y-4"
-                                            x-transition:enter-end="opacity-100 translate-y-0"
-                                            x-transition:leave="transition ease-in duration-200"
-                                            x-transition:leave-start="opacity-100 translate-y-0"
-                                            x-transition:leave-end="opacity-0 translate-y-4">
-
-                                            <!-- Close button -->
-                                            <button
-                                                @click="showHireModal = false; selectedStatus = '{{ $application->status }}'"
-                                                class="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                    viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd"
-                                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-
-                                            <!-- Modal content -->
-                                            <div class="p-6">
-                                                <div class="flex items-center mb-4">
-                                                    <div
-                                                        class="mr-3 flex-shrink-0 rounded-full bg-primary bg-opacity-10 p-2">
-                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                            class="h-6 w-6 text-primary" fill="none"
-                                                            viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                        </svg>
-                                                    </div>
-                                                    <h3 class="text-xl font-bold text-neutral-800 font-tertiary">
-                                                        Confirm Hiring</h3>
-                                                </div>
-
-                                                <p class="mb-8 text-neutral-600 font-main">
-                                                    You're about to hire this applicant. This will notify them and
-                                                    create an engagement between you and the freelancer.
-                                                </p>
-
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <button @click="showHireModal = false; showDeliverablesForm = true"
-                                                        class="flex items-center justify-center py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-sm">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                                        </svg>
-                                                        Setup Deliverables
-                                                    </button>
-                                                    <button
-                                                        @click="showHireModal = false; document.getElementById('hireForm').submit();"
-                                                        class="flex items-center justify-center py-3 px-4 bg-secondary text-white rounded-lg font-medium hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 shadow-sm">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                        Hire Without Deliverables
-                                                    </button>
-                                                </div>
-                                                <div class="mt-4">
-                                                    <button
-                                                        @click="showHireModal = false; selectedStatus = '{{ $application->status }}'"
-                                                        class="w-full py-2 px-4 bg-neutral-100 text-neutral-700 rounded-lg font-medium hover:bg-neutral-200 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:ring-offset-2">
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Deliverables Form Modal -->
-                                <div x-show="showDeliverablesForm" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
-                                    x-transition:enter="transition ease-out duration-300"
-                                    x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                    x-transition:leave="transition ease-in duration-200"
-                                    x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-
-                                    <!-- Modal backdrop -->
-                                    <div
-                                        class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
-                                    </div>
-
-                                    <!-- Modal container -->
-                                    <div class="flex min-h-screen items-center justify-center p-4">
-                                        <div class="relative w-full max-w-3xl transform overflow-hidden rounded-xl bg-white shadow-xl transition-all"
-                                            x-transition:enter="transition ease-out duration-300"
-                                            x-transition:enter-start="opacity-0 translate-y-4"
-                                            x-transition:enter-end="opacity-100 translate-y-0"
-                                            x-transition:leave="transition ease-in duration-200"
-                                            x-transition:leave-start="opacity-100 translate-y-0"
-                                            x-transition:leave-end="opacity-0 translate-y-4">
-
-                                            <!-- Modal header -->
-                                            <div class="border-b border-neutral-200 bg-neutral-50 px-6 py-4">
-                                                <div class="flex items-center justify-between">
-                                                    <div class="flex items-center">
+                                                <!-- Modal content -->
+                                                <div class="p-6">
+                                                    <div class="flex items-center mb-4">
                                                         <div
-                                                            class="mr-3 flex-shrink-0 rounded-full bg-secondary bg-opacity-10 p-2">
+                                                            class="mr-3 flex-shrink-0 rounded-full bg-primary bg-opacity-10 p-2">
                                                             <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-6 w-6 text-secondary" fill="none"
+                                                                class="h-6 w-6 text-primary" fill="none"
                                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     stroke-width="2"
-                                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                             </svg>
                                                         </div>
                                                         <h3 class="text-xl font-bold text-neutral-800 font-tertiary">
-                                                            Set Project Deliverables</h3>
+                                                            Confirm Hiring</h3>
                                                     </div>
 
-                                                    <!-- Close button -->
-                                                    <button
-                                                        @click="showDeliverablesForm = false; selectedStatus = '{{ $application->status }}'"
-                                                        class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                            viewBox="0 0 20 20" fill="currentColor">
-                                                            <path fill-rule="evenodd"
-                                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                                clip-rule="evenodd" />
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                            </div>
+                                                    <p class="mb-8 text-neutral-600 font-main">
+                                                        You're about to hire this applicant. This will notify them and
+                                                        create an engagement between you and the freelancer.
+                                                    </p>
 
-                                            <!-- Modal content -->
-                                            <div class="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-                                                <p class="mb-6 text-neutral-600 font-main">
-                                                    Define clear deliverables for this project. These will help track
-                                                    progress and set expectations with the freelancer.
-                                                </p>
-
-                                                <!-- Empty state when no deliverables are added -->
-                                                <div x-show="deliverables.length === 0"
-                                                    class="bg-neutral-50 rounded-lg border border-dashed border-neutral-300 p-8 mb-6 text-center">
-                                                    <div class="mb-3 flex justify-center">
-                                                        <div class="rounded-full bg-neutral-100 p-3">
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <button
+                                                            @click="showHireModal = false; showDeliverablesForm = true"
+                                                            class="flex items-center justify-center py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-sm">
                                                             <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-8 w-8 text-neutral-400" fill="none"
+                                                                class="h-5 w-5 mr-2" fill="none"
                                                                 viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
                                                                     stroke-width="2"
                                                                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                                             </svg>
-                                                        </div>
+                                                            Setup Deliverables
+                                                        </button>
+                                                        <button
+                                                            @click="showHireModal = false; document.getElementById('hireForm').submit();"
+                                                            class="flex items-center justify-center py-3 px-4 bg-secondary text-white rounded-lg font-medium hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 shadow-sm">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                class="h-5 w-5 mr-2" fill="none"
+                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Hire Without Deliverables
+                                                        </button>
                                                     </div>
-                                                    <h4 class="text-lg font-medium text-neutral-700 mb-2">No
-                                                        deliverables added yet</h4>
-                                                    <p class="text-neutral-500 mb-4">Add deliverables to create clear
-                                                        milestones for this project</p>
-                                                    <button
+                                                    <div class="mt-4">
+                                                        <button
+                                                            @click="showHireModal = false; selectedStatus = '{{ $application->status }}'"
+                                                            class="w-full py-2 px-4 bg-neutral-100 text-neutral-700 rounded-lg font-medium hover:bg-neutral-200 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:ring-offset-2">
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Deliverables Form Modal -->
+                                    <div x-show="showDeliverablesForm" x-cloak
+                                        class="fixed inset-0 z-50 overflow-y-auto"
+                                        x-transition:enter="transition ease-out duration-300"
+                                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+                                        x-transition:leave="transition ease-in duration-200"
+                                        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+
+                                        <!-- Modal backdrop -->
+                                        <div
+                                            class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
+                                        </div>
+
+                                        <!-- Modal container -->
+                                        <div class="flex min-h-screen items-center justify-center p-4">
+                                            <div class="relative w-full max-w-3xl transform overflow-hidden rounded-xl bg-white shadow-xl transition-all"
+                                                x-transition:enter="transition ease-out duration-300"
+                                                x-transition:enter-start="opacity-0 translate-y-4"
+                                                x-transition:enter-end="opacity-100 translate-y-0"
+                                                x-transition:leave="transition ease-in duration-200"
+                                                x-transition:leave-start="opacity-100 translate-y-0"
+                                                x-transition:leave-end="opacity-0 translate-y-4">
+
+                                                <!-- Modal header -->
+                                                <div class="border-b border-neutral-200 bg-neutral-50 px-6 py-4">
+                                                    <div class="flex items-center justify-between">
+                                                        <div class="flex items-center">
+                                                            <div
+                                                                class="mr-3 flex-shrink-0 rounded-full bg-secondary bg-opacity-10 p-2">
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                    class="h-6 w-6 text-secondary" fill="none"
+                                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                                </svg>
+                                                            </div>
+                                                            <h3
+                                                                class="text-xl font-bold text-neutral-800 font-tertiary">
+                                                                Set Project Deliverables</h3>
+                                                        </div>
+
+                                                        <!-- Close button -->
+                                                        <button
+                                                            @click="showDeliverablesForm = false; selectedStatus = '{{ $application->status }}'"
+                                                            class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                                                viewBox="0 0 20 20" fill="currentColor">
+                                                                <path fill-rule="evenodd"
+                                                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                    clip-rule="evenodd" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Modal content -->
+                                                <div class="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+                                                    <p class="mb-6 text-neutral-600 font-main">
+                                                        Define clear deliverables for this project. These will help
+                                                        track
+                                                        progress and set expectations with the freelancer.
+                                                    </p>
+
+                                                    <!-- Empty state when no deliverables are added -->
+                                                    <div x-show="deliverables.length === 0"
+                                                        class="bg-neutral-50 rounded-lg border border-dashed border-neutral-300 p-8 mb-6 text-center">
+                                                        <div class="mb-3 flex justify-center">
+                                                            <div class="rounded-full bg-neutral-100 p-3">
+                                                                <svg xmlns="http://www.w3.org/2000/svg"
+                                                                    class="h-8 w-8 text-neutral-400" fill="none"
+                                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                        <h4 class="text-lg font-medium text-neutral-700 mb-2">No
+                                                            deliverables added yet</h4>
+                                                        <p class="text-neutral-500 mb-4">Add deliverables to create
+                                                            clear
+                                                            milestones for this project</p>
+                                                        <button
+                                                            @click.prevent="deliverables.push({title: '', description: '', due_date: ''})"
+                                                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                class="h-5 w-5 mr-2" fill="none"
+                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                                            </svg>
+                                                            Add First Deliverable
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- Deliverables list -->
+                                                    <div id="deliverables-container" class="space-y-4 mb-6"
+                                                        x-show="deliverables.length > 0">
+                                                        <template x-for="(deliverable, index) in deliverables"
+                                                            :key="index">
+                                                            <div
+                                                                class="deliverable-item rounded-lg border border-neutral-200 bg-white shadow-sm overflow-hidden">
+                                                                <!-- Deliverable header -->
+                                                                <div
+                                                                    class="bg-neutral-50 px-4 py-3 border-b border-neutral-200">
+                                                                    <div class="flex items-center justify-between">
+                                                                        <h4 class="font-medium text-neutral-800">
+                                                                            Deliverable #<span
+                                                                                x-text="index + 1"></span>
+                                                                        </h4>
+                                                                        <button
+                                                                            @click.prevent="deliverables.splice(index, 1)"
+                                                                            class="text-neutral-500 hover:text-red-600 flex items-center text-sm">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                                class="h-4 w-4 mr-1" fill="none"
+                                                                                viewBox="0 0 24 24"
+                                                                                stroke="currentColor">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                            </svg>
+                                                                            Remove
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Deliverable content -->
+                                                                <div class="p-4">
+                                                                    <div
+                                                                        class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                                                        <div class="md:col-span-2">
+                                                                            <label
+                                                                                class="block text-sm font-medium text-neutral-700 mb-1">Title<span
+                                                                                    class="text-red-500">*</span></label>
+                                                                            <input type="text"
+                                                                                x-model="deliverable.title"
+                                                                                class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                                                placeholder="What needs to be delivered?"
+                                                                                required>
+                                                                        </div>
+                                                                        <div>
+                                                                            <label
+                                                                                class="block text-sm font-medium text-neutral-700 mb-1">Due
+                                                                                Date</label>
+                                                                            <input type="date"
+                                                                                x-model="deliverable.due_date"
+                                                                                class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label
+                                                                            class="block text-sm font-medium text-neutral-700 mb-1">Description</label>
+                                                                        <textarea x-model="deliverable.description"
+                                                                            class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                                            rows="2" placeholder="Add details, specifications, or acceptance criteria..."></textarea>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+
+                                                    <!-- Add button when deliverables exist -->
+                                                    <button x-show="deliverables.length > 0"
                                                         @click.prevent="deliverables.push({title: '', description: '', due_date: ''})"
-                                                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
+                                                        class="mb-6 flex items-center text-primary hover:text-primary-dark font-medium">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1"
                                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path stroke-linecap="round" stroke-linejoin="round"
                                                                 stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                                         </svg>
-                                                        Add First Deliverable
+                                                        Add Another Deliverable
                                                     </button>
                                                 </div>
 
-                                                <!-- Deliverables list -->
-                                                <div id="deliverables-container" class="space-y-4 mb-6"
-                                                    x-show="deliverables.length > 0">
-                                                    <template x-for="(deliverable, index) in deliverables"
-                                                        :key="index">
-                                                        <div
-                                                            class="deliverable-item rounded-lg border border-neutral-200 bg-white shadow-sm overflow-hidden">
-                                                            <!-- Deliverable header -->
-                                                            <div
-                                                                class="bg-neutral-50 px-4 py-3 border-b border-neutral-200">
-                                                                <div class="flex items-center justify-between">
-                                                                    <h4 class="font-medium text-neutral-800">
-                                                                        Deliverable #<span x-text="index + 1"></span>
-                                                                    </h4>
-                                                                    <button
-                                                                        @click.prevent="deliverables.splice(index, 1)"
-                                                                        class="text-neutral-500 hover:text-red-600 flex items-center text-sm">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                                            class="h-4 w-4 mr-1" fill="none"
-                                                                            viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                        </svg>
-                                                                        Remove
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Deliverable content -->
-                                                            <div class="p-4">
-                                                                <div
-                                                                    class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                                                    <div class="md:col-span-2">
-                                                                        <label
-                                                                            class="block text-sm font-medium text-neutral-700 mb-1">Title<span
-                                                                                class="text-red-500">*</span></label>
-                                                                        <input type="text"
-                                                                            x-model="deliverable.title"
-                                                                            class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                                            placeholder="What needs to be delivered?"
-                                                                            required>
-                                                                    </div>
-                                                                    <div>
-                                                                        <label
-                                                                            class="block text-sm font-medium text-neutral-700 mb-1">Due
-                                                                            Date</label>
-                                                                        <input type="date"
-                                                                            x-model="deliverable.due_date"
-                                                                            class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                                    </div>
-                                                                </div>
-                                                                <div>
-                                                                    <label
-                                                                        class="block text-sm font-medium text-neutral-700 mb-1">Description</label>
-                                                                    <textarea x-model="deliverable.description"
-                                                                        class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                                        rows="2" placeholder="Add details, specifications, or acceptance criteria..."></textarea>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </template>
-                                                </div>
-
-                                                <!-- Add button when deliverables exist -->
-                                                <button x-show="deliverables.length > 0"
-                                                    @click.prevent="deliverables.push({title: '', description: '', due_date: ''})"
-                                                    class="mb-6 flex items-center text-primary hover:text-primary-dark font-medium">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                    </svg>
-                                                    Add Another Deliverable
-                                                </button>
-                                            </div>
-
-                                            <!-- Modal footer -->
-                                            <div class="border-t border-neutral-200 bg-neutral-50 px-6 py-4">
-                                                <div class="flex justify-end space-x-4">
-                                                    <button
-                                                        @click="showDeliverablesForm = false; selectedStatus = '{{ $application->status }}'"
-                                                        class="py-2 px-4 bg-white border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:ring-offset-2">
-                                                        Cancel
-                                                    </button>
-                                                    <button @click="submitDeliverables()"
-                                                        :disabled="deliverables.length === 0 || deliverables.some(d => !d.title)"
-                                                        :class="{
-                                                            'opacity-50 cursor-not-allowed': deliverables.length ===
-                                                                0 ||
-                                                                deliverables.some(d => !d.title)
-                                                        }"
-                                                        class="py-2 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                        Submit and Hire
-                                                    </button>
+                                                <!-- Modal footer -->
+                                                <div class="border-t border-neutral-200 bg-neutral-50 px-6 py-4">
+                                                    <div class="flex justify-end space-x-4">
+                                                        <button
+                                                            @click="showDeliverablesForm = false; selectedStatus = '{{ $application->status }}'"
+                                                            class="py-2 px-4 bg-white border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:ring-offset-2">
+                                                            Cancel
+                                                        </button>
+                                                        <button @click="submitDeliverables()"
+                                                            :disabled="deliverables.length === 0 || deliverables.some(d => !d
+                                                                .title)"
+                                                            :class="{
+                                                                'opacity-50 cursor-not-allowed': deliverables.length ===
+                                                                    0 ||
+                                                                    deliverables.some(d => !d.title)
+                                                            }"
+                                                            class="py-2 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center">
+                                                            <svg xmlns="http://www.w3.org/2000/svg"
+                                                                class="h-5 w-5 mr-2" fill="none"
+                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                            Submit and Hire
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
-
-
                         </div>
                     </div>
 

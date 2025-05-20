@@ -10,6 +10,14 @@ class JobEngagement extends Model
 {
     use HasFactory;
 
+    // Status constants
+    const STATUS_PENDING = 'pending';
+    const STATUS_ACTIVE = 'active';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_DISPUTED = 'disputed';
+    const STATUS_SETTLED = 'settled';
+
     protected $fillable = [
         'application_id',
         'status',
@@ -82,6 +90,44 @@ class JobEngagement extends Model
     }
 
     /**
+     * Get the total number of deliverables
+     */
+    public function getTotalDeliverablesCount()
+    {
+        return $this->deliverables()->count();
+    }
+
+    /**
+     * Get the number of approved deliverables
+     */
+    public function getCompletedDeliverablesCount()
+    {
+        return $this->deliverables()->where('status', 'approved')->count();
+    }
+
+    /**
+     * Get the number of pending deliverables (submitted but not approved/rejected)
+     */
+    public function getPendingDeliverablesCount()
+    {
+        return $this->deliverables()->where('status', 'submitted')->count();
+    }
+
+    /**
+     * Check if there are any pending deliverables that need client action
+     */
+    public function hasPendingDeliverables()
+    {
+        return $this->getPendingDeliverablesCount() > 0;
+    }
+
+    public function hasSubmittedOrApprovedDeliverables()
+    {
+        return $this->getPendingDeliverablesCount() > 0 || $this->getCompletedDeliverablesCount() > 0;
+    }
+
+
+    /**
      * Get the reviews for this engagement
      */
     public function reviews()
@@ -122,6 +168,14 @@ class JobEngagement extends Model
     }
 
     /**
+     * Check if the engagement is settled
+     */
+    public function isSettled()
+    {
+        return $this->status === 'settled';
+    }
+
+    /**
      * Check if the payment is in escrow
      */
     public function isPaymentEscrowed()
@@ -158,12 +212,16 @@ class JobEngagement extends Model
     }
 
     // Check for existing review
-    public function hasBeenReviewedByCurrentUser()
+    public function hasBeenReviewedByUser($userId = null)
     {
+        $userId = $userId ?: Auth::id();
+
         return $this->reviews()
-            ->where('reviewer_id', Auth::id())
+            ->where('reviewer_id', $userId)
             ->exists();
     }
+
+
 
     /**
      * Get the cancellation record for this engagement
@@ -200,17 +258,73 @@ class JobEngagement extends Model
         return $user->id === $this->application->poster_id && $this->isCancelled();
     }
 
-    // // Scope for active (non-archived) engagements
-    // public function scopeActive($query)
-    // {
-    //     return $query->where('is_archived', false);
-    // }
+    /**
+     * Calculate the partial payment amount based on approved deliverables
+     */
+    public function calculatePartialPaymentAmount()
+    {
+        $totalDeliverables = $this->getTotalDeliverablesCount();
+        $approvedDeliverables = $this->getCompletedDeliverablesCount();
 
-    // // Scope for archived
-    // public function scopeArchived($query)
-    // {
-    //     return $query->where('is_archived', true);
-    // }
+        if ($totalDeliverables === 0 || $approvedDeliverables === 0) {
+            return 0;
+        }
+
+        $paymentPercentage = $approvedDeliverables / $totalDeliverables;
+        return round($this->agreed_amount * $paymentPercentage, 2);
+    }
+
+    /**
+     * Check if user can process partial payment
+     */
+    public function canProcessPartialPayment($userId)
+    {
+        // Only client or admin can process payments
+        $isClient = $this->application->poster_id === $userId;
+        $isAdmin = auth()->user()->hasRole('admin'); // Assuming you have a role system
+
+        return ($isClient || $isAdmin) &&
+            $this->status === self::STATUS_CANCELLED &&
+            !$this->hasPendingDeliverables();
+    }
+
+    /**
+     * Mark engagement as settled after payment acceptance
+     */
+
+    public function markAsSettled()
+    {
+        $this->update([
+            'status' => self::STATUS_SETTLED,
+        ]);
+
+        if ($this->cancellation) {
+            $this->cancellation->update([
+                'partial_payment_processed' => true,
+                'partial_payment_processed_at' => now(),
+            ]);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Mark engagement as disputed
+     */
+    public function markAsDisputed()
+    {
+        $this->update([
+            'status' => self::STATUS_DISPUTED,
+        ]);
+
+        if ($this->cancellation) {
+            $this->cancellation->update([
+                'is_dispute' => true,
+            ]);
+        }
+
+        return $this;
+    }
 
     public function scopeActiveForUser($query, $userId)
     {
@@ -236,5 +350,81 @@ class JobEngagement extends Model
                     ->where('job_engagements.is_archived_by_poster', true);
             });
         });
+    }
+
+    /**
+     * Get the status badge CSS classes based on engagement status
+     */
+    public function getStatusClasses()
+    {
+        return match ($this->status) {
+            'employer_accepted' => [
+                'bg' => 'bg-accent/10',
+                'text' => 'text-accent',
+                'border' => 'border-accent/20'
+            ],
+            'active' => [
+                'bg' => 'bg-secondary/10',
+                'text' => 'text-secondary',
+                'border' => 'border-secondary/20'
+            ],
+            'completed' => [
+                'bg' => 'bg-green-100',
+                'text' => 'text-green-800',
+                'border' => 'border-green-200'
+            ],
+            'cancelled' => [
+                'bg' => 'bg-red-100',
+                'text' => 'text-red-800',
+                'border' => 'border-red-200'
+            ],
+            'disputed' => [
+                'bg' => 'bg-orange-100',
+                'text' => 'text-orange-800',
+                'border' => 'border-orange-200'
+            ],
+            'settled' => [
+                'bg' => 'bg-blue-100',
+                'text' => 'text-blue-800',
+                'border' => 'border-blue-200'
+            ],
+            default => [
+                'bg' => 'bg-gray-100',
+                'text' => 'text-gray-800',
+                'border' => 'border-gray-200'
+            ],
+        };
+    }
+
+    /**
+     * Get human-readable status name
+     */
+    public function getStatusLabelAttribute()
+    {
+        return match ($this->status) {
+            'employer_accepted' => 'Pending',
+            'active' => 'Active',
+            'completed' => 'Completed',
+            'cancelled' => 'Withdrawn',
+            'disputed' => 'Disputed',
+            'settled' => 'Settled',
+            default => 'Unknown',
+        };
+    }
+
+    /**
+     * Get SVG path for status icon
+     */
+    public function getStatusIconPathAttribute()
+    {
+        return match ($this->status) {
+            'employer_accepted' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />',
+            'active' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />',
+            'completed' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
+            'cancelled' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />',
+            'disputed' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />',
+            'settled' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />',
+            default => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />',
+        };
     }
 }

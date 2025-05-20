@@ -523,7 +523,7 @@ class JobApplicationController extends Controller
         }
 
         // Get paginated results
-        $applications = $query->latest()->paginate(10)->withQueryString();
+        $applications = $query->where('status', '!=', 'draft')->latest()->paginate(10)->withQueryString();
 
         // Check if filters are active
         $hasFilters = ($request->has('search') && !empty($request->search)) ||

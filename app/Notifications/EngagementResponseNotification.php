@@ -26,7 +26,33 @@ class EngagementResponseNotification extends Notification implements ShouldQueue
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast'];
+        return ['database', 'broadcast', 'mail'];
+    }
+
+    public function toMail($notifiable)
+    {
+        $application = $this->engagement->application;
+        $job = $application->job;
+        $applicant = $application->applicant;
+
+        $responseText = $this->response === 'accept' ? 'accepted' : 'declined';
+
+        return (new MailMessage)
+            ->subject("Engagement Response for {$job->title}")
+            ->view(
+                'emails.engagements.response', // Create this view
+                [
+                    'notifiable' => $notifiable,
+                    'engagement' => $this->engagement,
+                    'application' => $application,
+                    'job' => $job,
+                    'applicant' => $applicant,
+                    'response' => $this->response,
+                    'responseText' => $responseText,
+                    'notes' => $this->notes,
+                    'actionUrl' => url("/jobs/{$job->slug}/applications/{$application->id}")
+                ]
+            );
     }
 
     public function toDatabase($notifiable)
