@@ -14,7 +14,7 @@ export default {
         extend: {
             fontFamily: {
                 main: ["Inter", "sans-serif"],
-                secondary: ["Roboto", "sans-serif"],
+                secondary: ["Poppins", "sans-serif"],
                 tertiary: ["Montserrat", "sans-serif"],
             },
             colors: {

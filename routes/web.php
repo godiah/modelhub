@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDisputeController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobDeliverableController;
@@ -96,6 +97,7 @@ Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->gr
 Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(function () {
     Route::get('/', [JobEngagementController::class, 'index'])->name('index');
     Route::get('/{id}', [JobEngagementController::class, 'showCancelledEngagement'])->name('show-cancelled');
+    Route::get('/disputed/{id}', [JobEngagementController::class, 'showDisputedEngagement'])->name('show-disputed');
     Route::post('/{id}/process-payment', [PartialPaymentController::class, 'processPartialPayment'])->name('process-partial-payment');
     Route::post('/partial-payments/{id}/accept', [PartialPaymentController::class, 'acceptPartialPayment'])->name('accept-partial-payment');
     Route::get('/partial-payments/{id}/dispute', [PartialPaymentController::class, 'disputePartialPayment'])->name('dispute-form');
@@ -106,6 +108,7 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
         Route::post('/', [JobEngagementController::class, 'archive'])->name('archive');
         Route::get('/archived', [JobEngagementController::class, 'archivedEngagements'])->name('archived');
         Route::post('/restore', [JobEngagementController::class, 'restore'])->name('restore');
+        Route::get('/{engagement}/details', [JobEngagementController::class, 'show'])->name('archived-details');
     });
 
     Route::middleware(['verify-engagement-ownership'])->group(function () {
@@ -124,7 +127,7 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     });
 
     // Review routes
-    Route::post('/engagements/{engagement}/review', [JobEngagementController::class, 'leaveReview'])->name('review');
+    Route::post('/{engagement}/review', [JobEngagementController::class, 'leaveReview'])->name('review');
 
     // Cancellation routes
     Route::get('/{engagement}/cancel', [JobEngagementController::class, 'showCancellationForm'])->name('cancel.form');
@@ -134,6 +137,16 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     // Policy routes
     Route::get('/policy', [PolicyManagementController::class, 'index'])->name('policy');
 });
+
+/**
+ * Administrator Routes
+ */
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
+    Route::post('/disputes/{id}/assign', [AdminDisputeController::class, 'assign'])->name('disputes.assign');
+    Route::post('/disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+});
+
 
 
 

@@ -205,17 +205,45 @@
     <!-- Dispute Warning Modal -->
     <div id="disputeWarningModal"
         class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
-            <div class="mb-4">
-                <h3 class="text-lg font-medium text-gray-900">
+        <div class="bg-white rounded-lg shadow-lg p-6 max-w-5xl w-full">
+            <div class="mb-5 flex flex-row items-center justify-center text-center bg-red-100 rounded-full">
+                <div class="p-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-7 h-7 text-red-600">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 font-main">
                     Important: Before Disputing Payment
                 </h3>
             </div>
 
-            <div class="mb-6 text-sm text-gray-600 space-y-3">
+            <div class="mb-6 text-sm font-main text-gray-600 space-y-3">
                 <p>
                     <strong>Please read before proceeding:</strong>
                 </p>
+                <!-- Alert box about job being frozen -->
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600"
+                                viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-amber-800 font-medium">
+                                <strong>Job Will Be Frozen</strong>: During the dispute resolution process, this job
+                                will be completely
+                                frozen. No further actions, payments, or deliverables can be processed until the dispute
+                                is resolved.
+                            </p>
+                        </div>
+                    </div>
+                </div>
                 <p>
                     Disputing a payment is a serious action that will involve platform administrators in the resolution
                     process. Please be aware of the following:
@@ -228,13 +256,28 @@
                     <li>Filing frivolous disputes may affect your account standing on the platform.</li>
                     <li>While under review, the disputed amount will be held in escrow.</li>
                 </ul>
-                <p>
-                    We recommend attempting to resolve payment issues directly with the client before initiating a
-                    dispute.
-                </p>
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-2">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                We strongly recommend attempting to resolve payment issues directly with the client
+                                before
+                                initiating a dispute.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="flex justify-between">
+            <div class="flex justify-between font-main">
                 <button type="button"
                     class="py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg text-sm"
                     onclick="closeDisputeModal()">
@@ -243,7 +286,7 @@
                 @if ($payment)
                     <a href="{{ route('engagements.dispute-form', $payment->id) }}"
                         class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm">
-                        Continue to Dispute Form
+                        Continue
                     </a>
                 @else
                     <span class="text-sm text-gray-500 italic">

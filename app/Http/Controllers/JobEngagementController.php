@@ -11,6 +11,7 @@ use App\Notifications\DisputeCreatedNotification;
 use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
 use App\Services\PartialPaymentService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,8 @@ use Illuminate\Support\Facades\Notification;
 
 class JobEngagementController extends Controller
 {
+    use AuthorizesRequests;
+
     protected $partialPaymentService;
 
     public function __construct(PartialPaymentService $partialPaymentService)
@@ -39,6 +42,7 @@ class JobEngagementController extends Controller
             'application.poster',
             'application.applicant',
             'deliverables',
+            'cancellation'
         ])
             ->whereHas('application', function ($q) use ($user) {
                 $q->where('applicant_id', $user->id)
@@ -267,7 +271,6 @@ class JobEngagementController extends Controller
             $revieweeName = $reviewee ? $reviewee->name : 'the ' . ($reviewerType === 'employer' ? 'freelancer' : 'client');
 
             return redirect()->route('engagements.index', $engagement)->with([
-                'hasReviewed' => $existingReview,
                 'success' => 'Review submitted successfully',
                 'alert' => [
                     'type' => 'success',
@@ -430,6 +433,36 @@ class JobEngagementController extends Controller
     }
 
     /**
+     * Display a disputed engagement
+     */
+    public function showDisputedEngagement($id)
+    {
+        $engagement = JobEngagement::with([
+            'application',
+            'cancellation.dispute.partialPayment',
+        ])->findOrFail($id);
+
+        $application = $engagement->application;
+        $authUser = Auth::user();
+
+        // Check if the user is the poster or applicant
+        if ($authUser->id !== $application->poster_id && $authUser->id !== $application->applicant_id && !$authUser->hasRole('admin')) {
+            return back()->with('error', 'Unauthorized Access.');
+        }
+
+        // Allow access only if the engagement is settled, or disputed
+        if (!in_array($engagement->status, ['settled', 'disputed'])) {
+            return back()->with('error', 'Unauthorized Action');
+        }
+
+        return view('jobBoard.engagements.disputed-engagements', [
+            'engagement' => $engagement,
+            'dispute' => $engagement->cancellation->dispute ?? null,
+            'partialPayment' => optional($engagement->cancellation->dispute)->partialPayment,
+        ]);
+    }
+
+    /**
      * Reopen a job after cancellation
      */
     public function reopenJob(JobEngagement $engagement, Request $request)
@@ -477,7 +510,7 @@ class JobEngagementController extends Controller
         $archivedEngagements = JobEngagement::archivedForUser($user->id)
             ->with(['application.job', 'application.applicant', 'application.poster'])
             ->latest()
-            ->paginate(10);
+            ->paginate(7);
 
         return view('jobBoard.engagements.archived', compact('archivedEngagements'));
     }
@@ -560,6 +593,32 @@ class JobEngagementController extends Controller
                 'text' => "Engagement unarchived successfully",
             ]
         ]);
+    }
+
+    /**
+     * Engagement Details
+     */
+    public function show(JobEngagement $engagement)
+    {
+        // Load all necessary relationships
+        $engagement->load([
+            'application.job',
+            'application.poster:id,name,email',
+            'application.applicant:id,name,email',
+            'deliverables',
+            'cancellation.initiator:id,name',
+            'cancellation.dispute.disputedBy:id,name',
+            'cancellation.dispute.assignedAdmin:id,name',
+            'cancellation.dispute.resolvedBy:id,name',
+            'partialPayments.processor:id,name',
+            'partialPayments.finalizer:id,name',
+            'partialPayments.dispute'
+        ]);
+
+        // Check authorization (ensure user can view this engagement)
+        $this->authorize('view', $engagement);
+
+        return view('jobBoard.engagements.show', compact('engagement'));
     }
 
     /**

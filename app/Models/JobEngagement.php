@@ -271,7 +271,7 @@ class JobEngagement extends Model
         }
 
         $paymentPercentage = $approvedDeliverables / $totalDeliverables;
-        return round($this->agreed_amount * $paymentPercentage, 2);
+        return round($this->net_amount * $paymentPercentage, 2);
     }
 
     /**
@@ -379,9 +379,9 @@ class JobEngagement extends Model
                 'border' => 'border-red-200'
             ],
             'disputed' => [
-                'bg' => 'bg-orange-100',
-                'text' => 'text-orange-800',
-                'border' => 'border-orange-200'
+                'bg' => 'bg-rose-100',
+                'text' => 'text-rose-800',
+                'border' => 'border-rose-200'
             ],
             'settled' => [
                 'bg' => 'bg-blue-100',

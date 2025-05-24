@@ -161,4 +161,20 @@ class JobPaymentDispute extends Model
 
         return $this;
     }
+
+    /**
+     * Map dispute reason
+     */
+    public function getFormattedReasonAttribute()
+    {
+        $map = [
+            'incorrect_amount' => 'Incorrect Amount',
+            'work_not_considered' => 'Work Completed Not Considered',
+            'agreement_violated' => 'Agreement Terms Violated',
+            'cancellation_dispute' => 'Cancellation Terms Dispute',
+            'other' => 'Other (please specify)',
+        ];
+
+        return $map[$this->dispute_reason] ?? ucfirst(str_replace('_', ' ', $this->dispute_reason));
+    }
 }

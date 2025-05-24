@@ -130,14 +130,10 @@ class PartialPaymentController extends Controller
                 $evidence
             );
 
-            return redirect()->route('engagements.show-cancelled', $engagement->id)->with([
-                'success' => 'Payment disputed successfully.',
-                'alert' => [
-                    'type' => 'info',
-                    'title' => 'Payment Disputed',
-                    'text' => "You have disputed the payment. An administrator will review your case.",
-                ]
-            ]);
+            return redirect()->route('engagements.show-cancelled', $engagement->id)->with(
+                'success',
+                'Payment disputed successfully. An administrator will review your case.',
+            );
         } catch (\Exception $e) {
             Log::error('Failed to dispute payment', [
                 'payment_id' => $payment->id,

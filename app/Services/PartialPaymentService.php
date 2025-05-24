@@ -85,7 +85,7 @@ class PartialPaymentService
         }
 
         $paymentPercentage = $approvedDeliverables / $totalDeliverables;
-        return round($engagement->agreed_amount * $paymentPercentage, 2);
+        return round($engagement->net_amount * $paymentPercentage, 2);
     }
 
     /**
@@ -283,12 +283,10 @@ class PartialPaymentService
                     'partial_payment_amount' => $payment->amount,
                     'payment_calculated_at' => now(),
                     'is_dispute' => true,
-                    'dispute_status' => JobCancellation::DISPUTE_STATUS_PENDING,
                 ]);
             } else {
                 $cancellation->update([
                     'is_dispute' => true,
-                    'dispute_status' => JobCancellation::DISPUTE_STATUS_PENDING,
                 ]);
             }
 
@@ -365,7 +363,7 @@ class PartialPaymentService
             $dispute->resolve($authUser->id, $notes, $finalAmount);
 
             // Update cancellation record
-            $cancellation->resolveDispute($authUser->id, $notes, $finalAmount);
+            $cancellation->resolveDispute($finalAmount);
 
             // Update payment record if exists
             if ($payment) {

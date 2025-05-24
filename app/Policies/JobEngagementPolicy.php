@@ -29,6 +29,14 @@ class JobEngagementPolicy
         return $user->id === $engagement->application->applicant_id;
     }
 
+    public function view(User $user, JobEngagement $engagement)
+    {
+        // User can view if they are the poster or applicant
+        return $user->id === $engagement->application->poster_id ||
+            $user->id === $engagement->application->applicant_id ||
+            $user->hasRole('admin');
+    }
+
     /**
      * Determine whether the user can create models.
      */

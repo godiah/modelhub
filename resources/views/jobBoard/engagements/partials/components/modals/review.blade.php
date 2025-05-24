@@ -1,6 +1,6 @@
 <!-- Review Modal -->
-<div x-data="{ open: false, rating: 0, reviewText: '', tags: [], isPublic: true, engagementId: null }" x-on:open-review-modal.window="engagementId = $event.detail.id; open = true"
-    class="relative z-50" x-cloak>
+<div x-data="{ open: false, rating: 0, reviewText: '', tags: [], isPublic: true, engagement: null }" x-on:open-review-modal.window="engagement = $event.detail; open = true" class="relative z-50"
+    x-cloak>
 
     <!-- Modal Backdrop -->
     <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
@@ -39,7 +39,7 @@
 
             <!-- Modal Body -->
             <div class="p-6 font-main">
-                <form id="reviewForm" action="{{ route('engagements.review', $engagement->id) }}" method="POST">
+                <form id="reviewForm" x-bind:action="'/engagements/' + engagement.id + '/review'" method="POST">
                     @csrf
 
                     <template x-if="engagement.status === 'cancelled'">
@@ -140,13 +140,17 @@
                             class="px-5 py-2.5 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors">
                             Cancel
                         </button>
-                        <button type="submit" @click="submitForm()"
+                        {{-- <button type="submit" @click="submitForm()"
                             :disabled="rating === 0 || reviewText.length < 10"
                             :class="{
                                 'opacity-50 cursor-not-allowed': rating === 0 || reviewText
                                     .length < 10
                             }"
                             class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300">
+                            Submit Review
+                        </button> --}}
+                        <button type="submit"
+                            class="px-4 py-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-lg transition-colors">
                             Submit Review
                         </button>
                     </div>
