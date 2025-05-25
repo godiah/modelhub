@@ -92,6 +92,16 @@ new class extends Component {
                             {{ __('Jobs Posted') }}
                         </x-dropdown-link>
 
+                        <!-- Engagements Link -->
+                        <x-dropdown-link :href="route('engagements.index')" wire:navigate>
+                            {{ __('My Engagements') }}
+                        </x-dropdown-link>
+
+                        <!-- Projects Link -->
+                        <x-dropdown-link :href="route('project.index')" wire:navigate>
+                            {{ __('My Projects') }}
+                        </x-dropdown-link>
+
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
                             <x-dropdown-link>
@@ -182,6 +192,12 @@ new class extends Component {
                 <x-responsive-nav-link :href="route('my-jobs.index')" wire:navigate>
                     {{ __('Jobs Posted') }}
                 </x-responsive-nav-link>
+
+                <!-- Mobile Engagements Link -->
+                <x-responsive-nav-link :href="route('engagements.index')" wire:navigate>
+                    {{ __('My Engagements') }}
+                </x-responsive-nav-link>
+
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start">

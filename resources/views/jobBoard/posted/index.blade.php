@@ -57,7 +57,7 @@
                     <h3 class="font-secondary text-neutral-700 text-lg">
                         Showing <span class="font-medium">{{ $postedJobs->count() }}</span> jobs
                     </h3>
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-2 font-main">
                         <select id="statusFilter"
                             class="rounded-lg border-neutral-300 text-neutral-700 text-sm focus:ring-primary focus:border-primary">
                             <option value="all">All Jobs</option>

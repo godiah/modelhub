@@ -17,7 +17,7 @@
                     Home
                 </a>
 
-                <a href="{{ route('my-jobs.index') }}"
+                <a href="{{ route('project.index') }}"
                     class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="h-5 w-5 mr-2">

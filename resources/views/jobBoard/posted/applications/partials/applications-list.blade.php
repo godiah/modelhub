@@ -37,7 +37,7 @@
                     <div class="flex items-center">
                         <!-- Applicant Avatar -->
                         <div
-                            class="flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary font-medium mr-3 border border-primary/20">
+                            class="font-main flex items-center justify-center h-10 w-10 rounded-full bg-primary/10 text-primary font-medium mr-3 border border-primary/20">
                             {{ $application->applicant->getInitials() }}
                         </div>
 
@@ -45,8 +45,8 @@
                             <h4 class="font-secondary font-medium text-neutral-900">
                                 {{ $application->applicant->name }}
                             </h4>
-                            <p class="text-sm text-neutral-500 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none"
+                            <p class="text-sm text-neutral-500 flex items-center font-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -57,7 +57,7 @@
                     </div>
 
                     <!-- Application Status -->
-                    <div class="flex items-center mt-4 sm:mt-0">
+                    <div class="flex items-center mt-4 sm:mt-0 font-main">
                         <span class="mr-3 flex items-center">
                             @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active && $application->status !== 'hired')
                                 <span
@@ -194,7 +194,7 @@
                                 </svg>
                                 Proposal
                             </h4>
-                            <div class="mt-2 mb-2 text-sm">
+                            <div class="mt-2 mb-2 text-sm font-main">
                                 @if ($application->proposal)
                                     <div
                                         class="text-neutral-700 text-justify bg-neutral-50 p-4 rounded-md border border-neutral-100 max-h-32 overflow-y-auto">
@@ -231,10 +231,10 @@
                                         </svg>
                                         Bid Amount
                                     </h4>
-                                    <p class="mt-1 text-xl font-semibold text-primary">
+                                    <p class="mt-1 text-xl font-semibold font-main text-primary">
                                         Ksh{{ number_format($application->offer_amount, 2) }}
                                     </p>
-                                    <p class="text-xs text-neutral-500">
+                                    <p class="text-xs text-neutral-500 font-secondary">
                                         @php
                                             $offerAmount = $application->offer_amount;
                                             $budget = $job->budget;
@@ -270,14 +270,14 @@
                                         </svg>
                                         Bid Amount
                                     </h4>
-                                    <p class="text-sm text-neutral-500 italic">
+                                    <p class="text-sm text-neutral-500 italic font-main">
                                         No bid provided
                                     </p>
                                 </div>
                             @endif
 
                             <!-- Actions -->
-                            <div class="mt-3">
+                            <div class="mt-3 font-main">
                                 @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active)
                                     @if ($application->status === 'hired')
                                         <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"

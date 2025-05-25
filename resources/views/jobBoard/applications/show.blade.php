@@ -290,7 +290,7 @@
                             </span>
                         </p>
                     </div>
-                    <div class="flex space-x-4">
+                    {{-- <div class="flex space-x-4">
                         <a href="{{ route('jobs.apply', ['job' => $application->job->slug]) }}"
                             class="inline-flex items-center px-4 py-2 bg-neutral-100 text-neutral-800 border border-neutral-300 rounded-lg hover:bg-neutral-200 transition-colors">
                             View Job Details
@@ -306,7 +306,7 @@
                                 Contact Client
                             </a>
                         @endif
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </div>

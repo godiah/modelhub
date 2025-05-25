@@ -28,7 +28,7 @@
                     <div class="flex flex-col md:flex-row md:items-center justify-between">
                         <div>
                             <h1 class="text-2xl font-bold text-primary font-main mb-2">{{ $job->title }}</h1>
-                            <div class="flex flex-wrap items-center gap-4 text-sm">
+                            <div class="flex flex-wrap items-center gap-4 text-sm font-secondary">
                                 <div class="flex items-center text-tertiary">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
                                         fill="currentColor">
@@ -50,7 +50,7 @@
                         </div>
                         <div class="mt-4 md:mt-0">
                             <span
-                                class="px-4 py-2 inline-flex items-center text-sm font-medium rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
+                                class="px-4 py-2 inline-flex items-center text-sm font-medium font-secondary rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                     stroke-width="1.5" stroke="currentColor" class="h-4 w-4 mr-2">
                                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -65,13 +65,13 @@
                     @if ($job->description)
                         <div x-data="{ expanded: false, shouldShowMore: false }" x-init="$nextTick(() => {
                             const el = $refs.content;
-                            shouldShowMore = el.scrollHeight > (window.innerWidth < 768 ? 80 : 40); // Approximate 5rem/2.5rem in pixels
+                            shouldShowMore = el.scrollHeight > (window.innerWidth < 768 ? 80 : 40);
                         })"
                             class="mt-4 bg-neutral-50 rounded-lg p-4 border border-neutral-100">
 
                             <!-- Markdown content div with reference -->
                             <div x-ref="content"
-                                class="prose prose-sm max-w-none text-neutral-700 text-sm transition-all duration-300 overflow-hidden
+                                class="prose prose-sm max-w-none text-neutral-700 text-sm font-main transition-all duration-300 overflow-hidden
                                         [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-1 
                                         [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-1
                                         [&>blockquote]:border-l-4 [&>blockquote]:border-neutral-200 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-2
@@ -86,7 +86,7 @@
 
                             <!-- Toggle button that only shows when needed -->
                             <button x-show="shouldShowMore" x-on:click="expanded = !expanded"
-                                class="mt-2 text-secondary text-sm font-medium hover:text-primary transition"
+                                class="mt-2 text-secondary text-sm font-medium font-main hover:text-primary transition"
                                 x-text="expanded ? 'Show less' : 'Read more'"></button>
                         </div>
                     @endif
@@ -132,7 +132,7 @@
                                     <h3 class="text-xl font-bold text-neutral-800 font-main">
                                         {{ $application->applicant->name }}
                                     </h3>
-                                    <div class="flex flex-wrap items-center gap-3 mt-1">
+                                    <div class="flex flex-wrap items-center gap-3 mt-1 font-secondary">
                                         <div class="flex items-center text-tertiary">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
                                                 viewBox="0 0 20 20" fill="currentColor">
@@ -168,7 +168,7 @@
                                             Details</h4>
                                         <div class="space-y-3">
                                             <div>
-                                                <div class="text-sm text-tertiary mb-1">Offer Amount</div>
+                                                <div class="text-xs text-tertiary mb-1 font-main">Offer Amount</div>
                                                 <div class="text-lg font-bold text-primary font-secondary">
                                                     @if ($application->offer_amount)
                                                         Ksh{{ number_format($application->offer_amount, 2) }}
@@ -180,7 +180,7 @@
                                             </div>
                                             @if ($application->net_amount)
                                                 <div>
-                                                    <div class="text-sm text-tertiary mb-1">Net Amount</div>
+                                                    <div class="text-xs text-tertiary mb-1 font-main">Net Amount</div>
                                                     <div class="text-lg font-bold text-blue-700 font-secondary">
                                                         Ksh{{ number_format($application->net_amount, 2) }}
                                                     </div>
@@ -206,7 +206,7 @@
                                         </h4>
                                         @if ($application->proposal)
                                             <div
-                                                class="text-neutral-700 text-justify text-sm bg-neutral-50 p-4 rounded-md border border-neutral-100 max-h-32 overflow-y-auto">
+                                                class="text-neutral-700 text-justify text-sm font-main bg-neutral-50 p-4 rounded-md border border-neutral-100 max-h-32 overflow-y-auto">
                                                 {!! nl2br(e($application->proposal)) !!}
                                             </div>
                                         @else
@@ -304,7 +304,7 @@
                     </div>
                 @empty
                     <!-- No Applications Found -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-12">
+                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-12 font-main">
                         <div class="text-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-neutral-300 mb-4"
                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">

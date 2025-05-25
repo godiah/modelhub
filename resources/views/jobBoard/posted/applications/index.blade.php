@@ -23,8 +23,8 @@
                 <div class="p-6">
                     <div class="flex justify-between items-start">
                         <div>
-                            <h3 class="text-xl font-secondary font-semibold text-neutral-800">{{ $job->title }}</h3>
-                            <div class="mt-2 flex flex-wrap items-center gap-4">
+                            <h3 class="text-xl font-main font-semibold text-neutral-800">{{ $job->title }}</h3>
+                            <div class="mt-2 flex flex-wrap items-center gap-4 font-secondary">
                                 <p class="text-sm text-neutral-500 flex items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary"
                                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -56,7 +56,7 @@
                             </div>
                         </div>
                         <span
-                            class="px-3 py-1.5 text-xs font-medium rounded-full inline-flex items-center {{ $job->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                            class="px-3 py-1.5 text-xs font-medium font-secondary rounded-full inline-flex items-center {{ $job->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                             <span
                                 class="h-2 w-2 rounded-full {{ $job->is_active ? 'bg-green-500' : 'bg-red-500' }} mr-1.5"></span>
                             {{ $job->is_active ? 'Active' : 'Closed' }}
@@ -65,13 +65,13 @@
 
                     <div x-data="{ expanded: false, shouldShowMore: false }" x-init="$nextTick(() => {
                         const el = $refs.content;
-                        shouldShowMore = el.scrollHeight > (window.innerWidth < 768 ? 80 : 40); // Approximate 5rem/2.5rem in pixels
+                        shouldShowMore = el.scrollHeight > (window.innerWidth < 768 ? 80 : 40);
                     })"
                         class="mt-4 bg-neutral-50 rounded-lg p-4 border border-neutral-100">
 
                         <!-- Markdown content div with reference -->
                         <div x-ref="content"
-                            class="prose prose-sm max-w-none text-neutral-700 text-sm transition-all duration-300 overflow-hidden
+                            class="prose prose-sm max-w-none text-neutral-700 text-sm font-main transition-all duration-300 overflow-hidden
                                         [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-1 
                                         [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-1
                                         [&>blockquote]:border-l-4 [&>blockquote]:border-neutral-200 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-2
@@ -86,7 +86,7 @@
 
                         <!-- Toggle button that only shows when needed -->
                         <button x-show="shouldShowMore" x-on:click="expanded = !expanded"
-                            class="mt-2 text-secondary text-sm font-medium hover:text-primary transition"
+                            class="mt-2 text-secondary text-sm font-medium font-main hover:text-primary transition"
                             x-text="expanded ? 'Show less' : 'Read more'"></button>
                     </div>
 
@@ -112,7 +112,7 @@
                         </h3>
 
                         @if ($applications->count() > 0)
-                            <div class="flex gap-2">
+                            <div class="flex gap-2 font-secondary">
                                 <div class="relative">
                                     <input id="searchInput" type="text" placeholder="Search applications"
                                         class="pl-9 pr-3 py-2 border border-neutral-300 rounded-md text-sm focus:ring-2 focus:ring-secondary focus:border-secondary">
@@ -156,7 +156,7 @@
                                 No applications have been received for this job yet. This could be because the job was
                                 recently posted or it hasn't gained visibility yet.
                             </p>
-                            <div class="space-x-4 pt-2">
+                            <div class="space-x-4 pt-2 font-secondary">
                                 <a href="{{ route('jobs.edit', ['job' => $job->slug]) }}"
                                     class="px-4 py-2 text-sm font-medium text-primary bg-white border border-primary rounded-md shadow-sm hover:bg-primary hover:text-white transition">
                                     Edit Job Details

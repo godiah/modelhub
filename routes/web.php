@@ -9,6 +9,7 @@ use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
 use App\Http\Controllers\PolicyManagementController;
+use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
@@ -111,6 +112,7 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
         Route::get('/{engagement}/details', [JobEngagementController::class, 'show'])->name('archived-details');
     });
 
+    // Accept & Reject Engagement
     Route::middleware(['verify-engagement-ownership'])->group(function () {
         Route::get('/{applicationId}/respond', [JobEngagementController::class, 'showResponseForm'])->name('response-form');
         Route::post('/{engagement}/respond', [JobEngagementController::class, 'respondToOffer'])->name('respond');
@@ -135,7 +137,15 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     Route::post('/{engagement}/reopen-job', [JobEngagementController::class, 'reopenJob'])->name('reopen-job');
 
     // Policy routes
-    Route::get('/policy', [PolicyManagementController::class, 'index'])->name('policy');
+    Route::get('/policies/cancellation', [PolicyManagementController::class, 'index'])->name('policy');
+});
+
+// Projects Dashboard
+Route::middleware(['auth'])->prefix('projects')->name('project.')->group(function () {
+    Route::get('/', [ProjectController::class, 'index'])->name('index');
+    Route::get('/engagement/{engagement}', [ProjectController::class, 'show'])->name('engagement.show');
+    Route::post('/engagement/{engagement}/archive', [ProjectController::class, 'archive'])->name('engagement.archive');
+    Route::post('/engagement/{engagement}/unarchive', [ProjectController::class, 'unarchive'])->name('engagement.unarchive');
 });
 
 /**

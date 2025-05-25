@@ -4,15 +4,6 @@
             <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
                 {{ $engagement->job->title }}
             </h2>
-            <a href="{{ route('engagements.archived') }}"
-                class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="h-5 w-5 mr-2">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                </svg>
-                Back to Archived Engagements
-            </a>
         </div>
     </x-slot>
 
@@ -31,307 +22,142 @@
                     @include('jobBoard.engagements.partials.details.timeline')
 
                     <!-- Deliverables -->
-                    <div class="bg-white rounded-lg shadow border">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h2 class="text-lg font-semibold text-gray-900">
-                                Deliverables
-                                <span
-                                    class="text-sm font-normal text-gray-500">({{ $engagement->deliverables->count() }})</span>
-                            </h2>
-                        </div>
-                        <div class="px-6 py-4">
-                            @if ($engagement->deliverables->count() > 0)
-                                <div class="space-y-3">
-                                    @foreach ($engagement->deliverables as $deliverable)
-                                        <div class="border border-gray-200 rounded-lg p-4">
-                                            <div class="flex items-start justify-between">
-                                                <div class="flex-1">
-                                                    <h4 class="text-sm font-medium text-gray-900">
-                                                        {{ $deliverable->title }}</h4>
-                                                    @if ($deliverable->description)
-                                                        <p class="text-sm text-gray-600 mt-1">
-                                                            {{ $deliverable->description }}</p>
-                                                    @endif
-                                                    <div class="flex items-center mt-2 text-xs text-gray-500">
-                                                        <span>Submitted:
-                                                            {{ $deliverable->created_at->format('M j, Y g:i A') }}</span>
-                                                    </div>
-                                                </div>
-                                                @if ($deliverable->status)
-                                                    <span
-                                                        class="ml-3 px-2 py-1 text-xs font-medium rounded-full
-                                                        @if ($deliverable->status === 'approved') bg-green-100 text-green-800
-                                                        @elseif($deliverable->status === 'rejected')
-                                                            bg-red-100 text-red-800
-                                                        @else
-                                                            bg-yellow-100 text-yellow-800 @endif
-                                                    ">
-                                                        {{ ucfirst($deliverable->status) }}
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <p class="text-gray-500 text-sm">No deliverables submitted yet.</p>
-                            @endif
-                        </div>
-                    </div>
+                    @include('jobBoard.engagements.partials.details.deliverable-details')
 
                     <!-- Cancellation Details (if cancelled) -->
-                    @if ($engagement->cancelled_at && $engagement->cancellation)
-                        <div class="bg-red-50 rounded-lg shadow border border-red-200">
-                            <div class="px-6 py-4 border-b border-red-200">
-                                <h2 class="text-lg font-semibold text-red-900">Cancellation Details</h2>
-                            </div>
-                            <div class="px-6 py-4">
-                                <div class="space-y-4">
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <span class="text-sm font-medium text-red-700">Initiated By</span>
-                                            <p class="text-sm text-red-900">
-                                                {{ $engagement->cancellation->initiator->name }}</p>
-                                        </div>
-                                        <div>
-                                            <span class="text-sm font-medium text-red-700">Type</span>
-                                            <p class="text-sm text-red-900">
-                                                {{ ucfirst(str_replace('_', ' ', $engagement->cancellation->cancellation_type)) }}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span class="text-sm font-medium text-red-700">Category</span>
-                                            <p class="text-sm text-red-900">
-                                                {{ ucfirst(str_replace('_', ' ', $engagement->cancellation->reason_category)) }}
-                                            </p>
-                                        </div>
-                                        @if ($engagement->cancellation->partial_payment_amount)
-                                            <div>
-                                                <span class="text-sm font-medium text-red-700">Partial Payment</span>
-                                                <p class="text-sm text-red-900">
-                                                    ${{ number_format($engagement->cancellation->partial_payment_amount, 2) }}
-                                                </p>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    @if ($engagement->cancellation->reason_details)
-                                        <div>
-                                            <span class="text-sm font-medium text-red-700">Details</span>
-                                            <p class="text-sm text-red-900 mt-1">
-                                                {{ $engagement->cancellation->reason_details }}</p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+                    @include('jobBoard.engagements.partials.details.cancelled-details')
 
                     <!-- Dispute Details (if disputed) -->
-                    @if ($engagement->cancellation && $engagement->cancellation->dispute)
-                        <div class="bg-orange-50 rounded-lg shadow border border-orange-200">
-                            <div class="px-6 py-4 border-b border-orange-200">
-                                <h2 class="text-lg font-semibold text-orange-900">Dispute Details</h2>
-                            </div>
-                            <div class="px-6 py-4">
-                                @php $dispute = $engagement->cancellation->dispute; @endphp
-                                <div class="space-y-4">
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <span class="text-sm font-medium text-orange-700">Disputed By</span>
-                                            <p class="text-sm text-orange-900">{{ $dispute->disputedBy->name }}</p>
-                                        </div>
-                                        <div>
-                                            <span class="text-sm font-medium text-orange-700">Status</span>
-                                            <p class="text-sm text-orange-900">
-                                                {{ ucfirst(str_replace('_', ' ', $dispute->status)) }}</p>
-                                        </div>
-                                        <div>
-                                            <span class="text-sm font-medium text-orange-700">Reason</span>
-                                            <p class="text-sm text-orange-900">{{ $dispute->formatted_reason }}</p>
-                                        </div>
-                                        @if ($dispute->resolution_amount)
-                                            <div>
-                                                <span class="text-sm font-medium text-orange-700">Resolution
-                                                    Amount</span>
-                                                <p class="text-sm text-orange-900">
-                                                    ${{ number_format($dispute->resolution_amount, 2) }}</p>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    @if ($dispute->dispute_details)
-                                        <div>
-                                            <span class="text-sm font-medium text-orange-700">Dispute Details</span>
-                                            <p class="text-sm text-orange-900 mt-1">{{ $dispute->dispute_details }}
-                                            </p>
-                                        </div>
-                                    @endif
-
-                                    @if ($dispute->resolution_notes)
-                                        <div>
-                                            <span class="text-sm font-medium text-orange-700">Resolution Notes</span>
-                                            <p class="text-sm text-orange-900 mt-1">{{ $dispute->resolution_notes }}
-                                            </p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+                    @include('jobBoard.engagements.partials.details.dispute-details')
 
                     <!-- Partial Payments -->
-                    @if ($engagement->partialPayments->count() > 0)
-                        <div class="bg-white rounded-lg shadow border">
-                            <div class="px-6 py-4 border-b border-gray-200">
-                                <h2 class="text-lg font-semibold text-gray-900">
-                                    Partial Payments
-                                    <span
-                                        class="text-sm font-normal text-gray-500">({{ $engagement->partialPayments->count() }})</span>
-                                </h2>
-                            </div>
-                            <div class="px-6 py-4">
-                                <div class="space-y-3">
-                                    @foreach ($engagement->partialPayments as $payment)
-                                        <div class="border border-gray-200 rounded-lg p-4">
-                                            <div class="flex items-start justify-between">
-                                                <div class="flex-1">
-                                                    <div class="flex items-center">
-                                                        <span
-                                                            class="text-lg font-medium text-gray-900">${{ number_format($payment->amount, 2) }}</span>
-                                                        @if ($payment->final_amount && $payment->final_amount != $payment->amount)
-                                                            <span class="ml-2 text-sm text-gray-500">(Final:
-                                                                ${{ number_format($payment->final_amount, 2) }})</span>
-                                                        @endif
-                                                    </div>
-                                                    @if ($payment->notes)
-                                                        <p class="text-sm text-gray-600 mt-1">{{ $payment->notes }}
-                                                        </p>
-                                                    @endif
-                                                    <div class="flex items-center mt-2 text-xs text-gray-500 space-x-4">
-                                                        <span>Processed:
-                                                            {{ $payment->processed_at->format('M j, Y g:i A') }}</span>
-                                                        @if ($payment->accepted_at)
-                                                            <span>Accepted:
-                                                                {{ $payment->accepted_at->format('M j, Y g:i A') }}</span>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                                <span
-                                                    class="ml-3 px-2 py-1 text-xs font-medium rounded-full
-                                                    @switch($payment->status)
-                                                        @case('pending')
-                                                            bg-yellow-100 text-yellow-800
-                                                            @break
-                                                        @case('accepted')
-                                                            bg-green-100 text-green-800
-                                                            @break
-                                                        @case('disputed')
-                                                            bg-red-100 text-red-800
-                                                            @break
-                                                        @case('finalized')
-                                                            bg-blue-100 text-blue-800
-                                                            @break
-                                                        @default
-                                                            bg-gray-100 text-gray-800
-                                                    @endswitch
-                                                ">
-                                                    {{ ucfirst($payment->status) }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+                    @include('jobBoard.engagements.partials.details.partial-payment-details')
                 </div>
 
                 <!-- Sidebar -->
                 <div class="space-y-6">
                     <!-- Poster Information -->
-                    <div class="bg-white rounded-lg shadow border">
-                        <div class="px-4 py-3 border-b border-gray-200">
-                            <h3 class="text-sm font-semibold text-gray-900">Job Poster</h3>
+                    <div
+                        class="relative bg-gradient-to-br from-neutral-50 to-neutral-100  rounded-2xl shadow-lg overflow-hidden">
+                        <!-- Header -->
+                        <div
+                            class="relative px-6 py-4 border-b border-neutral-200 bg-gradient-to-r from-primary to-primary/90">
+                            <div class="flex items-center space-x-3">
+                                <div
+                                    class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-white font-main">Client</h3>
+                            </div>
                         </div>
-                        <div class="px-4 py-3">
-                            <div class="flex items-center">
-                                @if ($engagement->application->poster->avatar)
-                                    <img class="h-10 w-10 rounded-full"
-                                        src="{{ $engagement->application->poster->avatar }}" alt="">
-                                @else
-                                    <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                        <span
-                                            class="text-sm font-medium text-gray-700">{{ substr($engagement->application->poster->name, 0, 1) }}</span>
-                                    </div>
-                                @endif
+
+                        <!-- Content -->
+                        <div class="px-6 py-4">
+                            <div class="flex items-center group">
+                                <div
+                                    class="h-10 w-10 rounded-full bg-neutral-300 flex items-center justify-center group-hover:ring-2 group-hover:ring-secondary/50 transition-all duration-200">
+                                    <span
+                                        class="text-sm font-medium text-neutral-700 font-main">{{ $engagement->application->poster->getInitials() }}</span>
+                                </div>
                                 <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">
+                                    <p class="text-sm font-medium text-neutral-900 font-main">
                                         {{ $engagement->application->poster->name }}</p>
-                                    <p class="text-xs text-gray-500">{{ $engagement->application->poster->email }}</p>
+                                    <p class="text-xs text-neutral-500 font-secondary">
+                                        {{ $engagement->application->poster->email }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Applicant Information -->
-                    <div class="bg-white rounded-lg shadow border">
-                        <div class="px-4 py-3 border-b border-gray-200">
-                            <h3 class="text-sm font-semibold text-gray-900">Freelancer</h3>
+                    <div
+                        class="relative bg-gradient-to-br from-neutral-50 to-neutral-100  rounded-2xl shadow-lg overflow-hidden">
+
+                        <!-- Header -->
+                        <div
+                            class="relative px-6 py-4 border-b border-neutral-200 bg-gradient-to-r from-primary to-primary/90">
+                            <div class="flex items-center space-x-3">
+                                <div
+                                    class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v1m-7 0H5v-2a3 3 0 015.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20a3 3 0 015.356-1.857M12 14a4 4 0 100-8 4 4 0 000 8z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-white font-main">Freelancer</h3>
+                            </div>
                         </div>
-                        <div class="px-4 py-3">
-                            <div class="flex items-center">
-                                @if ($engagement->application->applicant->avatar)
-                                    <img class="h-10 w-10 rounded-full"
-                                        src="{{ $engagement->application->applicant->avatar }}" alt="">
-                                @else
-                                    <div class="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                                        <span
-                                            class="text-sm font-medium text-gray-700">{{ substr($engagement->application->applicant->name, 0, 1) }}</span>
-                                    </div>
-                                @endif
+
+                        <!-- Content -->
+                        <div class="px-6 py-4">
+                            <div class="flex items-center group">
+
+                                <div
+                                    class="h-10 w-10 rounded-full bg-neutral-300 flex items-center justify-center group-hover:ring-2 group-hover:ring-secondary/50 transition-all duration-200">
+                                    <span
+                                        class="text-sm font-medium text-neutral-700 font-main">{{ $engagement->application->applicant->getInitials() }}</span>
+                                </div>
+
                                 <div class="ml-3">
-                                    <p class="text-sm font-medium text-gray-900">
+                                    <p class="text-sm font-medium text-neutral-900 font-main">
                                         {{ $engagement->application->applicant->name }}</p>
-                                    <p class="text-xs text-gray-500">{{ $engagement->application->applicant->email }}
-                                    </p>
+                                    <p class="text-xs text-neutral-500 font-secondary">
+                                        {{ $engagement->application->applicant->email }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Financial Summary -->
-                    <div class="bg-white rounded-lg shadow border">
-                        <div class="px-4 py-3 border-b border-gray-200">
-                            <h3 class="text-sm font-semibold text-gray-900">Financial Summary</h3>
-                        </div>
-                        <div class="px-4 py-3 space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-sm text-gray-600">Agreed Amount</span>
-                                <span
-                                    class="text-sm font-medium text-gray-900">${{ number_format($engagement->agreed_amount, 2) }}</span>
+                    <div
+                        class="relative bg-gradient-to-br from-neutral-50 to-neutral-100  rounded-2xl shadow-lg overflow-hidden">
+                        <!-- Header -->
+                        <div
+                            class="relative px-6 py-4 border-b border-neutral-200 bg-gradient-to-r from-primary to-primary/90">
+                            <div class="flex items-center space-x-3">
+                                <div
+                                    class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-white font-main">Financial Summary</h3>
                             </div>
+                        </div>
 
+                        <!-- Content -->
+                        <div class="px-6 py-4 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-neutral-600 font-secondary">Agreed Amount</span>
+                                <span
+                                    class="text-sm font-medium text-neutral-900 font-main">Ksh{{ number_format($engagement->agreed_amount, 2) }}</span>
+                            </div>
                             @if ($engagement->service_fee)
-                                <div class="flex justify-between">
-                                    <span class="text-sm text-gray-600">Service Fee</span>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-sm text-neutral-600 font-secondary">Service Fee</span>
                                     <span
-                                        class="text-sm font-medium text-gray-900">${{ number_format($engagement->service_fee, 2) }}</span>
+                                        class="text-sm font-medium text-neutral-900 font-main">Ksh{{ number_format($engagement->service_fee, 2) }}</span>
                                 </div>
                             @endif
-
                             @if ($engagement->net_amount)
-                                <div class="flex justify-between border-t border-gray-200 pt-3">
-                                    <span class="text-sm font-medium text-gray-900">Net Amount</span>
+                                <div class="flex justify-between items-center pt-3 border-t border-neutral-200">
+                                    <span class="text-sm font-medium text-neutral-900 font-main">Net Amount</span>
                                     <span
-                                        class="text-sm font-medium text-gray-900">${{ number_format($engagement->net_amount, 2) }}</span>
+                                        class="text-sm font-medium text-neutral-900 font-main">Ksh{{ number_format($engagement->net_amount, 2) }}</span>
                                 </div>
                             @endif
-
                             <!-- Payment Status -->
-                            <div class="pt-3 border-t border-gray-200">
+                            <div class="pt-3 border-t border-neutral-200 space-y-2">
                                 @if ($engagement->payment_escrowed_at)
-                                    <div class="flex items-center text-xs text-green-600 mb-1">
+                                    <div
+                                        class="flex items-center text-xs font-tertiary bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-3 py-1 rounded-full">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -340,9 +166,9 @@
                                         Payment Escrowed
                                     </div>
                                 @endif
-
                                 @if ($engagement->payment_released_at)
-                                    <div class="flex items-center text-xs text-green-600">
+                                    <div
+                                        class="flex items-center text-xs font-tertiary bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-3 py-1 rounded-full">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path fill-rule="evenodd"
                                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -357,12 +183,28 @@
 
                     <!-- Notes -->
                     @if ($engagement->notes)
-                        <div class="bg-white rounded-lg shadow border">
-                            <div class="px-4 py-3 border-b border-gray-200">
-                                <h3 class="text-sm font-semibold text-gray-900">Notes</h3>
+                        <div
+                            class="relative bg-gradient-to-br from-neutral-50 to-neutral-100  rounded-2xl shadow-lg overflow-hidden">
+
+                            <!-- Header -->
+                            <div
+                                class="relative px-6 py-4 border-b border-neutral-200 bg-gradient-to-r from-primary to-primary/90">
+                                <div class="flex items-center space-x-3">
+                                    <div
+                                        class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white font-main">Notes</h3>
+                                </div>
                             </div>
-                            <div class="px-4 py-3">
-                                <p class="text-sm text-gray-700">{{ $engagement->notes }}</p>
+
+                            <!-- Content -->
+                            <div class="px-6 py-4">
+                                <p class="text-sm text-neutral-700 font-secondary">{{ $engagement->notes }}</p>
                             </div>
                         </div>
                     @endif

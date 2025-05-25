@@ -503,16 +503,44 @@ class JobEngagementController extends Controller
     /**
      * Display a listing of archived engagements
      */
-    public function archivedEngagements()
+    public function archivedEngagements(Request $request)
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
+            $status = $request->get('status', 'all');
 
-        $archivedEngagements = JobEngagement::archivedForUser($user->id)
-            ->with(['application.job', 'application.applicant', 'application.poster'])
-            ->latest()
-            ->paginate(7);
+            $query = JobEngagement::archivedForUser($user->id)
+                ->with(['application.job', 'application.applicant', 'application.poster']);
 
-        return view('jobBoard.engagements.archived', compact('archivedEngagements'));
+            // Apply status filter
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+
+            $archivedEngagements = $query->latest()->paginate(7);
+
+            // Return JSON for AJAX requests
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'html' => view('jobBoard.engagements.partials.archived-list', compact('archivedEngagements'))->render(),
+                    'total' => $archivedEngagements->total(),
+                    'pagination' => $archivedEngagements->links()->render()
+                ]);
+            }
+
+            return view('jobBoard.engagements.archived', compact('archivedEngagements'));
+        } catch (\Exception $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Failed to load engagements',
+                    'message' => app()->environment('local') ? $e->getMessage() : 'Server error'
+                ], 500);
+            }
+
+            throw $e;
+        }
     }
 
     /**
