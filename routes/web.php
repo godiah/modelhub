@@ -5,6 +5,7 @@ use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobDeliverableController;
 use App\Http\Controllers\JobEngagementController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
@@ -77,7 +78,7 @@ Route::middleware(['auth'])->prefix('my-jobs')->name('my-jobs.')->group(function
     Route::patch('/{job}/archive', [JobApplicationController::class, 'archiveJob'])->name('archive');
 });
 
-// Message Templates
+// Email Message Templates
 Route::get('/my-jobs/message-templates', [MessageTemplateController::class, 'index'])
     ->middleware(['auth'])->name('my-jobs.message-templates');
 Route::post('/my-jobs/message-templates', [MessageTemplateController::class, 'store'])
@@ -146,6 +147,14 @@ Route::middleware(['auth'])->prefix('projects')->name('project.')->group(functio
     Route::get('/engagement/{engagement}', [ProjectController::class, 'show'])->name('engagement.show');
     Route::post('/engagement/{engagement}/archive', [ProjectController::class, 'archive'])->name('engagement.archive');
     Route::post('/engagement/{engagement}/unarchive', [ProjectController::class, 'unarchive'])->name('engagement.unarchive');
+});
+
+// Client - Freelancer Messaging
+Route::middleware(['auth'])->prefix('chat')->group(function () {
+    Route::get('/engagements/{engagement}/data', [MessageController::class, 'getEngagementData'])->name('engagements.data');
+    Route::post('/engagements/{engagement}/messages', [MessageController::class, 'store'])->name('messages.store');
+    Route::patch('/engagements/{engagement}/messages/read', [MessageController::class, 'markAsRead'])->name('messages.read');
+    //Route::get('/messages/unread-count', [MessageController::class, 'unreadCount'])->name('messages.unread-count');
 });
 
 /**

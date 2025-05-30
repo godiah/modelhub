@@ -1011,3 +1011,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     window.showTab = showTab;
 });
+
+// // Function to fetch unread message counts
+// function fetchUnreadMessageCounts() {
+//     fetch("/chat/messages/unread-count")
+//         .then((response) => response.json())
+//         .then((data) => {
+//             // Dispatch event with unread counts
+//             window.dispatchEvent(
+//                 new CustomEvent("update-unread-counts", {
+//                     detail: { unreadCounts: data.unread_counts },
+//                 })
+//             );
+//         })
+//         .catch((error) => {
+//             console.error("Error fetching unread counts:", error);
+//         });
+// }
+
+// // Fetch unread counts when page loads
+// document.addEventListener("DOMContentLoaded", () => {
+//     fetchUnreadMessageCounts();
+
+//     // Fetch unread counts periodically
+//     setInterval(fetchUnreadMessageCounts, 60000); // Every minute
+// });

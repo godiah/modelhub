@@ -27,11 +27,11 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-        <header class="bg-white shadow fixed-page-header">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                {{ $header }}
-            </div>
-        </header>
+            <header class="bg-white shadow fixed-page-header">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    {{ $header }}
+                </div>
+            </header>
         @endif
 
         <!-- Page Content -->
@@ -44,12 +44,15 @@
     </div>
     <!-- Check User Notifications -->
     @auth
-    <script>
-        window.userId = {{ auth()->id() }};
-    </script>
+        <script>
+            window.userId = {{ auth()->id() }};
+        </script>
     @endauth
     <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
     <script src="../path/to/flowbite/dist/flowbite.min.js"></script>
+
+    <!-- Messaging JavaScript -->
+
 </body>
 
 </html>

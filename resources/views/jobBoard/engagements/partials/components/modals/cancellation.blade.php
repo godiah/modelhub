@@ -6,7 +6,8 @@
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-neutral-800 font-tertiary">Cancel Engagement
                 </h3>
-                <button onclick="document.getElementById('cancelEngagementModal').classList.add('hidden')"
+                <button
+                    onclick="document.getElementById('cancelEngagementModal-{{ $engagement->id }}').classList.add('hidden')"
                     class="text-neutral-500 hover:text-neutral-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -125,7 +126,7 @@
 
                 <div class="mt-6 flex flex-col sm:flex-row sm:space-x-4">
                     <button type="button"
-                        onclick="document.getElementById('cancelEngagementModal').classList.add('hidden')"
+                        onclick="document.getElementById('cancelEngagementModal-{{ $engagement->id }}').classList.add('hidden')"
                         class="w-full sm:w-auto mb-3 sm:mb-0 inline-flex justify-center items-center px-4 py-2 border border-neutral-300 shadow-sm text-sm font-medium rounded-md text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">
                         Keep Engagement Active
                     </button>

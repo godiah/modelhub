@@ -62,7 +62,14 @@ class JobEngagement extends Model
      */
     public function job()
     {
-        return $this->hasOneThrough(ModelJob::class, JobApplication::class, 'id', 'id', 'application_id', 'job_id');
+        return $this->hasOneThrough(
+            ModelJob::class,           // Related model
+            JobApplication::class,     // Intermediate model
+            'id',                     // Foreign key on intermediate table (job_applications.id)
+            'id',                     // Foreign key on related table (model_jobs.id) 
+            'application_id',         // Local key on current table (job_engagements.application_id)
+            'job_id'                  // Local key on intermediate table (job_applications.job_id)
+        )->select('model_jobs.*');    // Explicitly select from model_jobs to avoid ambiguity
     }
 
     /**
@@ -73,12 +80,33 @@ class JobEngagement extends Model
         return $this->hasOneThrough(User::class, JobApplication::class, 'id', 'id', 'application_id', 'poster_id');
     }
 
-    /**
-     * Get the applicant (freelancer) associated with this engagement through the application
-     */
     public function applicant()
     {
         return $this->hasOneThrough(User::class, JobApplication::class, 'id', 'id', 'application_id', 'applicant_id');
+    }
+
+    /**
+     * Get the messages for the engagement.
+     */
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'engagement_id');
+    }
+
+    /**
+     * Get the client for the engagement.
+     */
+    public function client()
+    {
+        return $this->belongsTo(User::class, 'client_id');
+    }
+
+    /**
+     * Get the freelancer for the engagement.
+     */
+    public function freelancer()
+    {
+        return $this->belongsTo(User::class, 'freelancer_id');
     }
 
     /**

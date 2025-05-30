@@ -1361,4 +1361,364 @@
             </div>
         @endforeach
     </div>
+
+    <!-- Message Modal -->
+    <div x-data="messageModal()" x-on:open-message-modal.window="openModal($event.detail.engagementId)"
+        @keydown.escape.window="closeModal()" x-show="open" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
+        aria-labelledby="message-modal" role="dialog" aria-modal="true">
+
+        <!-- Overlay -->
+        <div x-show="open" @click="closeModal()"
+            class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm transition-opacity"></div>
+
+        <!-- Modal Content -->
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div @click.outside="closeModal()"
+                class="bg-white rounded-xl overflow-hidden shadow-2xl w-full max-w-2xl transition-all">
+
+                <!-- Header -->
+                <div class="bg-primary px-6 py-4 flex justify-between items-center">
+                    <div class="flex items-center">
+                        <div
+                            class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
+                            </svg>
+
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-lg font-tertiary text-white"
+                                x-text="engagement.job_title || 'Loading...'"></h3>
+                        </div>
+                    </div>
+                    <button @click="closeModal()" class="text-white hover:text-white/80 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Message List -->
+                <div class="bg-neutral-50 px-4 py-4 h-80 overflow-y-auto space-y-3" id="messages-container">
+                    <!-- Loading State -->
+                    <div x-show="loading"
+                        class="flex flex-col items-center justify-center h-full text-neutral-400 text-sm">
+                        <svg class="animate-spin h-8 w-8 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                            </path>
+                        </svg>
+                        Loading messages...
+                    </div>
+
+                    <!-- Messages -->
+                    <div x-show="!loading" id="messages-list">
+                        <!-- Rendered dynamically by renderMessages() -->
+                    </div>
+                </div>
+
+                <!-- Footer / Input -->
+                <div class="bg-white px-6 py-4 border-t border-neutral-200">
+                    <div x-show="canMessage">
+                        <form @submit.prevent="sendMessage()" id="message-form">
+                            <div class="flex items-center">
+                                <textarea x-model="newMessage" rows="2" required @keydown.enter.prevent="sendMessage()"
+                                    class="flex-grow rounded-md border-neutral-300 shadow-sm text-sm font-main resize-none focus:border-secondary focus:ring-secondary"
+                                    placeholder="Type your message..."></textarea>
+                                <button type="submit" :disabled="sending || !newMessage.trim()"
+                                    class="ml-3 inline-flex items-center justify-center rounded-md px-4 py-2 bg-secondary text-white hover:bg-secondary/90 disabled:opacity-50">
+                                    <svg x-show="!sending" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                    <svg x-show="sending" class="animate-spin h-5 w-5"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                            stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div x-show="!canMessage" class="text-sm text-red-600 text-center py-2 font-main">
+                        Messaging is only available for active or cancelled engagements.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function messageModal() {
+            return {
+                open: false,
+                loading: false,
+                sending: false,
+                currentEngagementId: null,
+                engagement: {
+                    job_title: '',
+                    other_user_name: '',
+                    other_user_initials: '', // Assuming backend provides this
+                    status: ''
+                },
+                messages: [],
+                newMessage: '',
+                canMessage: false,
+
+                async openModal(engagementId) {
+                    this.currentEngagementId = engagementId;
+                    this.open = true;
+                    this.loading = true;
+                    try {
+                        await this.loadEngagementData();
+                        await this.markMessagesAsRead();
+                    } catch (error) {
+                        console.error('Error loading engagement data:', error);
+                        this.showError('Failed to load messages');
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                closeModal() {
+                    this.open = false;
+                    this.currentEngagementId = null;
+                    this.messages = [];
+                    this.newMessage = '';
+                    this.engagement = {
+                        job_title: '',
+                        other_user_name: '',
+                        other_user_initials: '',
+                        status: ''
+                    };
+                },
+
+                async loadEngagementData() {
+                    try {
+                        const response = await fetch(`/chat/engagements/${this.currentEngagementId}/data`, {
+                            method: 'GET',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content')
+                            }
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Server response:', errorText);
+                            throw new Error(`HTTP ${response.status}: ${errorText}`);
+                        }
+
+                        const data = await response.json();
+                        this.engagement = data.engagement;
+                        this.messages = Array.isArray(data.messages) ? data.messages : [];
+                        this.canMessage = ['active', 'cancelled'].includes(data.engagement.status);
+                        this.renderMessages();
+                    } catch (error) {
+                        console.error('Detailed error:', error);
+                        throw error;
+                    }
+                },
+
+                async markMessagesAsRead() {
+                    try {
+                        const response = await fetch(`/chat/engagements/${this.currentEngagementId}/messages/read`, {
+                            method: 'PATCH',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content'),
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            const unreadBadge = document.getElementById(`unread-count-${this.currentEngagementId}`);
+                            if (unreadBadge) {
+                                unreadBadge.style.display = 'none';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error marking messages as read:', error);
+                    }
+                },
+
+                renderMessages() {
+                    const container = document.getElementById('messages-list');
+                    if (!container) {
+                        console.error('Messages container not found');
+                        return;
+                    }
+
+                    container.innerHTML = '';
+
+                    if (this.messages.length === 0) {
+                        const placeholderHtml = `
+                            <div class="flex flex-col items-center justify-center h-full text-neutral-400 text-sm py-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-3 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                <p class="text-center text-neutral-600 font-main">No messages yet</p>
+                                <p class="text-xs text-neutral-500 mt-1 font-secondary">Start the conversation by sending a message!</p>
+                            </div>
+                        `;
+                        container.innerHTML = placeholderHtml;
+                        this.scrollToBottom();
+                        return;
+                    }
+
+                    const messagesHtml = this.messages.map((message) => {
+                        const isOwn = message.is_own || false;
+                        const messageTime = this.formatMessageTime(message.created_at);
+                        const content = message.content || '[Empty message]';
+                        const senderName = message.sender_name || 'Unknown';
+                        return `
+                            <div class="flex ${isOwn ? 'justify-end' : 'justify-start'} mb-3">
+                                <div class="max-w-[70%] px-4 py-3 rounded-2xl shadow-sm ${
+                                    isOwn
+                                        ? 'bg-primary text-white rounded-br-none'
+                                        : 'bg-neutral-100 text-neutral-900 border border-neutral-200 rounded-bl-none'
+                                }">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-medium text-xs ${
+                                            isOwn ? 'text-white/90' : 'text-secondary'
+                                        }">
+                                            ${isOwn ? 'You' : senderName}
+                                        </span>
+                                        <span class="text-xs font-secondary ${
+                                            isOwn ? 'text-white/70' : 'text-neutral-500'
+                                        } ml-2">
+                                            ${messageTime}
+                                        </span>
+                                    </div>
+                                    <div class="whitespace-pre-line break-words text-sm font-main leading-relaxed">
+                                        ${this.escapeHtml(content)}
+                                    </div>
+                                    ${message.read_at && isOwn ? `
+                                                            <div class="text-xs text-white/60 mt-1 text-right font-secondary">
+                                                                Read
+                                                            </div>
+                                                        ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    container.innerHTML = messagesHtml;
+                    this.$nextTick(() => {
+                        this.scrollToBottom();
+                    });
+                },
+
+                scrollToBottom() {
+                    setTimeout(() => {
+                        const messagesContainer = document.getElementById('messages-container');
+                        if (messagesContainer) {
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }
+                    }, 50);
+                },
+
+                escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                },
+
+                async sendMessage() {
+                    if (!this.newMessage.trim() || this.sending) return;
+                    this.sending = true;
+                    const messageContent = this.newMessage.trim();
+
+                    try {
+                        const response = await fetch(`/chat/engagements/${this.currentEngagementId}/messages`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content'),
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                content: messageContent
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || 'Failed to send message');
+                        }
+
+                        const result = await response.json();
+                        this.messages.push(result.message);
+                        this.newMessage = '';
+                        this.renderMessages();
+                    } catch (error) {
+                        console.error('Error sending message:', error);
+                        this.showError('Failed to send message: ' + error.message);
+                    } finally {
+                        this.sending = false;
+                    }
+                },
+
+                showError(message) {
+                    alert(message);
+                },
+
+                isToday(date) {
+                    const today = new Date();
+                    return date.getDate() === today.getDate() &&
+                        date.getMonth() === today.getMonth() &&
+                        date.getFullYear() === today.getFullYear();
+                },
+
+                isYesterday(date) {
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    return date.getDate() === yesterday.getDate() &&
+                        date.getMonth() === yesterday.getMonth() &&
+                        date.getFullYear() === yesterday.getFullYear();
+                },
+
+                formatMessageTime(createdAt) {
+                    const messageDate = new Date(createdAt || Date.now());
+                    if (this.isToday(messageDate)) {
+                        return messageDate.toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    } else if (this.isYesterday(messageDate)) {
+                        return 'Yesterday, ' + messageDate.toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    } else {
+                        return messageDate.toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        });
+                    }
+                },
+
+            };
+        }
+    </script>
 @endif

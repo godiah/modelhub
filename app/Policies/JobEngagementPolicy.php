@@ -38,6 +38,16 @@ class JobEngagementPolicy
     }
 
     /**
+     * Determine whether the user can send messages in the engagement.
+     */
+    public function message(User $user, JobEngagement $engagement)
+    {
+        // User can message if they are the client or freelancer AND the engagement is active
+        return ($user->id === $engagement->application->poster_id || $user->id === $engagement->application->applicant_id)
+            && in_array($engagement->status, ['active', 'cancelled']);
+    }
+
+    /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool

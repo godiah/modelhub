@@ -87,15 +87,27 @@
         </div>
         <div>
             <p class="text-xs text-neutral-500 font-main">Communication</p>
-            @if ($engagement->status === 'active')
-                <button
-                    class="mt-1 inline-flex items-center px-3 py-1 text-xs font-medium rounded-full text-accent bg-accent/10 hover:bg-accent/20 transition-colors border border-accent/20">
+            @if ($engagement->status === 'active' || $engagement->status === 'cancelled')
+                <button @click="$dispatch('open-message-modal', { engagementId: {{ $engagement->id }} })"
+                    class="relative mt-1 inline-flex items-center px-3 py-1 text-xs font-medium rounded-full text-accent bg-accent/10 hover:bg-accent/20 transition-colors border border-accent/20">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    Message
+                    <span class="font-secondary">Message</span>
+                    @php
+                        $unreadCount = $engagement
+                            ->messages()
+                            ->where('sender_id', '!=', auth()->id())
+                            ->whereNull('read_at')
+                            ->count();
+                    @endphp
+                    @if ($unreadCount > 0)
+                        <span
+                            class="absolute -top-1 -right-2 bg-accent font-secondary text-white text-xs w-5 h-5 flex items-center justify-center rounded-full shadow-sm"
+                            id="unread-count-{{ $engagement->id }}">{{ $unreadCount }}</span>
+                    @endif
                 </button>
             @else
                 <p class="font-medium text-neutral-600">Not available</p>

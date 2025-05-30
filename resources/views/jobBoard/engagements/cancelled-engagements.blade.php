@@ -143,48 +143,6 @@
 
                 <!-- Project Deliverables Component -->
                 @include('jobBoard.engagements.partials.cancelled.deliverables-details')
-
-                <!-- Communication Section -->
-                <div class="bg-white rounded-xl shadow-sm border border-neutral-200">
-                    <div class="p-6 border-b border-neutral-200">
-                        <h2 class="font-tertiary font-semibold text-xl text-neutral-800">Communication</h2>
-                        <p class="text-sm text-neutral-500 mt-1">Send messages to discuss the cancelled engagement</p>
-                    </div>
-
-                    <div class="p-6">
-                        <!-- Messages List -->
-                        <div class="space-y-4 mb-6 max-h-80 overflow-y-auto">
-                            <template x-for="(message, index) in messages" :key="index">
-                                <div class="flex" :class="message.sender_id === currentUser.id ? 'justify-end' : ''">
-                                    <div class="max-w-3/4"
-                                        :class="message.sender_id === currentUser.id ? 'bg-secondary text-white' :
-                                            'bg-neutral-100 text-neutral-800'"
-                                        class="rounded-lg px-4 py-3">
-                                        <div class="text-sm" x-text="message.content"></div>
-                                        <div class="text-xs mt-1 opacity-75"
-                                            x-text="formatDateTime(message.created_at)"></div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-
-                        <!-- Message Input -->
-                        <div class="flex items-center">
-                            <textarea x-model="newMessage"
-                                class="flex-1 border border-neutral-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent resize-none"
-                                rows="2" placeholder="Type your message here..."></textarea>
-                            <button @click="sendMessage"
-                                class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                </svg>
-                                Send
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Right Column (1/3 width) -->
@@ -227,8 +185,8 @@
                 <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600"
-                                viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600" viewBox="0 0 20 20"
+                                fill="currentColor">
                                 <path fill-rule="evenodd"
                                     d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
                                     clip-rule="evenodd" />
