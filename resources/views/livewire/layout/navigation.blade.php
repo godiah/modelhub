@@ -60,12 +60,23 @@ new class extends Component {
                     <x-slot name="trigger">
                         <button
                             class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <!-- User Avatar with Initials -->
-                            <div
-                                class="flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-gray-700 mr-2">
-                                {{ auth()->user()->getInitials() }}
-                            </div>
 
+                            <!-- Avatar or Initials -->
+                            @php
+                                $profile = auth()->user()->profile;
+                            @endphp
+
+                            @if ($profile && $profile->avatar && file_exists(storage_path('app/public/' . $profile->avatar)))
+                                <img src="{{ asset('storage/' . $profile->avatar) }}" alt="User Avatar"
+                                    class="h-8 w-8 rounded-full object-contain mr-2">
+                            @else
+                                <div
+                                    class="flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-gray-700 mr-2 font-semibold">
+                                    {{ auth()->user()->getInitials() }}
+                                </div>
+                            @endif
+
+                            <!-- Dropdown Arrow -->
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 20 20">
