@@ -186,4 +186,51 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->socialLinks()->public()->ordered();
     }
+
+    /**
+     * Get reviews where this user is the reviewee (received reviews).
+     */
+    public function reviewsReceived()
+    {
+        return $this->hasMany(JobReview::class, 'reviewee_id');
+    }
+
+    /**
+     * Get reviews where this user is the reviewer (given reviews).
+     */
+    public function reviewsGiven()
+    {
+        return $this->hasMany(JobReview::class, 'reviewer_id');
+    }
+
+    /**
+     * Get public reviews received by this user.
+     */
+    public function publicReviewsReceived()
+    {
+        return $this->reviewsReceived()
+            ->where('is_public', true)
+            ->with(['reviewer', 'engagement'])
+            ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Calculate average rating for this user.
+     */
+    public function getAverageRatingAttribute()
+    {
+        return $this->reviewsReceived()
+            ->where('is_public', true)
+            ->avg('rating') ?: 0;
+    }
+
+    /**
+     * Get total count of public reviews received.
+     */
+    public function getTotalReviewsAttribute()
+    {
+        return $this->reviewsReceived()
+            ->where('is_public', true)
+            ->count();
+    }
 }

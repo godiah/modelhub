@@ -30,7 +30,7 @@
 
         <!-- Page Heading -->
         @if (isset($header))
-            <header class="bg-white shadow fixed-page-header">
+            <header class="bg-white shadow mt-16 w-full fixed top-0 z-30">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
@@ -38,7 +38,7 @@
         @endif
 
         <!-- Page Content -->
-        <div class="flex flex-col min-h-screen">
+        <div class="flex flex-col min-h-screen mt-36">
             <main class="flex-grow content-with-fixed-header">
                 {{ $slot }}
             </main>

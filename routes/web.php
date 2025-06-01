@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDisputeController;
+use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobDeliverableController;
@@ -22,6 +23,12 @@ Route::view('dashboard', 'dashboard')
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+/**
+ * User Dashboard
+ */
+Route::middleware(['auth'])->prefix('my-dashboard')->name('my-dashboard.')->group(function () {
+    Route::get('/', [DashBoardController::class, 'index'])->name('index');
+});
 
 // Job Public Routes (No auth)
 Route::prefix('jobs')->name('jobs.')->group(function () {
