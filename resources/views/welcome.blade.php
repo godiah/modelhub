@@ -16,108 +16,11 @@
 </head>
 
 <body class="bg-gray-100">
-    <!-- Header -->
-    <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <!-- Logo -->
-            <a href="#" class="flex items-center group">
-                <span class="ml-2 text-xl font-bold font-main text-primary">ModelHub</span>
-            </a>
-
-            <!-- Search bar -->
-            <div class="hidden md:block flex-1 mx-8">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <input type="text" placeholder="Search in more than 2 million 3D models"
-                        class="w-full py-2 pl-10 pr-32 border border-neutral-200 rounded-full focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent font-secondary text-neutral-700">
-                    <button
-                        class="absolute right-0 top-0 h-full px-6 bg-secondary text-white rounded-r-full hover:bg-opacity-90 transition-colors duration-300 font-main font-medium">
-                        Search
-                    </button>
-                </div>
-            </div>
-
-            <!-- Navigation -->
-            <nav class="hidden lg:flex items-center space-x-6">
-                <a href="{{ route('jobs.index') }}"
-                    class="font-secondary font-medium text-neutral-700 hover:text-secondary transition-colors duration-300">3D
-                    MODELS</a>
-                <a href="#"
-                    class="font-secondary font-medium text-neutral-700 hover:text-secondary transition-colors duration-300">CUSTOM
-                    3D</a>
-                <a href="{{ route('jobs.browse') }}"
-                    class="font-secondary font-medium text-neutral-700 hover:text-secondary transition-colors duration-300">FOR
-                    DESIGNERS</a>
-                <a href="#"
-                    class="font-secondary font-medium text-neutral-700 hover:text-secondary transition-colors duration-300">
-                    <div class="flex items-center">
-                        <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        AI IMAGE GENERATOR
-                    </div>
-                </a>
-                <a href="{{ route('login') }}"
-                    class="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-tertiary font-bold shadow-md hover:shadow-lg transition-shadow duration-300">
-                    U
-                </a>
-            </nav>
-
-            <!-- Icons -->
-            {{-- <div class="flex items-center space-x-3">
-                <a href="#" class="relative p-2 rounded-full hover:bg-neutral-100 transition-colors duration-300">
-                    <svg class="h-6 w-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <span
-                        class="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-main font-bold">0</span>
-                </a>
-                <a href="#" class="relative p-2 rounded-full hover:bg-neutral-100 transition-colors duration-300">
-                    <svg class="h-6 w-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    <span
-                        class="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-main font-bold">20</span>
-                </a>
-                <div class="hidden md:flex space-x-3">
-                    <a href="#" class="p-2 rounded-full hover:bg-neutral-100 transition-colors duration-300">
-                        <svg class="h-6 w-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                    </a>
-                    <a href="#" class="p-2 rounded-full hover:bg-neutral-100 transition-colors duration-300">
-                        <svg class="h-6 w-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                        </svg>
-                    </a>
-                </div>
-                <a href="#"
-                    class="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-secondary flex items-center justify-center text-white font-tertiary font-bold shadow-md hover:shadow-lg transition-shadow duration-300">
-                    G
-                </a>
-                <!-- Mobile menu button -->
-                <button class="block lg:hidden p-2 rounded-full hover:bg-neutral-100 transition-colors duration-300">
-                    <svg class="h-6 w-6 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div> --}}
-        </div>
-    </header>
+    <!-- Navbar -->
+    <livewire:layout.navigation />
 
     <!-- Hero Section -->
-    <section class="relative min-h-[75vh] flex items-center">
+    <section class="relative min-h-[80vh] flex items-center mt-16">
         <!-- Background gradient with pattern overlay -->
         <div class="absolute inset-0 bg-gradient-to-br from-primary/90 to-secondary/90 z-0">
             <!-- SVG Pattern Overlay -->
