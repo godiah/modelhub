@@ -4,6 +4,7 @@ use App\Livewire\Actions\Logout;
 use Livewire\Volt\Component;
 
 new class extends Component {
+    public $hasHeader;
     // public $cartCount = 0;
 
     // public function mount()
@@ -28,11 +29,13 @@ new class extends Component {
     designersOpen: false,
     modelsOpen: false,
     supportOpen: false,
-    scrolled: false
+    scrolled: false,
+    hasHeader: {{ $hasHeader ? 'true' : 'false' }}
 }" x-init="window.addEventListener('scroll', () => {
     scrolled = window.scrollY > 20;
 });"
-    :class="scrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg border-b border-neutral-200/50' :
+    :class="scrolled && !hasHeader ? 'bg-white/95 backdrop-blur-lg shadow-lg border-b border-neutral-200/50' :
+        scrolled && hasHeader ? 'bg-white border-b border-neutral-200' :
         'bg-white border-b border-neutral-100'"
     class="fixed top-0 z-50 w-full transition-all duration-300">
 
@@ -101,7 +104,7 @@ new class extends Component {
                         x-transition:leave-start="opacity-100 translate-y-0"
                         x-transition:leave-end="opacity-0 translate-y-1"
                         class="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50">
-                        <a href="#" wire:navigate
+                        <a href="{{ route('jobs.index') }}" wire:navigate
                             class="flex items-center px-4 py-3 text-sm text-neutral-700 hover:text-primary hover:bg-neutral-50 transition-colors duration-150 font-main">
                             <svg class="h-4 w-4 mr-3 text-neutral-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -110,7 +113,7 @@ new class extends Component {
                             </svg>
                             Find Jobs
                         </a>
-                        <a href="#" wire:navigate
+                        <a href="{{ route('jobs.index') }}" wire:navigate
                             class="flex items-center px-4 py-3 text-sm text-neutral-700 hover:text-primary hover:bg-neutral-50 transition-colors duration-150 font-main">
                             <svg class="h-4 w-4 mr-3 text-neutral-400" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
@@ -524,7 +527,7 @@ new class extends Component {
                 </div>
 
                 <!-- Mobile User Links -->
-                <div class="space-y-1">
+                {{-- <div class="space-y-1">
                     <a href="{{ route('my-dashboard.index') }}" wire:navigate
                         class="flex items-center px-3 py-2 text-sm text-neutral-700 hover:text-primary 
                               hover:bg-neutral-50 rounded-lg transition-all duration-200 font-main">
@@ -584,11 +587,11 @@ new class extends Component {
                             </svg>
                             Shopping Cart
                         </div>
-                        {{-- @if ($cartCount > 0)
+                        @if ($cartCount > 0)
                             <span class="bg-accent text-white rounded-full text-xs px-1.5 py-0.5 font-medium">
                                 {{ $cartCount }}
                             </span>
-                        @endif --}}
+                        @endif
                         <span class="bg-accent text-white rounded-full text-xs px-1.5 py-0.5 font-medium">
                             0
                         </span>
@@ -605,7 +608,7 @@ new class extends Component {
                         </svg>
                         Log Out
                     </button>
-                </div>
+                </div> --}}
             </div>
         @else
             <!-- Mobile Login/Register for Guests -->

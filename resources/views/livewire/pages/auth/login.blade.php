@@ -42,7 +42,7 @@ new #[Layout('layouts.guest')] class extends Component {
 
         // If no 2FA, proceed with normal login
         Session::regenerate();
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(default: route('home', absolute: false), navigate: true);
     }
 
     /**
@@ -73,7 +73,7 @@ new #[Layout('layouts.guest')] class extends Component {
         Auth::login($user, $this->form->remember);
         Session::regenerate();
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(default: route('home', absolute: false), navigate: true);
     }
 
     /**
