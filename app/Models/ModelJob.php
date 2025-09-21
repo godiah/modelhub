@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Helpers\Jobs\JobCacheHelper;
-use App\Jobs\JobFilterTrait;
+use App\Traits\JobFilterTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 class ModelJob extends Model

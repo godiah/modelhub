@@ -4,7 +4,7 @@
 // This trait includes methods for applying search, skills, software, and sorting filters to job queries,
 // enabling consistent and modular filtering logic across different parts of the application.
 
-namespace App\Jobs;
+namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Builder;
 

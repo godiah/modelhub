@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Payments;
 
 use App\Models\JobCancellation;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
 use App\Models\JobPaymentDispute;
-use App\Notifications\PartialPaymentProcessedNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

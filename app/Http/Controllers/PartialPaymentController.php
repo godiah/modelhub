@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
-use App\Services\PartialPaymentService;
+use App\Services\Payments\PartialPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
