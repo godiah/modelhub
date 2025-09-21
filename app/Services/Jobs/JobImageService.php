@@ -3,9 +3,11 @@
 // JobImageService manages image-related operations for job postings, including main and additional image uploads.
 // This service handles the storage of images in the public disk and associates additional images with the job model,
 // ensuring proper file handling and database integration for job-related imagery.
+// Service also handles application portfolio images for applicants of a job.
 
 namespace App\Services\Jobs;
 
+use App\Helpers\Applications\ApplicationFileHelper;
 use Illuminate\Http\Request;
 
 class JobImageService
@@ -37,5 +39,17 @@ class JobImageService
                 'image_path' => $imagePath
             ]);
         }
+    }
+
+    // Handle portfolio files for applications
+    public function handlePortfolioFiles(Request $request, array $existingFiles = []): array
+    {
+        return ApplicationFileHelper::handlePortfolioFiles($request, $existingFiles);
+    }
+
+    // Delete portfolio files for applications
+    public function deletePortfolioFiles(array $portfolio): void
+    {
+        ApplicationFileHelper::deleteApplicationPortfolio($portfolio);
     }
 }

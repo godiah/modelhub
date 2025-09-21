@@ -3,6 +3,7 @@
 // JobManagementService handles CRUD operations for job postings, including creation, updates, and retrieval.
 // This service integrates image handling, slug generation, and user authorization to manage job data,
 // ensuring database consistency, proper notifications, and access control for job-related actions.
+// Service also handle retrieving a user posted jobs, archiving & unarchiving user posted jobs too.
 
 namespace App\Services\Jobs;
 
@@ -10,6 +11,7 @@ use App\Models\ModelJob;
 use App\Models\Skill;
 use App\Models\Software;
 use App\Notifications\JobPostedNotification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -99,5 +101,81 @@ class JobManagementService
     public function titleExists(string $title): bool
     {
         return ModelJob::where('title', $title)->exists();
+    }
+
+    // Get user's posted jobs with filtering and sorting
+    public function getUserPostedJobs(array $filters): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        $query = ModelJob::where('user_id', Auth::id())->unarchived();
+
+        // Apply status filter if selected
+        if ($filters['status'] !== 'all') {
+            $query->where('is_active', $filters['status'] === 'active');
+        }
+
+        // Apply sorting
+        $this->applySortingToPostedJobs($query, $filters['sort']);
+
+        return $query->paginate(5)->withQueryString();
+    }
+
+    // Apply sorting to posted jobs query
+    protected function applySortingToPostedJobs(Builder $query, string $sort): void
+    {
+        switch ($sort) {
+            case 'newest':
+                $query->orderBy('created_at', 'desc');
+                break;
+            case 'deadline':
+                $query->orderBy('deadline', 'asc');
+                break;
+            case 'budget_high':
+                $query->orderBy('budget', 'desc');
+                break;
+            case 'budget_low':
+                $query->orderBy('budget', 'asc');
+                break;
+            default:
+                $query->latest();
+        }
+    }
+
+    // Archive a job
+    public function archiveJob(ModelJob $job): bool
+    {
+        if ($job->user_id !== Auth::id()) {
+            return false;
+        }
+
+        $job->archive();
+        return true;
+    }
+
+    // Restore an archived job
+    public function restoreJob(ModelJob $job): bool
+    {
+        if ($job->user_id !== Auth::id()) {
+            return false;
+        }
+
+        $job->unarchive();
+        return true;
+    }
+
+    // Get archived jobs
+    public function getArchivedJobs(): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        return ModelJob::where('user_id', Auth::id())
+            ->archived()
+            ->with(['applications', 'jobImages'])
+            ->withCount('applications')
+            ->latest()
+            ->paginate(10);
+    }
+
+    // Authorize job access for archived job view
+    public function authorizeArchivedJobAccess(ModelJob $job): bool
+    {
+        return $job->user_id === Auth::id();
     }
 }
