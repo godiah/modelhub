@@ -273,14 +273,21 @@ call sites from other modules)
 
 ## Cross-cutting concerns (span every module)
 
-- **The flash-message `'alert' => [...]` pattern is reimplemented at least 4 separate ways**: ad
-  hoc inline arrays in most controllers (23 occurrences total), `JobController`'s
-  `unauthorizedError()`/`jobClosedError()`, `JobApplicationController`'s own
-  `unauthorizedError()`, and `JobDeliverableController`'s `respondWith()` family. All four produce
-  the same `['success'|'error' => ..., 'alert' => ['type','title','text']]` shape. This is the
-  single highest-leverage cleanup: one trait (e.g. `HasFlashAlerts`, `success()`/`error()` methods)
-  used by every controller would remove ~30+ near-duplicate lines and make the shape consistent
-  everywhere (right now some controllers set `'text'` differently, some omit `'icon'`, etc.).
+- ✅ **Fixed 2026-09-24**: the flash-message `'alert' => [...]` pattern, reimplemented ~37 times
+  across 11 files (controllers, a middleware, and services), is now centralized in
+  `App\Helpers\FlashAlertHelper` (`success()`/`error()`/`info()`/`warning()`, plus `make()` for a
+  dynamic type). Bigger discovery made along the way: the rich `alert` array was **dead data** —
+  `partials/flash-messages.blade.php` only ever read the flat `session('success'/'error'/...)`
+  strings with a hardcoded generic title, so all that per-action title effort
+  (`'Application Archived!'`, `'Payment Processed'`, etc.) was invisible to users, who only ever
+  saw a generic "Success"/"Error" toast. The partial now reads `session('alert')` first for a
+  specific toast title (collapsing to title-only when title and text are identical, avoiding a
+  redundant repeated sentence), falling back to the old generic-title toast for the ~23 call sites
+  that only ever set a flat message with no natural distinct title — those were left alone.
+  Also found and fixed a real duplicate-toast bug surfaced by this same work: `jobs/show.blade.php`
+  and `applications/drafts.blade.php` each carried their own byte-for-byte-identical local copy of
+  a success toast on top of the one the shared partial already renders — every success flash on
+  those two pages fired twice. Both dead copies removed.
 - **Existing Blade componentization is real but narrow.** `components/jobs/*` (star-rating,
   benefit cards, skill/software SVGs) and `jobBoard/engagements/partials/*` (~20 files, well
   organized into `details/`, `cancelled/`, `modals/`) show the pattern already works well here.
@@ -305,8 +312,8 @@ call sites from other modules)
    2026-09-24.
 2. ✅ **Dashboard routing** — pulled forward from Module 2 alongside the fix above since it was
    the other quick, standalone win. Done 2026-09-24.
-3. **Cross-cutting flash-alert trait** — highest leverage, touches every module, best done once
-   before further module work so later modules don't add a 5th reimplementation of the same thing.
+3. ✅ **Cross-cutting flash-alert helper** — done 2026-09-24. Turned out to also fix a dead-data bug
+   (rich toast titles were never rendered) and a duplicate-toast bug found along the way.
 4. **Module 1 (Auth) → Module 2 (Profile/Dashboard)** — small, foundational; the routing decision
    is already resolved (above), so what's left is the rest of Module 2's findings.
 5. **Module 5 (Engagements)** — already the best-structured module; cleanup here is mostly
@@ -330,4 +337,10 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   login redirect target, Pint formatting, dependency security updates).
 - **2026-09-24 (later)**: Two quick fixes landed — `AdminDisputeController`'s fatal-error import bug
   (Module 9) and the `/dashboard` routing consolidation (Module 2). Both verified with real
-  authenticated requests before committing. Next up: the cross-cutting flash-alert trait.
+  authenticated requests before committing.
+- **2026-09-24 (later still)**: Cross-cutting flash-alert cleanup landed — `FlashAlertHelper`
+  centralizes the ~37 call sites, `flash-messages.blade.php` now actually renders the specific
+  toast titles that used to be dead data, and a real duplicate-toast bug (two views double-firing
+  on success) was found and fixed along the way. 4 commits, verified with a real render test before
+  committing. Next up: Module 1/2 (Auth/Profile), or Module 5 (Engagements) if that's preferred —
+  ask before picking.
