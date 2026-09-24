@@ -5,23 +5,16 @@
 namespace App\Services\Applications;
 
 use App\Helpers\Applications\ApplicationCalculationHelper;
+use App\Helpers\Applications\ApplicationFileHelper;
 use App\Helpers\FlashAlertHelper;
 use App\Models\JobApplication;
 use App\Models\ModelJob;
-use App\Services\Jobs\JobImageService;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class ApplicationManagementService
 {
-    protected JobImageService $imageService;
-
-    public function __construct(JobImageService $imageService)
-    {
-        $this->imageService = $imageService;
-    }
-
     // Store a new application or update existing draft
     public function store(Request $request, array $processedData): JobApplication
     {
@@ -32,7 +25,7 @@ class ApplicationManagementService
         $existingApplication = $this->getExistingApplication($processedData['job_id'], $processedData['applicant_id']);
         $existingFiles = $existingApplication && ! empty($existingApplication->portfolio) ? $existingApplication->portfolio : [];
 
-        $portfolioFiles = $this->imageService->handlePortfolioFiles($request, $existingFiles);
+        $portfolioFiles = ApplicationFileHelper::handlePortfolioFiles($request, $existingFiles);
 
         // Prepare application data
         $applicationData = array_merge($amounts, [
@@ -149,7 +142,7 @@ class ApplicationManagementService
         }
 
         // Remove portfolio files
-        $this->imageService->deletePortfolioFiles($application->portfolio ?? []);
+        ApplicationFileHelper::deleteApplicationPortfolio($application->portfolio ?? []);
 
         // Delete the application
         $application->delete();

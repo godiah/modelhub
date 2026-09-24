@@ -25,67 +25,41 @@ class JobBrowsingService
     // Browse jobs with filters and pagination
     public function browseJobs(array $filters): LengthAwarePaginator
     {
-        $query = ModelJob::active();
+        $query = ModelJob::active()
+            ->withSearch($filters['search'] ?? null)
+            ->withSorting($filters['sort'] ?? 'newest');
 
-        $this->applySearchFilter($query, $filters['search'] ?? null);
         $this->applySkillsFilter($query, $filters['skills'] ?? null);
         $this->applySoftwareFilter($query, $filters['software'] ?? null);
-        $this->applySorting($query, $filters['sort'] ?? 'newest');
 
         return $query->paginate(5);
     }
 
-    // Apply search filter to query
-    protected function applySearchFilter(Builder $query, ?string $search): void
-    {
-        if (! empty($search)) {
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-    }
-
-    // Apply skills filter to query
+    // The browse UI's filter is a single skill/software id, but ModelJob.skills/software
+    // store names (see JobManagementService::store()) — resolve the id here, then delegate
+    // the actual query condition to JobFilterTrait::scopeWithSkills()/scopeWithSoftware()
+    // rather than duplicating the whereJsonContains() call.
     protected function applySkillsFilter(Builder $query, ?int $skillId): void
     {
-        if ($skillId) {
-            $skill = Skill::find($skillId);
-            if ($skill) {
-                $query->whereJsonContains('skills', $skill->name);
-            }
+        if ($skillId && $skill = Skill::find($skillId)) {
+            $query->withSkills([$skill->name]);
         }
     }
 
-    // Apply software filter to query
     protected function applySoftwareFilter(Builder $query, ?int $softwareId): void
     {
-        if ($softwareId) {
-            $software = Software::find($softwareId);
-            if ($software) {
-                $query->whereJsonContains('software', $software->name);
-            }
+        if ($softwareId && $software = Software::find($softwareId)) {
+            $query->withSoftware([$software->name]);
         }
     }
 
-    // Apply sorting to query
-    protected function applySorting(Builder $query, string $sort): void
+    // Filter dropdown options for the browse view — kept here so the view never queries directly
+    public function getFilterOptions(): array
     {
-        switch ($sort) {
-            case 'budget_high':
-                $query->orderBy('budget', 'desc');
-                break;
-            case 'budget_low':
-                $query->orderBy('budget', 'asc');
-                break;
-            case 'deadline':
-                $query->whereNotNull('deadline')->orderBy('deadline', 'asc');
-                break;
-            case 'newest':
-            default:
-                $query->orderBy('created_at', 'desc');
-                break;
-        }
+        return [
+            'skills' => Skill::where('is_active', true)->get(),
+            'software' => Software::where('is_active', true)->get(),
+        ];
     }
 
     // Get similar jobs for a given job
