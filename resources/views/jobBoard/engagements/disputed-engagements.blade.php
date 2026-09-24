@@ -2,45 +2,36 @@
 @use('App\Enums\EngagementStatus')
 <x-app-layout>
     <x-slot name="header">
-        @if (Auth::user()->hasRole('admin'))
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                        {{ $engagement->job->title }}
-                    </h2>
-                </div>
-                <div class="flex space-x-3">
-                    <a href="{{ route('admin.disputes.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+        @php
+            $isAdminViewer = Auth::user()->hasRole('admin');
+        @endphp
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
+                    {{ $engagement->job->title }}
+                </h2>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ $isAdminViewer ? route('admin.disputes.index') : route('engagements.index') }}"
+                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                    @if ($isAdminViewer)
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="h-5 w-5 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                         </svg>
                         Disputed Engagements
-                    </a>
-                </div>
-            </div>
-        @else
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                        {{ $engagement->job->title }}
-                    </h2>
-                </div>
-                <div class="flex space-x-3">
-                    <a href="{{ route('engagements.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                    @else
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="h-5 w-5 mr-2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
                         </svg>
                         My Engagements
-                    </a>
-                </div>
+                    @endif
+                </a>
             </div>
-        @endif
+        </div>
     </x-slot>
 
     <div class="container mx-auto max-w-7xl px-4 py-8 pb-24 font-main text-neutral-800">
@@ -170,57 +161,47 @@
                 <!-- Left Column - Primary Details -->
                 <div class="space-y-6">
                     <!-- Dispute Reason Card -->
-                    <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 p-6">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <div class="bg-accent/10 rounded-lg p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold font-main text-neutral-800">Dispute Reason</h3>
-                        </div>
+                    <x-disputes.info-card title="Dispute Reason" color="accent">
+                        <x-slot:icon>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </x-slot:icon>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <p class="text-neutral-700 font-secondary text-sm">
                                 {{ $dispute->formatted_reason }}
                             </p>
                         </div>
-                    </div>
+                    </x-disputes.info-card>
 
                     <!-- Dispute Details Card -->
-                    <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 p-6">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <div class="bg-primary/10 rounded-lg p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold font-main text-neutral-800">Detailed Description</h3>
-                        </div>
+                    <x-disputes.info-card title="Detailed Description" color="primary">
+                        <x-slot:icon>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </x-slot:icon>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <p class="text-neutral-700 font-secondary leading-relaxed text-sm">
                                 {{ $dispute->dispute_details }}
                             </p>
                         </div>
-                    </div>
+                    </x-disputes.info-card>
 
                     <!-- Supporting Evidence Card -->
                     @if ($dispute->supporting_evidence)
-                        <div
-                            class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 p-6">
-                            <div class="flex items-center space-x-2 mb-2">
-                                <div class="bg-secondary/10 rounded-lg p-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                                    </svg>
-                                </div>
-                                <h3 class="font-bold font-main text-neutral-800">Supporting Evidence</h3>
-                            </div>
+                        <x-disputes.info-card title="Supporting Evidence" color="secondary">
+                            <x-slot:icon>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                </svg>
+                            </x-slot:icon>
                             <div class="space-y-3">
                                 @foreach ($dispute->supporting_evidence as $index => $evidence)
                                     <div
@@ -252,24 +233,21 @@
                                     </div>
                                 @endforeach
                             </div>
-                        </div>
+                        </x-disputes.info-card>
                     @endif
                 </div>
 
                 <!-- Right Column - Meta Information -->
                 <div class="space-y-6">
                     <!-- Filed By Card -->
-                    <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 p-6">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <div class="bg-tertiary/10 rounded-lg p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-tertiary" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold font-main text-neutral-800">Filed By</h3>
-                        </div>
+                    <x-disputes.info-card title="Filed By" color="tertiary">
+                        <x-slot:icon>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-tertiary" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </x-slot:icon>
                         <div class="flex items-center space-x-3">
                             <div
                                 class="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
@@ -286,20 +264,17 @@
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </x-disputes.info-card>
 
                     <!-- Current Status Card -->
-                    <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 p-6">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <div class="bg-accent/10 rounded-lg p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold font-main text-neutral-800">Current Status</h3>
-                        </div>
+                    <x-disputes.info-card title="Current Status" color="accent">
+                        <x-slot:icon>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </x-slot:icon>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <p class="text-sm font-semibold font-secondary text-neutral-800 mb-2">
                                 {{ $dispute->status->label() }}
@@ -345,20 +320,17 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
+                    </x-disputes.info-card>
 
                     <!-- Resolution Notes Card -->
-                    <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 p-6">
-                        <div class="flex items-center space-x-2 mb-2">
-                            <div class="bg-secondary/10 rounded-lg p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                            </div>
-                            <h3 class="font-bold font-main text-neutral-800">Resolution Notes</h3>
-                        </div>
+                    <x-disputes.info-card title="Resolution Notes" color="secondary">
+                        <x-slot:icon>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </x-slot:icon>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             @if ($dispute->resolution_notes)
                                 <p class="text-neutral-700 font-secondary leading-relaxed text-sm">
@@ -375,7 +347,7 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
+                    </x-disputes.info-card>
                 </div>
             </div>
         @endif

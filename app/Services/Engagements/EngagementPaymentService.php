@@ -27,23 +27,9 @@ class EngagementPaymentService
         return $this->partialPaymentService->canProcessPayment($engagement);
     }
 
-    // Check if payment can be processed
-    public function canProcessPayment(JobEngagement $engagement): bool
-    {
-        $paymentInfo = $this->getPaymentInfo($engagement);
-
-        return $paymentInfo['can_process'];
-    }
-
     // Get latest payment for engagement
     public function getLatestPayment(JobEngagement $engagement)
     {
         return $engagement->partialPayments()->latest()->first();
-    }
-
-    // Calculate partial payment amount
-    public function calculatePartialPayment(JobEngagement $engagement): float
-    {
-        return $this->partialPaymentService->calculatePartialPayment($engagement);
     }
 }
