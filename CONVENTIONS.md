@@ -182,16 +182,12 @@ actions in one class with almost no shared state — a split candidate, not a pa
 ## 13. Security and boundaries
 
 - **`env()` never called outside `config/`** — already fully compliant, zero exceptions found.
-- **File uploads: validate in the FormRequest, store on a private disk, serve via a signed/
-  authorized route** — **not currently followed, and this is more than a style gap.**
-  `JobDeliverableController::submit()` and `PartialPaymentController::processDisputePartialPayment()`
-  both store to the `public` disk (`storage/deliverable-submissions/...`,
-  `storage/dispute-evidence/...`), which Laravel serves at a directly guessable public URL to
-  anyone — not just the engagement's two parties or an admin. Submitted work files and dispute
-  evidence are meant to be confidential. This is a real confidentiality exposure, not just an
-  inconsistency, so it's worth prioritizing above typical style findings when Module 5's turn
-  comes — though fixing it also means deciding what to do with any files already uploaded to the
-  public disk, so treat it with the same care as any other real bug fix, not a drive-by patch.
+- **File uploads: validate in the FormRequest, store on a private disk, serve via an authorized
+  route** — **fixed 2026-09-24.** `JobDeliverableController::submit()` and
+  `PartialPaymentController::processDisputePartialPayment()` now store to the `local` disk instead
+  of `public`, with two new authorization-gated download routes
+  (`EngagementAuthorizationHelper::canView()` — poster, applicant, or admin only) replacing the raw
+  `Storage::url()`/`asset('storage/...')` links that used to expose files at a guessable public URL.
 - **Named routes + route-model binding** — already fully compliant app-wide.
 - **`scopeBindings()` for nested resources** — not directly applicable; routes are flat custom
   routes, not Laravel nested-resource controllers. Revisit only if that structure changes.
@@ -211,9 +207,10 @@ actions in one class with almost no shared state — a split candidate, not a pa
   service still declares the property then assigns it in the constructor body) — purely cosmetic,
   low priority; fine to modernize opportunistically as each service's module comes up, not worth a
   dedicated pass.
-- **No queries in Blade** — mostly compliant. One confirmed violation:
-  `jobBoard/jobs/browse.blade.php` queries `Skill::where(...)` and `Software::where(...)` directly
-  in the view instead of receiving them from the controller (Module 3).
+- **No queries in Blade** — fully compliant. The one confirmed violation,
+  `jobBoard/jobs/browse.blade.php` querying `Skill::where(...)`/`Software::where(...)` directly in
+  the view, was fixed during the Module 3 pass (data now comes from
+  `JobBrowsingService::getFilterOptions()` via the controller).
 - **API Resources for JSON endpoints** — not currently used anywhere; e.g.
   `MessageTemplateController` returns raw Eloquent collections via `response()->json($templates)`.
   Real, but low priority — this app has very few JSON endpoints so far.

@@ -165,7 +165,7 @@ class JobDeliverableController extends Controller
             // Delete previously submitted files
             if (! empty($deliverable->submission_files)) {
                 foreach ($deliverable->submission_files as $file) {
-                    Storage::disk('public')->delete($file['path']);
+                    Storage::disk('local')->delete($file['path']);
                 }
             }
 
@@ -183,7 +183,7 @@ class JobDeliverableController extends Controller
         if ($request->hasFile('submission_files')) {
             foreach ($request->file('submission_files') as $file) {
                 // Store all files in one main folder instead of per-deliverable subfolders
-                $path = $file->store('deliverable-submissions', 'public');
+                $path = $file->store('deliverable-submissions', 'local');
 
                 $submissionFiles[] = [
                     'name' => $file->getClientOriginalName(),
@@ -214,6 +214,25 @@ class JobDeliverableController extends Controller
             'Deliverable Submitted Successfully',
             'The deliverable has been submitted successfully.'
         );
+    }
+
+    /**
+     * Download a submitted deliverable file. Files live on the private disk —
+     * only the engagement's poster, applicant, or an admin may download them.
+     */
+    public function downloadSubmissionFile(JobDeliverable $deliverable, int $index)
+    {
+        if (! EngagementAuthorizationHelper::canView($deliverable->engagement, Auth::user())) {
+            abort(403);
+        }
+
+        $file = $deliverable->submission_files[$index] ?? null;
+
+        if (! $file || ! Storage::disk('local')->exists($file['path'])) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->download($file['path'], $file['name']);
     }
 
     /**

@@ -293,12 +293,25 @@ cancellation, disputes, and partial payment.
 - 🔴 `EngagementNotificationHelper::sendReviewNotification()` and `::sendPaymentNotification()` are
   empty stub methods — not called from anywhere, not implemented. Either wire them up when review/
   payment notifications are actually built, or remove until then.
-- 🔴🔴 **Deliverable submissions and dispute evidence are stored on the public disk** —
-  `JobDeliverableController::submit()` and `PartialPaymentController::processDisputePartialPayment()`
-  both `store(..., 'public')`, which Laravel serves at a directly guessable URL to anyone, not just
-  the engagement's two parties or an admin. See `CONVENTIONS.md` item 13 — flagged there as a real
-  confidentiality gap worth prioritizing above typical style findings when this module's full turn
-  comes, not a drive-by fix (also needs a decision on already-uploaded files).
+- ✅ **Deliverable submissions and dispute evidence moved off the public disk.**
+  `JobDeliverableController::submit()`/`::destroy()`'s file cleanup and
+  `PartialPaymentController::processDisputePartialPayment()` now `store(...,'local')` (Laravel's
+  private disk, rooted outside the symlinked `public/storage` path) instead of `'public'`. Since
+  these files were no longer reachable via `Storage::url()`/`asset('storage/...')`, added two
+  authorization-gated download routes — `GET deliverables/{deliverable}/files/{index}/download`
+  (`JobDeliverableController::downloadSubmissionFile()`) and
+  `GET engagements/disputes/{dispute}/evidence/{index}/download`
+  (`PartialPaymentController::downloadDisputeEvidence()`) — both gated by
+  `EngagementAuthorizationHelper::canView()` (poster, applicant, or admin only), streaming the file
+  via `Storage::disk('local')->download()` rather than exposing a public path. Updated the four
+  Blade call sites that built raw `Storage::url()`/`asset('storage/...')` links
+  (`engagements-list.blade.php` ×3, `deliverables-details.blade.php`, `disputed-engagements.blade.php`)
+  to link to the new routes instead, indexing into the `submission_files`/`supporting_evidence`
+  arrays by position rather than trusting any client-supplied path. No migration of already-uploaded
+  files was needed — checked the storage directory directly and found none exist yet (this app has
+  no production deployment so there was no real user data at the old public paths). Verified with
+  `Storage::fake()` that new uploads land on `local` and not `public`, and that download access is
+  correctly granted/denied by role, before committing.
 - 🔴 **No rate limiting on payment processing or dispute submission** routes
   (`engagements.process-partial-payment`, `engagements.process-dispute-partial-payment`) —
   `CONVENTIONS.md` item 13.
