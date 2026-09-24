@@ -191,9 +191,11 @@ actions in one class with almost no shared state — a split candidate, not a pa
 - **Named routes + route-model binding** — already fully compliant app-wide.
 - **`scopeBindings()` for nested resources** — not directly applicable; routes are flat custom
   routes, not Laravel nested-resource controllers. Revisit only if that structure changes.
-- **Rate limiting on sensitive actions** — **not currently applied** to `apply`, payment processing,
-  or dispute submission routes. Only login (a custom `RateLimiter` inside `LoginForm`) and email
-  verification (`throttle:6,1`) are protected today.
+- **Rate limiting on sensitive actions** — **payment processing and dispute submission fixed
+  2026-09-24** (`throttle:10,1` on `process-partial-payment`/`accept-partial-payment`/
+  `process-dispute-partial-payment`, Module 5). `apply` (Module 4) still has none — pick up when
+  that module's turn comes. Login (a custom `RateLimiter` inside `LoginForm`) and email verification
+  (`throttle:6,1`) were already protected.
 
 ## 14. Structure and consistency
 

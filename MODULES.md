@@ -323,9 +323,13 @@ cancellation, disputes, and partial payment.
   no production deployment so there was no real user data at the old public paths). Verified with
   `Storage::fake()` that new uploads land on `local` and not `public`, and that download access is
   correctly granted/denied by role, before committing.
-- 🔴 **No rate limiting on payment processing or dispute submission** routes
-  (`engagements.process-partial-payment`, `engagements.process-dispute-partial-payment`) —
-  `CONVENTIONS.md` item 13.
+- ✅ **Rate limiting added to payment processing and dispute submission routes.** `throttle:10,1`
+  (matching the limit style already used for email verification elsewhere in this app) now wraps
+  `process-partial-payment`, `accept-partial-payment`, and `process-dispute-partial-payment` as a
+  route-group middleware. `CONVENTIONS.md` item 13 updated. Verified with 11 rapid requests that the
+  11th returns 429 before committing. `admin.disputes.resolve` left alone — already gated by
+  `role:admin`, a stronger protection than a public-facing throttle, and not part of the flagged
+  finding.
 - 🔴 **No backed enums for engagement/payment/dispute statuses** — `JobEngagement`,
   `JobPaymentDispute`, and `JobPartialPayment` each use `const STATUS_X = 'x'` string constants
   instead. Good candidate module to convert first, given `CONVENTIONS.md` item 11 recommends doing

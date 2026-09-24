@@ -104,10 +104,12 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     Route::get('/', [JobEngagementController::class, 'index'])->name('index');
     Route::get('/{id}', [JobEngagementController::class, 'showCancelledEngagement'])->name('show-cancelled');
     Route::get('/disputed/{id}', [JobEngagementController::class, 'showDisputedEngagement'])->name('show-disputed');
-    Route::post('/{id}/process-payment', [PartialPaymentController::class, 'processPartialPayment'])->name('process-partial-payment');
-    Route::post('/partial-payments/{id}/accept', [PartialPaymentController::class, 'acceptPartialPayment'])->name('accept-partial-payment');
+    Route::middleware(['throttle:10,1'])->group(function () {
+        Route::post('/{id}/process-payment', [PartialPaymentController::class, 'processPartialPayment'])->name('process-partial-payment');
+        Route::post('/partial-payments/{id}/accept', [PartialPaymentController::class, 'acceptPartialPayment'])->name('accept-partial-payment');
+        Route::post('/partial-payments/{id}/process-dispute', [PartialPaymentController::class, 'processDisputePartialPayment'])->name('process-dispute-partial-payment');
+    });
     Route::get('/partial-payments/{id}/dispute', [PartialPaymentController::class, 'disputePartialPayment'])->name('dispute-form');
-    Route::post('/partial-payments/{id}/process-dispute', [PartialPaymentController::class, 'processDisputePartialPayment'])->name('process-dispute-partial-payment');
     Route::get('/disputes/{dispute}/evidence/{index}/download', [PartialPaymentController::class, 'downloadDisputeEvidence'])->name('disputes.download-evidence');
 
     // Archive functionality
