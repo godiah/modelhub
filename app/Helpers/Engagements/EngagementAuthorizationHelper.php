@@ -91,4 +91,22 @@ class EngagementAuthorizationHelper
     {
         return $engagement->hasBeenReviewedByUser($user->id);
     }
+
+    // Check if user can manage engagement deliverables (add/approve/reject/remove) — poster only
+    public static function canManageDeliverables(JobEngagement $engagement, User $user): bool
+    {
+        return $user->id === $engagement->poster->id;
+    }
+
+    // Check if user can edit a deliverable (poster or applicant)
+    public static function canEditDeliverable(JobEngagement $engagement, User $user): bool
+    {
+        return $user->id === $engagement->poster->id || $user->id === $engagement->applicant->id;
+    }
+
+    // Check if user can submit a deliverable — applicant only
+    public static function canSubmitDeliverable(JobEngagement $engagement, User $user): bool
+    {
+        return $user->id === $engagement->applicant->id;
+    }
 }
