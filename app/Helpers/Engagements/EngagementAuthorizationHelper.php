@@ -11,23 +11,20 @@ namespace App\Helpers\Engagements;
 
 use App\Models\JobEngagement;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class EngagementAuthorizationHelper
 {
     // Check if user can view engagement
     public static function canView(JobEngagement $engagement, User $user): bool
     {
-        $application = $engagement->application;
-
-        return $user->id === $application->poster_id ||
-               $user->id === $application->applicant_id ||
-               $user->hasRole('admin');
+        return Gate::forUser($user)->allows('view', $engagement);
     }
 
     // Check if user can respond to engagement offer
     public static function canRespondToOffer(JobEngagement $engagement, User $user): bool
     {
-        return $user->id === $engagement->application->applicant_id;
+        return Gate::forUser($user)->allows('respondToOffer', $engagement);
     }
 
     // Check if user can leave a review

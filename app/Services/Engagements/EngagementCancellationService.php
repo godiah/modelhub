@@ -113,7 +113,7 @@ class EngagementCancellationService
         $user = Auth::user();
 
         // Authorization check
-        if (! $this->canViewCancelledEngagement($engagement, $user)) {
+        if (! EngagementAuthorizationHelper::canView($engagement, $user)) {
             throw new \Exception('Unauthorized Access.');
         }
 
@@ -139,7 +139,7 @@ class EngagementCancellationService
         $user = Auth::user();
 
         // Authorization check
-        if (! $this->canViewDisputedEngagement($engagement, $user)) {
+        if (! EngagementAuthorizationHelper::canView($engagement, $user)) {
             throw new \Exception('Unauthorized Access.');
         }
 
@@ -153,22 +153,6 @@ class EngagementCancellationService
             'dispute' => $engagement->cancellation->dispute ?? null,
             'partialPayment' => optional($engagement->cancellation->dispute)->partialPayment,
         ];
-    }
-
-    // Check if user can view cancelled engagement
-    protected function canViewCancelledEngagement(JobEngagement $engagement, User $user): bool
-    {
-        $application = $engagement->application;
-
-        return $user->id === $application->poster_id ||
-               $user->id === $application->applicant_id ||
-               $user->hasRole('admin');
-    }
-
-    // Check if user can view disputed engagement
-    protected function canViewDisputedEngagement(JobEngagement $engagement, User $user): bool
-    {
-        return $this->canViewCancelledEngagement($engagement, $user);
     }
 
     // Reopen job after cancellation
