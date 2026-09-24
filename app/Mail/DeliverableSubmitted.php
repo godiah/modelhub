@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Mail;
+
+use App\Models\JobDeliverable;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
+use Illuminate\Queue\SerializesModels;
+
+class DeliverableSubmitted extends Mailable implements ShouldQueue
+{
+    use Queueable, SerializesModels;
+
+    public $deliverable;
+
+    /**
+     * Create a new message instance.
+     */
+    public function __construct(JobDeliverable $deliverable)
+    {
+        $this->deliverable = $deliverable->load(
+            'engagement.applicant',
+            'engagement.job.user'
+        );
+    }
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
+    {
+        return $this->subject('New Deliverable Submitted: '.$this->deliverable->title)
+            ->markdown('emails.deliverables.submitted');
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
+    }
+}

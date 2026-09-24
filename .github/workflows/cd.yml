@@ -1,0 +1,31 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cd-production
+  cancel-in-progress: false
+
+jobs:
+  pipeline:
+    permissions:
+      contents: read
+      packages: write
+    uses: godiah/laravel-cicd/.github/workflows/laravel-cd.yml@v1.0.5
+    with:
+      github-repo-owner: 'godiah'
+      app-name-slug: 'modelhub'
+      deploy-path: '/opt/modelhub'
+      prod-domain: 'modelhub.example.com'
+      db-service-name: 'mysql'
+      has-horizon: false
+      has-tenancy: false
+      skip-migrate: false
+      has-seed: false
+      prod-ready: false
+      # Flip to true only after ModelHub has a provisioned server, real
+      # domain, production .env, and repository deployment secrets.
+    secrets: inherit

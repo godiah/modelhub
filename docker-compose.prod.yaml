@@ -1,0 +1,179 @@
+# Production Docker Compose — ModelHub
+# All secrets come from .env on the server (never committed to git).
+#
+# Usage:
+#   docker compose -f docker-compose.prod.yaml --env-file .image-tag.env up -d
+#
+# The .image-tag.env file is written by the CD pipeline on every deploy:
+#   APP_IMAGE_TAG=sha-<short>
+# When absent (e.g. manual first boot), services fall back to :latest.
+
+# Shared volumes mounted into every app-layer container (app, scheduler, queue).
+# Named volumes persist data across image upgrades and container restarts.
+x-app-volumes: &app-volumes
+  - 'storage:/var/www/html/storage'
+  - 'cache:/var/www/html/bootstrap/cache'
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # nginx — reverse proxy + static asset server (loopback only)
+  # Binds to 127.0.0.1 so the host-level reverse proxy (nginx/Caddy) is the
+  # only entry point; it handles TLS termination and forwards here over HTTP.
+  # ---------------------------------------------------------------------------
+  nginx:
+    image: ghcr.io/godiah/modelhub:nginx-${APP_IMAGE_TAG:-latest}
+    ports:
+      # Loopback-only — host nginx/Caddy handles TLS and proxies here.
+      # Change the host port if another app already uses 8080 on this server.
+      - '127.0.0.1:8080:80'
+    volumes:
+      # Needed so nginx can resolve public/storage (symlinked to
+      # storage/app/public) and actually serve locally-uploaded files —
+      # without this it 403s on any file uploaded after the image was built.
+      - 'storage:/var/www/html/storage'
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # ---------------------------------------------------------------------------
+  # app — PHP-FPM (port 9000, internal only)
+  # ---------------------------------------------------------------------------
+  app:
+    image: ghcr.io/godiah/modelhub:${APP_IMAGE_TAG:-latest}
+    expose:
+      - '9000'
+    env_file: .env
+    volumes: *app-volumes
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'sh', '-c', 'nc -z 127.0.0.1 9000 || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # ---------------------------------------------------------------------------
+  # scheduler — Laravel cron via schedule:work (shares app image)
+  # ---------------------------------------------------------------------------
+  scheduler:
+    image: ghcr.io/godiah/modelhub:${APP_IMAGE_TAG:-latest}
+    command: php artisan schedule:work
+    env_file: .env
+    volumes: *app-volumes
+    depends_on:
+      app:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # ---------------------------------------------------------------------------
+  # queue — Laravel queue worker (shares app image, no HTTP port)
+  # ---------------------------------------------------------------------------
+  queue:
+    image: ghcr.io/godiah/modelhub:${APP_IMAGE_TAG:-latest}
+    command: php artisan queue:work --tries=3 --backoff=5
+    env_file: .env
+    volumes: *app-volumes
+    stop_grace_period: 30s
+    depends_on:
+      app:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      disable: true  # queue worker — no HTTP port
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # ---------------------------------------------------------------------------
+  # mysql — primary database (internal only)
+  # Port 3307 avoids conflict with any native mysqld on the host.
+  # ---------------------------------------------------------------------------
+  mysql:
+    image: mysql:8.4
+    ports:
+      # Loopback only — connect remotely via SSH tunnel if needed.
+      - '127.0.0.1:3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    volumes:
+      - 'mysql_data:/var/lib/mysql'
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-p${DB_PASSWORD}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  # ---------------------------------------------------------------------------
+  # redis — cache, session, queue backend (internal only)
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:8-alpine
+    # AOF persistence + RDB snapshots — survives container restarts
+    command: redis-server --appendonly yes --save "900 1" --save "300 10"
+    volumes:
+      - 'redis_data:/data'
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+# Explicit network name prevents container name collisions when multiple
+# compose projects run on the same Docker host.
+networks:
+  default:
+    name: modelhub-prod
+
+volumes:
+  storage:
+  cache:
+  mysql_data:
+  redis_data:
