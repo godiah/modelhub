@@ -195,7 +195,7 @@ hire (which hands off to Module 5).
 
 ---
 
-## Module 5 — Job Engagements (contract lifecycle) 🔴
+## Module 5 — Job Engagements (contract lifecycle) 🟡
 
 The best-architected part of the codebase — worth using as the reference pattern for cleaning up
 Modules 3–4. Covers everything from "offer accepted" through deliverables, completion,
@@ -216,11 +216,23 @@ cancellation, disputes, and partial payment.
   more of elsewhere)
 
 **Findings**
-- 🔴 **Duplicated authorization logic between a Policy and a Helper.** `JobEngagementPolicy::view()`
-  and `EngagementAuthorizationHelper::canView()` implement the *exact same* check (poster, applicant,
-  or admin) independently — one will drift from the other the next time someone edits just one of
-  them. Collapse to one source of truth (the Policy is the idiomatic Laravel mechanism; have the
-  helper/services call `Gate::allows()` instead of re-implementing the boolean logic).
+- ✅ **Duplicated authorization logic between a Policy and a Helper — consolidated.** Turned out to
+  be three drift-prone duplicates, not one: `JobEngagementPolicy::view()` vs. the (then-unused)
+  `EngagementAuthorizationHelper::canView()` vs. a third private copy of the same poster/applicant/
+  admin check hand-rolled in `EngagementCancellationService::canViewCancelledEngagement()` (actually
+  called, from `getCancelledEngagementDetails()`/`getDisputedEngagementDetails()`). Also found
+  `JobEngagementPolicy::respondToOffer()` (unused) duplicated by both
+  `EngagementAuthorizationHelper::canRespondToOffer()` (used by `EngagementResponseService`) and a
+  third inline copy in `VerifyJobEngagementOwnership` middleware. `JobEngagementPolicy` is now the
+  single source of truth for both `view` and `respondToOffer`; the Helper's `canView()`/
+  `canRespondToOffer()` are thin `Gate::forUser($user)->allows(...)` wrappers (keeping the
+  Service→Helper calling convention this module already uses elsewhere); the middleware and
+  `EngagementCancellationService` now call the Helper instead of re-implementing the boolean logic.
+  The unused, wrongly-homed `JobEngagementPolicy::viewResponseForm(User, JobApplication)` (lived on
+  the Engagement policy but took a JobApplication — would not have resolved via Laravel's policy
+  auto-discovery if ever wired up) was deleted as dead code rather than force-fit into the
+  consolidation. Verified with real HTTP requests through the middleware/controller and direct
+  service calls, covering allowed and denied users at each layer, before committing.
 - 🟡 **`JobDeliverableController` still breaks the module's own pattern for auth/validation.** Every
   other controller in this module delegates auth checks to `EngagementAuthorizationHelper` and
   validation to FormRequest classes. `JobDeliverableController` does neither — permission checks are

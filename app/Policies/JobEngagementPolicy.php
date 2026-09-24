@@ -2,23 +2,13 @@
 
 namespace App\Policies;
 
-use App\Models\JobApplication;
 use App\Models\JobEngagement;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
 
 class JobEngagementPolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Determine if the user can view the response form.
-     */
-    public function viewResponseForm(User $user, JobApplication $application)
-    {
-        return $user->id === $application->applicant_id;
-    }
 
     /**
      * Determine if the user can respond to the engagement offer.

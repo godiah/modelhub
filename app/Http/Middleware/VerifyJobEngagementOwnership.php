@@ -8,6 +8,7 @@ use App\Models\JobEngagement;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -35,7 +36,7 @@ class VerifyJobEngagementOwnership
         if ($request->route('engagement')) {
             $engagement = JobEngagement::with('application')->find($request->route('engagement'));
 
-            if (! $engagement || $engagement->application->applicant_id !== Auth::id()) {
+            if (! $engagement || Gate::forUser(Auth::user())->denies('respondToOffer', $engagement)) {
                 return redirect()->route('engagements.index')->with(
                     FlashAlertHelper::error('Unauthorized', 'You are not authorized to access this page.')
                 );
