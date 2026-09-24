@@ -6,7 +6,7 @@
  * Manages job engagement lifecycle from offer response to completion.
  * Handles responses, reviews, cancellations, disputes, payments, and archiving.
  * Delegates business logic to specialized service classes for maintainability.
-*/
+ */
 
 namespace App\Http\Controllers;
 
