@@ -1,4 +1,29 @@
-@if (session('success'))
+@if (session('alert'))
+    @php
+        $alert = session('alert');
+        $alertTitle = $alert['title'] ?? ucfirst($alert['type'] ?? 'info');
+        $alertText = ($alert['text'] ?? null) !== $alertTitle ? ($alert['text'] ?? null) : null;
+    @endphp
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: '{{ $alert['type'] ?? 'info' }}',
+                title: '<span class="font-main">{{ $alertTitle }}</span>',
+                @if ($alertText)
+                html: '<span class="font-main text-dark text-sm">{{ $alertText }}</span>',
+                @endif
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                customClass: {
+                    popup: 'font-main'
+                }
+            });
+        });
+    </script>
+@elseif (session('success'))
 <script>
     document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
@@ -16,9 +41,7 @@
             });
         });
 </script>
-@endif
-
-@if (session('error'))
+@elseif (session('error'))
 <script>
     document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
@@ -36,9 +59,7 @@
             });
         });
 </script>
-@endif
-
-@if (session('warning'))
+@elseif (session('warning'))
 <script>
     document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
@@ -56,9 +77,7 @@
             });
         });
 </script>
-@endif
-
-@if (session('info'))
+@elseif (session('info'))
 <script>
     document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
