@@ -38,26 +38,16 @@ new class extends Component {
 }; ?>
 
 <section class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-    <!-- Header Section -->
-    <div class="bg-gradient-to-r from-primary to-primary/90 px-6 py-5">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                    </path>
-                </svg>
-            </div>
-            <div>
-                <h2 class="text-xl font-semibold text-white font-secondary">
-                    {{ __('Update Password') }}
-                </h2>
-                <p class="text-white/60 text-sm font-main mt-1">
-                    {{ __('Ensure your account is using a long, random password to stay secure.') }}
-                </p>
-            </div>
-        </div>
-    </div>
+    <x-section-header :title="__('Update Password')"
+        :subtitle="__('Ensure your account is using a long, random password to stay secure.')">
+        <x-slot:icon>
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                </path>
+            </svg>
+        </x-slot:icon>
+    </x-section-header>
 
     <!-- Form Section -->
     <div class="p-6">
@@ -253,23 +243,7 @@ new class extends Component {
                         {{ __('Update Password') }}
                     </button>
 
-                    <!-- Success Message -->
-                    <div x-data="{ show: false }" x-show="show" x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 transform scale-90"
-                        x-transition:enter-end="opacity-100 transform scale-100"
-                        x-transition:leave="transition ease-in duration-200"
-                        x-transition:leave-start="opacity-100 transform scale-100"
-                        x-transition:leave-end="opacity-0 transform scale-90"
-                        @password-updated.window="show = true; setTimeout(() => show = false, 3000)"
-                        class="flex items-center space-x-2 text-secondary font-medium text-sm font-main"
-                        style="display: none;">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                clip-rule="evenodd"></path>
-                        </svg>
-                        <span>{{ __('Password updated successfully!') }}</span>
-                    </div>
+                    <x-success-toast event="password-updated" :message="__('Password updated successfully!')" />
                 </div>
             </div>
         </form>
