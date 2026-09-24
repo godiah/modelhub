@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    permissions:
+      contents: write
+    uses: godiah/laravel-cicd/.github/workflows/laravel-ci.yml@v1.0.4
+    with:
+      php-version: '8.4'
+      db-type: 'mysql'
+      has-vite: true
+      has-phpstan: false
+      has-tenancy: false
+      app-name-slug: 'modelhub'
+    secrets: inherit
