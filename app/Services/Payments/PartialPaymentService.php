@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments;
 
+use App\Enums\EngagementStatus;
 use App\Enums\PartialPaymentStatus;
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\Engagements\EngagementNotificationHelper;
@@ -23,7 +24,7 @@ class PartialPaymentService
         $authUser = Auth::user();
 
         // Check if engagement is cancelled
-        if ($engagement->status !== JobEngagement::STATUS_CANCELLED) {
+        if ($engagement->status !== EngagementStatus::Cancelled) {
             return [
                 'can_process' => false,
                 'message' => 'Partial payments can only be processed for cancelled engagements.',

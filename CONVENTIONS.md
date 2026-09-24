@@ -140,12 +140,15 @@ actions in one class with almost no shared state — a split candidate, not a pa
 - **Query scopes over repeated `where` chains** — already the consistent, established pattern
   (`scopeActive`, `scopeArchived`, `scopeActiveForUser`/`scopeArchivedForUser`, `scopeDraft`, etc.
   across `ModelJob`, `JobApplication`, `JobEngagement`). Nothing to change, just keep following it.
-- **Statuses as backed enums** — **not currently used anywhere**. Every status
-  (`JobEngagement`, `JobPaymentDispute`, `JobPartialPayment`) is a `const STATUS_X = 'x'` class
-  constant; `JobApplication`/`ModelJob` don't even have constants, just bare string literals in
-  services and Blade. Genuinely valuable, but converting one touches every service/policy/Blade
-  file that references that status — do it module-by-module as each module's cleanup pass reaches
-  it (e.g. convert `JobEngagement` statuses when Module 5 comes up), not as one app-wide sweep.
+- **Statuses as backed enums** — **`JobEngagement`, `JobPaymentDispute`, and `JobPartialPayment`
+  converted 2026-09-24** (Module 5) to `App\Enums\{EngagementStatus,DisputeStatus,
+  PartialPaymentStatus}`, each with a `label()` method; the old `const STATUS_X` constants are gone.
+  Turned up three real bugs in the process (see Module 5 in `MODULES.md` for details): a dead
+  `STATUS_PENDING` constant that never matched any real value, a copy-paste status typo in
+  `respond.blade.php` that permanently greyed out a textarea that should've been editable, and three
+  status-display `match` blocks silently missing the `applicant_accepted` case. `JobApplication`/
+  `ModelJob` still use bare string literals — convert when their modules (3/4) come up, following
+  the same one-model-at-a-time, fully-verified pattern established here.
 - **`$fillable`, never `$guarded = []`** — already fully compliant, zero exceptions found.
 - **Money as `decimal:2` casts, never floats** — already fully compliant
   (`offer_amount`/`service_fee`/`net_amount`/`agreed_amount` etc. all cast correctly).

@@ -9,6 +9,7 @@
 
 namespace App\Services\Engagements;
 
+use App\Enums\EngagementStatus;
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\Engagements\EngagementNotificationHelper;
 use App\Helpers\FlashAlertHelper;
@@ -33,7 +34,7 @@ class EngagementCancellationService
         }
 
         // Check if engagement can be cancelled
-        if ($engagement->status === 'completed') {
+        if ($engagement->status === EngagementStatus::Completed) {
             return [
                 'success' => false,
                 'error' => 'Cannot cancel a completed engagement.',
@@ -118,7 +119,7 @@ class EngagementCancellationService
         }
 
         // Check engagement status
-        if (! in_array($engagement->status, ['cancelled', 'settled', 'disputed'])) {
+        if (! in_array($engagement->status, [EngagementStatus::Cancelled, EngagementStatus::Settled, EngagementStatus::Disputed])) {
             throw new \Exception('Unauthorized Action');
         }
 
@@ -144,7 +145,7 @@ class EngagementCancellationService
         }
 
         // Check engagement status
-        if (! in_array($engagement->status, ['settled', 'disputed'])) {
+        if (! in_array($engagement->status, [EngagementStatus::Settled, EngagementStatus::Disputed])) {
             throw new \Exception('Unauthorized Action');
         }
 
@@ -169,7 +170,7 @@ class EngagementCancellationService
         }
 
         // Check engagement status
-        if (! in_array($engagement->status, ['cancelled', 'settled'])) {
+        if (! in_array($engagement->status, [EngagementStatus::Cancelled, EngagementStatus::Settled])) {
             return [
                 'success' => false,
                 'error' => 'Only cancelled or settled engagements can have their jobs reopened.',

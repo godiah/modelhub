@@ -330,10 +330,34 @@ cancellation, disputes, and partial payment.
   11th returns 429 before committing. `admin.disputes.resolve` left alone — already gated by
   `role:admin`, a stronger protection than a public-facing throttle, and not part of the flagged
   finding.
-- 🔴 **No backed enums for engagement/payment/dispute statuses** — `JobEngagement`,
-  `JobPaymentDispute`, and `JobPartialPayment` each use `const STATUS_X = 'x'` string constants
-  instead. Good candidate module to convert first, given `CONVENTIONS.md` item 11 recommends doing
-  this module-by-module rather than as one sweep.
+- ✅ **All three models converted to backed enums** — `App\Enums\{DisputeStatus,PartialPaymentStatus,
+  EngagementStatus}`, each with a `label()` method. Every raw string comparison, `in_array`,
+  `@switch`, array-key lookup, and display call site had to be found and converted across the whole
+  codebase — an enum instance never equals a raw string via `===`/`==`/`switch`, so a missed site is
+  a silent bug, not a loud error. Three real, confirmed pre-existing bugs turned up along the way:
+  1. `JobEngagement::STATUS_PENDING = 'pending'` was a dead constant — `'pending'` was never a valid
+     value in the DB enum (`employer_accepted`/`applicant_accepted`/`active`/`completed`/`cancelled`/
+     `disputed`/`settled`) and nothing ever set it.
+  2. `resources/views/jobBoard/engagements/respond.blade.php`'s notes-textarea background class
+     checked `$engagement->status !== 'pending'` while every sibling condition in the same block
+     correctly checked `!== 'employer_accepted'` — a copy-paste slip that made the textarea
+     permanently show the "already responded" grey background, even for a fresh, editable offer.
+     Fixed to match its siblings.
+  3. `JobEngagement::getStatusClasses()`/`getStatusLabelAttribute()`/`getStatusIconPathAttribute()`
+     had no case for the real (if vestigial — confirmed nothing in the app ever assigns it)
+     `applicant_accepted` status, silently falling through to a gray "Unknown" badge everywhere
+     these three helpers are used. Converting the `match` blocks to switch on the enum's own cases
+     (rather than raw strings with a `default` catch-all) closed this gap and, going forward, makes
+     a genuinely missed case a loud `UnhandledMatchError` instead of a silent visual bug.
+  Also found while touching `ProjectController` (forced, since it's a direct consumer of
+  `JobEngagement::status` — not a Module 6 cleanup pass): `project.engagement.show`/
+  `.archive`/`.unarchive` routes point to `ProjectController::show()`/`archive()`/`unarchive()`
+  methods that **don't exist on the controller at all** — only `index()` is implemented. Any request
+  to those three routes throws immediately. Not fixed here — it's squarely Module 6's territory and
+  unclear what those actions should even do; flagged for when that module's turn comes.
+  Verified with real HTTP requests and direct model assertions across every status of all three
+  enums (including the previously-mishandled `applicant_accepted` case and the respond.blade.php fix)
+  before committing each of the three conversions.
 - 🟡 `jobs/engagements/policy.blade.php` (1,078 lines, a single static cancellation-policy page) and
   `engagements/disputed-engagements.blade.php` (600 lines) are the largest views in the module and
   candidates for breaking into partials, following the pattern the rest of this module already
@@ -350,6 +374,14 @@ lens over the same data Module 5 already models.
 - **Views**: `resources/views/projects/*`
 
 **Findings**
+- 🔴🔴 **Three routes point to controller methods that don't exist.** `project.engagement.show`
+  (`GET /projects/engagement/{engagement}`), `project.engagement.archive`, and
+  `project.engagement.unarchive` are registered against `ProjectController::show()`/`archive()`/
+  `unarchive()` — but `ProjectController` only implements `index()` (plus two private helpers).
+  Any request to those three routes throws immediately. Found while touching this controller for
+  the Module 5 `EngagementStatus` enum conversion (forced, since it directly queries
+  `JobEngagement::status`) — not a Module 6 pass, so not fixed; needs a decision on what these
+  actions should actually do before they're implemented.
 - 🔴 **Significant overlap with `EngagementManagementService`.** `ProjectController` hand-rolls its
   own tab-based status filtering (`getEngagementsByTab()`) and stats calculation
   (`getEngagementStats()`) directly against `JobEngagement`, duplicating query patterns

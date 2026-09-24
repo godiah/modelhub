@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EngagementStatus;
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Deliverable\ApproveDeliverableRequest;
@@ -35,7 +36,7 @@ class JobDeliverableController extends Controller
         }
 
         // Check if the engagement is in a state where deliverables can be added
-        if (in_array($engagement->status, ['cancelled', 'completed'])) {
+        if (in_array($engagement->status, [EngagementStatus::Cancelled, EngagementStatus::Completed])) {
             return $this->respondWithError(
                 'Deliverables cannot be added to this engagement in its current state.',
                 'Invalid Operation',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EngagementStatus;
 use App\Models\JobEngagement;
 use Illuminate\Http\Request;
 
@@ -40,17 +41,17 @@ class ProjectController extends Controller
             case 'all':
                 return $query->activeForUser($userId)->get(); // All except archived
             case 'active':
-                return $query->activeForUser($userId)->where('status', JobEngagement::STATUS_ACTIVE)->get();
+                return $query->activeForUser($userId)->where('status', EngagementStatus::Active)->get();
             case 'pending':
-                return $query->activeForUser($userId)->where('status', 'employer_accepted')->get();
+                return $query->activeForUser($userId)->where('status', EngagementStatus::EmployerAccepted)->get();
             case 'completed':
-                return $query->activeForUser($userId)->where('status', JobEngagement::STATUS_COMPLETED)->get();
+                return $query->activeForUser($userId)->where('status', EngagementStatus::Completed)->get();
             case 'cancelled':
-                return $query->activeForUser($userId)->where('status', JobEngagement::STATUS_CANCELLED)->get();
+                return $query->activeForUser($userId)->where('status', EngagementStatus::Cancelled)->get();
             case 'disputed':
-                return $query->activeForUser($userId)->where('status', JobEngagement::STATUS_DISPUTED)->get();
+                return $query->activeForUser($userId)->where('status', EngagementStatus::Disputed)->get();
             case 'settled':
-                return $query->activeForUser($userId)->where('status', JobEngagement::STATUS_SETTLED)->get();
+                return $query->activeForUser($userId)->where('status', EngagementStatus::Settled)->get();
             case 'archived':
                 return $query->archivedForUser($userId)->get();
             default:
@@ -67,14 +68,14 @@ class ProjectController extends Controller
 
         return [
             'total' => $allActiveEngagements->count(),
-            'active' => $allActiveEngagements->where('status', JobEngagement::STATUS_ACTIVE)->count(),
-            'pending' => $allActiveEngagements->where('status', 'employer_accepted')->count(),
-            'completed' => $allActiveEngagements->where('status', JobEngagement::STATUS_COMPLETED)->count(),
-            'cancelled' => $allActiveEngagements->where('status', JobEngagement::STATUS_CANCELLED)->count(),
-            'disputed' => $allActiveEngagements->where('status', JobEngagement::STATUS_DISPUTED)->count(),
-            'settled' => $allActiveEngagements->where('status', JobEngagement::STATUS_SETTLED)->count(),
+            'active' => $allActiveEngagements->where('status', EngagementStatus::Active)->count(),
+            'pending' => $allActiveEngagements->where('status', EngagementStatus::EmployerAccepted)->count(),
+            'completed' => $allActiveEngagements->where('status', EngagementStatus::Completed)->count(),
+            'cancelled' => $allActiveEngagements->where('status', EngagementStatus::Cancelled)->count(),
+            'disputed' => $allActiveEngagements->where('status', EngagementStatus::Disputed)->count(),
+            'settled' => $allActiveEngagements->where('status', EngagementStatus::Settled)->count(),
             'archived' => JobEngagement::archivedForUser($userId)->count(),
-            'total_earnings' => JobEngagement::where('status', JobEngagement::STATUS_COMPLETED)
+            'total_earnings' => JobEngagement::where('status', EngagementStatus::Completed)
                 ->forApplicant($userId)
                 ->sum('net_amount'),
         ];

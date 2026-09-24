@@ -9,6 +9,7 @@
 
 namespace App\Http\Requests\Deliverable;
 
+use App\Enums\EngagementStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class RejectDeliverableRequest extends FormRequest
@@ -24,7 +25,7 @@ class RejectDeliverableRequest extends FormRequest
     {
         $rules = [];
 
-        if ($this->route('deliverable')->engagement->status !== 'cancelled') {
+        if ($this->route('deliverable')->engagement->status !== EngagementStatus::Cancelled) {
             $rules['feedback'] = 'required|string|max:1000';
         }
 

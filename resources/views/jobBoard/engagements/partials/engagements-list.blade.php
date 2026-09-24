@@ -1,3 +1,4 @@
+@use('App\Enums\EngagementStatus')
 @if ($engagements->isEmpty() && $hasFilters)
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
         <div class="p-12 flex flex-col items-center justify-center text-center font-main">
@@ -68,7 +69,7 @@
                         </div>
 
                         <div class="sm:ml-4 flex font-main">
-                            @if ($isApplicant && $engagement->status === 'employer_accepted')
+                            @if ($isApplicant && $engagement->status === EngagementStatus::EmployerAccepted)
                                 <a href="{{ route('engagements.response-form', ['applicationId' => $engagement->application_id]) }}"
                                     class="mr-3 inline-flex items-center px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full border border-primary/20 hover:bg-primary/20 transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none"
@@ -111,7 +112,7 @@
                     <!-- Engagement Details Row -->
                     @include('jobBoard.engagements.partials.components.engagement-details')
 
-                    @if ($engagement->status !== 'disputed')
+                    @if ($engagement->status !== EngagementStatus::Disputed)
                         @if ($isApplicant)
                             <div class="p-6">
                                 <h4 class="font-tertiary font-semibold text-primary mb-4 flex items-center">
@@ -1182,7 +1183,7 @@
                                                 <!-- Action Buttons -->
                                                 <div class="flex flex-wrap items-center gap-3 mt-2">
                                                     <!-- Approve/Reject Deliverable -->
-                                                    @if ($deliverable->status === 'submitted' && $engagement->status === 'active')
+                                                    @if ($deliverable->status === 'submitted' && $engagement->status === EngagementStatus::Active)
                                                         <button x-data
                                                             x-on:click="$dispatch('open-modal', 'approve-deliverable-{{ $deliverable->id }}')"
                                                             class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-white bg-secondary hover:bg-secondary/90 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
@@ -1209,7 +1210,7 @@
                                                     @endif
 
                                                     <!-- Edit/Delete Deliverable -->
-                                                    @if ($deliverable->status === 'pending' && $engagement->status === 'active')
+                                                    @if ($deliverable->status === 'pending' && $engagement->status === EngagementStatus::Active)
                                                         <button x-data
                                                             x-on:click="$dispatch('open-modal', 'edit-deliverable-{{ $deliverable->id }}')"
                                                             class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-primary border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/40">
