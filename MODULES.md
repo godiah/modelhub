@@ -22,7 +22,7 @@ module's files.
 
 ---
 
-## Module 1 — Auth & Identity 🔴
+## Module 1 — Auth & Identity 🟢
 
 Breeze + Livewire Volt scaffolding, extended with custom email-OTP two-factor auth (not Breeze
 stock).
@@ -35,38 +35,79 @@ stock).
   `enableTwoFactor`/`disableTwoFactor`, `hasTwoFactorEnabled`)
 - **Mail**: `Mail\TwoFactorCode` + `emails/two-factor-code.blade.php`
 - **Layout**: `layouts/guest.blade.php`
+- **Shared components (new)**: `components/auth-card.blade.php`, `components/auth-illustration-panel.blade.php`
 
 **Findings**
-- ✅ Fixed this session: login redirect defaulted to `route('home')` instead of `route('dashboard')`.
-- ✅ Fixed this session: `User::hasTwoFactorEnabled()` null-vs-bool TypeError on freshly-created models.
-- 🔴 **`/dashboard` is Breeze's untouched placeholder** ("You're logged in!") — see Module 2. Since
-  it's literally the post-login redirect target, every user's first stop after signing in is a dead
-  page, not the real dashboard at `/my-dashboard`.
+- ✅ Fixed earlier: login redirect defaulted to `route('home')` instead of `route('dashboard')`.
+- ✅ Fixed earlier: `User::hasTwoFactorEnabled()` null-vs-bool TypeError on freshly-created models.
+- ✅ **Fixed 2026-09-24 (review pass)**: `confirm-password.blade.php` was the one auth page never
+  given the app's branded design — it rendered as plain unstyled Breeze stock while every sibling
+  page had a custom card/illustration treatment. Now uses `<x-auth-card>`, the same component
+  extracted from the other pages.
+- ✅ **Fixed**: `login.blade.php`/`register.blade.php` had 100%-identical illustration-panel markup
+  (only the description text differed) — extracted to `<x-auth-illustration-panel>`.
+  `forgot-password`/`reset-password`/`verify-email`/`confirm-password` each duplicated the same
+  card wrapper + header — extracted to `<x-auth-card>`.
+- ✅ **Fixed**: `verify-email.blade.php` hand-rolled its own status banner instead of using the
+  shared `<x-auth-session-status>` component `forgot-password.blade.php` already used. Extended
+  that component's existing status-message map (it already had this exact pattern for
+  `two-factor-code-sent`) to cover `verification-link-sent` too, rather than inlining a ternary at
+  the call site — kept the mapping in one place.
+- No controller/service/model issues found in this module — it's thin Breeze/Volt scaffolding by
+  design, nothing to centralize beyond the view layer.
 
 ---
 
-## Module 2 — User Profile & Main Dashboard 🔴
+## Module 2 — User Profile & Main Dashboard 🟢
 
 Profile editing, skills/software, social links, and the real landing dashboard (reviews, activity,
 stats).
 
-- **Routes**: `/profile`, `/dashboard` (now the real one — see finding below)
+- **Routes**: `/profile`, `/dashboard` (now the real one)
 - **Controller**: `DashBoardController`
 - **Livewire**: `livewire/profile/{delete-user-form,social-links-form,two-factor-form,update-password-form,update-profile-information-form,user-profile-form}.blade.php`
 - **Models**: `UserProfile`, `UserSocialLink`, `SocialNetwork`, `Skill`, `Software` (Skill/Software
   are shared with Module 3 — see cross-cutting note)
-- **Views**: `resources/views/profile.blade.php`, `dashboard.blade.php` (stock, dead),
-  `dashboard/index.blade.php` (real, 641 lines)
+- **Views**: `resources/views/profile.blade.php`, `dashboard/index.blade.php` (641 lines)
+- **Shared components (new)**: `components/section-header.blade.php`, `components/success-toast.blade.php`
 
 **Findings**
-- ✅ **Fixed 2026-09-24**: two competing "dashboard" views. `dashboard` route now points directly
-  at `DashBoardController@index`; the redundant `/my-dashboard` route group and the dead Breeze
+- ✅ **Fixed**: two competing "dashboard" views. `dashboard` route now points directly at
+  `DashBoardController@index`; the redundant `/my-dashboard` route group and the dead Breeze
   placeholder view are removed. The two nav bar links that pointed at `my-dashboard.index` were
-  updated. Verified via a real authenticated request.
+  updated.
+- ✅ **Fixed 2026-09-24 (review pass)**: the same gradient card-header markup was duplicated **8
+  times** across all 6 profile Livewire components plus `dashboard/index.blade.php`, with zero
+  reuse. Extracted to `<x-section-header>` (`variant: primary/danger`, optional `icon`/`action`
+  slots).
+- ✅ **Fixed, real bug**: `update-profile-information-form` and `user-profile-form` both dispatched
+  the *same* browser event (`profile-updated`), and each had its own local success-toast listener
+  for it — since both components render on the same `/profile` page, submitting **either** form
+  popped **both** success toasts simultaneously. Renamed to `profile-info-updated` and
+  `profile-details-updated`; verified via Volt component tests that each dispatches only its own
+  event now.
+- ✅ **Fixed, real bug**: `delete-user-form.blade.php` hand-rolled a full ~140-line Alpine modal
+  (focus-trap, backdrop, transitions) that duplicated the app's existing `<x-modal>` component
+  almost line for line — this is literally Breeze's stock delete-account pattern, which normally
+  just uses `<x-modal>`; this file had reimplemented it from scratch instead. Now uses
+  `<x-modal name="confirm-user-deletion" :show="$errors->isNotEmpty()" focusable>`, preserving the
+  reopen-with-errors-shown behavior (verified via a Volt test).
+- ✅ **Fixed**: 4 duplicated Alpine success-toast blocks (2 layout variants: inline-next-to-button
+  and fixed-top-right-banner) across `update-profile-information-form`, `update-password-form`,
+  `user-profile-form`, `social-links-form` — extracted to `<x-success-toast>` (`variant:
+  inline/floating`). Along the way, normalized a stray `top-10` vs `top-4` positioning drift
+  between two of the floating instances.
+- ✅ **Fixed**: two no-op `try { ... } catch (ValidationException $e) { throw $e; }` blocks
+  (functionally identical to not having the try/catch at all) in `social-links-form::save()` and
+  `user-profile-form::updateProfile()`, plus their now-unused imports.
+- ✅ **Fixed**: `update-profile-information-form`'s inline "Verification email sent successfully!"
+  banner was a third hand-rolled copy of the same status-message concept fixed in Module 1 — now
+  uses `<x-auth-session-status>`.
 - 🔴 `DashBoardController::calculateReviewStats()` and `getActivitySummary()` hand-roll raw
   `DB::table(...)` queries for counts that mostly duplicate what Eloquent relationships/scopes
   already express elsewhere (e.g. `job_engagements` status counts are already modeled in
-  `JobEngagement` scopes used by `ProjectController` — see Module 6).
+  `JobEngagement` scopes used by `ProjectController` — see Module 6). Left open — lower value,
+  touches Module 6 too, better done when that module's turn comes.
 
 ---
 
@@ -318,8 +359,9 @@ call sites from other modules)
    the other quick, standalone win. Done 2026-09-24.
 3. ✅ **Cross-cutting flash-alert helper** — done 2026-09-24. Turned out to also fix a dead-data bug
    (rich toast titles were never rendered) and a duplicate-toast bug found along the way.
-4. **Module 1 (Auth) → Module 2 (Profile/Dashboard)** — small, foundational; the routing decision
-   is already resolved (above), so what's left is the rest of Module 2's findings.
+4. ✅ **Module 1 (Auth) → Module 2 (Profile/Dashboard)** — done 2026-09-24. Found and fixed two real
+   bugs beyond the componentization work: an event-name collision causing duplicate success toasts,
+   and a hand-rolled modal duplicating the existing `<x-modal>` component.
 5. **Module 5 (Engagements)** — already the best-structured module; cleanup here is mostly
    consolidating the Policy/Helper duplication and fixing `JobDeliverableController`'s
    inconsistency, plus some view componentization. Low risk, good template-setting work.
@@ -328,6 +370,8 @@ call sites from other modules)
 7. **Module 3 (Jobs)** — wire up `JobFilterTrait`, resolve the `JobImageService` cross-domain
    leak, componentize `apply.blade.php`/`new.blade.php`.
 8. **Module 6 (Projects)** — fold into `EngagementManagementService` once Module 5 is settled.
+   `DashBoardController`'s raw `DB::table()` stat queries (flagged in Module 2) fit naturally here
+   too.
 9. **Module 7 (Messaging)** — needs a product decision (real-time or not) before code changes.
 10. **Module 8 (Notifications)** — hasn't had a deep pass yet; do that pass as part of this
     module's turn.
@@ -346,5 +390,16 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   centralizes the ~37 call sites, `flash-messages.blade.php` now actually renders the specific
   toast titles that used to be dead data, and a real duplicate-toast bug (two views double-firing
   on success) was found and fixed along the way. 4 commits, verified with a real render test before
-  committing. Next up: Module 1/2 (Auth/Profile), or Module 5 (Engagements) if that's preferred —
-  ask before picking.
+  committing.
+- **2026-09-24 (Module 1/2 pass)**: `CONVENTIONS.md` written (extracted from the Module 5 audit) as
+  the standing reference checklist for every future module review. Then read every remaining
+  Auth/Profile/Dashboard file not yet covered by earlier sessions (Volt auth pages, all 6 profile
+  Livewire components, dashboard/index.blade.php, navigation.blade.php) and applied it: 4 new shared
+  components (`auth-card`, `auth-illustration-panel`, `section-header`, `success-toast`) replacing
+  duplicated markup at ~15 call sites, plus two real bugs found and fixed — an event-name collision
+  causing duplicate success toasts on the profile page, and a hand-rolled modal in
+  `delete-user-form` duplicating the existing `<x-modal>` component. One self-inflicted bug caught
+  and fixed before commit: a nested-double-quote Blade attribute (`:subtitle="__("...")"`) broke
+  the whole component tag — caught by the verification test suite, not by inspection, which is
+  exactly why every change in this pass was verified with a real render/request before committing,
+  not just Pint+tests. 2 commits (Module 1, Module 2), both pushed. Next up: Module 5 (Engagements).
