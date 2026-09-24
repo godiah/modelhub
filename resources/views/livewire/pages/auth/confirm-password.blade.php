@@ -33,30 +33,24 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
-    </div>
+<x-auth-card :title="__('Confirm Password')"
+    :subtitle="__('This is a secure area of the application. Please confirm your password before continuing.')">
 
-    <form wire:submit="confirmPassword">
+    <form wire:submit="confirmPassword" class="space-y-4 font-main">
         <!-- Password -->
         <div>
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="password"
-                          id="password"
-                          class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
-
+            <x-input-label for="password" :value="__('Password')" class="sr-only" />
+            <x-text-input wire:model="password" id="password"
+                class="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all duration-200 focus:outline-none"
+                type="password" name="password" placeholder="{{ __('Password') }}" required
+                autocomplete="current-password" />
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('Confirm') }}
-            </x-primary-button>
-        </div>
+        <!-- Submit Button -->
+        <x-primary-button
+            class="font-secondary inline-flex items-center justify-center w-full px-6 py-3 bg-secondary border border-transparent rounded-xl font-semibold text-sm text-white tracking-widest hover:bg-teal-600 focus:bg-teal-600 active:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-secondary focus:ring-offset-2 focus:ring-secondary/50 transition-all duration-200 transform hover:shadow-lg hover:shadow-secondary/30">
+            {{ __('Confirm') }}
+        </x-primary-button>
     </form>
-</div>
+</x-auth-card>

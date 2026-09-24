@@ -1,6 +1,13 @@
 @props(['status'])
 
-@if ($status === 'two-factor-code-sent')
+@php
+    $friendlyStatuses = [
+        'two-factor-code-sent' => 'Verification code sent to your email address.',
+        'verification-link-sent' => 'A new verification link has been sent to the email address you provided during registration.',
+    ];
+@endphp
+
+@if (isset($friendlyStatuses[$status]))
     <div class="rounded-md bg-green-50 p-4">
         <div class="flex">
             <div class="flex-shrink-0">
@@ -12,7 +19,7 @@
             </div>
             <div class="ml-3">
                 <p class="text-sm font-medium text-green-800">
-                    Verification code sent to your email address.
+                    {{ $friendlyStatuses[$status] }}
                 </p>
             </div>
         </div>
