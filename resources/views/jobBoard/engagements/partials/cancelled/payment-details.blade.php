@@ -1,3 +1,4 @@
+@use('App\Enums\PartialPaymentStatus')
 <div class="space-y-6">
     {{-- Payment Summary Card --}}
     <div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
@@ -98,11 +99,11 @@
             {{-- Status Alert --}}
             @if ($payment)
                 <div
-                    class="mb-5 p-4 rounded-lg border-l-4 {{ $payment->status === 'pending' ? 'bg-amber-50 border-accent' : 'bg-green-50 border-secondary' }} shadow-sm">
+                    class="mb-5 p-4 rounded-lg border-l-4 {{ $payment->status === PartialPaymentStatus::Pending ? 'bg-amber-50 border-accent' : 'bg-green-50 border-secondary' }} shadow-sm">
                     <div class="flex items-start">
                         <div
-                            class="{{ $payment->status === 'pending' ? 'text-accent' : 'text-secondary' }} flex-shrink-0 mr-3">
-                            @if ($payment->status === 'pending')
+                            class="{{ $payment->status === PartialPaymentStatus::Pending ? 'text-accent' : 'text-secondary' }} flex-shrink-0 mr-3">
+                            @if ($payment->status === PartialPaymentStatus::Pending)
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" width="24"
                                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -120,25 +121,25 @@
                         </div>
                         <div class="flex-1">
                             <p
-                                class="text-sm font-medium {{ $payment->status === 'pending' ? 'text-amber-800' : 'text-green-800' }}">
+                                class="text-sm font-medium {{ $payment->status === PartialPaymentStatus::Pending ? 'text-amber-800' : 'text-green-800' }}">
                                 @if (Auth::user()->id === $engagement->application->poster_id)
-                                    @if ($payment->status === 'pending')
+                                    @if ($payment->status === PartialPaymentStatus::Pending)
                                         Payment processed and awaiting freelancer response.
-                                    @elseif($payment->status === 'accepted')
+                                    @elseif($payment->status === PartialPaymentStatus::Accepted)
                                         Payment has been accepted by the freelancer.
-                                    @elseif($payment->status === 'disputed')
+                                    @elseif($payment->status === PartialPaymentStatus::Disputed)
                                         Payment has been disputed by the freelancer.
-                                    @elseif($payment->status === 'finalized')
+                                    @elseif($payment->status === PartialPaymentStatus::Finalized)
                                         Payment has been finalized.
                                     @endif
                                 @elseif(Auth::user()->id === $engagement->application->applicant_id)
-                                    @if ($payment->status === 'pending')
+                                    @if ($payment->status === PartialPaymentStatus::Pending)
                                         Payment has been processed. Please review and respond.
-                                    @elseif($payment->status === 'accepted')
+                                    @elseif($payment->status === PartialPaymentStatus::Accepted)
                                         You have accepted this payment.
-                                    @elseif($payment->status === 'disputed')
+                                    @elseif($payment->status === PartialPaymentStatus::Disputed)
                                         You have disputed this payment.
-                                    @elseif($payment->status === 'finalized')
+                                    @elseif($payment->status === PartialPaymentStatus::Finalized)
                                         This payment has been finalized.
                                     @endif
                                 @endif
@@ -173,7 +174,7 @@
                                 Status
                             </dt>
                             <dd class="text-neutral-900">
-                                @switch($payment->status)
+                                @switch($payment->status->value)
                                     @case('pending')
                                         <span
                                             class="px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium inline-flex items-center">
@@ -231,7 +232,7 @@
 
                                     @default
                                         <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
-                                            {{ $payment->status }}
+                                            {{ $payment->status->label() }}
                                         </span>
                                 @endswitch
                             </dd>
@@ -279,7 +280,7 @@
                 </div>
 
                 {{-- Freelancer Actions --}}
-                @if (Auth::user()->id === $engagement->application->applicant_id && $payment->status === 'pending')
+                @if (Auth::user()->id === $engagement->application->applicant_id && $payment->status === PartialPaymentStatus::Pending)
                     <div class="mt-6">
                         <div class="flex flex-col sm:flex-row gap-2">
                             <form action="{{ route('engagements.accept-partial-payment', $payment->id) }}"

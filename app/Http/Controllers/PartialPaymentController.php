@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PartialPaymentStatus;
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Payment\ProcessDisputePartialPaymentRequest;
@@ -95,7 +96,7 @@ class PartialPaymentController extends Controller
         }
 
         // Verify payment is in pending status
-        if ($payment->status !== JobPartialPayment::STATUS_PENDING) {
+        if ($payment->status !== PartialPaymentStatus::Pending) {
             return back()->with('error', 'This payment cannot be disputed in its current state.');
         }
 
