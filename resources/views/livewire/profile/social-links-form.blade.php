@@ -3,7 +3,6 @@
 use App\Models\SocialNetwork;
 use App\Models\UserSocialLink;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 use Livewire\Volt\Component;
 
 new class extends Component {
@@ -82,17 +81,13 @@ new class extends Component {
      */
     public function save(): void
     {
-        try {
-            $validated = $this->validate([
-                'social_network_id' => 'required|exists:social_networks,id',
-                'username' => 'nullable|string|max:255',
-                'url' => 'required|url|max:500',
-                'display_name' => 'nullable|string|max:255',
-                'is_public' => 'boolean',
-            ]);
-        } catch (ValidationException $e) {
-            throw $e;
-        }
+        $validated = $this->validate([
+            'social_network_id' => 'required|exists:social_networks,id',
+            'username' => 'nullable|string|max:255',
+            'url' => 'required|url|max:500',
+            'display_name' => 'nullable|string|max:255',
+            'is_public' => 'boolean',
+        ]);
 
         $user = Auth::user();
 
@@ -198,28 +193,17 @@ new class extends Component {
 }; ?>
 
 <section class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-    <!-- Header Section -->
-    <div class="bg-gradient-to-r from-primary to-primary/90 px-6 py-5">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
-                        </path>
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="text-xl font-semibold text-white font-secondary">
-                        {{ __('Social Links') }}
-                    </h2>
-                    <p class="text-white/60 text-sm font-main mt-1">
-                        {{ __('Manage your social media profiles and website links') }}
-                    </p>
-                </div>
-            </div>
-
-            @if (!$showAddForm)
+    <x-section-header :title="__('Social Links')"
+        :subtitle="__('Manage your social media profiles and website links')">
+        <x-slot:icon>
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                </path>
+            </svg>
+        </x-slot:icon>
+        @if (!$showAddForm)
+            <x-slot:action>
                 <button wire:click="showAdd"
                     class="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary font-main">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,9 +211,9 @@ new class extends Component {
                     </svg>
                     {{ __('Add Link') }}
                 </button>
-            @endif
-        </div>
-    </div>
+            </x-slot:action>
+        @endif
+    </x-section-header>
 
     <!-- Content Section -->
     <div class="p-6">
@@ -574,23 +558,6 @@ new class extends Component {
         @endif
     </div>
 
-    <!-- Success Message -->
-    <div x-data="{ show: false }" x-show="show" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 transform translate-x-full"
-        x-transition:enter-end="opacity-100 transform translate-x-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 transform translate-x-0"
-        x-transition:leave-end="opacity-0 transform translate-x-full"
-        @social-links-updated.window="show = true; setTimeout(() => show = false, 4000)"
-        class="fixed top-10 right-4 bg-secondary/10 border border-secondary/30 text-secondary px-6 py-4 rounded-lg shadow-lg z-50"
-        style="display: none;">
-        <div class="flex items-center space-x-3">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd"></path>
-            </svg>
-            <span class="font-medium font-main">{{ __('Social links updated successfully!') }}</span>
-        </div>
-    </div>
+    <x-success-toast event="social-links-updated" :message="__('Social links updated successfully!')"
+        variant="floating" :timeout="4000" />
 </section>

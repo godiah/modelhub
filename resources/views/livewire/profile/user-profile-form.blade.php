@@ -4,7 +4,6 @@ use App\Models\Skill;
 use App\Models\Software;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\ValidationException;
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
 
@@ -73,20 +72,16 @@ new class extends Component {
      */
     public function updateProfile(): void
     {
-        try {
-            $validated = $this->validate([
-                'avatar' => 'nullable|image|max:1024',
-                'professional_info' => 'nullable|string|max:1000',
-                'location' => 'nullable|string|max:255',
-                'telephone_number' => 'nullable|string|max:20',
-                'selected_skills' => 'array',
-                'selected_skills.*' => 'exists:skills,id',
-                'selected_software' => 'array',
-                'selected_software.*' => 'exists:software,id',
-            ]);
-        } catch (ValidationException $e) {
-            throw $e;
-        }
+        $validated = $this->validate([
+            'avatar' => 'nullable|image|max:1024',
+            'professional_info' => 'nullable|string|max:1000',
+            'location' => 'nullable|string|max:255',
+            'telephone_number' => 'nullable|string|max:20',
+            'selected_skills' => 'array',
+            'selected_skills.*' => 'exists:skills,id',
+            'selected_software' => 'array',
+            'selected_software.*' => 'exists:software,id',
+        ]);
 
         $user = Auth::user();
         $profile = $user->getOrCreateProfile();
@@ -118,7 +113,7 @@ new class extends Component {
         $this->reset('avatar', 'avatar_preview');
         $this->current_avatar = $avatarPath;
 
-        $this->dispatch('profile-updated');
+        $this->dispatch('profile-details-updated');
     }
 
     /**
@@ -140,25 +135,15 @@ new class extends Component {
 }; ?>
 
 <section class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-    <!-- Header Section -->
-    <div class="bg-gradient-to-r from-primary to-primary/90 px-6 py-5">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-            </div>
-            <div>
-                <h2 class="text-xl font-semibold text-white font-secondary">
-                    {{ __('Bio Information') }}
-                </h2>
-                <p class="text-white/60 text-sm font-main mt-1">
-                    {{ __('Update your bio information, skills, and preferred tools') }}
-                </p>
-            </div>
-        </div>
-    </div>
+    <x-section-header :title="__('Bio Information')"
+        :subtitle="__('Update your bio information, skills, and preferred tools')">
+        <x-slot:icon>
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+        </x-slot:icon>
+    </x-section-header>
 
     <!-- Form Section -->
     <div class="p-6">
@@ -629,25 +614,8 @@ new class extends Component {
         </form>
     </div>
 
-    <!-- Success Message -->
-    <div x-data="{ show: false }" x-show="show" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 transform translate-x-full"
-        x-transition:enter-end="opacity-100 transform translate-x-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 transform translate-x-0"
-        x-transition:leave-end="opacity-0 transform translate-x-full"
-        @profile-updated.window="show = true; setTimeout(() => show = false, 4000)"
-        class="fixed top-4 right-4 bg-secondary/10 border border-secondary/30 text-secondary px-6 py-4 rounded-lg shadow-lg z-50"
-        style="display: none;">
-        <div class="flex items-center space-x-3">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd"></path>
-            </svg>
-            <span class="font-medium font-main">{{ __('Profile updated successfully!') }}</span>
-        </div>
-    </div>
+    <x-success-toast event="profile-details-updated" :message="__('Profile updated successfully!')"
+        variant="floating" :timeout="4000" />
 </section>
 
 <!-- Alpine.js Multi-Select Component -->
