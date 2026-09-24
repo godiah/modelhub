@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FlashAlertHelper;
 use App\Mail\DeliverableSubmitted;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
@@ -164,14 +165,7 @@ class JobDeliverableController extends Controller
             // Delete the deliverable
             $deliverable->delete();
 
-            return back()->with([
-                'success' => 'Deliverable has been removed successfully.',
-                'alert' => [
-                    'type' => 'success',
-                    'title' => 'Deliverable has been removed successfully.',
-                    'text' => 'Deliverable has been removed successfully.',
-                ],
-            ]);
+            return back()->with(FlashAlertHelper::success('Deliverable has been removed successfully.'));
         } catch (\Exception $e) {
             return $this->respondWithError(
                 'Something went wrong. Please try again.',
@@ -387,14 +381,7 @@ class JobDeliverableController extends Controller
      */
     protected function respondWith(string $status, string $message, string $title, ?string $text = null): RedirectResponse
     {
-        return redirect()->back()->with([
-            $status => $message,
-            'alert' => [
-                'type' => $status,
-                'title' => $title,
-                'text' => $text ?? $message,
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::make($status, $title, $text ?? $message));
     }
 
     /**

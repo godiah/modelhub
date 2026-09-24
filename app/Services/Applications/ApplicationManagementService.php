@@ -5,6 +5,7 @@
 namespace App\Services\Applications;
 
 use App\Helpers\Applications\ApplicationCalculationHelper;
+use App\Helpers\FlashAlertHelper;
 use App\Models\JobApplication;
 use App\Models\ModelJob;
 use App\Services\Jobs\JobImageService;
@@ -92,51 +93,35 @@ class ApplicationManagementService
         if ($existingApplication && $isDraft) {
             $prohibitedStatuses = ['submitted', 'reviewed', 'rejected', 'hired', 'withdrawn'];
             if (in_array($existingApplication->status, $prohibitedStatuses)) {
-                return [
-                    'error' => 'Cannot create a draft for this application',
-                    'alert' => [
-                        'type' => 'error',
-                        'title' => 'Action Not Allowed',
-                        'text' => 'Your application has already been '.$existingApplication->status.'. You cannot create a draft version of it.',
-                    ],
-                ];
+                return FlashAlertHelper::error(
+                    'Action Not Allowed',
+                    'Your application has already been '.$existingApplication->status.'. You cannot create a draft version of it.'
+                );
             }
         }
 
         // Prevent multiple drafts
         if ($isDraft && $existingApplication && $existingApplication->status === 'draft') {
-            return [
-                'info' => 'A draft application already exists for this job',
-                'alert' => [
-                    'type' => 'info',
-                    'title' => 'Existing Draft',
-                    'text' => 'You already have a draft application for this job. Please edit the existing draft or submit it.',
-                ],
-            ];
+            return FlashAlertHelper::info(
+                'Existing Draft',
+                'You already have a draft application for this job. Please edit the existing draft or submit it.'
+            );
         }
 
         // Prevent reapplying after deletion
         if ($existingApplicationWithDeleted && $existingApplicationWithDeleted->deleted_at) {
-            return [
-                'error' => 'You cannot reapply to this job after deleting your application',
-                'alert' => [
-                    'type' => 'error',
-                    'title' => 'Reapplication Not Allowed',
-                    'text' => 'You have previously deleted your application for this job and cannot apply again.',
-                ],
-            ];
+            return FlashAlertHelper::error(
+                'Reapplication Not Allowed',
+                'You have previously deleted your application for this job and cannot apply again.'
+            );
         }
 
         // Check for existing submitted application
         if (! $isDraft && $existingApplication && $existingApplication->status === 'submitted') {
-            return [
-                'info' => 'You have already submitted an application for this job',
-                'alert' => [
-                    'type' => 'info',
-                    'title' => 'Your Application Already Exists',
-                    'text' => 'You have already submitted an application for this job. Your previous application is still pending review.',
-                ],
-            ];
+            return FlashAlertHelper::info(
+                'Your Application Already Exists',
+                'You have already submitted an application for this job. Your previous application is still pending review.'
+            );
         }
 
         return null; // No validation errors

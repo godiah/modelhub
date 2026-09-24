@@ -10,6 +10,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Engagement\ArchiveEngagementRequest;
 use App\Http\Requests\Engagement\BrowseEngagementsRequest;
 use App\Http\Requests\Engagement\CancelEngagementRequest;
@@ -98,14 +99,9 @@ class JobEngagementController extends Controller
             $responseData = $request->getResponseData();
             $result = $this->engagementResponseService->respondToOffer($engagement, $responseData);
 
-            return redirect()->route('engagements.index')->with([
-                'success' => $result['message'],
-                'alert' => [
-                    'type' => $result['alert_type'],
-                    'title' => $result['message'],
-                    'text' => $result['alert_text'],
-                ],
-            ]);
+            return redirect()->route('engagements.index')->with(
+                FlashAlertHelper::make($result['alert_type'], $result['message'], $result['alert_text'])
+            );
         } catch (\Exception $e) {
             return redirect()->route('engagements.index')->with('error', $e->getMessage());
         }
@@ -235,23 +231,11 @@ class JobEngagementController extends Controller
         $engagementId = $request->getEngagementId();
 
         if ($this->engagementManagementService->archiveEngagement($engagementId)) {
-            return back()->with([
-                'success' => 'Engagement archived successfully.',
-                'alert' => [
-                    'type' => 'success',
-                    'title' => 'Engagement archived successfully',
-                    'text' => 'Engagement archived successfully',
-                ],
-            ]);
+            return back()->with(FlashAlertHelper::success('Engagement archived successfully'));
         } else {
-            return back()->with([
-                'error' => 'You are not authorized to archive this engagement.',
-                'alert' => [
-                    'type' => 'error',
-                    'title' => 'Authorization Error',
-                    'text' => "You don't have permission to archive this engagement.",
-                ],
-            ]);
+            return back()->with(
+                FlashAlertHelper::error('Authorization Error', "You don't have permission to archive this engagement.")
+            );
         }
     }
 
@@ -261,23 +245,11 @@ class JobEngagementController extends Controller
         $engagementId = $request->getEngagementId();
 
         if ($this->engagementManagementService->restoreEngagement($engagementId)) {
-            return back()->with([
-                'success' => 'Engagement unarchived successfully.',
-                'alert' => [
-                    'type' => 'success',
-                    'title' => 'Engagement unarchived successfully',
-                    'text' => 'Engagement unarchived successfully',
-                ],
-            ]);
+            return back()->with(FlashAlertHelper::success('Engagement unarchived successfully'));
         } else {
-            return back()->with([
-                'error' => 'You are not authorized to unarchive this engagement.',
-                'alert' => [
-                    'type' => 'error',
-                    'title' => 'Authorization Error',
-                    'text' => "You don't have permission to unarchive this engagement.",
-                ],
-            ]);
+            return back()->with(
+                FlashAlertHelper::error('Authorization Error', "You don't have permission to unarchive this engagement.")
+            );
         }
     }
 

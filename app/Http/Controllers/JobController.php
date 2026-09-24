@@ -6,6 +6,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Job\BrowseJobsRequest;
 use App\Http\Requests\Job\CheckTitleRequest;
 use App\Http\Requests\Job\StoreJobRequest;
@@ -127,27 +128,14 @@ class JobController extends Controller
     // Handle unauthorized access error
     protected function unauthorizedError()
     {
-        return redirect()->back()->with([
-            'error' => 'Unauthorized Action',
-            'alert' => [
-                'type' => 'error',
-                'title' => 'Unauthorized Action',
-                'text' => 'Unauthorized Action',
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::error('Unauthorized Action'));
     }
 
     // Handle job closed error
     protected function jobClosedError()
     {
-        return redirect()->route('jobs.browse')->with([
-            'error' => 'This job is no longer accepting new applications',
-            'alert' => [
-                'type' => 'error',
-                'title' => 'This job is no longer accepting new applications.',
-                'text' => 'This job is no longer accepting new applications.',
-                'icon' => 'error',
-            ],
-        ]);
+        return redirect()->route('jobs.browse')->with(
+            FlashAlertHelper::error('This job is no longer accepting new applications.')
+        );
     }
 }

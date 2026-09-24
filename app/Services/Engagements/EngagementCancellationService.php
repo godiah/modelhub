@@ -11,6 +11,7 @@ namespace App\Services\Engagements;
 
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\Engagements\EngagementNotificationHelper;
+use App\Helpers\FlashAlertHelper;
 use App\Models\JobEngagement;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -73,11 +74,7 @@ class EngagementCancellationService
                 'success' => true,
                 'cancellation' => $cancellation,
                 'message' => 'Engagement cancelled successfully. All parties have been notified.',
-                'alert' => [
-                    'type' => 'success',
-                    'title' => 'Engagement cancelled successfully.',
-                    'text' => 'Engagement cancelled successfully.',
-                ],
+                'alert' => FlashAlertHelper::success('Engagement cancelled successfully.')['alert'],
             ];
         } catch (\Exception $e) {
             DB::rollBack();
@@ -202,11 +199,7 @@ class EngagementCancellationService
             return [
                 'success' => true,
                 'message' => 'Job has been reopened successfully',
-                'alert' => [
-                    'type' => 'success',
-                    'title' => 'Job has been reopened successfully',
-                    'text' => 'Job has been reopened successfully',
-                ],
+                'alert' => FlashAlertHelper::success('Job has been reopened successfully')['alert'],
             ];
         } catch (\Exception $e) {
             return [

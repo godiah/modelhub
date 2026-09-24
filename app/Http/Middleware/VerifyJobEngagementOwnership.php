@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\FlashAlertHelper;
 use App\Models\JobApplication;
 use App\Models\JobEngagement;
 use Closure;
@@ -24,14 +25,9 @@ class VerifyJobEngagementOwnership
             $application = JobApplication::find($request->route('applicationId'));
 
             if (! $application || $application->applicant_id !== Auth::id()) {
-                return redirect()->route('engagements.index')->with([
-                    'error' => 'You are not authorized to access this page.',
-                    'alert' => [
-                        'type' => 'error',
-                        'title' => 'Unauthorized',
-                        'text' => 'You are not authorized to access this page.',
-                    ],
-                ]);
+                return redirect()->route('engagements.index')->with(
+                    FlashAlertHelper::error('Unauthorized', 'You are not authorized to access this page.')
+                );
             }
         }
 
@@ -40,14 +36,9 @@ class VerifyJobEngagementOwnership
             $engagement = JobEngagement::with('application')->find($request->route('engagement'));
 
             if (! $engagement || $engagement->application->applicant_id !== Auth::id()) {
-                return redirect()->route('engagements.index')->with([
-                    'error' => 'You are not authorized to access this page.',
-                    'alert' => [
-                        'type' => 'error',
-                        'title' => 'Unauthorized',
-                        'text' => 'You are not authorized to access this page.',
-                    ],
-                ]);
+                return redirect()->route('engagements.index')->with(
+                    FlashAlertHelper::error('Unauthorized', 'You are not authorized to access this page.')
+                );
             }
         }
 

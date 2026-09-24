@@ -10,6 +10,7 @@
 namespace App\Services\Engagements;
 
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
+use App\Helpers\FlashAlertHelper;
 use App\Models\JobEngagement;
 use App\Services\Payments\PartialPaymentService;
 use Illuminate\Support\Facades\Auth;
@@ -66,11 +67,10 @@ class EngagementPaymentService
             return [
                 'success' => true,
                 'message' => 'Payment for partial work has been processed successfully.',
-                'alert' => [
-                    'type' => 'success',
-                    'title' => 'Payment Processed',
-                    'text' => 'Payment for partial work has been processed successfully.',
-                ],
+                'alert' => FlashAlertHelper::success(
+                    'Payment Processed',
+                    'Payment for partial work has been processed successfully.'
+                )['alert'],
             ];
         } catch (\Exception $e) {
             DB::rollBack();
