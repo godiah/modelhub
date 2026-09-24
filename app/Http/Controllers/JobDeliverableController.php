@@ -2,27 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\FlashAlertHelper;
+use App\Http\Requests\Deliverable\ApproveDeliverableRequest;
+use App\Http\Requests\Deliverable\RejectDeliverableRequest;
+use App\Http\Requests\Deliverable\StoreDeliverableRequest;
+use App\Http\Requests\Deliverable\SubmitDeliverableRequest;
+use App\Http\Requests\Deliverable\UpdateDeliverableRequest;
 use App\Mail\DeliverableSubmitted;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 class JobDeliverableController extends Controller
 {
     /**
      * Store a newly created deliverable in storage.
      */
-    public function store(Request $request, JobEngagement $engagement)
+    public function store(StoreDeliverableRequest $request, JobEngagement $engagement)
     {
         // Check if the user has permission to add a deliverable (only job poster can add)
-        if (Auth::id() !== $engagement->poster->id) {
+        if (! EngagementAuthorizationHelper::canManageDeliverables($engagement, Auth::user())) {
             return $this->respondWithError(
                 'Only the job poster can add deliverables.',
                 'Permission Denied',
@@ -40,20 +44,7 @@ class JobDeliverableController extends Controller
         }
 
         try {
-            // Validate the request data
-            $validated = $request->validate([
-                'del_title' => 'required|string|max:255',
-                'del_description' => 'nullable|string',
-                'due_date' => 'nullable|date|after:today',
-            ]);
-
-            // Create the deliverable
-            $deliverable = $engagement->deliverables()->create([
-                'title' => $validated['del_title'],
-                'description' => $validated['del_description'] ?? null,
-                'due_date' => $validated['due_date'] ?? null,
-                'status' => 'pending',
-            ]);
+            $engagement->deliverables()->create($request->getDeliverableData());
 
             return $this->respondWithSuccess(
                 'Deliverable has been added successfully!',
@@ -72,20 +63,12 @@ class JobDeliverableController extends Controller
     /**
      * Update the specified deliverable.
      */
-    public function update(Request $request, JobDeliverable $deliverable)
+    public function update(UpdateDeliverableRequest $request, JobDeliverable $deliverable)
     {
-        // Validate the request data
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'sometimes|required|string',
-            'due_date' => 'sometimes|nullable|date|after_or_equal:today',
-        ]);
-
-        // Check if the user has permission to edit the deliverable
         $engagement = $deliverable->engagement;
 
         // Ensure user is either the employer/poster or the applicant of this job
-        if (Auth::id() !== $engagement->poster->id && Auth::id() !== $engagement->applicant->id) {
+        if (! EngagementAuthorizationHelper::canEditDeliverable($engagement, Auth::user())) {
             return $this->respondWithError(
                 'You do not have permission to edit this deliverable.',
                 'Permission Denied',
@@ -103,23 +86,8 @@ class JobDeliverableController extends Controller
         }
 
         try {
-            // Only update the fields that were provided
-            $updates = [];
-
-            if (isset($validated['title'])) {
-                $updates['title'] = $validated['title'];
-            }
-
-            if (isset($validated['description'])) {
-                $updates['description'] = $validated['description'];
-            }
-
-            if (isset($validated['due_date'])) {
-                $updates['due_date'] = $validated['due_date'];
-            }
-
-            // Update the deliverable with only the provided fields
-            $deliverable->update($updates);
+            // validated() already excludes fields absent from the request (via `sometimes`)
+            $deliverable->update($request->validated());
 
             return $this->respondWithSuccess(
                 'Deliverable updated successfully.',
@@ -140,11 +108,10 @@ class JobDeliverableController extends Controller
      */
     public function destroy(JobDeliverable $deliverable)
     {
-        // Check if the user has permission to delete the deliverable
         $engagement = $deliverable->engagement;
 
         // Ensure user is the employer/poster of this job
-        if (Auth::id() !== $engagement->poster->id) {
+        if (! EngagementAuthorizationHelper::canManageDeliverables($engagement, Auth::user())) {
             return $this->respondWithError(
                 'You do not have permission to edit this deliverable.',
                 'Permission Denied',
@@ -162,7 +129,6 @@ class JobDeliverableController extends Controller
         }
 
         try {
-            // Delete the deliverable
             $deliverable->delete();
 
             return back()->with(FlashAlertHelper::success('Deliverable has been removed successfully.'));
@@ -178,8 +144,17 @@ class JobDeliverableController extends Controller
     /**
      * Submit deliverable files and notes
      */
-    public function submit(Request $request, JobDeliverable $deliverable)
+    public function submit(SubmitDeliverableRequest $request, JobDeliverable $deliverable)
     {
+        // Ensure user is the applicant/freelancer for this engagement
+        if (! EngagementAuthorizationHelper::canSubmitDeliverable($deliverable->engagement, Auth::user())) {
+            return $this->respondWithError(
+                'You do not have permission to submit this deliverable.',
+                'Permission Denied',
+                'You do not have permission to submit this deliverable.'
+            );
+        }
+
         // Prevent submission if approved
         if ($deliverable->approved_at) {
             return redirect()->back()->withErrors(['message' => 'Approved deliverables cannot be modified.']);
@@ -202,12 +177,6 @@ class JobDeliverableController extends Controller
                 'feedback' => null,
             ]);
         }
-
-        $request->validate([
-            'submission_files' => 'array|max:5', // Limit to 5 files
-            'submission_files.*' => 'file|max:10240', // 10MB max per file
-            'submission_notes' => 'nullable|string|max:1000',
-        ]);
 
         $submissionFiles = [];
 
@@ -250,18 +219,12 @@ class JobDeliverableController extends Controller
     /**
      * Approve a deliverable
      */
-    public function approve(Request $request, JobDeliverable $deliverable)
+    public function approve(ApproveDeliverableRequest $request, JobDeliverable $deliverable)
     {
-        // Validate request
-        $validated = $request->validate([
-            'feedback' => 'nullable|string|max:1000',
-        ]);
-
-        // Check if the user has permission to approve the deliverable
         $engagement = $deliverable->engagement;
 
         // Ensure user is the employer/poster of this job
-        if (Auth::id() !== $engagement->poster->id) {
+        if (! EngagementAuthorizationHelper::canManageDeliverables($engagement, Auth::user())) {
             return $this->respondWithError(
                 'You do not have permission to edit this deliverable.',
                 'Permission Denied',
@@ -284,7 +247,7 @@ class JobDeliverableController extends Controller
             // Update the deliverable
             $deliverable->update([
                 'status' => 'approved',
-                'feedback' => $validated['feedback'] ?? null,
+                'feedback' => $request->validated('feedback'),
                 'approved_at' => now(),
                 'rejected_at' => null, // Ensure it's not rejected
             ]);
@@ -313,12 +276,12 @@ class JobDeliverableController extends Controller
     /**
      * Reject a deliverable
      */
-    public function reject(Request $request, JobDeliverable $deliverable)
+    public function reject(RejectDeliverableRequest $request, JobDeliverable $deliverable)
     {
         $engagement = $deliverable->engagement;
 
         // Ensure user is the employer/poster of this job
-        if (Auth::id() !== $engagement->poster->id) {
+        if (! EngagementAuthorizationHelper::canManageDeliverables($engagement, Auth::user())) {
             return $this->respondWithError(
                 'You do not have permission to edit this deliverable.',
                 'Permission Denied',
@@ -335,18 +298,10 @@ class JobDeliverableController extends Controller
             );
         }
 
-        // Conditional validation: feedback is required if engagement is not cancelled
-        $rules = [];
-        if ($engagement->status !== 'cancelled') {
-            $rules['feedback'] = 'required|string|max:1000';
-        }
-
-        $validated = Validator::make($request->all(), $rules)->validate();
-
         // Reject the deliverable
         $deliverable->update([
             'status' => 'rejected',
-            'feedback' => $validated['feedback'] ?? null,
+            'feedback' => $request->validated('feedback'),
             'rejected_at' => now(),
             'approved_at' => null, // Ensure it's not approved
         ]);

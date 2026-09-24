@@ -233,13 +233,25 @@ cancellation, disputes, and partial payment.
   auto-discovery if ever wired up) was deleted as dead code rather than force-fit into the
   consolidation. Verified with real HTTP requests through the middleware/controller and direct
   service calls, covering allowed and denied users at each layer, before committing.
-- 🟡 **`JobDeliverableController` still breaks the module's own pattern for auth/validation.** Every
-  other controller in this module delegates auth checks to `EngagementAuthorizationHelper` and
-  validation to FormRequest classes. `JobDeliverableController` does neither — permission checks are
-  inline (`Auth::id() !== $engagement->poster->id`, repeated 4 times in this one file) and
-  validation is inline `$request->validate([...])` instead of a dedicated Request class. (Its
-  `respondWith()` trio no longer hand-builds the flash-alert array itself — that's already fixed,
-  it now delegates to `FlashAlertHelper` — but the auth/validation inconsistency remains open.)
+- ✅ **`JobDeliverableController` auth/validation inconsistency fixed — and a real authorization
+  bypass found along the way.** `store`/`destroy`/`approve`/`reject` had four separate inline copies
+  of `Auth::id() !== $engagement->poster->id`; `update` had its own inline poster-or-applicant copy.
+  Worse: `submit()` — the action the *applicant* uses to upload their actual deliverable files — had
+  **no permission check at all**. Any authenticated user could `POST` to
+  `deliverables/{deliverable}/submit` for an engagement they had no part in and overwrite someone
+  else's submission files/notes; only route-model binding stood between the request and the
+  deliverable. Fixed by adding `canManageDeliverables()` (poster-only), `canEditDeliverable()`
+  (poster or applicant), and `canSubmitDeliverable()` (applicant-only) to
+  `EngagementAuthorizationHelper`, used at all six call sites. Validation moved to five new
+  `Http\Requests\Deliverable\*` FormRequest classes (`Store`/`Update`/`Submit`/`Approve`/
+  `RejectDeliverableRequest`), matching this module's established convention
+  (`authorize()` always `true`, permission checks stay in the Helper — same pattern as the
+  `Engagement\*` requests). As a side effect this also fixed a real bug in `store()`: validation used
+  to run *inside* a `try/catch (\Exception $e)` block, so a `ValidationException` (which extends
+  `Exception`) was being swallowed into a generic "Something went wrong" flash instead of Laravel's
+  normal field-level error response — FormRequest validation now runs before the controller method,
+  outside that catch entirely. Verified with real HTTP requests covering every role×action
+  combination (including the fixed `submit()` bypass) before committing.
 - 🔴 **`PartialPaymentController`/`AdminDisputeController` also skip FormRequests** — inline
   `$request->validate()` calls, same inconsistency.
 - 🔴 **`App\Services\Payments\PartialPaymentService::resolveDispute()` has dead/wrong code**:
