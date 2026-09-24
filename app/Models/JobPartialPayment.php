@@ -2,21 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\PartialPaymentStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class JobPartialPayment extends Model
 {
     use HasFactory;
-
-    // Payment statuses
-    const STATUS_PENDING = 'pending';
-
-    const STATUS_ACCEPTED = 'accepted';
-
-    const STATUS_DISPUTED = 'disputed';
-
-    const STATUS_FINALIZED = 'finalized';
 
     protected $fillable = [
         'engagement_id',
@@ -33,6 +25,7 @@ class JobPartialPayment extends Model
     ];
 
     protected $casts = [
+        'status' => PartialPaymentStatus::class,
         'amount' => 'decimal:2',
         'final_amount' => 'decimal:2',
         'processed_at' => 'datetime',
@@ -78,7 +71,7 @@ class JobPartialPayment extends Model
     public function markAsAccepted()
     {
         $this->update([
-            'status' => self::STATUS_ACCEPTED,
+            'status' => PartialPaymentStatus::Accepted,
             'accepted_at' => now(),
         ]);
 
@@ -91,7 +84,7 @@ class JobPartialPayment extends Model
     public function markAsDisputed($disputeId)
     {
         $this->update([
-            'status' => self::STATUS_DISPUTED,
+            'status' => PartialPaymentStatus::Disputed,
             'dispute_id' => $disputeId,
         ]);
 
@@ -104,7 +97,7 @@ class JobPartialPayment extends Model
     public function finalize($adminId, $finalAmount = null)
     {
         $this->update([
-            'status' => self::STATUS_FINALIZED,
+            'status' => PartialPaymentStatus::Finalized,
             'finalized_at' => now(),
             'finalized_by' => $adminId,
             'final_amount' => $finalAmount ?? $this->amount,
@@ -118,7 +111,7 @@ class JobPartialPayment extends Model
      */
     public function isPending()
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === PartialPaymentStatus::Pending;
     }
 
     /**
@@ -126,7 +119,7 @@ class JobPartialPayment extends Model
      */
     public function isDisputed()
     {
-        return $this->status === self::STATUS_DISPUTED;
+        return $this->status === PartialPaymentStatus::Disputed;
     }
 
     /**
@@ -134,7 +127,7 @@ class JobPartialPayment extends Model
      */
     public function isAccepted()
     {
-        return $this->status === self::STATUS_ACCEPTED;
+        return $this->status === PartialPaymentStatus::Accepted;
     }
 
     /**
@@ -142,6 +135,6 @@ class JobPartialPayment extends Model
      */
     public function isFinalized()
     {
-        return $this->status === self::STATUS_FINALIZED;
+        return $this->status === PartialPaymentStatus::Finalized;
     }
 }

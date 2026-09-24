@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments;
 
+use App\Enums\PartialPaymentStatus;
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\Engagements\EngagementNotificationHelper;
 use App\Models\JobCancellation;
@@ -107,10 +108,10 @@ class PartialPaymentService
         // Check for existing unfinalized partial payment
         $existingPartialPayment = JobPartialPayment::where('engagement_id', $engagement->id)
             ->whereIn('status', [
-                JobPartialPayment::STATUS_PENDING,
-                JobPartialPayment::STATUS_ACCEPTED,
-                JobPartialPayment::STATUS_DISPUTED,
-                JobPartialPayment::STATUS_FINALIZED,
+                PartialPaymentStatus::Pending,
+                PartialPaymentStatus::Accepted,
+                PartialPaymentStatus::Disputed,
+                PartialPaymentStatus::Finalized,
             ])
             ->first();
 
@@ -137,7 +138,7 @@ class PartialPaymentService
             $partialPayment = JobPartialPayment::create([
                 'engagement_id' => $engagement->id,
                 'amount' => $amount,
-                'status' => JobPartialPayment::STATUS_PENDING,
+                'status' => PartialPaymentStatus::Pending,
                 'notes' => $notes ?? 'Partial payment for approved deliverables',
                 'processed_by' => $authUser->id,
                 'processed_at' => now(),
@@ -198,7 +199,7 @@ class PartialPaymentService
         }
 
         // Ensure payment is pending and not already accepted/disputed
-        if ($payment->status !== JobPartialPayment::STATUS_PENDING) {
+        if ($payment->status !== PartialPaymentStatus::Pending) {
             throw new \Exception('This payment has already been accepted or disputed.');
         }
 
@@ -206,7 +207,7 @@ class PartialPaymentService
         try {
             // Update payment status
             $payment->update([
-                'status' => JobPartialPayment::STATUS_ACCEPTED,
+                'status' => PartialPaymentStatus::Accepted,
                 'accepted_at' => now(),
             ]);
 
@@ -264,7 +265,7 @@ class PartialPaymentService
         }
 
         // Ensure payment is pending and not already accepted/disputed
-        if ($payment->status !== JobPartialPayment::STATUS_PENDING) {
+        if ($payment->status !== PartialPaymentStatus::Pending) {
             throw new \Exception('This payment has already been accepted or disputed.');
         }
 
@@ -272,7 +273,7 @@ class PartialPaymentService
         try {
             // Update payment status initially
             $payment->update([
-                'status' => JobPartialPayment::STATUS_DISPUTED,
+                'status' => PartialPaymentStatus::Disputed,
             ]);
 
             // Get or create cancellation record
@@ -376,7 +377,7 @@ class PartialPaymentService
                 $payment = JobPartialPayment::create([
                     'engagement_id' => $engagement->id,
                     'amount' => $finalAmount ?? $cancellation->partial_payment_amount,
-                    'status' => JobPartialPayment::STATUS_FINALIZED,
+                    'status' => PartialPaymentStatus::Finalized,
                     'notes' => 'Payment after dispute resolution: '.$notes,
                     'processed_by' => $authUser->id,
                     'processed_at' => now(),

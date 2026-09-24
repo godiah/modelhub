@@ -57,7 +57,7 @@
                         </div>
                         <span
                             class="ml-3 flex items-center px-3 py-1 text-xs font-medium font-tertiary rounded-full
-                                @switch($payment->status)
+                                @switch($payment->status->value)
                                     @case('pending')
                                         bg-gradient-to-r from-accent/20 to-accent/40 text-accent
                                         @break
@@ -75,7 +75,7 @@
                                 @endswitch
                             ">
                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                @switch($payment->status)
+                                @switch($payment->status->value)
                                     @case('pending')
                                         <path fill-rule="evenodd"
                                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 001 1h4a1 1 0 100-2h-3V7z"
@@ -106,7 +106,7 @@
                                             clip-rule="evenodd" />
                                 @endswitch
                             </svg>
-                            {{ ucfirst($payment->status) }}
+                            {{ $payment->status->label() }}
                         </span>
                     </div>
                 </div>
