@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Notifications\DisputeCreatedNotification;
 use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
+use App\Notifications\PartialPaymentProcessedNotification;
 use Illuminate\Support\Facades\Notification;
 
 class EngagementNotificationHelper
@@ -50,14 +51,13 @@ class EngagementNotificationHelper
     // Send review notification (if needed in future)
     public static function sendReviewNotification(JobEngagement $engagement, $review): void
     {
-        // Implementation for review notifications if needed
-        // Currently not implemented in original controller
+        // No Notification class exists for this yet — needs a product decision, not a
+        // silent implementation. See MODULES.md (Module 5) for the open finding.
     }
 
-    // Send payment notification (wrapper for future payment notifications)
+    // Send partial payment processed notification to the freelancer
     public static function sendPaymentNotification(JobEngagement $engagement, $payment): void
     {
-        // Implementation for payment notifications if needed
-        // Would integrate with PartialPaymentService notifications
+        $engagement->applicant->notify(new PartialPaymentProcessedNotification($engagement, $payment));
     }
 }

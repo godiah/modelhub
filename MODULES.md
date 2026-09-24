@@ -290,9 +290,20 @@ cancellation, disputes, and partial payment.
   `::calculatePartialPayment()` turned out to also have zero external callers (only `getPaymentInfo`/
   `getLatestPayment` are actually used) — left alone since it wasn't part of the ask, but worth a
   look next time this service is touched.
-- 🔴 `EngagementNotificationHelper::sendReviewNotification()` and `::sendPaymentNotification()` are
-  empty stub methods — not called from anywhere, not implemented. Either wire them up when review/
-  payment notifications are actually built, or remove until then.
+- ✅ **`EngagementNotificationHelper::sendPaymentNotification()` wired up** — `Notifications\
+  PartialPaymentProcessedNotification` (mail + database + broadcast, plus its email Blade view) was
+  fully built but never dispatched anywhere. Wired the helper method to send it to
+  `$engagement->applicant` and called it from `PartialPaymentService::processPartialPayment()`,
+  replacing a commented-out call to a *different*, never-built class name
+  (`PartialPaymentReadyNotification`) that had been sitting there as a stale reminder. Verified with
+  `Notification::fake()` that the freelancer (not the poster) receives it.
+- 🔴 **Still open, needs a product decision, not a silent build:** `sendReviewNotification()` has no
+  backing `Notification` class at all (unlike the payment one, which just needed wiring up) — building
+  one is new feature work, not a gap-fill. Same story for two other commented-out call sites found
+  in `PartialPaymentService` referencing notification classes that were never created:
+  `PaymentAcceptedNotification` (in `acceptPartialPayment()`) and `PaymentDisputedNotification` (in
+  `disputePartialPayment()`). All three need someone to decide what the notification should say and
+  who receives it before there's anything to wire up.
 - ✅ **Deliverable submissions and dispute evidence moved off the public disk.**
   `JobDeliverableController::submit()`/`::destroy()`'s file cleanup and
   `PartialPaymentController::processDisputePartialPayment()` now `store(...,'local')` (Laravel's

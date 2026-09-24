@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
+use App\Helpers\Engagements\EngagementNotificationHelper;
 use App\Models\JobCancellation;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
@@ -163,8 +164,7 @@ class PartialPaymentService
             }
 
             // Notify the freelancer about the payment
-            // $freelancer = $engagement->applicant->user;
-            // $freelancer->notify(new PartialPaymentReadyNotification($engagement, $partialPayment));
+            EngagementNotificationHelper::sendPaymentNotification($engagement, $partialPayment);
 
             Log::info('Partial payment processed', [
                 'engagement_id' => $engagement->id,
