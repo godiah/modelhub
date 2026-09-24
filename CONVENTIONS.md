@@ -10,6 +10,11 @@ whole module already matches, say so and move on.
 files deviate from its own dominant pattern (noted below as "known exceptions") — copy the pattern,
 not those specific files.
 
+Items 1–10 come from the Module 5 audit. Items 11–15 were added 2026-09-24 from a set of
+externally-suggested conventions, each individually verified against the actual codebase (grepped,
+not assumed) before being written down here — so each one says explicitly whether it's already
+true, a real confirmed gap, or a deliberate decision already made.
+
 ---
 
 ## 1. Controllers are thin dispatchers
@@ -126,6 +131,145 @@ class because their models are related. Module 5's controllers each own one clea
 which mixes the applicant's own-application actions with the employer's applicant-review/hiring
 actions in one class with almost no shared state — a split candidate, not a pattern to copy.
 
+## 11. Data layer discipline
+
+- **Eager loading** — listings already consistently load relationships via `with()`. **Not yet
+  done**: `Model::preventLazyLoading(! app()->isProduction())` is not set anywhere in
+  `AppServiceProvider::boot()`. Cheap, safe addition — add it so N+1s fail loudly in local/testing
+  instead of silently shipping.
+- **Query scopes over repeated `where` chains** — already the consistent, established pattern
+  (`scopeActive`, `scopeArchived`, `scopeActiveForUser`/`scopeArchivedForUser`, `scopeDraft`, etc.
+  across `ModelJob`, `JobApplication`, `JobEngagement`). Nothing to change, just keep following it.
+- **Statuses as backed enums** — **not currently used anywhere**. Every status
+  (`JobEngagement`, `JobPaymentDispute`, `JobPartialPayment`) is a `const STATUS_X = 'x'` class
+  constant; `JobApplication`/`ModelJob` don't even have constants, just bare string literals in
+  services and Blade. Genuinely valuable, but converting one touches every service/policy/Blade
+  file that references that status — do it module-by-module as each module's cleanup pass reaches
+  it (e.g. convert `JobEngagement` statuses when Module 5 comes up), not as one app-wide sweep.
+- **`$fillable`, never `$guarded = []`** — already fully compliant, zero exceptions found.
+- **Money as `decimal:2` casts, never floats** — already fully compliant
+  (`offer_amount`/`service_fee`/`net_amount`/`agreed_amount` etc. all cast correctly).
+- **Soft deletes vs. archiving flags** — this is *not* a single "pick one" rule here. `JobApplication`
+  uses both `SoftDeletes` (real deletion) and its own `is_archived` flag (hide-from-view) —
+  legitimately different concepts. `JobEngagement` uses **per-actor** flags
+  (`is_archived_by_applicant`/`is_archived_by_poster`) because the two parties need to archive
+  independently of each other. `ModelJob` uses one global flag because it only has one owner. Three
+  different shapes, each matching that model's actual ownership structure — document the
+  distinction, don't force uniformity onto it.
+- **Migrations** — never edit one that's already merged/deployed; new foreign keys use
+  `foreignId()->constrained()` with an explicit `onDelete()` (already the consistent pattern in
+  sampled migrations), and index columns you filter on.
+
+## 12. Side effects and async
+
+- **Queue anything slow or external** — Mail is already consistently queued
+  (`->queue()` throughout). Nothing else external exists to extend this to yet — the payment
+  gateway integration is still a commented-out stub in `PartialPaymentService`. Apply this the
+  moment a real third-party call lands; anything payment-related should use `ShouldBeUnique` or an
+  explicit lock so a retried job can't double-process a payment.
+- **Notifications: static Helper, not Events/Listeners** — **confirmed decision, 2026-09-24**: the
+  `{Domain}NotificationHelper` static-class pattern (item 5) stays as the *only* mechanism.
+  Introducing Laravel Events/Listeners now would create two competing ways to do the same thing,
+  and nothing in the current codebase needs the decoupling Events would buy — revisit only if a
+  real case for multiple independent listeners on the same domain event shows up.
+- **Log on the throw path** — when a service throws a user-safe exception message, log the internal
+  detail with context first if there's anything non-obvious that would otherwise be lost (a bare
+  `throw new \Exception('short, already-safe message')` doesn't need it). Currently inconsistent —
+  e.g. `PartialPaymentService` logs before most of its throws, `EngagementManagementService::getResponseFormData()`
+  throws with nothing logged. Worth tightening up when each service's module comes around, not
+  urgent on its own.
+
+## 13. Security and boundaries
+
+- **`env()` never called outside `config/`** — already fully compliant, zero exceptions found.
+- **File uploads: validate in the FormRequest, store on a private disk, serve via a signed/
+  authorized route** — **not currently followed, and this is more than a style gap.**
+  `JobDeliverableController::submit()` and `PartialPaymentController::processDisputePartialPayment()`
+  both store to the `public` disk (`storage/deliverable-submissions/...`,
+  `storage/dispute-evidence/...`), which Laravel serves at a directly guessable public URL to
+  anyone — not just the engagement's two parties or an admin. Submitted work files and dispute
+  evidence are meant to be confidential. This is a real confidentiality exposure, not just an
+  inconsistency, so it's worth prioritizing above typical style findings when Module 5's turn
+  comes — though fixing it also means deciding what to do with any files already uploaded to the
+  public disk, so treat it with the same care as any other real bug fix, not a drive-by patch.
+- **Named routes + route-model binding** — already fully compliant app-wide.
+- **`scopeBindings()` for nested resources** — not directly applicable; routes are flat custom
+  routes, not Laravel nested-resource controllers. Revisit only if that structure changes.
+- **Rate limiting on sensitive actions** — **not currently applied** to `apply`, payment processing,
+  or dispute submission routes. Only login (a custom `RateLimiter` inside `LoginForm`) and email
+  verification (`throttle:6,1`) are protected today.
+
+## 14. Structure and consistency
+
+- **Service result shape** — **confirmed decision, 2026-09-24**: keep the
+  `['success' => bool, 'message'|'error' => ..., 'alert' => FlashAlertHelper::...]` array
+  convention (item 2), not a typed `ServiceResult` DTO. It's consistent across ~15 service classes
+  and was just fully centralized through `FlashAlertHelper` — a DTO would touch every service
+  method signature app-wide for a mostly cosmetic/type-safety win.
+- **Constructor injection, not static-heavy services** — already the consistent pattern for all
+  Services. Not currently using PHP 8's readonly-promoted-property constructor shorthand (every
+  service still declares the property then assigns it in the constructor body) — purely cosmetic,
+  low priority; fine to modernize opportunistically as each service's module comes up, not worth a
+  dedicated pass.
+- **No queries in Blade** — mostly compliant. One confirmed violation:
+  `jobBoard/jobs/browse.blade.php` queries `Skill::where(...)` and `Software::where(...)` directly
+  in the view instead of receiving them from the controller (Module 3).
+- **API Resources for JSON endpoints** — not currently used anywhere; e.g.
+  `MessageTemplateController` returns raw Eloquent collections via `response()->json($templates)`.
+  Real, but low priority — this app has very few JSON endpoints so far.
+
+## 15. Testing: end-to-end first
+
+Tests describe what an actor does, not how a class works. Every user-facing workflow gets a
+browser test that drives the real UI from start to finish as that actor would (e.g. applicant
+applies → poster accepts → applicant submits deliverable → poster pays → both review). Unit tests
+are not the default and aren't expected per Service.
+
+**Current state (2026-09-24)**: the entire test suite is 26 tests, all of them Breeze's stock
+Auth/Profile scaffolding — **zero coverage of any actual business logic** (Jobs, Applications,
+Engagements, Payments, Disputes, Messaging). This is a green-field adoption, not a migration away
+from an existing convention.
+
+**Tooling — confirmed decision, 2026-09-24**: Pest browser testing (Playwright-based), not Laravel
+Dusk — keeps the whole suite in one framework, matching the already-established Pest-only
+convention, with no second test runner/ChromeDriver process to manage. **Not yet installed**:
+`composer.json` currently pins `pestphp/pest: ^3.7` (locked at 3.8.7) — bumping to `^4.0` is needed
+before the first browser test can be written. Do that bump deliberately when starting the first
+E2E suite, not as a drive-by dependency change.
+
+**Organize by workflow, not by class**: `tests/Browser/Engagements/CancelEngagementTest.php`, not
+`tests/Unit/Services/EngagementCancellationServiceTest.php`. One file per workflow, one test per
+meaningful path through it (happy path, the main rejection/error path, and any branch that changes
+what the user ends up seeing).
+
+**Selectors**: target `dusk="..."` (or `data-test`) attributes, never CSS classes or copy text —
+keeps tests stable while views are still being split into partials/components under item 9.
+
+**State**: build preconditions with factories, never by clicking through earlier steps. A cancel
+test starts from a factory-made accepted engagement, not from a fresh job post. Use
+`DatabaseTruncation`/`DatabaseMigrations` (not `RefreshDatabase` — the browser runs in a separate
+process, so an in-memory sqlite `RefreshDatabase` transaction wrapping the test process wouldn't be
+visible to it).
+
+**External services**: never hit real payment, KYC, or mail providers from a browser test. Point
+the testing environment at sandbox credentials or a fake gateway once the payment integration
+exists; use Mailpit or the `log` mail driver for asserting notifications (`Mail::fake()` doesn't
+cross into the browser process).
+
+**Assert what the user sees**: the redirect lands on the right page, the `FlashAlertHelper` toast
+shows the right title/text, and the resulting state is visible in the UI. A database assertion is
+fine as a final check, but it doesn't replace the visible outcome.
+
+**Allowed non-E2E tests (the only exceptions)**:
+- Authorization matrices: HTTP feature tests covering each actor × action combination against a
+  Policy (item 4) — a browser test per combination is slow and adds nothing a Policy test doesn't
+  already prove.
+- Money and calculation logic: plain Pest tests for amounts, partial-payment splits, rounding, and
+  currency handling (e.g. `ApplicationCalculationHelper`, `PartialPaymentService::calculatePartialPayment()`).
+
+**Review finding**: a workflow with no E2E test is a finding under that module in `MODULES.md`,
+same as any other deviation — not a separate, lower-priority category of gap.
+
 ---
 
 ## How to use this doc during a module review
@@ -143,3 +287,9 @@ Record findings in `MODULES.md` under that module's section, same format as exis
 ## Status log
 
 - **2026-09-24**: Extracted from the Module 5 audit in `MODULES.md`, ahead of the Module 1/2 review.
+- **2026-09-24 (later)**: Added items 11–15 (data layer, side effects/async, security, structure,
+  testing) from a set of externally-suggested conventions — each verified against the actual
+  codebase before being written down, not assumed. Three items needed the user's own decision
+  (Events vs. Helper, ServiceResult DTO, E2E tooling) — all three resolved and recorded above. One
+  finding (deliverables/dispute-evidence stored on the public disk) flagged as higher-priority than
+  a typical style deviation — it's a real confidentiality gap, not just an inconsistency.
