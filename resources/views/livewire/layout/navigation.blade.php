@@ -334,7 +334,7 @@ new class extends Component {
                             <!-- Menu Items -->
                             <div class="py-2">
                                 <!-- Dashboard Link -->
-                                <x-dropdown-link :href="route('my-dashboard.index')" wire:navigate>
+                                <x-dropdown-link :href="route('dashboard')" wire:navigate>
                                     <x-slot name="icon">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
@@ -528,7 +528,7 @@ new class extends Component {
 
                 <!-- Mobile User Links -->
                 {{-- <div class="space-y-1">
-                    <a href="{{ route('my-dashboard.index') }}" wire:navigate
+                    <a href="{{ route('dashboard') }}" wire:navigate
                         class="flex items-center px-3 py-2 text-sm text-neutral-700 hover:text-primary 
                               hover:bg-neutral-50 rounded-lg transition-all duration-200 font-main">
                         <svg class="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -16,19 +16,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome')->name('home');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', [DashBoardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
-/**
- * User Dashboard
- */
-Route::middleware(['auth'])->prefix('my-dashboard')->name('my-dashboard.')->group(function () {
-    Route::get('/', [DashBoardController::class, 'index'])->name('index');
-});
 
 // Job Public Routes (No auth)
 Route::prefix('jobs')->name('jobs.')->group(function () {

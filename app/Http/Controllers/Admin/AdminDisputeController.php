@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\JobPaymentDispute;
-use App\Services\PartialPaymentService;
+use App\Services\Payments\PartialPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
