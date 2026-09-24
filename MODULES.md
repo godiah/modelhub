@@ -138,6 +138,9 @@ Creating, editing, browsing, and closing job listings. The "supply" side of the 
 - 🟡 `jobs/apply.blade.php` is **1,100 lines**, `jobs/new.blade.php` is 469 — both are job-posting-shaped
   forms (skills picker, software picker, image upload) that likely share significant markup with
   each other and with `jobs/edit.blade.php` (181 lines). Prime componentization target.
+- 🔴 **`jobBoard/jobs/browse.blade.php` queries models directly in the view** — `Skill::where('is_active', true)->get()`
+  and the same for `Software`, instead of receiving them from the controller
+  (`CONVENTIONS.md` item 14).
 
 ---
 
@@ -177,9 +180,11 @@ hire (which hands off to Module 5).
   already exists and only covers `view`/`update`/`delete` — extending it (or an
   `ApplicationAuthorizationHelper` mirroring Module 5's pattern) would collapse all ten into one
   place, the same fix that already happened for Engagements.
-- 🔴 The flash-message `'alert' => ['type' => ..., 'title' => ..., 'text' => ...]` response shape
-  is repeated **11 times** in this controller alone (23 times app-wide) — see the cross-cutting
-  finding at the bottom of this doc.
+- ✅ Flash-message handling already fixed app-wide (including this module) by the cross-cutting
+  `FlashAlertHelper` pass — no longer a Module 4-specific finding.
+- 🔴 **No rate limiting on `applications.store` (applying to a job)** — `CONVENTIONS.md` item 13.
+- 🔴 **`MessageTemplateController` returns raw Eloquent collections via `response()->json()`**
+  (`index()`/`store()`) instead of an API Resource — `CONVENTIONS.md` item 14.
 
 ---
 
@@ -209,13 +214,13 @@ cancellation, disputes, and partial payment.
   or admin) independently — one will drift from the other the next time someone edits just one of
   them. Collapse to one source of truth (the Policy is the idiomatic Laravel mechanism; have the
   helper/services call `Gate::allows()` instead of re-implementing the boolean logic).
-- 🔴 **`JobDeliverableController` breaks the module's own pattern.** Every other controller in this
-  module delegates auth checks to `EngagementAuthorizationHelper` and validation to FormRequest
-  classes. `JobDeliverableController` does neither — permission checks are inline
-  (`Auth::id() !== $engagement->poster->id`, repeated 4 times in this one file) and validation is
-  inline `$request->validate([...])` instead of a dedicated Request class. It also defines its own
-  local `respondWith()`/`respondWithSuccess()`/`respondWithError()` trio — a third independent
-  implementation of the same flash-alert shape every other controller hand-rolls differently.
+- 🟡 **`JobDeliverableController` still breaks the module's own pattern for auth/validation.** Every
+  other controller in this module delegates auth checks to `EngagementAuthorizationHelper` and
+  validation to FormRequest classes. `JobDeliverableController` does neither — permission checks are
+  inline (`Auth::id() !== $engagement->poster->id`, repeated 4 times in this one file) and
+  validation is inline `$request->validate([...])` instead of a dedicated Request class. (Its
+  `respondWith()` trio no longer hand-builds the flash-alert array itself — that's already fixed,
+  it now delegates to `FlashAlertHelper` — but the auth/validation inconsistency remains open.)
 - 🔴 **`PartialPaymentController`/`AdminDisputeController` also skip FormRequests** — inline
   `$request->validate()` calls, same inconsistency.
 - 🔴 **`App\Services\Payments\PartialPaymentService::resolveDispute()` has dead/wrong code**:
@@ -228,6 +233,19 @@ cancellation, disputes, and partial payment.
 - 🔴 `EngagementNotificationHelper::sendReviewNotification()` and `::sendPaymentNotification()` are
   empty stub methods — not called from anywhere, not implemented. Either wire them up when review/
   payment notifications are actually built, or remove until then.
+- 🔴🔴 **Deliverable submissions and dispute evidence are stored on the public disk** —
+  `JobDeliverableController::submit()` and `PartialPaymentController::processDisputePartialPayment()`
+  both `store(..., 'public')`, which Laravel serves at a directly guessable URL to anyone, not just
+  the engagement's two parties or an admin. See `CONVENTIONS.md` item 13 — flagged there as a real
+  confidentiality gap worth prioritizing above typical style findings when this module's full turn
+  comes, not a drive-by fix (also needs a decision on already-uploaded files).
+- 🔴 **No rate limiting on payment processing or dispute submission** routes
+  (`engagements.process-partial-payment`, `engagements.process-dispute-partial-payment`) —
+  `CONVENTIONS.md` item 13.
+- 🔴 **No backed enums for engagement/payment/dispute statuses** — `JobEngagement`,
+  `JobPaymentDispute`, and `JobPartialPayment` each use `const STATUS_X = 'x'` string constants
+  instead. Good candidate module to convert first, given `CONVENTIONS.md` item 11 recommends doing
+  this module-by-module rather than as one sweep.
 - 🟡 `jobs/engagements/policy.blade.php` (1,078 lines, a single static cancellation-policy page) and
   `engagements/disputed-engagements.blade.php` (600 lines) are the largest views in the module and
   candidates for breaking into partials, following the pattern the rest of this module already
@@ -348,6 +366,16 @@ call sites from other modules)
   Helper pattern works well when used consistently; Module 4 shows what happens when it isn't
   (10 independent inline copies of the same check). Worth picking one mechanism and using it
   everywhere — Policies are the Laravel-idiomatic choice given two already exist.
+- 🔴 **`Model::preventLazyLoading()` is never set.** `AppServiceProvider::boot()` only registers the
+  `JobApplicationObserver` — no lazy-loading guard for local/testing. Cheap, safe, app-wide fix
+  (`CONVENTIONS.md` item 11); do it whenever any module's turn touches `AppServiceProvider`, no
+  need to wait for a dedicated pass.
+- 🔴🔴 **Zero test coverage of any actual business logic.** The whole suite is 26 tests, all Breeze's
+  stock Auth/Profile scaffolding — nothing covers Jobs, Applications, Engagements, Payments,
+  Disputes, or Messaging. `CONVENTIONS.md` item 15 sets the going-forward testing convention
+  (E2E-first, Pest browser testing once `pestphp/pest` is bumped to `^4.0`). A workflow with no
+  test is itself a finding under that workflow's module, same as any other deviation — not tracked
+  separately here.
 
 ---
 
@@ -403,3 +431,16 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   the whole component tag — caught by the verification test suite, not by inspection, which is
   exactly why every change in this pass was verified with a real render/request before committing,
   not just Pint+tests. 2 commits (Module 1, Module 2), both pushed. Next up: Module 5 (Engagements).
+- **2026-09-24 (conventions review)**: User supplied a second batch of suggested conventions (data
+  layer, async/side-effects, security, structure, testing). Each was individually verified against
+  the actual codebase before being added — most turned out to already be followed
+  (`$fillable`, `decimal:2` money, `env()` discipline, query scopes, constructor injection, named
+  routes/route-model-binding), a handful are real confirmed gaps now tracked per-module above
+  (no `preventLazyLoading`, no backed enums, no rate limiting on sensitive actions, one
+  query-in-Blade, one raw-model JSON response, inconsistent logging-before-throw), and one is a
+  real confidentiality issue rather than a style gap (deliverables/dispute-evidence on the public
+  disk — Module 5). Three items needed the user's own decision and got one: keep the
+  `EngagementNotificationHelper`-style static Helper pattern (no Events), keep the array-shaped
+  service result (no `ServiceResult` DTO), and Pest browser testing over Dusk for the E2E suite
+  once it starts. `CONVENTIONS.md` items 11–15 record all of this. No code changed in this pass —
+  it was a conventions/documentation update only.
