@@ -134,19 +134,14 @@
             <!-- Main Content Sections -->
             <div class="space-y-6">
                 <!-- Section 1: Cancellation Overview -->
-                <section id="cancellation-overview" class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">1. Cancellation Overview</h3>
-                            </div>
-                        </div>
-                        <div class="px-6 py-5 font-main text-neutral-700">
+                <x-policy.section id="cancellation-overview" number="1" title="Cancellation Overview">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </x-slot:icon>
                             <p class="mb-4">Either the Client or the Freelancer may cancel an engagement at any time
                                 for any reason. All cancellations must include:</p>
 
@@ -180,25 +175,17 @@
                                     <span>A review of submitted deliverables (if any).</span>
                                 </li>
                             </ul>
-                        </div>
-                    </div>
-                </section>
+                </x-policy.section>
 
                 <!-- Section 2: Handling Deliverables -->
-                <section id="handling-deliverables" class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25-2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">2. Handling Deliverables Upon
-                                    Cancellation</h3>
-                            </div>
-                        </div>
-                        <div class="px-6 py-5 font-main text-neutral-700">
+                <x-policy.section id="handling-deliverables" number="2" title="Handling Deliverables Upon Cancellation">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25-2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                    </x-slot:icon>
                             <p class="mb-4">Upon cancellation, the platform will identify whether any deliverables
                                 have been:</p>
 
@@ -235,24 +222,17 @@
                                         final and eligible for payment.</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
+                </x-policy.section>
 
                 <!-- Section 3: Payment Eligibility -->
-                <section id="payment-eligibility" class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">3. Payment Eligibility</h3>
-                            </div>
-                        </div>
-                        <div class="px-6 py-5 font-main text-neutral-700">
+                <x-policy.section id="payment-eligibility" number="3" title="Payment Eligibility">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+                        </svg>
+                    </x-slot:icon>
                             <div class="mb-6">
                                 <h4 class="text-md font-tertiary font-semibold mb-3 text-primary">A. Approved
                                     Deliverables</h4>
@@ -315,25 +295,17 @@
                                     </li>
                                 </ul>
                             </div>
-                        </div>
-                    </div>
-                </section>
+                </x-policy.section>
 
                 <!-- Section 4: Payment Processing Flow  -->
-                <section id="payment-processing" class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">4. Payment Processing Flow
-                                </h3>
-                            </div>
-                        </div>
-                        <div class="px-6 py-5 font-main text-neutral-700">
+                <x-policy.section id="payment-processing" number="4" title="Payment Processing Flow">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
+                        </svg>
+                    </x-slot:icon>
                             <div class="mb-6">
                                 <div
                                     class="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent font-medium text-sm mb-3">
@@ -420,25 +392,17 @@
                                 <p class="text-sm">Both parties will receive a detailed cancellation summary that
                                     outlines the approved deliverables, payment amounts, and next steps.</p>
                             </div>
-                        </div>
-                    </div>
-                </section>
+                </x-policy.section>
 
                 <!-- Section 5: Escrow and Fund Release -->
-                <section id="escrow" class="bg-white rounded-lg shadow-md overflow-hidden mt-6">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">5. Escrow and Fund Release
-                                </h3>
-                            </div>
-                        </div>
-                        <div class="px-6 py-5 font-main text-neutral-700">
+                <x-policy.section id="escrow" number="5" title="Escrow and Fund Release">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+                        </svg>
+                    </x-slot:icon>
                             <ul class="space-y-3">
                                 <li class="flex items-start">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -500,24 +464,17 @@
                                         third-party accounts separate from platform operating funds.</p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
+                </x-policy.section>
 
                 <!-- Section 6: Dispute Resolution -->
-                <section id="dispute" class="bg-white rounded-lg shadow-md overflow-hidden mt-6">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 12.75c1.148 0 2.278.08 3.383.237 1.037.146 1.866.966 1.866 2.013 0 3.728-2.35 6.75-5.25 6.75S6.75 18.728 6.75 15c0-1.046.83-1.867 1.866-2.013A24.204 24.204 0 0112 12.75zm0 0c2.883 0 5.647.508 8.207 1.44a23.91 23.91 0 01-1.152 6.06M12 12.75c-2.883 0-5.647.508-8.208 1.44.125 2.104.52 4.136 1.153 6.06M12 12.75a2.25 2.25 0 002.248-2.354M12 12.75a2.25 2.25 0 01-2.248-2.354M12 8.25c.995 0 1.971-.08 2.922-.236.403-.066.74-.358.795-.762a3.778 3.778 0 00-.399-2.25M12 8.25c-.995 0-1.97-.08-2.922-.236-.402-.066-.74-.358-.795-.762a3.734 3.734 0 01.4-2.253M12 8.25a2.25 2.25 0 00-2.248 2.146M12 8.25a2.25 2.25 0 012.248 2.146M8.683 5a6.032 6.032 0 01-1.155-1.002c.07-.63.27-1.222.574-1.747m.581 2.749A3.75 3.75 0 0115.318 5m0 0c.427-.283.815-.62 1.155-.999a4.471 4.471 0 00-.575-1.752M4.921 6a24.048 24.048 0 00-.392 3.314c1.668.546 3.416.914 5.223 1.082M19.08 6c.205 1.08.337 2.187.392 3.314a23.882 23.882 0 01-5.223 1.082" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">6. Dispute Resolution</h3>
-                            </div>
-                        </div>
-                        <div class="px-6 py-5 font-main text-neutral-700">
+                <x-policy.section id="dispute" number="6" title="Dispute Resolution">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 12.75c1.148 0 2.278.08 3.383.237 1.037.146 1.866.966 1.866 2.013 0 3.728-2.35 6.75-5.25 6.75S6.75 18.728 6.75 15c0-1.046.83-1.867 1.866-2.013A24.204 24.204 0 0112 12.75zm0 0c2.883 0 5.647.508 8.207 1.44a23.91 23.91 0 01-1.152 6.06M12 12.75c-2.883 0-5.647.508-8.208 1.44.125 2.104.52 4.136 1.153 6.06M12 12.75a2.25 2.25 0 002.248-2.354M12 12.75a2.25 2.25 0 01-2.248-2.354M12 8.25c.995 0 1.971-.08 2.922-.236.403-.066.74-.358.795-.762a3.778 3.778 0 00-.399-2.25M12 8.25c-.995 0-1.97-.08-2.922-.236-.402-.066-.74-.358-.795-.762a3.734 3.734 0 01.4-2.253M12 8.25a2.25 2.25 0 00-2.248 2.146M12 8.25a2.25 2.25 0 012.248 2.146M8.683 5a6.032 6.032 0 01-1.155-1.002c.07-.63.27-1.222.574-1.747m.581 2.749A3.75 3.75 0 0115.318 5m0 0c.427-.283.815-.62 1.155-.999a4.471 4.471 0 00-.575-1.752M4.921 6a24.048 24.048 0 00-.392 3.314c1.668.546 3.416.914 5.223 1.082M19.08 6c.205 1.08.337 2.187.392 3.314a23.882 23.882 0 01-5.223 1.082" />
+                        </svg>
+                    </x-slot:icon>
                             <p class="mb-4">If either party disagrees with the payment outcome:</p>
 
                             <ul class="space-y-3">
@@ -664,24 +621,17 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
+                </x-policy.section>
 
                 <!-- Section 7: Platform Rights -->
-                <section id="platform-rights" class="bg-white rounded-lg shadow-md overflow-hidden mt-6">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">7. Platform Rights</h3>
-                            </div>
-                        </div>
-                        <div class="px-6 py-5 font-main text-neutral-700">
+                <x-policy.section id="platform-rights" number="7" title="Platform Rights">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                        </svg>
+                    </x-slot:icon>
                             <p class="mb-4">{{ config('app.name') }} reserves the right to:</p>
 
                             <ul class="space-y-3">
@@ -742,24 +692,17 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
+                </x-policy.section>
 
                 <!-- Section 8: Communication and Notifications -->
-                <section id="communication" class="bg-white rounded-lg shadow-md overflow-hidden mt-6">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">8. Communication and
-                                    Notifications</h3>
-                            </div>
-                        </div>
+                <x-policy.section id="communication" number="8" title="Communication and Notifications">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                        </svg>
+                    </x-slot:icon>
                         <div class="px-6 py-5 font-main text-neutral-700">
                             <p class="mb-4">All actions in the cancellation flow will trigger platform notifications
                                 and email alerts to both parties to ensure transparency and timely resolution.</p>
@@ -835,24 +778,17 @@
                                     </svg>
                                 </a>
                             </div>
-                        </div>
-                    </div>
-                </section>
+                </x-policy.section>
 
                 <!-- Section 9: Policy Updates -->
-                <section id="policy-updates" class="bg-white rounded-lg shadow-md overflow-hidden mt-6">
-                    <div class="border-l-4 border-secondary">
-                        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                                </svg>
-                                <h3 class="text-lg font-tertiary font-bold text-primary">9. Policy Updates</h3>
-                            </div>
-                        </div>
-                        <div class="px-6 py-5 font-main text-neutral-700">
+                <x-policy.section id="policy-updates" number="9" title="Policy Updates">
+                    <x-slot:icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                        </svg>
+                    </x-slot:icon>
                             <p>This policy is subject to change. Users will be notified of significant changes via email
                                 and platform notification.</p>
 
@@ -1070,8 +1006,7 @@
                                     updates,
                                     users agree to abide by the modified terms.</p>
                             </div>
-                        </div>
-                </section>
+                </x-policy.section>
             </div>
         </div>
     </div>
