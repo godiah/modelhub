@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\EngagementStatus;
 use App\Models\JobEngagement;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -33,7 +34,7 @@ class JobEngagementPolicy
     {
         // User can message if they are the client or freelancer AND the engagement is active
         return ($user->id === $engagement->application->poster_id || $user->id === $engagement->application->applicant_id)
-            && in_array($engagement->status, ['active', 'cancelled']);
+            && in_array($engagement->status, [EngagementStatus::Active, EngagementStatus::Cancelled]);
     }
 
     /**

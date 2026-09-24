@@ -1,3 +1,4 @@
+@use('App\Enums\EngagementStatus')
 <!-- Engagement Details Row -->
 <div
     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 mx-auto bg-gradient-to-r from-neutral-50 to-neutral-100 border border-neutral-200">
@@ -87,7 +88,7 @@
         </div>
         <div>
             <p class="text-xs text-neutral-500 font-main">Communication</p>
-            @if ($engagement->status === 'active' || $engagement->status === 'cancelled')
+            @if ($engagement->status === EngagementStatus::Active || $engagement->status === EngagementStatus::Cancelled)
                 <button @click="$dispatch('open-message-modal', { engagementId: {{ $engagement->id }} })"
                     class="relative mt-1 inline-flex items-center px-3 py-1 text-xs font-medium rounded-full text-accent bg-accent/10 hover:bg-accent/20 transition-colors border border-accent/20">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"

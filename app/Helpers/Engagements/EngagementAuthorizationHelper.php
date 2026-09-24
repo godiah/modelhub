@@ -9,6 +9,7 @@
 
 namespace App\Helpers\Engagements;
 
+use App\Enums\EngagementStatus;
 use App\Models\JobEngagement;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
@@ -34,7 +35,7 @@ class EngagementAuthorizationHelper
 
         return ($user->id === $application->poster_id ||
                 $user->id === $application->applicant_id) &&
-               in_array($engagement->status, ['completed', 'cancelled', 'settled']);
+               in_array($engagement->status, [EngagementStatus::Completed, EngagementStatus::Cancelled, EngagementStatus::Settled]);
     }
 
     // Check if user can cancel engagement
@@ -58,7 +59,7 @@ class EngagementAuthorizationHelper
     public static function canReopenJob(JobEngagement $engagement, User $user): bool
     {
         return $user->id === $engagement->application->poster_id &&
-               in_array($engagement->status, ['cancelled', 'settled']);
+               in_array($engagement->status, [EngagementStatus::Cancelled, EngagementStatus::Settled]);
     }
 
     // Check if user can archive engagement

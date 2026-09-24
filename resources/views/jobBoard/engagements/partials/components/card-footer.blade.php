@@ -1,3 +1,4 @@
+@use('App\Enums\EngagementStatus')
 <!-- Engagement Card Footer -->
 <div class="bg-white border-t border-neutral-200">
     <div class="py-2 px-4">
@@ -71,10 +72,10 @@
 
             <!-- Cancel Engagement or Budget Card -->
             @if (
-                $engagement->status !== 'completed' &&
-                    $engagement->status !== 'cancelled' &&
-                    $engagement->status !== 'settled' &&
-                    $engagement->status !== 'disputed')
+                $engagement->status !== EngagementStatus::Completed &&
+                    $engagement->status !== EngagementStatus::Cancelled &&
+                    $engagement->status !== EngagementStatus::Settled &&
+                    $engagement->status !== EngagementStatus::Disputed)
                 <!-- Cancel Engagement Card  -->
                 <div
                     class="flex items-start bg-red-50 p-4 rounded-lg transition-all hover:shadow-md border border-red-100">
@@ -120,7 +121,7 @@
         </div>
 
         <!-- Action buttons -->
-        @if ($isApplicant && $engagement->status === 'employer_accepted')
+        @if ($isApplicant && $engagement->status === EngagementStatus::EmployerAccepted)
             <div class="pt-2 flex justify-end">
                 <a href="{{ route('engagements.response-form', ['applicationId' => $engagement->application_id]) }}"
                     class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300">
@@ -153,7 +154,7 @@
                     <button
                         @click="$dispatch('open-review-modal', { 
                           id: {{ $engagement->id }}, 
-                          status: '{{ $engagement->status }}'
+                          status: '{{ $engagement->status->value }}'
                         })"
                         class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
@@ -189,7 +190,7 @@
                 @endif
             @endif
             <!-- Reopen Job Section (for clients only) -->
-            @if (in_array($engagement->status, ['cancelled', 'settled']) &&
+            @if (in_array($engagement->status, [EngagementStatus::Cancelled, EngagementStatus::Settled]) &&
                     Auth::id() === $engagement->application->poster_id &&
                     !$engagement->job->is_active)
                 <form action="{{ route('engagements.reopen-job', $engagement) }}" method="POST">

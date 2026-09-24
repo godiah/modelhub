@@ -1,4 +1,5 @@
 @use('App\Enums\DisputeStatus')
+@use('App\Enums\EngagementStatus')
 <x-app-layout>
     <x-slot name="header">
         @if (Auth::user()->hasRole('admin'))
@@ -123,7 +124,7 @@
                 </div>
 
                 <!-- Progress Bar / Timeline -->
-                @if ($engagement->status === 'disputed' || $engagement->status === 'settled')
+                @if ($engagement->status === EngagementStatus::Disputed || $engagement->status === EngagementStatus::Settled)
                     <div class="bg-neutral-50 p-4 border-t border-neutral-200">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs font-medium text-neutral-500">Dispute Resolution Progress</span>

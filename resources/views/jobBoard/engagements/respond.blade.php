@@ -1,4 +1,5 @@
 <!-- resources/views/jobBoard/engagements/respond.blade.php -->
+@use('App\Enums\EngagementStatus')
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -193,7 +194,7 @@
                 @csrf
 
                 <div class="space-y-6">
-                    @if ($engagement->status !== 'employer_accepted')
+                    @if ($engagement->status !== EngagementStatus::EmployerAccepted)
                         <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 mr-2"
@@ -202,9 +203,9 @@
                                         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <p class="text-amber-800 font-medium">
-                                    You have already {{ $engagement->status === 'active' ? 'accepted' : 'declined' }}
+                                    You have already {{ $engagement->status === EngagementStatus::Active ? 'accepted' : 'declined' }}
                                     this offer on
-                                    {{ $engagement->status === 'active' ? $engagement->started_at->format('M d, Y') : $engagement->cancelled_at->format('M d, Y') }}.
+                                    {{ $engagement->status === EngagementStatus::Active ? $engagement->started_at->format('M d, Y') : $engagement->cancelled_at->format('M d, Y') }}.
                                 </p>
                             </div>
                         </div>
@@ -222,10 +223,10 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <label
-                                class="relative flex {{ $engagement->status !== 'employer_accepted' ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' }} rounded-xl border border-neutral-200 bg-white p-5 shadow-sm hover:bg-neutral-50 transition duration-200">
+                                class="relative flex {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' }} rounded-xl border border-neutral-200 bg-white p-5 shadow-sm hover:bg-neutral-50 transition duration-200">
                                 <input type="radio" name="response" value="accepted" class="sr-only peer"
-                                    {{ $engagement->status === 'active' ? 'checked' : '' }}
-                                    {{ $engagement->status !== 'employer_accepted' ? 'disabled' : '' }}>
+                                    {{ $engagement->status === EngagementStatus::Active ? 'checked' : '' }}
+                                    {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'disabled' : '' }}>
                                 <div class="flex w-full items-center">
                                     <div class="flex-shrink-0 mr-4">
                                         <div
@@ -247,10 +248,10 @@
                             </label>
 
                             <label
-                                class="relative flex {{ $engagement->status !== 'employer_accepted' ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' }} rounded-xl border border-neutral-200 bg-white p-5 shadow-sm hover:bg-neutral-50 transition duration-200">
+                                class="relative flex {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' }} rounded-xl border border-neutral-200 bg-white p-5 shadow-sm hover:bg-neutral-50 transition duration-200">
                                 <input type="radio" name="response" value="declined" class="sr-only peer"
-                                    {{ $engagement->status === 'cancelled' ? 'checked' : '' }}
-                                    {{ $engagement->status !== 'employer_accepted' ? 'disabled' : '' }}>
+                                    {{ $engagement->status === EngagementStatus::Cancelled ? 'checked' : '' }}
+                                    {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'disabled' : '' }}>
                                 <div class="flex w-full items-center">
                                     <div class="flex-shrink-0 mr-4">
                                         <div
@@ -281,14 +282,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                            {{ $engagement->status !== 'employer_accepted' ? 'Your Notes' : 'Additional Notes' }}
+                            {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'Your Notes' : 'Additional Notes' }}
                             <span
-                                class="text-xs font-normal text-neutral-500 ml-2">{{ $engagement->status === 'employer_accepted' ? '(Optional)' : '' }}</span>
+                                class="text-xs font-normal text-neutral-500 ml-2">{{ $engagement->status === EngagementStatus::EmployerAccepted ? '(Optional)' : '' }}</span>
                         </label>
                         <textarea id="notes" name="notes" rows="4"
-                            class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-secondary focus:ring-secondary focus:ring-opacity-50 transition duration-200 resize-none {{ $engagement->status !== 'pending' ? 'bg-neutral-100' : '' }}"
-                            placeholder="{{ $engagement->status === 'employer_accepted' ? 'Type your message to the job poster here...' : '' }}"
-                            {{ $engagement->status !== 'employer_accepted' ? 'readonly' : '' }}>{{ $engagement->notes ?? '' }}</textarea>
+                            class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-secondary focus:ring-secondary focus:ring-opacity-50 transition duration-200 resize-none {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'bg-neutral-100' : '' }}"
+                            placeholder="{{ $engagement->status === EngagementStatus::EmployerAccepted ? 'Type your message to the job poster here...' : '' }}"
+                            {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'readonly' : '' }}>{{ $engagement->notes ?? '' }}</textarea>
                     </div>
 
                     <div class="flex justify-end pt-4">
@@ -299,10 +300,10 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            {{ $engagement->status !== 'employer_accepted' ? 'Back' : 'Cancel' }}
+                            {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'Back' : 'Cancel' }}
                         </a>
 
-                        @if ($engagement->status === 'employer_accepted')
+                        @if ($engagement->status === EngagementStatus::EmployerAccepted)
                             <button type="submit" id="submitResponseBtn"
                                 class="inline-flex justify-center items-center py-2.5 px-6 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-md transition duration-150 opacity-50 cursor-not-allowed"
                                 disabled>
