@@ -109,4 +109,10 @@ class EngagementAuthorizationHelper
     {
         return $user->id === $engagement->applicant->id;
     }
+
+    // Check if user can accept or dispute a partial payment — freelancer/applicant only
+    public static function canRespondToPartialPayment(JobEngagement $engagement, User $user): bool
+    {
+        return $user->id === $engagement->application->applicant_id;
+    }
 }

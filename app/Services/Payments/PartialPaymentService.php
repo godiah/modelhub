@@ -2,6 +2,7 @@
 
 namespace App\Services\Payments;
 
+use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Models\JobCancellation;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
@@ -190,7 +191,7 @@ class PartialPaymentService
         $authUser = Auth::user();
 
         // Ensure user is the freelancer
-        if ($authUser->id !== $engagement->application->applicant_id) {
+        if (! EngagementAuthorizationHelper::canRespondToPartialPayment($engagement, $authUser)) {
             throw new \Exception('Only the freelancer can accept the partial payment.');
         }
 
@@ -256,7 +257,7 @@ class PartialPaymentService
         $authUser = Auth::user();
 
         // Ensure user is the freelancer
-        if ($authUser->id !== $engagement->application->applicant_id) {
+        if (! EngagementAuthorizationHelper::canRespondToPartialPayment($engagement, $authUser)) {
             throw new \Exception('Only the freelancer can dispute the partial payment.');
         }
 
@@ -389,10 +390,8 @@ class PartialPaymentService
             // Here you would integrate with your payment gateway to process the actual payment
             // For example: $this->paymentGateway->transferFunds($finalAmount, $engagement->applicant);
 
-            // Notify involved parties
-            $client = $engagement->poster->user;
-            $freelancer = $engagement->applicant->user;
-
+            // Notify involved parties: $engagement->poster and $engagement->applicant are already
+            // User models (hasOneThrough) — no ->user needed when wiring up notifications here.
             // Create and send notifications
             // You would need to implement these notification classes
 

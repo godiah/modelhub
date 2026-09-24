@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\FlashAlertHelper;
+use App\Http\Requests\Payment\ProcessDisputePartialPaymentRequest;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
 use App\Services\Payments\PartialPaymentService;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -81,7 +82,7 @@ class PartialPaymentController extends Controller
         $authUser = Auth::user();
 
         // Verify this is the freelancer
-        if ($authUser->id !== $engagement->application->applicant_id) {
+        if (! EngagementAuthorizationHelper::canRespondToPartialPayment($engagement, $authUser)) {
             return back()->with('error', 'Unauthorized access.');
         }
 
@@ -100,17 +101,10 @@ class PartialPaymentController extends Controller
     /**
      * Process the dispute form submission
      */
-    public function processDisputePartialPayment(Request $request, $paymentId)
+    public function processDisputePartialPayment(ProcessDisputePartialPaymentRequest $request, $paymentId)
     {
-        $request->validate([
-            'reason' => 'required|string|max:255',
-            'details' => 'required|string',
-            'evidence' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240',
-        ]);
-
         $payment = JobPartialPayment::findOrFail($paymentId);
         $engagement = $payment->engagement;
-        $authUser = Auth::user();
 
         try {
             // Upload evidence if provided

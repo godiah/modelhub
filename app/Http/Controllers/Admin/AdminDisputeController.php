@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Dispute\ResolveDisputeRequest;
 use App\Models\JobPaymentDispute;
 use App\Services\Payments\PartialPaymentService;
 use Illuminate\Http\Request;
@@ -50,13 +51,8 @@ class AdminDisputeController extends Controller
         return redirect()->back()->with('success', 'Dispute assigned to you successfully.');
     }
 
-    public function resolve(Request $request, JobPaymentDispute $dispute)
+    public function resolve(ResolveDisputeRequest $request, JobPaymentDispute $dispute)
     {
-        $request->validate([
-            'resolution_notes' => 'required|string|max:1000',
-            'resolution_amount' => 'nullable|numeric|min:0',
-        ]);
-
         try {
             $result = $this->partialPaymentService->resolveDispute(
                 $dispute,
