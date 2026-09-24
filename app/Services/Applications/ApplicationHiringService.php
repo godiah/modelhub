@@ -48,7 +48,7 @@ class ApplicationHiringService
         ]);
 
         // Create deliverables if provided
-        if (!empty($deliverables)) {
+        if (! empty($deliverables)) {
             $this->createDeliverables($engagement, $deliverables);
         }
 

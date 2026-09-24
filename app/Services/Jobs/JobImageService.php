@@ -11,7 +11,7 @@ use App\Helpers\Applications\ApplicationFileHelper;
 use Illuminate\Http\Request;
 
 class JobImageService
-{    
+{
     // Handle main image upload
     public function handleMainImage(Request $request): ?string
     {
@@ -25,7 +25,7 @@ class JobImageService
     // Handle additional images upload
     public function handleAdditionalImages(Request $request, $job): void
     {
-        if (!$request->hasFile('additional_images')) {
+        if (! $request->hasFile('additional_images')) {
             return;
         }
 
@@ -36,7 +36,7 @@ class JobImageService
 
             $job->jobImages()->create([
                 'model_job_id' => $job->id,
-                'image_path' => $imagePath
+                'image_path' => $imagePath,
             ]);
         }
     }

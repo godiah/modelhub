@@ -1,6 +1,6 @@
 <?php
 
-// StoreApplicationRequest validates and processes data for creating or updating job applications, 
+// StoreApplicationRequest validates and processes data for creating or updating job applications,
 // supporting both draft and submitted states.
 
 namespace App\Http\Requests\Application;
@@ -28,7 +28,7 @@ class StoreApplicationRequest extends FormRequest
         ];
 
         // Add stricter validation for submission (not for draft)
-        if (!$isDraft) {
+        if (! $isDraft) {
             $rules['offer'] = 'required|numeric|min:1';
             $rules['terms'] = 'required|accepted';
         } else {
@@ -66,7 +66,7 @@ class StoreApplicationRequest extends FormRequest
         // Only set terms_accepted if provided (required for submission, optional for draft)
         if ($this->has('terms')) {
             $data['terms_accepted'] = true;
-        } elseif (!$this->isDraft()) {
+        } elseif (! $this->isDraft()) {
             // For submissions, terms must be accepted
             $data['terms_accepted'] = true;
         }

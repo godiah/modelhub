@@ -35,16 +35,16 @@ class PartialPaymentController extends Controller
                 'alert' => [
                     'type' => 'success',
                     'title' => 'Payment Processed',
-                    'text' => "Partial payment of " . number_format($partialPayment->amount, 2) . " has been processed successfully.",
-                ]
+                    'text' => 'Partial payment of '.number_format($partialPayment->amount, 2).' has been processed successfully.',
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Payment processing failed', [
                 'engagement_id' => $engagement->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to process partial payment: ' . $e->getMessage());
+            return back()->with('error', 'Failed to process partial payment: '.$e->getMessage());
         }
     }
 
@@ -65,10 +65,10 @@ class PartialPaymentController extends Controller
             Log::error('Failed to accept payment', [
                 'payment_id' => $payment->id,
                 'engagement_id' => $engagement->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to accept payment: ' . $e->getMessage());
+            return back()->with('error', 'Failed to accept payment: '.$e->getMessage());
         }
     }
 
@@ -94,7 +94,7 @@ class PartialPaymentController extends Controller
         // Show dispute form
         return view('jobBoard.engagements.dispute', [
             'payment' => $payment,
-            'engagement' => $engagement
+            'engagement' => $engagement,
         ]);
     }
 
@@ -138,10 +138,10 @@ class PartialPaymentController extends Controller
             Log::error('Failed to dispute payment', [
                 'payment_id' => $payment->id,
                 'engagement_id' => $engagement->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Failed to dispute payment: ' . $e->getMessage());
+            return back()->with('error', 'Failed to dispute payment: '.$e->getMessage());
         }
     }
 }

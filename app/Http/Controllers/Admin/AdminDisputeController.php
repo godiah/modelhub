@@ -54,7 +54,7 @@ class AdminDisputeController extends Controller
     {
         $request->validate([
             'resolution_notes' => 'required|string|max:1000',
-            'resolution_amount' => 'nullable|numeric|min:0'
+            'resolution_amount' => 'nullable|numeric|min:0',
         ]);
 
         try {
@@ -66,7 +66,7 @@ class AdminDisputeController extends Controller
 
             return redirect()->route('admin.disputes.index')->with('success', 'Dispute resolved successfully.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.disputes.index')->with('error', 'Failed to resolve dispute: ' . $e->getMessage());
+            return redirect()->route('admin.disputes.index')->with('error', 'Failed to resolve dispute: '.$e->getMessage());
         }
     }
 }

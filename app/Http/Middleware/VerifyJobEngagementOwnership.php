@@ -11,11 +11,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 /**
  * A custom middleware to ensure only the correct users can access these routes:
- * 
+ *
  * Route::get('/{applicationId}/respond', [JobEngagementController::class, 'showResponseForm'])->name('response-form');
  * Route::post('/{engagement}/respond', [JobEngagementController::class, 'respondToOffer'])->name('respond');
  */
-
 class VerifyJobEngagementOwnership
 {
     public function handle(Request $request, Closure $next)
@@ -24,14 +23,14 @@ class VerifyJobEngagementOwnership
         if ($request->route('applicationId')) {
             $application = JobApplication::find($request->route('applicationId'));
 
-            if (!$application || $application->applicant_id !== Auth::id()) {
+            if (! $application || $application->applicant_id !== Auth::id()) {
                 return redirect()->route('engagements.index')->with([
                     'error' => 'You are not authorized to access this page.',
                     'alert' => [
                         'type' => 'error',
                         'title' => 'Unauthorized',
                         'text' => 'You are not authorized to access this page.',
-                    ]
+                    ],
                 ]);
             }
         }
@@ -40,14 +39,14 @@ class VerifyJobEngagementOwnership
         if ($request->route('engagement')) {
             $engagement = JobEngagement::with('application')->find($request->route('engagement'));
 
-            if (!$engagement || $engagement->application->applicant_id !== Auth::id()) {
+            if (! $engagement || $engagement->application->applicant_id !== Auth::id()) {
                 return redirect()->route('engagements.index')->with([
                     'error' => 'You are not authorized to access this page.',
                     'alert' => [
                         'type' => 'error',
                         'title' => 'Unauthorized',
                         'text' => 'You are not authorized to access this page.',
-                    ]
+                    ],
                 ]);
             }
         }

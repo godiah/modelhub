@@ -11,8 +11,11 @@ class JobPartialPayment extends Model
 
     // Payment statuses
     const STATUS_PENDING = 'pending';
+
     const STATUS_ACCEPTED = 'accepted';
+
     const STATUS_DISPUTED = 'disputed';
+
     const STATUS_FINALIZED = 'finalized';
 
     protected $fillable = [

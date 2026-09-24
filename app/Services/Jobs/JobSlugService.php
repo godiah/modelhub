@@ -23,7 +23,7 @@ class JobSlugService
 
         while (ModelJob::where('slug', $slug)->exists()) {
             // If slug exists, append a number
-            $slug = $originalSlug . '-' . $count;
+            $slug = $originalSlug.'-'.$count;
             $count++;
         }
 

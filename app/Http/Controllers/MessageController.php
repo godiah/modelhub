@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\NewMessageEvent;
 use App\Models\JobEngagement;
 use App\Models\Message;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -44,13 +43,15 @@ class MessageController extends Controller
             }
 
             // Verify required data exists
-            if (!$job) {
+            if (! $job) {
                 Log::error('Job not found', ['engagement_id' => $engagement->id]);
+
                 return response()->json(['error' => 'Job data not found'], 404);
             }
 
-            if (!$engagement->application) {
+            if (! $engagement->application) {
                 Log::error('Application not found', ['engagement_id' => $engagement->id]);
+
                 return response()->json(['error' => 'Application data not found'], 404);
             }
 
@@ -92,27 +93,28 @@ class MessageController extends Controller
 
             Log::info('Successfully loaded engagement data', [
                 'engagement_id' => $engagement->id,
-                'message_count' => $formattedMessages->count()
+                'message_count' => $formattedMessages->count(),
             ]);
 
             return response()->json($responseData);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             Log::warning('Authorization failed', [
                 'engagement_id' => $engagement->id,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
             ]);
+
             return response()->json(['error' => 'Unauthorized access'], 403);
         } catch (\Exception $e) {
             Log::error('Error loading engagement data', [
                 'engagement_id' => $engagement->id,
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'error' => 'Internal server error',
-                'message' => config('app.debug') ? $e->getMessage() : 'Something went wrong'
+                'message' => config('app.debug') ? $e->getMessage() : 'Something went wrong',
             ], 500);
         }
     }
@@ -138,7 +140,7 @@ class MessageController extends Controller
             // Load sender relationship for response
             $message->load('sender:id,name');
 
-            // Return JSON response 
+            // Return JSON response
             return response()->json([
                 'success' => true,
                 'message' => [
@@ -148,7 +150,7 @@ class MessageController extends Controller
                     'is_own' => true,
                     'created_at' => $message->created_at->toISOString(),
                     'read_at' => null,
-                ]
+                ],
             ]);
         } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
             return response()->json(['error' => 'Unauthorized to send message'], 403);
@@ -161,6 +163,7 @@ class MessageController extends Controller
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
             ]);
+
             return response()->json(['error', 'Failed to send message'], 500);
         }
     }
@@ -183,7 +186,7 @@ class MessageController extends Controller
             Log::info('Messages marked as read', [
                 'engagement_id' => $engagement->id,
                 'updated_count' => $updatedCount,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
             ]);
 
             return response()->json([
@@ -193,12 +196,12 @@ class MessageController extends Controller
         } catch (\Exception $e) {
             Log::error('Error marking messages as read', [
                 'engagement_id' => $engagement->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'error' => 'Failed to mark messages as read'
+                'error' => 'Failed to mark messages as read',
             ], 500);
         }
     }

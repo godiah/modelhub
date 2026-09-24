@@ -2,10 +2,10 @@
 
 /**
  * EngagementManagementService
- * 
+ *
  * Handles core engagement operations including listing, archiving, and basic management.
  * Manages engagement queries, filters, and archive operations for users.
-*/
+ */
 
 namespace App\Services\Engagements;
 
@@ -21,22 +21,22 @@ class EngagementManagementService
     public function getUserEngagements(array $filters): \Illuminate\Pagination\LengthAwarePaginator
     {
         $user = Auth::user();
-        
+
         $query = JobEngagement::with([
             'application.job',
             'application.poster',
             'application.applicant',
             'deliverables',
-            'cancellation'
+            'cancellation',
         ])
-        ->whereHas('application', function ($q) use ($user) {
-            $q->where('applicant_id', $user->id)
-                ->orWhere('poster_id', $user->id);
-        })
-        ->activeForUser($user->id);
+            ->whereHas('application', function ($q) use ($user) {
+                $q->where('applicant_id', $user->id)
+                    ->orWhere('poster_id', $user->id);
+            })
+            ->activeForUser($user->id);
 
         // Apply search filter
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
@@ -52,12 +52,9 @@ class EngagementManagementService
     protected function applySearchFilter(Builder $query, string $search): void
     {
         $query->where(function ($q) use ($search) {
-            $q->whereHas('application.job', fn($q2) =>
-                $q2->where('title', 'like', "%{$search}%"))
-                ->orWhereHas('application.applicant', fn($q2) =>
-                $q2->where('name', 'like', "%{$search}%"))
-                ->orWhereHas('application.poster', fn($q2) =>
-                $q2->where('name', 'like', "%{$search}%"));
+            $q->whereHas('application.job', fn ($q2) => $q2->where('title', 'like', "%{$search}%"))
+                ->orWhereHas('application.applicant', fn ($q2) => $q2->where('name', 'like', "%{$search}%"))
+                ->orWhereHas('application.poster', fn ($q2) => $q2->where('name', 'like', "%{$search}%"));
         });
     }
 
@@ -65,6 +62,7 @@ class EngagementManagementService
     public function hasArchivedEngagements(): bool
     {
         $user = Auth::user();
+
         return JobEngagement::archivedForUser($user->id)->exists();
     }
 
@@ -82,7 +80,7 @@ class EngagementManagementService
             'cancellation.dispute.resolvedBy:id,name',
             'partialPayments.processor:id,name',
             'partialPayments.finalizer:id,name',
-            'partialPayments.dispute'
+            'partialPayments.dispute',
         ]);
 
         return $engagement;
@@ -92,7 +90,7 @@ class EngagementManagementService
     public function getResponseFormData(int $applicationId): array
     {
         $user = Auth::user();
-        
+
         $application = JobApplication::with(['job', 'applicant', 'poster', 'engagement.deliverables'])
             ->where('id', $applicationId)
             ->where('applicant_id', $user->id)
@@ -100,7 +98,7 @@ class EngagementManagementService
 
         $engagement = $application->engagement;
 
-        if (!$engagement) {
+        if (! $engagement) {
             throw new \Exception('No engagement offer found for this application.');
         }
 
@@ -113,7 +111,7 @@ class EngagementManagementService
         $engagement = JobEngagement::findOrFail($engagementId);
         $user = Auth::user();
 
-        if (!EngagementAuthorizationHelper::canArchiveEngagement($engagement, $user)) {
+        if (! EngagementAuthorizationHelper::canArchiveEngagement($engagement, $user)) {
             return false;
         }
 
@@ -130,6 +128,7 @@ class EngagementManagementService
         }
 
         $engagement->save();
+
         return true;
     }
 
@@ -139,7 +138,7 @@ class EngagementManagementService
         $engagement = JobEngagement::findOrFail($engagementId);
         $user = Auth::user();
 
-        if (!EngagementAuthorizationHelper::canArchiveEngagement($engagement, $user)) {
+        if (! EngagementAuthorizationHelper::canArchiveEngagement($engagement, $user)) {
             return false;
         }
 
@@ -156,6 +155,7 @@ class EngagementManagementService
         }
 
         $engagement->save();
+
         return true;
     }
 
@@ -163,7 +163,7 @@ class EngagementManagementService
     public function getArchivedEngagements(string $status = 'all'): \Illuminate\Pagination\LengthAwarePaginator
     {
         $user = Auth::user();
-        
+
         $query = JobEngagement::archivedForUser($user->id)
             ->with(['application.job', 'application.applicant', 'application.poster']);
 

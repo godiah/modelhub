@@ -2,10 +2,10 @@
 
 /**
  * EngagementNotificationHelper
- * 
+ *
  * Centralizes notification sending for engagement-related events.
  * Handles notifications for responses, cancellations, disputes, and reviews.
-*/
+ */
 
 namespace App\Helpers\Engagements;
 
@@ -30,8 +30,8 @@ class EngagementNotificationHelper
     {
         // Determine who to notify
         $application = $engagement->application;
-        $userToNotify = ($initiator->id === $application->poster_id) 
-            ? $application->applicant 
+        $userToNotify = ($initiator->id === $application->poster_id)
+            ? $application->applicant
             : $application->poster;
 
         $userToNotify->notify(new EngagementCancelledNotification($engagement, $cancellation));
@@ -42,7 +42,7 @@ class EngagementNotificationHelper
     {
         // Get all users with admin role
         $adminUsers = User::role('admin')->get();
-        
+
         // Notify admins about dispute
         Notification::send($adminUsers, new DisputeCreatedNotification($engagement, $cancellation));
     }

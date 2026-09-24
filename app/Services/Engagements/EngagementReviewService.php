@@ -2,10 +2,10 @@
 
 /**
  * EngagementReviewService
- * 
+ *
  * Handles review creation and management for completed engagements.
  * Manages review submissions, validation, and reviewer/reviewee relationships.
-*/
+ */
 
 namespace App\Services\Engagements;
 
@@ -21,9 +21,9 @@ class EngagementReviewService
     public function submitReview(JobEngagement $engagement, array $reviewData): array
     {
         $user = Auth::user();
-        
+
         // Check if engagement can be reviewed
-        if (!$this->canLeaveReview($engagement, $user)) {
+        if (! $this->canLeaveReview($engagement, $user)) {
             return [
                 'success' => false,
                 'error' => 'You can only review completed jobs',
@@ -31,13 +31,13 @@ class EngagementReviewService
                     'type' => 'error',
                     'title' => 'Review Not Allowed',
                     'text' => 'You can only leave reviews for completed jobs.',
-                ]
+                ],
             ];
         }
 
         // Determine reviewer and reviewee roles
         $roles = $this->determineReviewerRoles($engagement, $user);
-        if (!$roles) {
+        if (! $roles) {
             return [
                 'success' => false,
                 'error' => 'Unauthorized',
@@ -45,7 +45,7 @@ class EngagementReviewService
                     'type' => 'error',
                     'title' => 'Access Denied',
                     'text' => 'You are not authorized to leave a review for this job.',
-                ]
+                ],
             ];
         }
 
@@ -58,7 +58,7 @@ class EngagementReviewService
                     'type' => 'warning',
                     'title' => 'Review Already Submitted',
                     'text' => 'You have already submitted a review for this job.',
-                ]
+                ],
             ];
         }
 
@@ -76,7 +76,7 @@ class EngagementReviewService
 
             // Get reviewee name for personalized message
             $reviewee = User::find($roles['reviewee_id']);
-            $revieweeName = $reviewee ? $reviewee->name : 'the ' . ($roles['reviewer_type'] === 'employer' ? 'freelancer' : 'client');
+            $revieweeName = $reviewee ? $reviewee->name : 'the '.($roles['reviewer_type'] === 'employer' ? 'freelancer' : 'client');
 
             return [
                 'success' => true,
@@ -85,7 +85,7 @@ class EngagementReviewService
                     'type' => 'success',
                     'title' => 'Review Submitted',
                     'text' => "Thank you for reviewing $revieweeName. Your feedback helps build trust in our community.",
-                ]
+                ],
             ];
         } catch (\Exception $e) {
             // Log::error('Error saving review: ' . $e->getMessage());
@@ -97,7 +97,7 @@ class EngagementReviewService
                     'type' => 'error',
                     'title' => 'Error',
                     'text' => 'There was a problem submitting your review. Please try again.',
-                ]
+                ],
             ];
         }
     }
@@ -123,13 +123,13 @@ class EngagementReviewService
             return [
                 'reviewer_id' => $application->poster_id,
                 'reviewee_id' => $application->applicant_id,
-                'reviewer_type' => 'employer'
+                'reviewer_type' => 'employer',
             ];
         } elseif ($user->id === $application->applicant_id) {
             return [
                 'reviewer_id' => $application->applicant_id,
                 'reviewee_id' => $application->poster_id,
-                'reviewer_type' => 'freelancer'
+                'reviewer_type' => 'freelancer',
             ];
         }
 

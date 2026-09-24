@@ -69,8 +69,8 @@ class UserSocialLink extends Model
     public function setUrlAttribute($value): void
     {
         // Ensure URL has protocol
-        if ($value && !preg_match('/^https?:\/\//', $value)) {
-            $value = 'https://' . $value;
+        if ($value && ! preg_match('/^https?:\/\//', $value)) {
+            $value = 'https://'.$value;
         }
 
         $this->attributes['url'] = $value;

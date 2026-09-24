@@ -5,12 +5,10 @@ namespace App\Http\Controllers;
 use App\Mail\DeliverableSubmitted;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
-use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -172,7 +170,7 @@ class JobDeliverableController extends Controller
                     'type' => 'success',
                     'title' => 'Deliverable has been removed successfully.',
                     'text' => 'Deliverable has been removed successfully.',
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return $this->respondWithError(
@@ -196,7 +194,7 @@ class JobDeliverableController extends Controller
         // Check if the deliverable is rejected and allow resubmission
         if ($deliverable->rejected_at) {
             // Delete previously submitted files
-            if (!empty($deliverable->submission_files)) {
+            if (! empty($deliverable->submission_files)) {
                 foreach ($deliverable->submission_files as $file) {
                     Storage::disk('public')->delete($file['path']);
                 }
@@ -239,7 +237,7 @@ class JobDeliverableController extends Controller
             'submission_notes' => $request->submission_notes,
             'submitted_at' => now(),
             'status' => 'submitted',
-            'rejected_at' => null // Reset rejected_at if it was set
+            'rejected_at' => null, // Reset rejected_at if it was set
         ]);
 
         // Send notification email to the job poster
@@ -309,6 +307,7 @@ class JobDeliverableController extends Controller
             );
         } catch (\Exception $e) {
             DB::rollBack();
+
             return $this->respondWithError(
                 'Something went wrong. Please try again.',
                 'Error',
@@ -365,7 +364,6 @@ class JobDeliverableController extends Controller
         );
     }
 
-
     /**
      * Check if all deliverables are approved and mark engagement as completed if so
      */
@@ -379,11 +377,10 @@ class JobDeliverableController extends Controller
         if ($totalDeliverables > 0 && $totalDeliverables === $approvedDeliverables) {
             $engagement->update([
                 'status' => 'completed',
-                'completed_at' => now()
+                'completed_at' => now(),
             ]);
         }
     }
-
 
     /**
      * Helper function to create standardized responses
@@ -396,7 +393,7 @@ class JobDeliverableController extends Controller
                 'type' => $status,
                 'title' => $title,
                 'text' => $text ?? $message,
-            ]
+            ],
         ]);
     }
 

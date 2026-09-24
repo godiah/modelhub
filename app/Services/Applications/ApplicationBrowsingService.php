@@ -24,7 +24,7 @@ class ApplicationBrowsingService
         $query = $job->applications()->with('applicant');
 
         // Apply search filter
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
@@ -40,12 +40,12 @@ class ApplicationBrowsingService
             ->withQueryString();
 
         // Check if filters are active
-        $hasFilters = !empty($filters['search']) || $filters['status'] !== 'all';
+        $hasFilters = ! empty($filters['search']) || $filters['status'] !== 'all';
 
         return [
             'job' => $job,
             'applications' => $applications,
-            'hasFilters' => $hasFilters
+            'hasFilters' => $hasFilters,
         ];
     }
 
@@ -68,7 +68,7 @@ class ApplicationBrowsingService
         $totalReviews = JobReview::where('reviewee_id', $application->applicant_id)
             ->public()
             ->count();
-            
+
         $averageRating = JobReview::where('reviewee_id', $application->applicant_id)
             ->public()
             ->avg('rating') ?? 0;
@@ -83,7 +83,7 @@ class ApplicationBrowsingService
             'totalReviews' => $totalReviews,
             'averageRating' => $averageRating,
             'topSkill' => $topSkill,
-            'ratingFilter' => 'all'
+            'ratingFilter' => 'all',
         ];
     }
 
@@ -119,8 +119,8 @@ class ApplicationBrowsingService
     protected function applySearchFilter(Builder $query, string $search): void
     {
         $query->whereHas('applicant', function ($q) use ($search) {
-            $q->where('name', 'like', '%' . $search . '%')
-                ->orWhere('email', 'like', '%' . $search . '%');
+            $q->where('name', 'like', '%'.$search.'%')
+                ->orWhere('email', 'like', '%'.$search.'%');
         });
     }
 }

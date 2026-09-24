@@ -23,7 +23,7 @@ class PartialPaymentService
         if ($engagement->status !== JobEngagement::STATUS_CANCELLED) {
             return [
                 'can_process' => false,
-                'message' => 'Partial payments can only be processed for cancelled engagements.'
+                'message' => 'Partial payments can only be processed for cancelled engagements.',
             ];
         }
 
@@ -31,10 +31,10 @@ class PartialPaymentService
         $isClient = $authUser->id === $engagement->application->poster_id;
         $isAdmin = $authUser->hasRole('admin');
 
-        if (!$isClient && !$isAdmin) {
+        if (! $isClient && ! $isAdmin) {
             return [
                 'can_process' => false,
-                'message' => 'Payment is currently pending and has not yet been processed.'
+                'message' => 'Payment is currently pending and has not yet been processed.',
             ];
         }
 
@@ -43,7 +43,7 @@ class PartialPaymentService
             return [
                 'can_process' => false,
                 'message' => 'There are pending deliverables that need to be approved or rejected before processing payment.',
-                'pending_count' => $engagement->getPendingDeliverablesCount()
+                'pending_count' => $engagement->getPendingDeliverablesCount(),
             ];
         }
 
@@ -51,7 +51,7 @@ class PartialPaymentService
         if ($engagement->getCompletedDeliverablesCount() === 0) {
             return [
                 'can_process' => false,
-                'message' => 'No approved deliverables found for partial payment.'
+                'message' => 'No approved deliverables found for partial payment.',
             ];
         }
 
@@ -60,14 +60,14 @@ class PartialPaymentService
         if ($cancellation && $cancellation->partial_payment_processed) {
             return [
                 'can_process' => false,
-                'message' => 'Partial payment has already been processed.'
+                'message' => 'Partial payment has already been processed.',
             ];
         }
 
         return [
             'can_process' => true,
             'message' => 'You may proceed with processing the payment.',
-            'calculated_amount' => $engagement->calculatePartialPaymentAmount()
+            'calculated_amount' => $engagement->calculatePartialPaymentAmount(),
         ];
     }
 
@@ -84,6 +84,7 @@ class PartialPaymentService
         }
 
         $paymentPercentage = $approvedDeliverables / $totalDeliverables;
+
         return round($engagement->net_amount * $paymentPercentage, 2);
     }
 
@@ -94,7 +95,7 @@ class PartialPaymentService
     {
         // First validate if payment can be processed
         $canProcess = $this->canProcessPayment($engagement);
-        if (!$canProcess['can_process']) {
+        if (! $canProcess['can_process']) {
             throw new \Exception($canProcess['message']);
         }
 
@@ -159,13 +160,13 @@ class PartialPaymentService
             }
 
             // Notify the freelancer about the payment
-            //$freelancer = $engagement->applicant->user;
-            //$freelancer->notify(new PartialPaymentReadyNotification($engagement, $partialPayment));
+            // $freelancer = $engagement->applicant->user;
+            // $freelancer->notify(new PartialPaymentReadyNotification($engagement, $partialPayment));
 
             Log::info('Partial payment processed', [
                 'engagement_id' => $engagement->id,
                 'amount' => $amount,
-                'processed_by' => $authUser->id
+                'processed_by' => $authUser->id,
             ]);
 
             DB::commit();
@@ -175,7 +176,7 @@ class PartialPaymentService
             DB::rollBack();
             Log::error('Failed to process partial payment', [
                 'engagement_id' => $engagement->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -203,7 +204,7 @@ class PartialPaymentService
             // Update payment status
             $payment->update([
                 'status' => JobPartialPayment::STATUS_ACCEPTED,
-                'accepted_at' => now()
+                'accepted_at' => now(),
             ]);
 
             // Update cancellation record
@@ -213,7 +214,7 @@ class PartialPaymentService
                     'partial_payment_processed' => true,
                     'partial_payment_processed_at' => now(),
                     'freelancer_accepted_payment' => true,
-                    'freelancer_accepted_at' => now()
+                    'freelancer_accepted_at' => now(),
                 ]);
             }
 
@@ -224,13 +225,13 @@ class PartialPaymentService
             // For example: $this->paymentGateway->transferFunds($payment->amount, $engagement->applicant);
 
             // Notify the client about acceptance
-            //$client = $engagement->poster->user;
-            //$client->notify(new PaymentAcceptedNotification($engagement, $payment));
+            // $client = $engagement->poster->user;
+            // $client->notify(new PaymentAcceptedNotification($engagement, $payment));
 
             Log::info('Partial payment accepted', [
                 'engagement_id' => $engagement->id,
                 'payment_id' => $payment->id,
-                'freelancer_id' => $authUser->id
+                'freelancer_id' => $authUser->id,
             ]);
 
             DB::commit();
@@ -241,7 +242,7 @@ class PartialPaymentService
             Log::error('Failed to accept partial payment', [
                 'engagement_id' => $engagement->id,
                 'payment_id' => $payment->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -268,12 +269,12 @@ class PartialPaymentService
         try {
             // Update payment status initially
             $payment->update([
-                'status' => JobPartialPayment::STATUS_DISPUTED
+                'status' => JobPartialPayment::STATUS_DISPUTED,
             ]);
 
             // Get or create cancellation record
             $cancellation = $engagement->cancellation;
-            if (!$cancellation) {
+            if (! $cancellation) {
                 $cancellation = JobCancellation::create([
                     'engagement_id' => $engagement->id,
                     'initiator_id' => $authUser->id,
@@ -294,7 +295,7 @@ class PartialPaymentService
 
             // Update payment with dispute reference
             $payment->update([
-                'dispute_id' => $dispute->id
+                'dispute_id' => $dispute->id,
             ]);
 
             // Add evidence if provided
@@ -306,18 +307,18 @@ class PartialPaymentService
             $engagement->markAsDisputed();
 
             // Notify the client about dispute
-            //$client = $engagement->poster->user;
-            //$client->notify(new PaymentDisputedNotification($engagement, $payment, $dispute));
+            // $client = $engagement->poster->user;
+            // $client->notify(new PaymentDisputedNotification($engagement, $payment, $dispute));
 
             // Notify admins
-            //$admins = User::role('admin')->get();
-            //Notification::send($admins, new PaymentDisputeAdminNotification($engagement, $payment));
+            // $admins = User::role('admin')->get();
+            // Notification::send($admins, new PaymentDisputeAdminNotification($engagement, $payment));
 
             Log::info('Partial payment disputed', [
                 'engagement_id' => $engagement->id,
                 'payment_id' => $payment->id,
                 'dispute_id' => $dispute->id,
-                'freelancer_id' => $authUser->id
+                'freelancer_id' => $authUser->id,
             ]);
 
             DB::commit();
@@ -328,7 +329,7 @@ class PartialPaymentService
             Log::error('Failed to dispute partial payment', [
                 'engagement_id' => $engagement->id,
                 'payment_id' => $payment->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -342,7 +343,7 @@ class PartialPaymentService
         $authUser = Auth::user();
 
         // Ensure user is an admin
-        if (!$authUser->hasRole('admin')) {
+        if (! $authUser->hasRole('admin')) {
             throw new \Exception('Only administrators can resolve payment disputes.');
         }
 
@@ -373,7 +374,7 @@ class PartialPaymentService
                     'engagement_id' => $engagement->id,
                     'amount' => $finalAmount ?? $cancellation->partial_payment_amount,
                     'status' => JobPartialPayment::STATUS_FINALIZED,
-                    'notes' => 'Payment after dispute resolution: ' . $notes,
+                    'notes' => 'Payment after dispute resolution: '.$notes,
                     'processed_by' => $authUser->id,
                     'processed_at' => now(),
                     'finalized_at' => now(),
@@ -399,20 +400,20 @@ class PartialPaymentService
                 'engagement_id' => $engagement->id,
                 'dispute_id' => $dispute->id,
                 'admin_id' => $authUser->id,
-                'final_amount' => $finalAmount ?? $cancellation->partial_payment_amount
+                'final_amount' => $finalAmount ?? $cancellation->partial_payment_amount,
             ]);
 
             DB::commit();
 
             return [
                 'dispute' => $dispute,
-                'payment' => $payment
+                'payment' => $payment,
             ];
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Failed to resolve dispute', [
                 'dispute_id' => $dispute->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }

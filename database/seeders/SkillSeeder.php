@@ -3,12 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Skill;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SkillSeeder extends Seeder
 {
-
     public function run(): void
     {
         $skills = [
@@ -28,7 +26,7 @@ class SkillSeeder extends Seeder
             'Animation Basics',
             'Rendering & Lighting',
             'File Format Management & Export',
-            'Reference Research & Accuracy'
+            'Reference Research & Accuracy',
         ];
 
         foreach ($skills as $skillName) {

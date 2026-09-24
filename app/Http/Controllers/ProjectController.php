@@ -17,7 +17,7 @@ class ProjectController extends Controller
             'application.job',
             'application.applicant',
             'application.poster',
-            'deliverables'
+            'deliverables',
         ]);
 
         // Filter based on tab selection

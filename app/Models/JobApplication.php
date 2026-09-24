@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Auth;
 
 class JobApplication extends Model
 {
@@ -89,7 +88,7 @@ class JobApplication extends Model
     }
 
     /**
-     * “Filled by someone else”: 
+     * “Filled by someone else”:
      *  there’s an engagement on the same job, but _not_ for this application.
      */
     public function hasOtherEngagement(): bool

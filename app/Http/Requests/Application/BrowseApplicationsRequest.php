@@ -1,6 +1,6 @@
 <?php
 
-// BrowseApplicationsRequest validates filtering and sorting parameters for 
+// BrowseApplicationsRequest validates filtering and sorting parameters for
 // browsing job applications, supporting status, sort, and search filters.
 
 namespace App\Http\Requests\Application;
@@ -54,7 +54,7 @@ class BrowseApplicationsRequest extends FormRequest
 
     public function hasActiveFilters(): bool
     {
-        return ($this->has('search') && !empty($this->search)) ||
+        return ($this->has('search') && ! empty($this->search)) ||
                ($this->has('status') && $this->status !== 'all');
     }
 }

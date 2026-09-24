@@ -21,7 +21,7 @@ class BrowseJobsRequest extends FormRequest
         return [
             'search' => 'sometimes|string|max:255',
             'skills' => 'sometimes|integer|exists:skills,id',
-            'software' => 'sometimes|integer|exists:software,id', 
+            'software' => 'sometimes|integer|exists:software,id',
             'sort' => 'sometimes|string|in:budget_high,budget_low,deadline,newest',
         ];
     }
@@ -52,7 +52,7 @@ class BrowseJobsRequest extends FormRequest
             'search' => $this->getSearch(),
             'skills' => $this->getSkillsFilter(),
             'software' => $this->getSoftwareFilter(),
-            'sort' => $this->getSortOption()
+            'sort' => $this->getSortOption(),
         ];
     }
 

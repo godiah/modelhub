@@ -2,10 +2,10 @@
 
 /**
  * BrowseEngagementsRequest
- * 
+ *
  * Handles validation for engagement listing and filtering operations.
  * Manages search terms, status filters, and pagination parameters.
-*/
+ */
 
 namespace App\Http\Requests\Engagement;
 
@@ -43,7 +43,7 @@ class BrowseEngagementsRequest extends FormRequest
     // Check if filters are active
     public function hasActiveFilters(): bool
     {
-        return $this->filled('search') || 
+        return $this->filled('search') ||
                ($this->filled('status') && $this->status !== 'all');
     }
 

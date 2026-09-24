@@ -1,10 +1,10 @@
 <?php
 
+use App\Console\Commands\DeactivateExpiredJobs;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\ClosureCommand;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
-use App\Console\Commands\DeactivateExpiredJobs;
-use Illuminate\Console\Scheduling\Schedule;
 
 Artisan::command('inspire', function () {
     /** @var ClosureCommand $this */

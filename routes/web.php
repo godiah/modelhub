@@ -161,7 +161,7 @@ Route::middleware(['auth'])->prefix('chat')->group(function () {
     Route::get('/engagements/{engagement}/data', [MessageController::class, 'getEngagementData'])->name('engagements.data');
     Route::post('/engagements/{engagement}/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::patch('/engagements/{engagement}/messages/read', [MessageController::class, 'markAsRead'])->name('messages.read');
-    //Route::get('/messages/unread-count', [MessageController::class, 'unreadCount'])->name('messages.unread-count');
+    // Route::get('/messages/unread-count', [MessageController::class, 'unreadCount'])->name('messages.unread-count');
 });
 
 /**
@@ -173,7 +173,4 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
 });
 
-
-
-
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

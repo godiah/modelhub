@@ -38,7 +38,7 @@ class JobBrowsingService
     // Apply search filter to query
     protected function applySearchFilter(Builder $query, ?string $search): void
     {
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
@@ -92,7 +92,7 @@ class JobBrowsingService
     public function getSimilarJobs(ModelJob $job)
     {
         // Ensure the job is active
-        if (!$job->is_active || !$job->isActive()) {
+        if (! $job->is_active || ! $job->isActive()) {
             return collect();
         }
 

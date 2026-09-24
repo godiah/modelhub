@@ -2,10 +2,10 @@
 
 /**
  * ReopenJobRequest
- * 
+ *
  * Handles validation for job reopening operations.
  * Validates requests to reopen jobs after engagement cancellation or settlement.
-*/
+ */
 
 namespace App\Http\Requests\Job;
 

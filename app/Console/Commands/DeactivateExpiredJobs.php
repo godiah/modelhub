@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\ModelJob;
 use Carbon\Carbon;
+use Illuminate\Console\Command;
 
 class DeactivateExpiredJobs extends Command
 {
     protected $signature = 'jobs:deactivate-expired';
+
     protected $description = 'Deactivate jobs with passed deadlines';
 
     public function handle()

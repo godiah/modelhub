@@ -1,7 +1,8 @@
 <?php
+
 /**
  * JobEngagementController
- * 
+ *
  * Manages job engagement lifecycle from offer response to completion.
  * Handles responses, reviews, cancellations, disputes, payments, and archiving.
  * Delegates business logic to specialized service classes for maintainability.
@@ -30,9 +31,13 @@ class JobEngagementController extends Controller
     use AuthorizesRequests;
 
     protected EngagementManagementService $engagementManagementService;
+
     protected EngagementResponseService $engagementResponseService;
+
     protected EngagementReviewService $engagementReviewService;
+
     protected EngagementCancellationService $engagementCancellationService;
+
     protected EngagementPaymentService $engagementPaymentService;
 
     public function __construct(
@@ -48,13 +53,13 @@ class JobEngagementController extends Controller
         $this->engagementCancellationService = $engagementCancellationService;
         $this->engagementPaymentService = $engagementPaymentService;
     }
-    
+
     // Display a listing of the user's job engagements
     public function index(BrowseEngagementsRequest $request)
     {
         $filters = [
             'search' => $request->getSearchTerm(),
-            'status' => $request->getStatusFilter()
+            'status' => $request->getStatusFilter(),
         ];
 
         $engagements = $this->engagementManagementService->getUserEngagements($filters);
@@ -65,7 +70,7 @@ class JobEngagementController extends Controller
             return view('jobBoard.engagements.partials.engagements-list', [
                 'engagements' => $engagements,
                 'hasFilters' => $hasFilters,
-                'hasArchivedEngagements' => $hasArchivedEngagements
+                'hasArchivedEngagements' => $hasArchivedEngagements,
             ])->render();
         }
 
@@ -77,6 +82,7 @@ class JobEngagementController extends Controller
     {
         try {
             $data = $this->engagementManagementService->getResponseFormData($applicationId);
+
             return view('jobBoard.engagements.respond', $data);
         } catch (\Exception $e) {
             return redirect()->route('engagements.index')->with('error', $e->getMessage());
@@ -87,7 +93,7 @@ class JobEngagementController extends Controller
     public function respondToOffer(RespondToOfferRequest $request, $engagementId)
     {
         $engagement = JobEngagement::with(['application.job', 'application.poster'])->findOrFail($engagementId);
-        
+
         try {
             $responseData = $request->getResponseData();
             $result = $this->engagementResponseService->respondToOffer($engagement, $responseData);
@@ -98,7 +104,7 @@ class JobEngagementController extends Controller
                     'type' => $result['alert_type'],
                     'title' => $result['message'],
                     'text' => $result['alert_text'],
-                ]
+                ],
             ]);
         } catch (\Exception $e) {
             return redirect()->route('engagements.index')->with('error', $e->getMessage());
@@ -114,7 +120,7 @@ class JobEngagementController extends Controller
         if ($result['success']) {
             return redirect()->route('engagements.index', $engagement)->with([
                 'success' => 'Review submitted successfully',
-                'alert' => $result['alert']
+                'alert' => $result['alert'],
             ]);
         } else {
             return redirect()->back()->with($result);
@@ -136,7 +142,7 @@ class JobEngagementController extends Controller
         if ($result['success']) {
             return redirect()->route('engagements.index', $engagement)->with([
                 'success' => $result['message'],
-                'alert' => $result['alert']
+                'alert' => $result['alert'],
             ]);
         } else {
             return back()->with('error', $result['error']);
@@ -149,7 +155,7 @@ class JobEngagementController extends Controller
         try {
             $data = $this->engagementCancellationService->getCancelledEngagementDetails($id);
             $engagement = $data['engagement'];
-            
+
             // Get payment information
             $paymentInfo = $this->engagementPaymentService->getPaymentInfo($engagement);
             $latestPayment = $this->engagementPaymentService->getLatestPayment($engagement);
@@ -170,7 +176,7 @@ class JobEngagementController extends Controller
     {
         try {
             $data = $this->engagementCancellationService->getDisputedEngagementDetails($id);
-            
+
             return view('jobBoard.engagements.disputed-engagements', $data);
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
@@ -185,7 +191,7 @@ class JobEngagementController extends Controller
         if ($result['success']) {
             return redirect()->route('engagements.index')->with([
                 'success' => $result['message'],
-                'alert' => $result['alert']
+                'alert' => $result['alert'],
             ]);
         } else {
             return back()->with('error', $result['error']);
@@ -205,7 +211,7 @@ class JobEngagementController extends Controller
                     'success' => true,
                     'html' => view('jobBoard.engagements.partials.archived-list', compact('archivedEngagements'))->render(),
                     'total' => $archivedEngagements->total(),
-                    'pagination' => $archivedEngagements->links()->render()
+                    'pagination' => $archivedEngagements->links()->render(),
                 ]);
             }
 
@@ -215,7 +221,7 @@ class JobEngagementController extends Controller
                 return response()->json([
                     'success' => false,
                     'error' => 'Failed to load engagements',
-                    'message' => app()->environment('local') ? $e->getMessage() : 'Server error'
+                    'message' => app()->environment('local') ? $e->getMessage() : 'Server error',
                 ], 500);
             }
 
@@ -227,7 +233,7 @@ class JobEngagementController extends Controller
     public function archive(ArchiveEngagementRequest $request)
     {
         $engagementId = $request->getEngagementId();
-        
+
         if ($this->engagementManagementService->archiveEngagement($engagementId)) {
             return back()->with([
                 'success' => 'Engagement archived successfully.',
@@ -235,7 +241,7 @@ class JobEngagementController extends Controller
                     'type' => 'success',
                     'title' => 'Engagement archived successfully',
                     'text' => 'Engagement archived successfully',
-                ]
+                ],
             ]);
         } else {
             return back()->with([
@@ -244,7 +250,7 @@ class JobEngagementController extends Controller
                     'type' => 'error',
                     'title' => 'Authorization Error',
                     'text' => "You don't have permission to archive this engagement.",
-                ]
+                ],
             ]);
         }
     }
@@ -253,7 +259,7 @@ class JobEngagementController extends Controller
     public function restore(ArchiveEngagementRequest $request)
     {
         $engagementId = $request->getEngagementId();
-        
+
         if ($this->engagementManagementService->restoreEngagement($engagementId)) {
             return back()->with([
                 'success' => 'Engagement unarchived successfully.',
@@ -261,7 +267,7 @@ class JobEngagementController extends Controller
                     'type' => 'success',
                     'title' => 'Engagement unarchived successfully',
                     'text' => 'Engagement unarchived successfully',
-                ]
+                ],
             ]);
         } else {
             return back()->with([
@@ -270,7 +276,7 @@ class JobEngagementController extends Controller
                     'type' => 'error',
                     'title' => 'Authorization Error',
                     'text' => "You don't have permission to unarchive this engagement.",
-                ]
+                ],
             ]);
         }
     }
@@ -295,7 +301,7 @@ class JobEngagementController extends Controller
         if ($result['success']) {
             return redirect()->route('engagements.show', $engagement)->with([
                 'success' => $result['message'],
-                'alert' => $result['alert']
+                'alert' => $result['alert'],
             ]);
         } else {
             return back()->with('error', $result['error']);

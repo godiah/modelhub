@@ -11,7 +11,9 @@ class JobPaymentDispute extends Model
 
     // Dispute statuses
     const STATUS_PENDING = 'pending';
+
     const STATUS_UNDER_REVIEW = 'under_review';
+
     const STATUS_RESOLVED = 'resolved';
 
     protected $fillable = [

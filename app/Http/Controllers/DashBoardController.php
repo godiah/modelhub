@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\JobReview;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -28,7 +27,7 @@ class DashBoardController extends Controller
                     ->with(['socialNetwork' => function ($networkQuery) {
                         $networkQuery->active()->ordered();
                     }]);
-            }
+            },
         ])->find($user->id);
 
         // Fetch reviews received by the user with reviewer details
@@ -44,7 +43,7 @@ class DashBoardController extends Controller
             },
             'engagement.job' => function ($query) {
                 $query->select('model_jobs.id', 'model_jobs.title');
-            }
+            },
         ])
             ->where('reviewee_id', $user->id)
             ->where('is_public', true)

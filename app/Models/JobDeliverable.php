@@ -44,7 +44,7 @@ class JobDeliverable extends Model
      */
     public function isOverdue()
     {
-        if (!$this->due_date) {
+        if (! $this->due_date) {
             return false;
         }
 
@@ -72,7 +72,7 @@ class JobDeliverable extends Model
      */
     public function daysRemaining()
     {
-        if (!$this->due_date || $this->status !== 'pending') {
+        if (! $this->due_date || $this->status !== 'pending') {
             return null;
         }
 

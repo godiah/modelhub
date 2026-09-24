@@ -13,7 +13,7 @@ trait JobFilterTrait
     // Apply search filter to job query
     public function scopeWithSearch(Builder $query, ?string $search): Builder
     {
-        if (!empty($search)) {
+        if (! empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%");
@@ -26,7 +26,7 @@ trait JobFilterTrait
     // Apply skills filter to job query
     public function scopeWithSkills(Builder $query, ?array $skills): Builder
     {
-        if (!empty($skills)) {
+        if (! empty($skills)) {
             foreach ($skills as $skill) {
                 $query->whereJsonContains('skills', $skill);
             }
@@ -38,7 +38,7 @@ trait JobFilterTrait
     // Apply software filter to job query
     public function scopeWithSoftware(Builder $query, ?array $software): Builder
     {
-        if (!empty($software)) {
+        if (! empty($software)) {
             foreach ($software as $soft) {
                 $query->whereJsonContains('software', $soft);
             }

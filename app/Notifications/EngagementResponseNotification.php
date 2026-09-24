@@ -14,7 +14,9 @@ class EngagementResponseNotification extends Notification implements ShouldQueue
     use Queueable;
 
     public $engagement;
+
     public $response;
+
     public $notes;
 
     public function __construct(JobEngagement $engagement, string $response, ?string $notes = null)
@@ -50,7 +52,7 @@ class EngagementResponseNotification extends Notification implements ShouldQueue
                     'response' => $this->response,
                     'responseText' => $responseText,
                     'notes' => $this->notes,
-                    'actionUrl' => url("/jobs/{$job->slug}/applications/{$application->id}")
+                    'actionUrl' => url("/jobs/{$job->slug}/applications/{$application->id}"),
                 ]
             );
     }

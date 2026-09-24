@@ -2,10 +2,10 @@
 
 /**
  * EngagementAuthorizationHelper
- * 
+ *
  * Centralizes authorization logic for engagement operations.
  * Handles permission checks for viewing, responding, cancelling, and managing engagements.
-*/
+ */
 
 namespace App\Helpers\Engagements;
 
@@ -18,8 +18,8 @@ class EngagementAuthorizationHelper
     public static function canView(JobEngagement $engagement, User $user): bool
     {
         $application = $engagement->application;
-        
-        return $user->id === $application->poster_id || 
+
+        return $user->id === $application->poster_id ||
                $user->id === $application->applicant_id ||
                $user->hasRole('admin');
     }
@@ -34,8 +34,8 @@ class EngagementAuthorizationHelper
     public static function canLeaveReview(JobEngagement $engagement, User $user): bool
     {
         $application = $engagement->application;
-        
-        return ($user->id === $application->poster_id || 
+
+        return ($user->id === $application->poster_id ||
                 $user->id === $application->applicant_id) &&
                in_array($engagement->status, ['completed', 'cancelled', 'settled']);
     }
@@ -44,8 +44,8 @@ class EngagementAuthorizationHelper
     public static function canCancelEngagement(JobEngagement $engagement, User $user): bool
     {
         $application = $engagement->application;
-        
-        return ($user->id === $application->poster_id || 
+
+        return ($user->id === $application->poster_id ||
                 $user->id === $application->applicant_id) &&
                $engagement->canBeCancelled();
     }
@@ -53,7 +53,7 @@ class EngagementAuthorizationHelper
     // Check if user can process payment
     public static function canProcessPayment(JobEngagement $engagement, User $user): bool
     {
-        return $user->id === $engagement->application->poster_id || 
+        return $user->id === $engagement->application->poster_id ||
                $user->hasRole('admin');
     }
 
@@ -68,8 +68,8 @@ class EngagementAuthorizationHelper
     public static function canArchiveEngagement(JobEngagement $engagement, User $user): bool
     {
         $application = $engagement->application;
-        
-        return $user->id === $application->poster_id || 
+
+        return $user->id === $application->poster_id ||
                $user->id === $application->applicant_id;
     }
 
@@ -77,7 +77,7 @@ class EngagementAuthorizationHelper
     public static function getUserRole(JobEngagement $engagement, User $user): string
     {
         $application = $engagement->application;
-        
+
         if ($user->id === $application->poster_id) {
             return 'poster';
         } elseif ($user->id === $application->applicant_id) {
@@ -85,7 +85,7 @@ class EngagementAuthorizationHelper
         } elseif ($user->hasRole('admin')) {
             return 'admin';
         }
-        
+
         return 'unauthorized';
     }
 

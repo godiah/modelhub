@@ -53,7 +53,7 @@ class JobPostedNotification extends Notification implements ShouldQueue
         return [
             'job_id' => $this->job->id,
             'job_title' => $this->job->title,
-            'message' => 'Your project has been posted successfully.'
+            'message' => 'Your project has been posted successfully.',
         ];
     }
 }

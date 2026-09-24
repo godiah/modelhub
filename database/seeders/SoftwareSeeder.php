@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Software;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class SoftwareSeeder extends Seeder
@@ -29,7 +28,7 @@ class SoftwareSeeder extends Seeder
             'Unreal Engine',
             'V-Ray',
             'Arnold',
-            'Octane Render'
+            'Octane Render',
         ];
 
         foreach ($software as $softwareName) {

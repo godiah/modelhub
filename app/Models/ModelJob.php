@@ -6,6 +6,7 @@ use App\Helpers\Jobs\JobCacheHelper;
 use App\Traits\JobFilterTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+
 class ModelJob extends Model
 {
     use HasFactory, JobFilterTrait;
@@ -126,7 +127,7 @@ class ModelJob extends Model
     {
         $this->update([
             'is_archived' => true,
-            'is_active' => false
+            'is_active' => false,
         ]);
     }
 
@@ -137,7 +138,7 @@ class ModelJob extends Model
     {
         $this->update([
             'is_archived' => false,
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 
@@ -151,7 +152,7 @@ class ModelJob extends Model
         // When a job is updated, we should invalidate related caches
         static::updated(function ($job) {
             $cacheHelper = app(JobCacheHelper::class);
-            
+
             // Clear cache for this specific job
             $cacheHelper->clearJobCache($job);
 
@@ -162,7 +163,7 @@ class ModelJob extends Model
         // When a job is created, invalidate caches of jobs that might show this as similar
         static::created(function ($job) {
             $cacheHelper = app(JobCacheHelper::class);
-            
+
             // Clear cache for related jobs that might need to include this new job
             $cacheHelper->clearRelatedJobsCache($job);
         });

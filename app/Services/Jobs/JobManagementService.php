@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 class JobManagementService
 {
     protected JobImageService $imageService;
+
     protected JobSlugService $slugService;
 
     public function __construct(JobImageService $imageService, JobSlugService $slugService)
@@ -32,7 +33,7 @@ class JobManagementService
     {
         return [
             'skills' => Skill::where('is_active', true)->get(),
-            'software' => Software::where('is_active', true)->get()
+            'software' => Software::where('is_active', true)->get(),
         ];
     }
 
@@ -51,15 +52,15 @@ class JobManagementService
         $job = DB::transaction(function () use ($request, $validatedData, $slug) {
             // Create the job associated with the authenticated user
             $job = Auth::user()->jobs()->create([
-                'title'       => $validatedData['title'],
-                'slug'        => $slug,
+                'title' => $validatedData['title'],
+                'slug' => $slug,
                 'description' => $validatedData['description'] ?? null,
-                'skills'      => $validatedData['skills'],
-                'software'    => $validatedData['software'],
-                'images'      => $validatedData['image'] ?? null,
-                'deadline'    => $validatedData['deadline'],
+                'skills' => $validatedData['skills'],
+                'software' => $validatedData['software'],
+                'images' => $validatedData['image'] ?? null,
+                'deadline' => $validatedData['deadline'],
                 'no_deadline' => $validatedData['no_deadline'],
-                'budget'      => $validatedData['budget'],
+                'budget' => $validatedData['budget'],
             ]);
 
             // Handle additional images
@@ -80,7 +81,7 @@ class JobManagementService
         return [
             'job' => $job,
             'skills' => Skill::where('is_active', true)->get(),
-            'software' => Software::where('is_active', true)->get()
+            'software' => Software::where('is_active', true)->get(),
         ];
     }
 
@@ -88,6 +89,7 @@ class JobManagementService
     public function update(ModelJob $job, array $updateData): ModelJob
     {
         $job->update($updateData);
+
         return $job;
     }
 
@@ -148,6 +150,7 @@ class JobManagementService
         }
 
         $job->archive();
+
         return true;
     }
 
@@ -159,6 +162,7 @@ class JobManagementService
         }
 
         $job->unarchive();
+
         return true;
     }
 

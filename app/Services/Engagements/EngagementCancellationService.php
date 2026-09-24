@@ -2,10 +2,10 @@
 
 /**
  * EngagementCancellationService
- * 
+ *
  * Handles engagement cancellation and dispute management.
  * Manages cancellation requests, dispute creation, and related notifications.
-*/
+ */
 
 namespace App\Services\Engagements;
 
@@ -22,12 +22,12 @@ class EngagementCancellationService
     public function cancelEngagement(JobEngagement $engagement, array $cancellationData): array
     {
         $user = Auth::user();
-        
+
         // Authorization check
-        if (!EngagementAuthorizationHelper::canCancelEngagement($engagement, $user)) {
+        if (! EngagementAuthorizationHelper::canCancelEngagement($engagement, $user)) {
             return [
                 'success' => false,
-                'error' => 'You are not authorized to cancel this engagement.'
+                'error' => 'You are not authorized to cancel this engagement.',
             ];
         }
 
@@ -35,7 +35,7 @@ class EngagementCancellationService
         if ($engagement->status === 'completed') {
             return [
                 'success' => false,
-                'error' => 'Cannot cancel a completed engagement.'
+                'error' => 'Cannot cancel a completed engagement.',
             ];
         }
 
@@ -43,7 +43,7 @@ class EngagementCancellationService
         if ($this->hasExistingCancellation($engagement, $user)) {
             return [
                 'success' => false,
-                'error' => 'You have already submitted a cancellation for this engagement.'
+                'error' => 'You have already submitted a cancellation for this engagement.',
             ];
         }
 
@@ -77,13 +77,14 @@ class EngagementCancellationService
                     'type' => 'success',
                     'title' => 'Engagement cancelled successfully.',
                     'text' => 'Engagement cancelled successfully.',
-                ]
+                ],
             ];
         } catch (\Exception $e) {
             DB::rollBack();
+
             return [
                 'success' => false,
-                'error' => 'Failed to cancel engagement: ' . $e->getMessage()
+                'error' => 'Failed to cancel engagement: '.$e->getMessage(),
             ];
         }
     }
@@ -115,22 +116,22 @@ class EngagementCancellationService
         $user = Auth::user();
 
         // Authorization check
-        if (!$this->canViewCancelledEngagement($engagement, $user)) {
+        if (! $this->canViewCancelledEngagement($engagement, $user)) {
             throw new \Exception('Unauthorized Access.');
         }
 
         // Check engagement status
-        if (!in_array($engagement->status, ['cancelled', 'settled', 'disputed'])) {
+        if (! in_array($engagement->status, ['cancelled', 'settled', 'disputed'])) {
             throw new \Exception('Unauthorized Action');
         }
 
         return [
             'engagement' => $engagement,
-            'user' => $user
+            'user' => $user,
         ];
     }
 
-    // Get disputed engagement details  
+    // Get disputed engagement details
     public function getDisputedEngagementDetails(int $engagementId): array
     {
         $engagement = JobEngagement::with([
@@ -141,12 +142,12 @@ class EngagementCancellationService
         $user = Auth::user();
 
         // Authorization check
-        if (!$this->canViewDisputedEngagement($engagement, $user)) {
+        if (! $this->canViewDisputedEngagement($engagement, $user)) {
             throw new \Exception('Unauthorized Access.');
         }
 
         // Check engagement status
-        if (!in_array($engagement->status, ['settled', 'disputed'])) {
+        if (! in_array($engagement->status, ['settled', 'disputed'])) {
             throw new \Exception('Unauthorized Action');
         }
 
@@ -161,9 +162,9 @@ class EngagementCancellationService
     protected function canViewCancelledEngagement(JobEngagement $engagement, User $user): bool
     {
         $application = $engagement->application;
-        
-        return $user->id === $application->poster_id || 
-               $user->id === $application->applicant_id || 
+
+        return $user->id === $application->poster_id ||
+               $user->id === $application->applicant_id ||
                $user->hasRole('admin');
     }
 
@@ -177,20 +178,20 @@ class EngagementCancellationService
     public function reopenJob(JobEngagement $engagement): array
     {
         $user = Auth::user();
-        
+
         // Authorization check
-        if (!EngagementAuthorizationHelper::canReopenJob($engagement, $user)) {
+        if (! EngagementAuthorizationHelper::canReopenJob($engagement, $user)) {
             return [
                 'success' => false,
-                'error' => 'Only the job poster can reopen this job.'
+                'error' => 'Only the job poster can reopen this job.',
             ];
         }
 
         // Check engagement status
-        if (!in_array($engagement->status, ['cancelled', 'settled'])) {
+        if (! in_array($engagement->status, ['cancelled', 'settled'])) {
             return [
                 'success' => false,
-                'error' => 'Only cancelled or settled engagements can have their jobs reopened.'
+                'error' => 'Only cancelled or settled engagements can have their jobs reopened.',
             ];
         }
 
@@ -205,12 +206,12 @@ class EngagementCancellationService
                     'type' => 'success',
                     'title' => 'Job has been reopened successfully',
                     'text' => 'Job has been reopened successfully',
-                ]
+                ],
             ];
         } catch (\Exception $e) {
             return [
                 'success' => false,
-                'error' => 'Failed to reopen job: ' . $e->getMessage()
+                'error' => 'Failed to reopen job: '.$e->getMessage(),
             ];
         }
     }

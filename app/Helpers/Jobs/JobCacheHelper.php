@@ -26,7 +26,7 @@ class JobCacheHelper
     // Generate cache key for similar jobs
     public function generateSimilarJobsCacheKey(ModelJob $job): string
     {
-        return 'similar_jobs_' . $job->id . '_' . $job->updated_at->timestamp;
+        return 'similar_jobs_'.$job->id.'_'.$job->updated_at->timestamp;
     }
 
     // Calculate similar jobs based on tags
@@ -53,21 +53,21 @@ class JobCacheHelper
         // Use raw SQL for JSON array comparison
         $similarJobsQuery->where(function ($query) use ($currentJobTags) {
             foreach ($currentJobTags as $tag) {
-                $query->orWhereRaw("JSON_CONTAINS(skills, ?)", ['"' . $tag . '"'])
-                    ->orWhereRaw("JSON_CONTAINS(software, ?)", ['"' . $tag . '"']);
+                $query->orWhereRaw('JSON_CONTAINS(skills, ?)', ['"'.$tag.'"'])
+                    ->orWhereRaw('JSON_CONTAINS(software, ?)', ['"'.$tag.'"']);
             }
         });
 
         // Calculate similarity score at database level and order by it
         $selectRaw = [];
         foreach ($currentJobTags as $tag) {
-            $selectRaw[] = "JSON_CONTAINS(skills, '\"" . $tag . "\")";
-            $selectRaw[] = "JSON_CONTAINS(software, '\"" . $tag . "\")";
+            $selectRaw[] = "JSON_CONTAINS(skills, '\"".$tag.'")';
+            $selectRaw[] = "JSON_CONTAINS(software, '\"".$tag.'")';
         }
 
         $similarJobs = $similarJobsQuery
             ->select('*')
-            ->selectRaw('(' . implode(' + ', $selectRaw) . ') as similarity_score')
+            ->selectRaw('('.implode(' + ', $selectRaw).') as similarity_score')
             ->orderByDesc('similarity_score')
             ->orderByDesc('created_at')
             ->take(4)
@@ -111,8 +111,8 @@ class JobCacheHelper
             ->active()
             ->where(function ($query) use ($tags) {
                 foreach ($tags as $tag) {
-                    $query->orWhereRaw("JSON_CONTAINS(skills, ?)", ['"' . $tag . '"'])
-                        ->orWhereRaw("JSON_CONTAINS(software, ?)", ['"' . $tag . '"']);
+                    $query->orWhereRaw('JSON_CONTAINS(skills, ?)', ['"'.$tag.'"'])
+                        ->orWhereRaw('JSON_CONTAINS(software, ?)', ['"'.$tag.'"']);
                 }
             })
             ->limit(50) // Limit to avoid excessive processing

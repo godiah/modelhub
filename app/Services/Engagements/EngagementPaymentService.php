@@ -2,10 +2,10 @@
 
 /**
  * EngagementPaymentService
- * 
+ *
  * Handles payment processing for cancelled engagements.
  * Acts as a wrapper around PartialPaymentService with engagement-specific logic.
-*/
+ */
 
 namespace App\Services\Engagements;
 
@@ -28,12 +28,12 @@ class EngagementPaymentService
     public function processPartialPayment(JobEngagement $engagement, array $paymentData): array
     {
         $user = Auth::user();
-        
+
         // Authorization check
-        if (!EngagementAuthorizationHelper::canProcessPayment($engagement, $user)) {
+        if (! EngagementAuthorizationHelper::canProcessPayment($engagement, $user)) {
             return [
                 'success' => false,
-                'error' => 'You are not authorized to process payments for this engagement.'
+                'error' => 'You are not authorized to process payments for this engagement.',
             ];
         }
 
@@ -70,13 +70,14 @@ class EngagementPaymentService
                     'type' => 'success',
                     'title' => 'Payment Processed',
                     'text' => 'Payment for partial work has been processed successfully.',
-                ]
+                ],
             ];
         } catch (\Exception $e) {
             DB::rollBack();
+
             return [
                 'success' => false,
-                'error' => 'Failed to process payment: ' . $e->getMessage()
+                'error' => 'Failed to process payment: '.$e->getMessage(),
             ];
         }
     }
@@ -91,6 +92,7 @@ class EngagementPaymentService
     public function canProcessPayment(JobEngagement $engagement): bool
     {
         $paymentInfo = $this->getPaymentInfo($engagement);
+
         return $paymentInfo['can_process'];
     }
 

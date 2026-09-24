@@ -33,6 +33,6 @@ class ConfirmHireRequest extends FormRequest
      */
     public function hasDeliverables(): bool
     {
-        return $this->has('deliverables') && !empty($this->deliverables);
+        return $this->has('deliverables') && ! empty($this->deliverables);
     }
 }

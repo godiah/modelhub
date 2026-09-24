@@ -5,9 +5,7 @@ namespace App\Notifications;
 use App\Models\JobApplication;
 use App\Models\JobEngagement;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class HiredNotification extends Notification
@@ -15,6 +13,7 @@ class HiredNotification extends Notification
     use Queueable;
 
     public $application;
+
     public $engagement;
 
     public function __construct(JobApplication $application, JobEngagement $engagement)
@@ -40,7 +39,7 @@ class HiredNotification extends Notification
             'job_title' => $job->title,
             'employer_name' => $job->user->name,
             'agreed_amount' => $this->engagement->agreed_amount,
-            'message_preview' => "You've been hired for the job: {$job->title}. Click to view details."
+            'message_preview' => "You've been hired for the job: {$job->title}. Click to view details.",
         ];
     }
 
@@ -57,7 +56,7 @@ class HiredNotification extends Notification
             'employer_name' => $job->user->name,
             'agreed_amount' => $this->engagement->agreed_amount,
             'subject' => "You've been hired!",
-            'message_preview' => "You've been hired for the job: {$job->title}"
+            'message_preview' => "You've been hired for the job: {$job->title}",
         ]);
     }
 }

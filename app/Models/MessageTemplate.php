@@ -13,7 +13,7 @@ class MessageTemplate extends Model
         'user_id',
         'name',
         'subject',
-        'message'
+        'message',
     ];
 
     public function user()

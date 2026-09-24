@@ -11,7 +11,7 @@ class Software extends Model
 
     protected $fillable = [
         'name',
-        'is_active'
+        'is_active',
     ];
 
     // Scope to get active software

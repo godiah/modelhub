@@ -12,7 +12,6 @@ class JobEngagementPolicy
 {
     use HandlesAuthorization;
 
-
     /**
      * Determine if the user can view the response form.
      */

@@ -2,10 +2,10 @@
 
 /**
  * EngagementResponseService
- * 
+ *
  * Handles engagement offer responses and related job status updates.
  * Manages acceptance or rejection of engagement offers and their consequences.
-*/
+ */
 
 namespace App\Services\Engagements;
 
@@ -20,9 +20,9 @@ class EngagementResponseService
     public function respondToOffer(JobEngagement $engagement, array $responseData): array
     {
         $user = Auth::user();
-        
+
         // Authorization check
-        if (!EngagementAuthorizationHelper::canRespondToOffer($engagement, $user)) {
+        if (! EngagementAuthorizationHelper::canRespondToOffer($engagement, $user)) {
             throw new \Exception('You are not authorized to respond to this engagement offer.');
         }
 
@@ -43,7 +43,7 @@ class EngagementResponseService
         $engagement->update([
             'status' => 'active',
             'started_at' => now(),
-            'notes' => $notes
+            'notes' => $notes,
         ]);
 
         // Update application status
@@ -59,7 +59,7 @@ class EngagementResponseService
         return [
             'message' => 'Offer accepted successfully! Your engagement has started.',
             'alert_type' => 'success',
-            'alert_text' => 'You can now start working on the project deliverables.'
+            'alert_text' => 'You can now start working on the project deliverables.',
         ];
     }
 
@@ -70,7 +70,7 @@ class EngagementResponseService
         $engagement->update([
             'status' => 'cancelled',
             'cancelled_at' => now(),
-            'notes' => $notes
+            'notes' => $notes,
         ]);
 
         // Update application status
@@ -85,7 +85,7 @@ class EngagementResponseService
         return [
             'message' => 'Offer declined. The job poster has been notified.',
             'alert_type' => 'info',
-            'alert_text' => 'Thank you for your response.'
+            'alert_text' => 'Thank you for your response.',
         ];
     }
 

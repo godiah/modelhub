@@ -2,10 +2,10 @@
 
 /**
  * CancelEngagementRequest
- * 
+ *
  * Handles validation for engagement cancellation submissions.
  * Validates cancellation type, reason, and required terms acceptance.
-*/
+ */
 
 namespace App\Http\Requests\Engagement;
 

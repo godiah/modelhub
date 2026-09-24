@@ -33,7 +33,7 @@ class BrowsePostedJobsRequest extends FormRequest
 
     public function hasActiveFilters(): bool
     {
-        return ($this->has('status') && $this->status !== 'all') || 
+        return ($this->has('status') && $this->status !== 'all') ||
                $this->has('sort');
     }
 

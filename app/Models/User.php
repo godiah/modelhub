@@ -13,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     protected $fillable = [
         'name',
@@ -59,7 +59,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Take first letter of each word
         foreach ($words as $word) {
-            if (!empty(trim($word))) {
+            if (! empty(trim($word))) {
                 $initials .= strtoupper($word[0]);
             }
         }
@@ -88,12 +88,13 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function verifyTwoFactorCode(string $code): bool
     {
-        if (!$this->two_factor_code || !$this->two_factor_expires_at) {
+        if (! $this->two_factor_code || ! $this->two_factor_expires_at) {
             return false;
         }
 
         if ($this->two_factor_expires_at->isPast()) {
             $this->clearTwoFactorCode();
+
             return false;
         }
 

@@ -46,6 +46,7 @@ class MessageTemplateController extends Controller
         }
 
         $template->delete();
+
         return response()->json(['success' => true]);
     }
 }

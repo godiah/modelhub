@@ -4,9 +4,7 @@ namespace App\Notifications;
 
 use App\Models\ApplicantMessage;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewApplicationMessage extends Notification

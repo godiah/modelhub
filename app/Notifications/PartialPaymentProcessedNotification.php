@@ -15,6 +15,7 @@ class PartialPaymentProcessedNotification extends Notification implements Should
     use Queueable;
 
     protected $engagement;
+
     protected $partialPayment;
 
     public function __construct(JobEngagement $engagement, JobPartialPayment $partialPayment)
@@ -34,7 +35,7 @@ class PartialPaymentProcessedNotification extends Notification implements Should
         $client = $this->engagement->poster;
 
         return (new MailMessage)
-            ->subject('Partial Payment Processed for Job: ' . $job->title)
+            ->subject('Partial Payment Processed for Job: '.$job->title)
             ->view('emails.engagements.partial_payment_processed', [
                 'job' => $job,
                 'client' => $client,
@@ -60,7 +61,7 @@ class PartialPaymentProcessedNotification extends Notification implements Should
             'notes' => $this->partialPayment->notes,
             'processed_at' => $this->partialPayment->processed_at,
             'type' => 'payment',
-            'url' => '/engagements/' . $this->engagement->id,
+            'url' => '/engagements/'.$this->engagement->id,
         ];
     }
 

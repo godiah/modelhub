@@ -11,8 +11,11 @@ class JobCancellation extends Model
 
     // Cancellation types
     const TYPE_CLIENT_INITIATED = 'client_initiated';
+
     const TYPE_FREELANCER_INITIATED = 'freelancer_initiated';
+
     const TYPE_MUTUAL_AGREEMENT = 'mutual_agreement';
+
     const TYPE_ADMIN_TERMINATED = 'admin_terminated';
 
     protected $fillable = [
@@ -71,7 +74,7 @@ class JobCancellation extends Model
      */
     public function isPartialPaymentPending()
     {
-        return $this->process_payment_for_work && !$this->partial_payment_processed;
+        return $this->process_payment_for_work && ! $this->partial_payment_processed;
     }
 
     /**

@@ -28,8 +28,8 @@ class ApplicationManagementService
 
         // Handle portfolio files
         $existingApplication = $this->getExistingApplication($processedData['job_id'], $processedData['applicant_id']);
-        $existingFiles = $existingApplication && !empty($existingApplication->portfolio) ? $existingApplication->portfolio : [];
-        
+        $existingFiles = $existingApplication && ! empty($existingApplication->portfolio) ? $existingApplication->portfolio : [];
+
         $portfolioFiles = $this->imageService->handlePortfolioFiles($request, $existingFiles);
 
         // Prepare application data
@@ -47,6 +47,7 @@ class ApplicationManagementService
         // Update existing draft or create new application
         if ($existingApplication && $existingApplication->status === 'draft') {
             $existingApplication->update($applicationData);
+
             return $existingApplication;
         } else {
             // Create new application
@@ -65,7 +66,7 @@ class ApplicationManagementService
     {
         // Check if the job exists and is active
         $job = ModelJob::findOrFail($processedData['job_id']);
-        if (!$job->is_active || !$job->isActive()) {
+        if (! $job->is_active || ! $job->isActive()) {
             return ['error' => 'This job is no longer accepting new applications'];
         }
 
@@ -95,8 +96,8 @@ class ApplicationManagementService
                     'alert' => [
                         'type' => 'error',
                         'title' => 'Action Not Allowed',
-                        'text' => 'Your application has already been ' . $existingApplication->status . '. You cannot create a draft version of it.'
-                    ]
+                        'text' => 'Your application has already been '.$existingApplication->status.'. You cannot create a draft version of it.',
+                    ],
                 ];
             }
         }
@@ -108,8 +109,8 @@ class ApplicationManagementService
                 'alert' => [
                     'type' => 'info',
                     'title' => 'Existing Draft',
-                    'text' => 'You already have a draft application for this job. Please edit the existing draft or submit it.'
-                ]
+                    'text' => 'You already have a draft application for this job. Please edit the existing draft or submit it.',
+                ],
             ];
         }
 
@@ -120,20 +121,20 @@ class ApplicationManagementService
                 'alert' => [
                     'type' => 'error',
                     'title' => 'Reapplication Not Allowed',
-                    'text' => 'You have previously deleted your application for this job and cannot apply again.'
-                ]
+                    'text' => 'You have previously deleted your application for this job and cannot apply again.',
+                ],
             ];
         }
 
         // Check for existing submitted application
-        if (!$isDraft && $existingApplication && $existingApplication->status === 'submitted') {
+        if (! $isDraft && $existingApplication && $existingApplication->status === 'submitted') {
             return [
                 'info' => 'You have already submitted an application for this job',
                 'alert' => [
                     'type' => 'info',
                     'title' => 'Your Application Already Exists',
-                    'text' => 'You have already submitted an application for this job. Your previous application is still pending review.'
-                ]
+                    'text' => 'You have already submitted an application for this job. Your previous application is still pending review.',
+                ],
             ];
         }
 
@@ -144,7 +145,7 @@ class ApplicationManagementService
     public function getDraftApplication(string $slug): array
     {
         $job = ModelJob::where('slug', $slug)->firstOrFail();
-        
+
         $application = JobApplication::where('job_id', $job->id)
             ->where('applicant_id', Auth::id())
             ->where('status', 'draft')
@@ -219,11 +220,12 @@ class ApplicationManagementService
     // Archive an application
     public function archiveApplication(JobApplication $application): bool
     {
-        if (!$application->canBeArchived()) {
+        if (! $application->canBeArchived()) {
             return false;
         }
 
         $application->update(['is_archived' => true]);
+
         return true;
     }
 
@@ -231,17 +233,19 @@ class ApplicationManagementService
     public function restoreApplication(JobApplication $application): bool
     {
         $application->update(['is_archived' => false]);
+
         return true;
     }
 
     // Delete an archived application (soft delete)
     public function deleteArchivedApplication(JobApplication $application): bool
     {
-        if (!$application->is_archived) {
+        if (! $application->is_archived) {
             return false;
         }
 
         $application->delete();
+
         return true;
     }
 

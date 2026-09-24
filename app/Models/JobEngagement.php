@@ -12,10 +12,15 @@ class JobEngagement extends Model
 
     // Status constants
     const STATUS_PENDING = 'pending';
+
     const STATUS_ACTIVE = 'active';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_DISPUTED = 'disputed';
+
     const STATUS_SETTLED = 'settled';
 
     protected $fillable = [
@@ -66,7 +71,7 @@ class JobEngagement extends Model
             ModelJob::class,           // Related model
             JobApplication::class,     // Intermediate model
             'id',                     // Foreign key on intermediate table (job_applications.id)
-            'id',                     // Foreign key on related table (model_jobs.id) 
+            'id', // Foreign key on related table (model_jobs.id)
             'application_id',         // Local key on current table (job_engagements.application_id)
             'job_id'                  // Local key on intermediate table (job_applications.job_id)
         )->select('model_jobs.*');    // Explicitly select from model_jobs to avoid ambiguity
@@ -154,7 +159,6 @@ class JobEngagement extends Model
         return $this->getPendingDeliverablesCount() > 0 || $this->getCompletedDeliverablesCount() > 0;
     }
 
-
     /**
      * Get the reviews for this engagement
      */
@@ -208,7 +212,7 @@ class JobEngagement extends Model
      */
     public function isPaymentEscrowed()
     {
-        return !is_null($this->payment_escrowed_at);
+        return ! is_null($this->payment_escrowed_at);
     }
 
     /**
@@ -236,6 +240,7 @@ class JobEngagement extends Model
         }
 
         $completed = $this->deliverables->where('status', 'approved')->count();
+
         return ($completed / $total) * 100;
     }
 
@@ -248,8 +253,6 @@ class JobEngagement extends Model
             ->where('reviewer_id', $userId)
             ->exists();
     }
-
-
 
     /**
      * Get the cancellation record for this engagement
@@ -272,7 +275,7 @@ class JobEngagement extends Model
      */
     public function canBeCancelled()
     {
-        return !in_array($this->status, ['completed', 'cancelled']);
+        return ! in_array($this->status, ['completed', 'cancelled']);
     }
 
     /**
@@ -281,7 +284,9 @@ class JobEngagement extends Model
     public function canProcessPayment()
     {
         $user = Auth::user();
-        if (!$user) return false;
+        if (! $user) {
+            return false;
+        }
 
         return $user->id === $this->application->poster_id && $this->isCancelled();
     }
@@ -299,6 +304,7 @@ class JobEngagement extends Model
         }
 
         $paymentPercentage = $approvedDeliverables / $totalDeliverables;
+
         return round($this->net_amount * $paymentPercentage, 2);
     }
 
@@ -313,13 +319,12 @@ class JobEngagement extends Model
 
         return ($isClient || $isAdmin) &&
             $this->status === self::STATUS_CANCELLED &&
-            !$this->hasPendingDeliverables();
+            ! $this->hasPendingDeliverables();
     }
 
     /**
      * Mark engagement as settled after payment acceptance
      */
-
     public function markAsSettled()
     {
         $this->update([
@@ -389,37 +394,37 @@ class JobEngagement extends Model
             'employer_accepted' => [
                 'bg' => 'bg-accent/10',
                 'text' => 'text-accent',
-                'border' => 'border-accent/20'
+                'border' => 'border-accent/20',
             ],
             'active' => [
                 'bg' => 'bg-secondary/10',
                 'text' => 'text-secondary',
-                'border' => 'border-secondary/20'
+                'border' => 'border-secondary/20',
             ],
             'completed' => [
                 'bg' => 'bg-green-100',
                 'text' => 'text-green-800',
-                'border' => 'border-green-200'
+                'border' => 'border-green-200',
             ],
             'cancelled' => [
                 'bg' => 'bg-red-100',
                 'text' => 'text-red-800',
-                'border' => 'border-red-200'
+                'border' => 'border-red-200',
             ],
             'disputed' => [
                 'bg' => 'bg-rose-100',
                 'text' => 'text-rose-800',
-                'border' => 'border-rose-200'
+                'border' => 'border-rose-200',
             ],
             'settled' => [
                 'bg' => 'bg-blue-100',
                 'text' => 'text-blue-800',
-                'border' => 'border-blue-200'
+                'border' => 'border-blue-200',
             ],
             default => [
                 'bg' => 'bg-gray-100',
                 'text' => 'text-gray-800',
-                'border' => 'border-gray-200'
+                'border' => 'border-gray-200',
             ],
         };
     }

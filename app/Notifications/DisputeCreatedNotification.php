@@ -15,6 +15,7 @@ class DisputeCreatedNotification extends Notification implements ShouldQueue
     use Queueable;
 
     protected $engagement;
+
     protected $cancellation;
 
     public function __construct(JobEngagement $engagement, JobCancellation $cancellation)
@@ -45,10 +46,9 @@ class DisputeCreatedNotification extends Notification implements ShouldQueue
                 'initiator' => $initiator,
                 'client' => $client,
                 'freelancer' => $freelancer,
-                'actionUrl' => url("/admin/disputes/{$this->cancellation->id}")
+                'actionUrl' => url("/admin/disputes/{$this->cancellation->id}"),
             ]);
     }
-
 
     public function toDatabase($notifiable)
     {
@@ -66,7 +66,7 @@ class DisputeCreatedNotification extends Notification implements ShouldQueue
             'reason_details' => $this->cancellation->reason_details,
             'initiated_at' => $this->cancellation->created_at,
             'type' => 'dispute',
-            'url' => '/admin/disputes/' . $this->cancellation->id,
+            'url' => '/admin/disputes/'.$this->cancellation->id,
         ];
     }
 
@@ -86,7 +86,7 @@ class DisputeCreatedNotification extends Notification implements ShouldQueue
             'reason_details' => $this->cancellation->reason_details,
             'initiated_at' => $this->cancellation->created_at,
             'type' => 'dispute',
-            'url' => '/admin/disputes/' . $this->cancellation->id,
+            'url' => '/admin/disputes/'.$this->cancellation->id,
         ]);
     }
 }

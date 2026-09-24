@@ -2,10 +2,10 @@
 
 /**
  * RespondToOfferRequest
- * 
+ *
  * Handles validation for engagement offer responses.
  * Validates acceptance or rejection of job engagement offers.
-*/
+ */
 
 namespace App\Http\Requests\Engagement;
 

@@ -2,10 +2,10 @@
 
 /**
  * ProcessPartialPaymentRequest
- * 
+ *
  * Handles validation for partial payment processing.
  * Validates payment amounts and optional notes for cancelled engagements.
-*/
+ */
 
 namespace App\Http\Requests\Payment;
 

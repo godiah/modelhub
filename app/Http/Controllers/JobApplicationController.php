@@ -1,7 +1,8 @@
 <?php
+
 /**
  * JobApplicationController
- * 
+ *
  * Manages job applications for both applicants and employers.
  * Handles application creation, status updates, hiring process, messaging, and archiving.
  * Delegates business logic to specialized service classes for maintainability.
@@ -29,9 +30,13 @@ class JobApplicationController extends Controller
     use AuthorizesRequests;
 
     protected ApplicationManagementService $applicationManagementService;
+
     protected ApplicationBrowsingService $applicationBrowsingService;
+
     protected ApplicationHiringService $applicationHiringService;
+
     protected ApplicationMessagingService $applicationMessagingService;
+
     protected JobManagementService $jobManagementService;
 
     public function __construct(
@@ -70,8 +75,8 @@ class JobApplicationController extends Controller
             'alert' => [
                 'type' => 'success',
                 'title' => $request->isDraft() ? 'Draft Saved!' : 'Application Submitted!',
-                'text' => $message
-            ]
+                'text' => $message,
+            ],
         ]);
     }
 
@@ -79,7 +84,7 @@ class JobApplicationController extends Controller
     public function continueDraft($slug)
     {
         $data = $this->applicationManagementService->getDraftApplication($slug);
-        
+
         return view('jobBoard.applications.continue-draft', $data);
     }
 
@@ -91,7 +96,7 @@ class JobApplicationController extends Controller
         $draftCount = $this->applicationManagementService->getDraftCount();
 
         if ($request->isAjaxRequest()) {
-            return view('jobBoard.applications.partials.applications-list', 
+            return view('jobBoard.applications.partials.applications-list',
                 compact('applications', 'activeFilters', 'draftCount'))->render();
         }
 
@@ -102,20 +107,20 @@ class JobApplicationController extends Controller
     public function getDraftApplications()
     {
         $drafts = $this->applicationManagementService->getDraftApplications();
-        
+
         return view('jobBoard.applications.drafts', compact('drafts'));
     }
 
     // Delete an application or draft
     public function destroyDraft(JobApplication $application)
     {
-        if (!$this->applicationManagementService->deleteApplication($application)) {
+        if (! $this->applicationManagementService->deleteApplication($application)) {
             return redirect()->back()->with([
                 'alert' => [
                     'type' => 'error',
                     'title' => 'Unauthorized Action',
                     'text' => 'You do not have permission to delete this application.',
-                ]
+                ],
             ]);
         }
 
@@ -125,7 +130,7 @@ class JobApplicationController extends Controller
                 'type' => 'success',
                 'title' => 'Deleted!',
                 'text' => 'Your application has been removed.',
-            ]
+            ],
         ]);
     }
 
@@ -133,7 +138,7 @@ class JobApplicationController extends Controller
     public function show(ModelJob $job)
     {
         $application = $this->applicationManagementService->getApplicationDetails($job);
-        
+
         return view('jobBoard.applications.show', compact('application'));
     }
 
@@ -141,7 +146,7 @@ class JobApplicationController extends Controller
     public function archived()
     {
         $applications = $this->applicationManagementService->getArchivedApplications();
-        
+
         return view('jobBoard.applications.archived', compact('applications'));
     }
 
@@ -150,7 +155,7 @@ class JobApplicationController extends Controller
     {
         $this->authorize('update', $application);
 
-        if (!$this->applicationManagementService->archiveApplication($application)) {
+        if (! $this->applicationManagementService->archiveApplication($application)) {
             return back()->with('error', 'This application cannot be archived at this time.');
         }
 
@@ -159,8 +164,8 @@ class JobApplicationController extends Controller
             'alert' => [
                 'type' => 'success',
                 'title' => 'Application Archived!',
-                'text' => 'Application archived successfully.'
-            ]
+                'text' => 'Application archived successfully.',
+            ],
         ]);
     }
 
@@ -176,8 +181,8 @@ class JobApplicationController extends Controller
             'alert' => [
                 'type' => 'success',
                 'title' => 'Application Restored!',
-                'text' => 'Application restored successfully.'
-            ]
+                'text' => 'Application restored successfully.',
+            ],
         ]);
     }
 
@@ -186,7 +191,7 @@ class JobApplicationController extends Controller
     {
         $this->authorize('delete', $application);
 
-        if (!$this->applicationManagementService->deleteArchivedApplication($application)) {
+        if (! $this->applicationManagementService->deleteArchivedApplication($application)) {
             return back()->with('error', 'You can only delete archived applications.');
         }
 
@@ -195,21 +200,21 @@ class JobApplicationController extends Controller
             'alert' => [
                 'type' => 'success',
                 'title' => 'Application Deleted!',
-                'text' => 'Application deleted successfully.'
-            ]
+                'text' => 'Application deleted successfully.',
+            ],
         ]);
     }
 
     /**
      * User Posted Jobs Controller Methods
-    */
+     */
 
     // Display jobs the user has posted
     public function getUserPostedJobs(BrowsePostedJobsRequest $request)
     {
         $filters = [
             'status' => $request->getStatusFilter(),
-            'sort' => $request->getSortOption()
+            'sort' => $request->getSortOption(),
         ];
 
         $postedJobs = $this->jobManagementService->getUserPostedJobs($filters);
@@ -227,7 +232,7 @@ class JobApplicationController extends Controller
     {
         $filters = [
             'search' => $request->getSearchTerm(),
-            'status' => $request->getStatusFilter()
+            'status' => $request->getStatusFilter(),
         ];
 
         $data = $this->applicationBrowsingService->getJobApplications($slug, $filters);
@@ -243,14 +248,14 @@ class JobApplicationController extends Controller
     public function showApplications(JobApplication $application)
     {
         $data = $this->applicationBrowsingService->getApplicationDetails($application);
-        
+
         return view('jobBoard.posted.applications.show', $data);
     }
 
     // Update application status
     public function updateStatus(UpdateApplicationStatusRequest $request, JobApplication $application)
     {
-        if (!$this->applicationHiringService->authorizeStatusUpdate($application)) {
+        if (! $this->applicationHiringService->authorizeStatusUpdate($application)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -272,7 +277,7 @@ class JobApplicationController extends Controller
     public function confirmHire(ConfirmHireRequest $request, JobApplication $application)
     {
         $deliverables = $request->hasDeliverables() ? $request->getDeliverables() : [];
-        
+
         $engagement = $this->applicationHiringService->confirmHire($application, $deliverables);
 
         return redirect()->back()->with([
@@ -281,14 +286,14 @@ class JobApplicationController extends Controller
                 'type' => 'success',
                 'title' => 'Hire confirmed and applicant notified',
                 'text' => 'Hire confirmed and applicant notified',
-            ]
+            ],
         ]);
     }
 
     // Send message to applicant
     public function sendMessage(SendMessageRequest $request, JobApplication $application)
     {
-        if (!$this->applicationMessagingService->authorizeMessageSending($application)) {
+        if (! $this->applicationMessagingService->authorizeMessageSending($application)) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -301,7 +306,7 @@ class JobApplicationController extends Controller
                 'type' => 'success',
                 'title' => 'Message sent successfully.',
                 'text' => 'Message sent successfully.',
-            ]
+            ],
         ]);
     }
 
@@ -309,14 +314,14 @@ class JobApplicationController extends Controller
     public function archivedJobs()
     {
         $archivedJobs = $this->jobManagementService->getArchivedJobs();
-        
+
         return view('jobBoard.posted.archived', compact('archivedJobs'));
     }
 
     // Archive a job
     public function archiveJob(ModelJob $job)
     {
-        if (!$this->jobManagementService->archiveJob($job)) {
+        if (! $this->jobManagementService->archiveJob($job)) {
             return $this->unauthorizedError();
         }
 
@@ -325,15 +330,15 @@ class JobApplicationController extends Controller
             'alert' => [
                 'type' => 'success',
                 'title' => 'Job Archived!',
-                'text' => 'Job archived successfully.'
-            ]
+                'text' => 'Job archived successfully.',
+            ],
         ]);
     }
 
     // Restore an archived job
     public function restoreJob(ModelJob $job)
     {
-        if (!$this->jobManagementService->restoreJob($job)) {
+        if (! $this->jobManagementService->restoreJob($job)) {
             return $this->unauthorizedError();
         }
 
@@ -342,15 +347,15 @@ class JobApplicationController extends Controller
             'alert' => [
                 'type' => 'success',
                 'title' => 'Job Restored!',
-                'text' => 'Job restored successfully.'
-            ]
+                'text' => 'Job restored successfully.',
+            ],
         ]);
     }
 
     // View archived job details
     public function showArchivedJob(ModelJob $job)
     {
-        if (!$this->jobManagementService->authorizeArchivedJobAccess($job)) {
+        if (! $this->jobManagementService->authorizeArchivedJobAccess($job)) {
             return $this->unauthorizedError();
         }
 
@@ -358,7 +363,7 @@ class JobApplicationController extends Controller
         $job->load([
             'applications' => function ($query) {
                 $query->with('applicant');
-            }
+            },
         ]);
 
         $job->loadCount('applications');
@@ -374,8 +379,8 @@ class JobApplicationController extends Controller
             'alert' => [
                 'type' => 'error',
                 'title' => 'Unauthorized Action',
-                'text' => 'Unauthorized Action'
-            ]
+                'text' => 'Unauthorized Action',
+            ],
         ]);
     }
 }

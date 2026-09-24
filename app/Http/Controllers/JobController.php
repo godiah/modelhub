@@ -15,20 +15,20 @@ use App\Services\Jobs\JobBrowsingService;
 use App\Services\Jobs\JobManagementService;
 use Illuminate\Http\Request;
 
-
 class JobController extends Controller
 {
     protected JobManagementService $jobManagementService;
+
     protected JobBrowsingService $jobBrowsingService;
 
     public function __construct(
-        JobManagementService $jobManagementService, 
+        JobManagementService $jobManagementService,
         JobBrowsingService $jobBrowsingService
     ) {
         $this->jobManagementService = $jobManagementService;
         $this->jobBrowsingService = $jobBrowsingService;
     }
-    
+
     // Job Board Home Page
     public function index()
     {
@@ -39,7 +39,7 @@ class JobController extends Controller
     public function new()
     {
         $data = $this->jobManagementService->getNewJobData();
-        
+
         return view('jobBoard.jobs.new', $data);
     }
 
@@ -47,7 +47,7 @@ class JobController extends Controller
     public function store(StoreJobRequest $request)
     {
         $validatedData = $request->getProcessedData();
-        
+
         $job = $this->jobManagementService->store($request, $validatedData);
 
         return redirect()->route('jobs.show', $job->slug)
@@ -69,7 +69,7 @@ class JobController extends Controller
     public function update(UpdateJobRequest $request, ModelJob $job)
     {
         $updateData = $request->getUpdateData();
-        
+
         $this->jobManagementService->update($job, $updateData);
 
         return redirect()->route('jobs.show', $job->slug)
@@ -79,12 +79,12 @@ class JobController extends Controller
     // Show a specific job
     public function show(ModelJob $job)
     {
-        if (!$this->jobManagementService->authorizeJobView($job)) {
+        if (! $this->jobManagementService->authorizeJobView($job)) {
             return $this->unauthorizedError();
         }
 
         $jobUrl = url("/jobs/{$job->slug}");
-        
+
         return view('jobBoard.jobs.show', compact('job', 'jobUrl'));
     }
 
@@ -108,7 +108,7 @@ class JobController extends Controller
         $similarJobs = $this->jobBrowsingService->getSimilarJobs($job);
 
         // If job is not active, return error
-        if ($similarJobs->isEmpty() && (!$job->is_active || !$job->isActive())) {
+        if ($similarJobs->isEmpty() && (! $job->is_active || ! $job->isActive())) {
             return $this->jobClosedError();
         }
 
@@ -132,8 +132,8 @@ class JobController extends Controller
             'alert' => [
                 'type' => 'error',
                 'title' => 'Unauthorized Action',
-                'text' => 'Unauthorized Action'
-            ]
+                'text' => 'Unauthorized Action',
+            ],
         ]);
     }
 
@@ -146,8 +146,8 @@ class JobController extends Controller
                 'type' => 'error',
                 'title' => 'This job is no longer accepting new applications.',
                 'text' => 'This job is no longer accepting new applications.',
-                'icon' => 'error'
-            ]
+                'icon' => 'error',
+            ],
         ]);
     }
 }

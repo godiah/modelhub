@@ -14,6 +14,7 @@ class EngagementCancelledNotification extends Notification implements ShouldQueu
     use Queueable;
 
     protected $engagement;
+
     protected $cancellation;
 
     public function __construct(JobEngagement $engagement, JobCancellation $cancellation)
@@ -72,7 +73,7 @@ class EngagementCancelledNotification extends Notification implements ShouldQueu
             'partial_payment_amount' => $this->cancellation->partial_payment_amount,
             'initiated_at' => $this->cancellation->created_at,
             'type' => 'cancellation',
-            'url' => "/engagements/",
+            'url' => '/engagements/',
         ];
     }
 

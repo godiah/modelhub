@@ -56,6 +56,6 @@ class SocialNetwork extends Model
             return $username; // For websites and custom URLs
         }
 
-        return $this->base_url . $username;
+        return $this->base_url.$username;
     }
 }
