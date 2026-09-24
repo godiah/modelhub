@@ -67,21 +67,10 @@ new #[Layout('layouts.guest')] class extends Component {
     }
 }; ?>
 
-<!-- Password Reset Form -->
-<div class="w-full max-w-2xl p-8 mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden ">
-    <div class=" mx-auto">
+<x-auth-card :title="__('Reset Password')" subtitle="Enter your new password below">
 
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-neutral-900 font-tertiary tracking-wider">
-                {{ __('Reset Password') }}</h1>
-            <p class="text-tertiary text-sm leading-relaxed font-main">
-                Enter your new password below
-            </p>
-        </div>
-
-        <!-- Password Reset Form -->
-        <form wire:submit="resetPassword" class="space-y-4 font-main">
+    <!-- Password Reset Form -->
+    <form wire:submit="resetPassword" class="space-y-4 font-main">
 
             <!-- Email Address -->
             <div>
@@ -119,6 +108,5 @@ new #[Layout('layouts.guest')] class extends Component {
                 {{ __('Reset Password') }}
             </x-primary-button>
 
-        </form>
-    </div>
-</div>
+    </form>
+</x-auth-card>
