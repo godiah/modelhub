@@ -111,7 +111,7 @@ stats).
 
 ---
 
-## Module 3 — Job Postings 🔴
+## Module 3 — Job Postings 🟢
 
 Creating, editing, browsing, and closing job listings. The "supply" side of the board.
 
@@ -124,23 +124,30 @@ Creating, editing, browsing, and closing job listings. The "supply" side of the 
 - **Views**: `resources/views/jobBoard/jobs/*`, `components/jobs/*`
 
 **Findings**
-- 🔴 **`JobFilterTrait` is attached to `ModelJob` but never called.** It defines
-  `scopeWithSearch`/`scopeWithSkills`/`scopeWithSoftware`/`scopeWithSorting` — exactly the logic
-  `JobBrowsingService` needs — but `JobBrowsingService::browseJobs()` reimplements the same four
-  filters as private methods instead of calling the scopes it already has for free
-  (`$query->withSearch($search)->withSkills($skills)...`). Either wire the service to the trait, or
-  delete the trait — right now it's dead weight duplicated by hand.
-- 🔴 `JobImageService` has `handlePortfolioFiles()`/`deletePortfolioFiles()` methods that just
-  delegate to `Helpers\Applications\ApplicationFileHelper` — a Jobs-domain service reaching into
-  the Applications domain for something that isn't job-image-related at all (it's applicant
-  portfolio files). These two methods look misplaced; likely belong directly on
-  `ApplicationFileHelper`'s call sites instead of proxied through `JobImageService`.
-- 🟡 `jobs/apply.blade.php` is **1,100 lines**, `jobs/new.blade.php` is 469 — both are job-posting-shaped
-  forms (skills picker, software picker, image upload) that likely share significant markup with
-  each other and with `jobs/edit.blade.php` (181 lines). Prime componentization target.
-- 🔴 **`jobBoard/jobs/browse.blade.php` queries models directly in the view** — `Skill::where('is_active', true)->get()`
-  and the same for `Software`, instead of receiving them from the controller
-  (`CONVENTIONS.md` item 14).
+- ✅ **`JobFilterTrait` wired up.** `JobBrowsingService::browseJobs()` now calls the trait's
+  `scopeWithSearch()`/`scopeWithSorting()` instead of reimplementing them as private methods.
+  Skill/software filters keep their id→name resolution in the service (ModelJob.skills/software
+  store names, not ids) but delegate the actual query condition to `scopeWithSkills()`/
+  `scopeWithSoftware()`.
+- ✅ **`JobImageService` cross-domain leak removed.** `handlePortfolioFiles()`/`deletePortfolioFiles()`
+  (pure passthroughs to `Applications\ApplicationFileHelper`) deleted; `ApplicationManagementService`
+  now calls `ApplicationFileHelper` directly instead of proxying through the Jobs domain.
+- ✅ **`jobBoard/jobs/browse.blade.php` no longer queries models directly in the view.**
+  `Skill`/`Software` lists now come from `JobBrowsingService::getFilterOptions()` via the
+  controller (`CONVENTIONS.md` item 14).
+- ✅ **`jobs/new.blade.php` and `jobs/edit.blade.php` componentized.** Both shared a form header
+  banner and a Budget/Deadline field pair (identical markup, minor value/state differences).
+  Extracted to `components/jobs/{form-header,budget-field,deadline-field}.blade.php` — the header
+  takes `title`/`subtitle` props plus `icon`/`decoration` slots; the fields take value/required/
+  checked/dimmed-style props so both the "create" (empty, `old()`-backed) and "edit" (prefilled
+  from `$job`) states reuse the same markup. `new.blade.php` dropped ~110 lines, `edit.blade.php`
+  ~80.
+- 🟡 **Correction to an earlier note in this file**: `jobs/apply.blade.php` (1,100 lines) is *not*
+  a job-posting form like `new.blade.php`/`edit.blade.php` — it's a job-details display +
+  application-submission form (different concern, shares no real markup with the posting forms).
+  It's a large view and still a componentization candidate, but on its own terms — possibly
+  alongside `jobs/show.blade.php`, which also displays job details — not lumped in with this
+  batch.
 
 ---
 
@@ -395,8 +402,10 @@ call sites from other modules)
    inconsistency, plus some view componentization. Low risk, good template-setting work.
 6. **Module 4 (Applications) using Module 5 as the template** — the controller-split and
    authorization-centralization work benefits from having just done the equivalent in Module 5.
-7. **Module 3 (Jobs)** — wire up `JobFilterTrait`, resolve the `JobImageService` cross-domain
-   leak, componentize `apply.blade.php`/`new.blade.php`.
+7. ✅ **Module 3 (Jobs)** — done 2026-09-24. `JobFilterTrait` wired up, `JobImageService`
+   cross-domain leak resolved, query-in-Blade fixed, form-header/budget/deadline componentized
+   across `new.blade.php`/`edit.blade.php`. `apply.blade.php`'s own componentization is deferred —
+   turned out not to be the same shape as the posting forms (see Module 3 note above).
 8. **Module 6 (Projects)** — fold into `EngagementManagementService` once Module 5 is settled.
    `DashBoardController`'s raw `DB::table()` stat queries (flagged in Module 2) fit naturally here
    too.
@@ -444,3 +453,19 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   service result (no `ServiceResult` DTO), and Pest browser testing over Dusk for the E2E suite
   once it starts. `CONVENTIONS.md` items 11–15 record all of this. No code changed in this pass —
   it was a conventions/documentation update only.
+- **2026-09-24 (Module 3 pass)**: User opted to jump to Module 3 (Jobs) ahead of Module 5 in the
+  proposed order. `JobBrowsingService::browseJobs()` wired to `JobFilterTrait`'s scopes instead of
+  hand-duplicated filter methods (verified with real query tests); `JobImageService`'s cross-domain
+  passthrough to `ApplicationFileHelper` removed, `ApplicationManagementService` now calls it
+  directly; `browse.blade.php`'s inline `Skill`/`Software` queries replaced with controller-supplied
+  data via a new `getFilterOptions()` method (also fixed a loop-variable shadowing bug this
+  surfaced); `new.blade.php`/`edit.blade.php` had their shared form-header banner and Budget/
+  Deadline field markup extracted into `components/jobs/{form-header,budget-field,deadline-field}
+  .blade.php`. Along the way, found and fixed an unrelated but serious bug: `/jobs/create` and
+  `POST /jobs` had no `auth` middleware at all (public job-creation routes were fatal-erroring for
+  guests instead of redirecting to login) — fixed by adding the middleware and re-ordering the route
+  group so the now-more-specific static routes register before the `{job:slug}` wildcard. Also
+  created `ModelJobFactory` (didn't exist before), needed for the new verification tests. All of it
+  verified with real HTTP/component tests before committing; temp tests deleted after. 2 commits,
+  both pushed. Corrected an earlier note in this file: `apply.blade.php` is not a job-posting form
+  like `new`/`edit` — it's job-details display + application submission, a different concern.
