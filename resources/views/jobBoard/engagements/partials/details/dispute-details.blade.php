@@ -1,3 +1,4 @@
+@use('App\Enums\DisputeStatus')
 @if ($engagement->cancellation && $engagement->cancellation->dispute)
     @php $dispute = $engagement->cancellation->dispute; @endphp
     <div
@@ -22,24 +23,24 @@
                 <div class="flex items-center space-x-2">
                     <span
                         class="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white text-sm font-medium
-                        @if ($dispute->status === 'resolved') text-green-100 bg-white/30
-                        @elseif($dispute->status === 'pending') text-yellow-100 bg-white/30
+                        @if ($dispute->status === DisputeStatus::Resolved) text-green-100 bg-white/30
+                        @elseif($dispute->status === DisputeStatus::Pending) text-yellow-100 bg-white/30
                         @else text-orange-100 bg-white/30 @endif
                     ">
-                        @if ($dispute->status === 'resolved')
+                        @if ($dispute->status === DisputeStatus::Resolved)
                             <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                                     clip-rule="evenodd"></path>
                             </svg>
-                        @elseif($dispute->status === 'pending')
+                        @elseif($dispute->status === DisputeStatus::Pending)
                             <svg class="w-3 h-3 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
                                     clip-rule="evenodd"></path>
                             </svg>
                         @endif
-                        {{ ucfirst(str_replace('_', ' ', $dispute->status)) }}
+                        {{ $dispute->status->label() }}
                     </span>
                 </div>
             </div>
@@ -73,17 +74,17 @@
                     <div class="flex items-start space-x-3">
                         <div
                             class="p-2 rounded-lg
-                            @if ($dispute->status === 'resolved') bg-green-100
-                            @elseif($dispute->status === 'pending') bg-yellow-100
+                            @if ($dispute->status === DisputeStatus::Resolved) bg-green-100
+                            @elseif($dispute->status === DisputeStatus::Pending) bg-yellow-100
                             @else bg-orange-100 @endif
                         ">
-                            @if ($dispute->status === 'resolved')
+                            @if ($dispute->status === DisputeStatus::Resolved)
                                 <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
-                            @elseif($dispute->status === 'pending')
+                            @elseif($dispute->status === DisputeStatus::Pending)
                                 <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -102,11 +103,11 @@
                             <h3 class="text-xs font-semibold text-orange-800 font-main mb-1">Current Status</h3>
                             <p
                                 class="text-sm font-medium font-secondary
-                                @if ($dispute->status === 'resolved') text-green-700
-                                @elseif($dispute->status === 'pending') text-yellow-700
+                                @if ($dispute->status === DisputeStatus::Resolved) text-green-700
+                                @elseif($dispute->status === DisputeStatus::Pending) text-yellow-700
                                 @else text-orange-700 @endif
                             ">
-                                {{ ucfirst(str_replace('_', ' ', $dispute->status)) }}
+                                {{ $dispute->status->label() }}
                             </p>
                         </div>
                     </div>
@@ -180,7 +181,7 @@
                 </div>
 
                 <!-- Resolution Date (if resolved) -->
-                @if ($dispute->status === 'resolved' && $dispute->resolved_at)
+                @if ($dispute->status === DisputeStatus::Resolved && $dispute->resolved_at)
                     <div class="bg-white rounded-lg p-4 border border-green-100 shadow-sm">
                         <div class="flex items-center space-x-3">
                             <div class="p-2 bg-green-100 rounded-lg">
@@ -255,20 +256,20 @@
             <!-- Status Alert -->
             <div
                 class="bg-gradient-to-r 
-                @if ($dispute->status === 'resolved') from-green-600 to-green-700
-                @elseif($dispute->status === 'pending') from-yellow-600 to-amber-600
+                @if ($dispute->status === DisputeStatus::Resolved) from-green-600 to-green-700
+                @elseif($dispute->status === DisputeStatus::Pending) from-yellow-600 to-amber-600
                 @else from-orange-600 to-red-600 @endif
                 rounded-lg p-4
             ">
                 <div class="flex items-center space-x-3">
                     <div class="flex-shrink-0">
-                        @if ($dispute->status === 'resolved')
+                        @if ($dispute->status === DisputeStatus::Resolved)
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                     clip-rule="evenodd"></path>
                             </svg>
-                        @elseif($dispute->status === 'pending')
+                        @elseif($dispute->status === DisputeStatus::Pending)
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd"
                                     d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
@@ -285,9 +286,9 @@
                     <div>
                         <h3 class="text-sm font-semibold text-white font-main">Dispute Status</h3>
                         <p class="text-white/90 text-sm font-secondary mt-0.5">
-                            @if ($dispute->status === 'resolved')
+                            @if ($dispute->status === DisputeStatus::Resolved)
                                 This dispute has been successfully resolved and closed.
-                            @elseif($dispute->status === 'pending')
+                            @elseif($dispute->status === DisputeStatus::Pending)
                                 This dispute is currently under review and pending resolution.
                             @else
                                 This dispute is active and requires attention.

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\DisputeStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -120,7 +121,7 @@ class JobCancellation extends Model
             'disputed_by' => $userId,
             'dispute_reason' => $reason,
             'dispute_details' => $details,
-            'status' => JobPaymentDispute::STATUS_PENDING,
+            'status' => DisputeStatus::Pending,
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\DisputeStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dispute\ResolveDisputeRequest;
 use App\Models\JobPaymentDispute;
@@ -35,9 +36,9 @@ class AdminDisputeController extends Controller
         // Get counts for each status
         $statusCounts = [
             'all' => JobPaymentDispute::count(),
-            'pending' => JobPaymentDispute::where('status', 'pending')->count(),
-            'under_review' => JobPaymentDispute::where('status', 'under_review')->count(),
-            'resolved' => JobPaymentDispute::where('status', 'resolved')->count(),
+            'pending' => JobPaymentDispute::where('status', DisputeStatus::Pending)->count(),
+            'under_review' => JobPaymentDispute::where('status', DisputeStatus::UnderReview)->count(),
+            'resolved' => JobPaymentDispute::where('status', DisputeStatus::Resolved)->count(),
         ];
 
         return view('admin.disputes.index', compact('disputes', 'status', 'statusCounts'));
