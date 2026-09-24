@@ -3,8 +3,10 @@
 /**
  * ProcessPartialPaymentRequest
  *
- * Handles validation for partial payment processing.
- * Validates payment amounts and optional notes for cancelled engagements.
+ * Handles validation for processing a partial payment on a cancelled
+ * engagement. The amount is optional — when omitted, the service
+ * auto-calculates it from the ratio of approved deliverables; when
+ * provided, it overrides that calculation.
  */
 
 namespace App\Http\Requests\Payment;
@@ -23,24 +25,15 @@ class ProcessPartialPaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'payment_amount' => 'required|numeric|min:0',
+            'payment_amount' => 'nullable|numeric|min:0.01',
             'payment_notes' => 'nullable|string|max:1000',
         ];
     }
 
-    // Get payment data
-    public function getPaymentData(): array
+    // Get the manually-entered payment amount, or null to auto-calculate
+    public function getPaymentAmount(): ?float
     {
-        return [
-            'payment_amount' => $this->payment_amount,
-            'payment_notes' => $this->payment_notes,
-        ];
-    }
-
-    // Get payment amount
-    public function getPaymentAmount(): float
-    {
-        return (float) $this->payment_amount;
+        return $this->filled('payment_amount') ? (float) $this->payment_amount : null;
     }
 
     // Get payment notes

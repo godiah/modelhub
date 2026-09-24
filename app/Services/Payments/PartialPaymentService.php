@@ -90,9 +90,12 @@ class PartialPaymentService
     }
 
     /**
-     * Process partial payment for a cancelled engagement
+     * Process partial payment for a cancelled engagement. When $manualAmount is
+     * omitted, the amount is auto-calculated from the ratio of approved
+     * deliverables; when provided, it overrides that calculation (capped at
+     * the engagement's net amount).
      */
-    public function processPartialPayment(JobEngagement $engagement, $manualAmount = null)
+    public function processPartialPayment(JobEngagement $engagement, $manualAmount = null, ?string $notes = null)
     {
         // First validate if payment can be processed
         $canProcess = $this->canProcessPayment($engagement);
@@ -118,16 +121,15 @@ class PartialPaymentService
 
         DB::beginTransaction();
         try {
-            // Calculate payment amount
-            $amount = $manualAmount;
+            // Calculate payment amount — manual amount overrides the auto-calculated one
+            $amount = $manualAmount ?? $this->calculatePartialPayment($engagement);
 
-            // If no manual amount provided, calculate based on approved deliverables
-            if ($amount === null) {
-                $amount = $this->calculatePartialPayment($engagement);
+            if ($amount <= 0) {
+                throw new \Exception('Cannot process a payment amount that is zero or negative.');
+            }
 
-                if ($amount <= 0) {
-                    throw new \Exception('Cannot calculate a valid payment amount.');
-                }
+            if ($amount > $engagement->net_amount) {
+                throw new \Exception('Payment amount cannot exceed the engagement\'s net amount.');
             }
 
             // Create partial payment record
@@ -135,7 +137,7 @@ class PartialPaymentService
                 'engagement_id' => $engagement->id,
                 'amount' => $amount,
                 'status' => JobPartialPayment::STATUS_PENDING,
-                'notes' => 'Partial payment for approved deliverables',
+                'notes' => $notes ?? 'Partial payment for approved deliverables',
                 'processed_by' => $authUser->id,
                 'processed_at' => now(),
             ]);
