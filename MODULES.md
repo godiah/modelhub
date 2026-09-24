@@ -16,6 +16,10 @@ a **Findings** subsection with concrete issues found while reading the code — 
 things confirmed by reading or grepping the source. Findings are the real backlog; the module list
 is just the map to navigate by. Status per module: 🔴 not started · 🟡 in progress · 🟢 done.
 
+See **`CONVENTIONS.md`** for the reference checklist (extracted from Module 5) used to judge
+whether a module's code matches the app's own established pattern — read it before reviewing any
+module's files.
+
 ---
 
 ## Module 1 — Auth & Identity 🔴
