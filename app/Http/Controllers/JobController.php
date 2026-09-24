@@ -100,7 +100,14 @@ class JobController extends Controller
             return view('jobBoard.jobs.partials.jobs-list', compact('jobs'));
         }
 
-        return view('jobBoard.jobs.browse', compact('jobs', 'filters'));
+        $filterOptions = $this->jobBrowsingService->getFilterOptions();
+
+        return view('jobBoard.jobs.browse', [
+            'jobs' => $jobs,
+            'filters' => $filters,
+            'skills' => $filterOptions['skills'],
+            'software' => $filterOptions['software'],
+        ]);
     }
 
     // Apply for a job

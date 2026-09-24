@@ -72,7 +72,7 @@
                                 <select id="skills-filter" name="skills"
                                     class="filter-select w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
                                     <option value="">All Skills</option>
-                                    @foreach (App\Models\Skill::where('is_active', true)->get() as $skill)
+                                    @foreach ($skills as $skill)
                                         <option value="{{ $skill->id }}"
                                             {{ request()->get('skills') == $skill->id ? 'selected' : '' }}>
                                             {{ $skill->name }}
@@ -88,10 +88,10 @@
                                 <select id="software-filter" name="software"
                                     class="filter-select w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
                                     <option value="">All Software</option>
-                                    @foreach (App\Models\Software::where('is_active', true)->get() as $software)
-                                        <option value="{{ $software->id }}"
-                                            {{ request()->get('software') == $software->id ? 'selected' : '' }}>
-                                            {{ $software->name }}
+                                    @foreach ($software as $softwareOption)
+                                        <option value="{{ $softwareOption->id }}"
+                                            {{ request()->get('software') == $softwareOption->id ? 'selected' : '' }}>
+                                            {{ $softwareOption->name }}
                                         </option>
                                     @endforeach
                                 </select>
