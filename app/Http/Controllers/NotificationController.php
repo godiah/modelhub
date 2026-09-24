@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FlashAlertHelper;
 use App\Models\ApplicantMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -65,28 +66,14 @@ class NotificationController extends Controller
             return redirect()->route('engagements.index');
         }
 
-        return redirect()->back()->with([
-            'success' => 'Notification marked as read',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Notification marked as read',
-                'text' => 'Notification marked as read',
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::success('Notification marked as read'));
     }
 
     public function markAllAsRead()
     {
         Auth::user()->unreadNotifications->markAsRead();
 
-        return redirect()->back()->with([
-            'success' => 'All notifications marked as read',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'All notifications marked as read',
-                'text' => 'All notifications marked as read',
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::success('All notifications marked as read'));
     }
 
     public function destroy($id)

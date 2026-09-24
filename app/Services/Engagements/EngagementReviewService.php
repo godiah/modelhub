@@ -10,6 +10,7 @@
 namespace App\Services\Engagements;
 
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
+use App\Helpers\FlashAlertHelper;
 use App\Models\JobEngagement;
 use App\Models\JobReview;
 use App\Models\User;
@@ -27,11 +28,7 @@ class EngagementReviewService
             return [
                 'success' => false,
                 'error' => 'You can only review completed jobs',
-                'alert' => [
-                    'type' => 'error',
-                    'title' => 'Review Not Allowed',
-                    'text' => 'You can only leave reviews for completed jobs.',
-                ],
+                'alert' => FlashAlertHelper::error('Review Not Allowed', 'You can only leave reviews for completed jobs.')['alert'],
             ];
         }
 
@@ -41,11 +38,10 @@ class EngagementReviewService
             return [
                 'success' => false,
                 'error' => 'Unauthorized',
-                'alert' => [
-                    'type' => 'error',
-                    'title' => 'Access Denied',
-                    'text' => 'You are not authorized to leave a review for this job.',
-                ],
+                'alert' => FlashAlertHelper::error(
+                    'Access Denied',
+                    'You are not authorized to leave a review for this job.'
+                )['alert'],
             ];
         }
 
@@ -54,11 +50,10 @@ class EngagementReviewService
             return [
                 'success' => false,
                 'error' => 'You have already reviewed this job',
-                'alert' => [
-                    'type' => 'warning',
-                    'title' => 'Review Already Submitted',
-                    'text' => 'You have already submitted a review for this job.',
-                ],
+                'alert' => FlashAlertHelper::warning(
+                    'Review Already Submitted',
+                    'You have already submitted a review for this job.'
+                )['alert'],
             ];
         }
 
@@ -81,11 +76,10 @@ class EngagementReviewService
             return [
                 'success' => true,
                 'review' => $review,
-                'alert' => [
-                    'type' => 'success',
-                    'title' => 'Review Submitted',
-                    'text' => "Thank you for reviewing $revieweeName. Your feedback helps build trust in our community.",
-                ],
+                'alert' => FlashAlertHelper::success(
+                    'Review Submitted',
+                    "Thank you for reviewing $revieweeName. Your feedback helps build trust in our community."
+                )['alert'],
             ];
         } catch (\Exception $e) {
             // Log::error('Error saving review: ' . $e->getMessage());
@@ -93,11 +87,10 @@ class EngagementReviewService
             return [
                 'success' => false,
                 'error' => 'Failed to submit review',
-                'alert' => [
-                    'type' => 'error',
-                    'title' => 'Error',
-                    'text' => 'There was a problem submitting your review. Please try again.',
-                ],
+                'alert' => FlashAlertHelper::error(
+                    'Error',
+                    'There was a problem submitting your review. Please try again.'
+                )['alert'],
             ];
         }
     }

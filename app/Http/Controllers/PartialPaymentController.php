@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FlashAlertHelper;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
 use App\Services\Payments\PartialPaymentService;
@@ -30,14 +31,12 @@ class PartialPaymentController extends Controller
             // Process the payment with the calculated amount (no manual input)
             $partialPayment = $this->partialPaymentService->processPartialPayment($engagement);
 
-            return redirect()->route('engagements.show-cancelled', $engagement->id)->with([
-                'success' => 'Partial payment processed successfully.',
-                'alert' => [
-                    'type' => 'success',
-                    'title' => 'Payment Processed',
-                    'text' => 'Partial payment of '.number_format($partialPayment->amount, 2).' has been processed successfully.',
-                ],
-            ]);
+            return redirect()->route('engagements.show-cancelled', $engagement->id)->with(
+                FlashAlertHelper::success(
+                    'Payment Processed',
+                    'Partial payment of '.number_format($partialPayment->amount, 2).' has been processed successfully.'
+                )
+            );
         } catch (\Exception $e) {
             Log::error('Payment processing failed', [
                 'engagement_id' => $engagement->id,

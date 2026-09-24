@@ -10,6 +10,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Application\BrowseApplicationsRequest;
 use App\Http\Requests\Application\BrowsePostedJobsRequest;
 use App\Http\Requests\Application\ConfirmHireRequest;
@@ -70,14 +71,9 @@ class JobApplicationController extends Controller
         $message = $request->isDraft() ? 'Application saved as draft' : 'Application submitted successfully';
         $redirectRoute = $request->isDraft() ? 'applications.drafts' : 'applications.my';
 
-        return redirect()->route($redirectRoute)->with([
-            'success' => $message,
-            'alert' => [
-                'type' => 'success',
-                'title' => $request->isDraft() ? 'Draft Saved!' : 'Application Submitted!',
-                'text' => $message,
-            ],
-        ]);
+        return redirect()->route($redirectRoute)->with(
+            FlashAlertHelper::success($request->isDraft() ? 'Draft Saved!' : 'Application Submitted!', $message)
+        );
     }
 
     // Load a draft application for editing
@@ -115,23 +111,14 @@ class JobApplicationController extends Controller
     public function destroyDraft(JobApplication $application)
     {
         if (! $this->applicationManagementService->deleteApplication($application)) {
-            return redirect()->back()->with([
-                'alert' => [
-                    'type' => 'error',
-                    'title' => 'Unauthorized Action',
-                    'text' => 'You do not have permission to delete this application.',
-                ],
-            ]);
+            return redirect()->back()->with(
+                FlashAlertHelper::error('Unauthorized Action', 'You do not have permission to delete this application.')
+            );
         }
 
-        return redirect()->route('applications.my')->with([
-            'success' => 'Application deleted successfully.',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Deleted!',
-                'text' => 'Your application has been removed.',
-            ],
-        ]);
+        return redirect()->route('applications.my')->with(
+            FlashAlertHelper::success('Deleted!', 'Your application has been removed.')
+        );
     }
 
     // Display the specific job application details
@@ -159,14 +146,7 @@ class JobApplicationController extends Controller
             return back()->with('error', 'This application cannot be archived at this time.');
         }
 
-        return back()->with([
-            'success' => 'Application archived successfully.',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Application Archived!',
-                'text' => 'Application archived successfully.',
-            ],
-        ]);
+        return back()->with(FlashAlertHelper::success('Application Archived!', 'Application archived successfully.'));
     }
 
     // Restore an archived application
@@ -176,14 +156,7 @@ class JobApplicationController extends Controller
 
         $this->applicationManagementService->restoreApplication($application);
 
-        return back()->with([
-            'success' => 'Application restored successfully.',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Application Restored!',
-                'text' => 'Application restored successfully.',
-            ],
-        ]);
+        return back()->with(FlashAlertHelper::success('Application Restored!', 'Application restored successfully.'));
     }
 
     // Delete an archived application
@@ -195,14 +168,7 @@ class JobApplicationController extends Controller
             return back()->with('error', 'You can only delete archived applications.');
         }
 
-        return back()->with([
-            'success' => 'Application deleted successfully.',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Application Deleted!',
-                'text' => 'Application deleted successfully.',
-            ],
-        ]);
+        return back()->with(FlashAlertHelper::success('Application Deleted!', 'Application deleted successfully.'));
     }
 
     /**
@@ -280,14 +246,7 @@ class JobApplicationController extends Controller
 
         $engagement = $this->applicationHiringService->confirmHire($application, $deliverables);
 
-        return redirect()->back()->with([
-            'success' => 'Hire confirmed and applicant notified',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Hire confirmed and applicant notified',
-                'text' => 'Hire confirmed and applicant notified',
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::success('Hire confirmed and applicant notified'));
     }
 
     // Send message to applicant
@@ -300,14 +259,7 @@ class JobApplicationController extends Controller
         $messageData = $request->getMessageData();
         $this->applicationMessagingService->sendMessage($application, $messageData);
 
-        return redirect()->back()->with([
-            'success' => 'Message sent successfully.',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Message sent successfully.',
-                'text' => 'Message sent successfully.',
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::success('Message sent successfully.'));
     }
 
     // View Archived Posted Jobs
@@ -325,14 +277,7 @@ class JobApplicationController extends Controller
             return $this->unauthorizedError();
         }
 
-        return redirect()->back()->with([
-            'success' => 'Job has been archived successfully.',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Job Archived!',
-                'text' => 'Job archived successfully.',
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::success('Job Archived!', 'Job archived successfully.'));
     }
 
     // Restore an archived job
@@ -342,14 +287,7 @@ class JobApplicationController extends Controller
             return $this->unauthorizedError();
         }
 
-        return redirect()->back()->with([
-            'success' => 'Job restored successfully.',
-            'alert' => [
-                'type' => 'success',
-                'title' => 'Job Restored!',
-                'text' => 'Job restored successfully.',
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::success('Job Restored!', 'Job restored successfully.'));
     }
 
     // View archived job details
@@ -374,13 +312,6 @@ class JobApplicationController extends Controller
     // Handle unauthorized access error
     protected function unauthorizedError()
     {
-        return redirect()->back()->with([
-            'error' => 'Unauthorized Action',
-            'alert' => [
-                'type' => 'error',
-                'title' => 'Unauthorized Action',
-                'text' => 'Unauthorized Action',
-            ],
-        ]);
+        return redirect()->back()->with(FlashAlertHelper::error('Unauthorized Action'));
     }
 }
