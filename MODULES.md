@@ -195,7 +195,7 @@ hire (which hands off to Module 5).
 
 ---
 
-## Module 5 — Job Engagements (contract lifecycle) 🟡
+## Module 5 — Job Engagements (contract lifecycle) 🟢
 
 The best-architected part of the codebase — worth using as the reference pattern for cleaning up
 Modules 3–4. Covers everything from "offer accepted" through deliverables, completion,
@@ -364,9 +364,29 @@ cancellation, disputes, and partial payment.
   slot). 1078 → 1013 lines even before accounting for the ~15 lines of wrapper markup the component
   itself now owns once instead of 9 times. Verified all 9 sections still render with correct IDs,
   titles, and spot-checked body content before committing.
-- 🟡 `engagements/disputed-engagements.blade.php` (600 lines) is now the largest view in the module
-  and a candidate for breaking into partials, following the pattern the rest of this module already
-  uses well.
+- ✅ **`disputed-engagements.blade.php` componentized.** Two real duplications found: (1) six
+  "info card" blocks (Dispute Reason, Detailed Description, Supporting Evidence, Filed By, Current
+  Status, Resolution Notes) shared identical wrapper chrome (rounded card, icon-box + title header
+  row) — extracted to `<x-disputes.info-card title color>`, icon via a named slot, body via the
+  default slot (a 7th similar-looking card, "Partial Payment Information", genuinely differs in
+  structure — a bigger section with its own 3-column grid — so it was correctly left alone rather
+  than force-fit); (2) the page-header's admin-vs-non-admin branches were near-identical (same
+  heading, same button shape) differing only in destination route, icon, and label — collapsed to
+  one block with a single `$isAdminViewer` conditional instead of two full copies. 601 → 582 lines
+  even before counting the six-times-duplicated card chrome now living once in the component.
+  Verified both header variants and all six info cards (including the pending/resolved dispute
+  states and evidence-file rendering) with real HTTP requests before committing.
+
+Also removed `EngagementPaymentService::canProcessPayment()`/`::calculatePartialPayment()` — the two
+dead methods flagged earlier this module's pass, confirmed still zero callers, deleted rather than
+left to bit-rot further.
+
+**Module 5 status: closed out.** The two remaining open items —
+`EngagementNotificationHelper::sendReviewNotification()` plus two other never-built notification
+classes (needs a product decision on content/recipient), and
+`PartialPaymentService::canProcessPayment()`'s auth-check entangled with business-rule validation
+(deliberately not unwound, low risk to leave) — are both low-priority and independently actionable
+whenever picked back up; neither blocks moving to another module.
 
 ---
 
@@ -587,3 +607,31 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   verified with real HTTP/component tests before committing; temp tests deleted after. 2 commits,
   both pushed. Corrected an earlier note in this file: `apply.blade.php` is not a job-posting form
   like `new`/`edit` — it's job-details display + application submission, a different concern.
+- **2026-09-24/25 (Module 5 pass, closed out)**: 13 commits across the module's full findings list.
+  Consolidated three separate Policy/Helper/inline duplicates of the view and respond-to-offer
+  authorization checks into `JobEngagementPolicy` as single source of truth. Fixed a real
+  authorization bypass in `JobDeliverableController::submit()` (zero permission check existed) plus
+  a second instance of the same pattern across `PartialPaymentController`/`PartialPaymentService`.
+  Wired up an orphaned manual-payment-amount code path as a real option on the live partial-payment
+  flow and moved deliverable/dispute files off the public disk onto private storage with
+  authorization-gated download routes — both per explicit user decisions rather than default
+  assumptions. Wired up a fully-built-but-never-dispatched payment notification. Added rate limiting
+  to payment/dispute routes. Converted all three status fields (`JobEngagement`/`JobPaymentDispute`/
+  `JobPartialPayment`) to backed PHP enums, one model at a time, each fully verified — surfaced 4
+  real pre-existing bugs along the way (a dead `STATUS_PENDING` constant matching no real DB value,
+  a copy-paste status-string typo permanently greying out an editable textarea, three `match` blocks
+  silently missing the `applicant_accepted` case, and — flagged for Module 6, not fixed here —
+  `project.engagement.show`/`archive`/`unarchive` routes pointing to `ProjectController` methods
+  that don't exist at all). Componentized both oversized views: `policy.blade.php`'s 9 near-identical
+  section wrappers into `<x-policy.section>` (1078→1013 lines) and `disputed-engagements.blade.php`'s
+  6 near-identical info cards into `<x-disputes.info-card>` plus its duplicated admin/non-admin page
+  header (601→582 lines). Removed two confirmed-dead `EngagementPaymentService` methods. Every
+  change verified with real HTTP requests or direct model/service assertions, temp tests deleted
+  after, before committing — including, for the enum conversions specifically, exhaustive
+  per-file greps to catch every raw-string comparison site (an enum instance silently never equals
+  a raw string via `===`/`switch`/array-key-lookup, so a missed site is a silent bug, not a loud
+  error). Two large/risky items (full three-model enum scope, and what to do about two
+  explicitly-flagged decisions — the orphaned payment code and the public-disk files) were confirmed
+  with the user before proceeding rather than assumed. Module 5 marked 🟢; two small, genuinely
+  low-priority items left open and documented in the module's own findings section, not blocking
+  further work.
