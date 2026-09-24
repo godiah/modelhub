@@ -24,15 +24,18 @@ Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
 
-// Job Public Routes (No auth)
+// Job Routes — static paths (create/browse) must stay registered before the
+// {job:slug} wildcard below, or "create"/"browse" would themselves get
+// matched as a slug and 404. Browsing/viewing is public; posting/editing
+// requires auth.
 Route::prefix('jobs')->name('jobs.')->group(function () {
     Route::get('/', [JobController::class, 'index'])->name('index');
     Route::get('/browse', [JobController::class, 'browseJobs'])->name('browse');
-    Route::get('/create', [JobController::class, 'new'])->name('create');
-    Route::post('/', [JobController::class, 'store'])->name('store');
+    Route::get('/create', [JobController::class, 'new'])->middleware('auth')->name('create');
+    Route::post('/', [JobController::class, 'store'])->middleware('auth')->name('store');
+
     Route::get('/{job:slug}', [JobController::class, 'show'])->name('show');
     Route::get('/{job:slug}/apply', [JobController::class, 'apply'])->name('apply');
-
     Route::get('/{job:slug}/edit', [JobController::class, 'edit'])->middleware('auth')->name('edit');
     Route::patch('/{job:slug}', [JobController::class, 'update'])->middleware('auth')->name('update');
 });
