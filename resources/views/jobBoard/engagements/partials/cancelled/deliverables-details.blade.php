@@ -188,7 +188,7 @@
                                     <h5 class="font-medium text-neutral-800 mb-1">Attached Files
                                     </h5>
                                     <ul class="space-y-2">
-                                        @foreach ($deliverable->submission_files as $file)
+                                        @foreach ($deliverable->submission_files as $index => $file)
                                             <li class="flex items-center gap-2">
                                                 <div
                                                     class="h-8 w-8 bg-neutral-100 rounded flex items-center justify-center">
@@ -201,7 +201,7 @@
                                                     </svg>
                                                 </div>
                                                 <div>
-                                                    <a href="{{ Storage::url($file['path']) }}" target="_blank"
+                                                    <a href="{{ route('engagements.deliverables.download-file', [$deliverable->id, $index]) }}"
                                                         class="text-primary hover:text-primary/80 font-medium hover:underline transition duration-200">
                                                         {{ $file['name'] }}
                                                     </a>

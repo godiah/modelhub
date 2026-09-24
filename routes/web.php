@@ -108,6 +108,7 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     Route::post('/partial-payments/{id}/accept', [PartialPaymentController::class, 'acceptPartialPayment'])->name('accept-partial-payment');
     Route::get('/partial-payments/{id}/dispute', [PartialPaymentController::class, 'disputePartialPayment'])->name('dispute-form');
     Route::post('/partial-payments/{id}/process-dispute', [PartialPaymentController::class, 'processDisputePartialPayment'])->name('process-dispute-partial-payment');
+    Route::get('/disputes/{dispute}/evidence/{index}/download', [PartialPaymentController::class, 'downloadDisputeEvidence'])->name('disputes.download-evidence');
 
     // Archive functionality
     Route::prefix('archive')->group(function () {
@@ -131,6 +132,7 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
         Route::patch('/{deliverable}', [JobDeliverableController::class, 'update'])->name('update');
         Route::delete('/{deliverable}', [JobDeliverableController::class, 'destroy'])->name('destroy');
         Route::post('/{engagement}/store', [JobDeliverableController::class, 'store'])->name('store');
+        Route::get('/{deliverable}/files/{index}/download', [JobDeliverableController::class, 'downloadSubmissionFile'])->name('download-file');
     });
 
     // Review routes

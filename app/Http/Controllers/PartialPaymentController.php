@@ -8,9 +8,11 @@ use App\Http\Requests\Payment\ProcessDisputePartialPaymentRequest;
 use App\Http\Requests\Payment\ProcessPartialPaymentRequest;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
+use App\Models\JobPaymentDispute;
 use App\Services\Payments\PartialPaymentService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PartialPaymentController extends Controller
 {
@@ -116,7 +118,7 @@ class PartialPaymentController extends Controller
             // Upload evidence if provided
             $evidence = null;
             if ($request->hasFile('evidence')) {
-                $evidencePath = $request->file('evidence')->store('dispute-evidence', 'public');
+                $evidencePath = $request->file('evidence')->store('dispute-evidence', 'local');
                 $evidence = $evidencePath;
             }
 
@@ -142,5 +144,24 @@ class PartialPaymentController extends Controller
 
             return back()->with('error', 'Failed to dispute payment: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Download a piece of dispute evidence. Files live on the private disk —
+     * only the engagement's poster, applicant, or an admin may download them.
+     */
+    public function downloadDisputeEvidence(JobPaymentDispute $dispute, int $index)
+    {
+        if (! EngagementAuthorizationHelper::canView($dispute->engagement, Auth::user())) {
+            abort(403);
+        }
+
+        $path = $dispute->supporting_evidence[$index] ?? null;
+
+        if (! $path || ! Storage::disk('local')->exists($path)) {
+            abort(404);
+        }
+
+        return Storage::disk('local')->download($path);
     }
 }

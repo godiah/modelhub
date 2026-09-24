@@ -636,9 +636,8 @@
                                                                             Files:</h6>
                                                                         <div
                                                                             class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                            @foreach ($deliverable->submission_files as $file)
-                                                                                <a href="{{ Storage::url($file['path']) }}"
-                                                                                    target="_blank"
+                                                                            @foreach ($deliverable->submission_files as $index => $file)
+                                                                                <a href="{{ route('engagements.deliverables.download-file', [$deliverable->id, $index]) }}"
                                                                                     class="flex items-center p-1.5 bg-white border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors">
                                                                                     <div
                                                                                         class="rounded-md bg-neutral-100 p-1 mr-2">
@@ -756,9 +755,8 @@
                                                                 Submitted Files:
                                                             </h6>
                                                             <div class="ml-6 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                @foreach ($deliverable->submission_files as $file)
-                                                                    <a href="{{ Storage::url($file['path']) }}"
-                                                                        target="_blank"
+                                                                @foreach ($deliverable->submission_files as $index => $file)
+                                                                    <a href="{{ route('engagements.deliverables.download-file', [$deliverable->id, $index]) }}"
                                                                         class="flex items-center p-2 bg-white border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors group">
                                                                         <div
                                                                             class="rounded-md bg-secondary/10 p-1.5 mr-2 group-hover:bg-secondary/20 transition-colors">
@@ -1112,9 +1110,8 @@
                                                         <!-- Submitted Files -->
                                                         @if (!empty($deliverable->submission_files))
                                                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                                                @foreach ($deliverable->submission_files as $file)
-                                                                    <a href="{{ Storage::url($file['path']) }}"
-                                                                        target="_blank"
+                                                                @foreach ($deliverable->submission_files as $index => $file)
+                                                                    <a href="{{ route('engagements.deliverables.download-file', [$deliverable->id, $index]) }}"
                                                                         class="flex items-center p-2 border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors">
                                                                         <svg xmlns="http://www.w3.org/2000/svg"
                                                                             class="h-5 w-5 mr-2 text-primary"

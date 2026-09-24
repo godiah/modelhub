@@ -220,10 +220,10 @@
                                 <h3 class="font-bold font-main text-neutral-800">Supporting Evidence</h3>
                             </div>
                             <div class="space-y-3">
-                                @foreach ($dispute->supporting_evidence as $evidence)
+                                @foreach ($dispute->supporting_evidence as $index => $evidence)
                                     <div
                                         class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50 hover:bg-neutral-100 transition-colors">
-                                        <a href="{{ asset('storage/' . $evidence) }}" target="_blank"
+                                        <a href="{{ route('engagements.disputes.download-evidence', [$dispute->id, $index]) }}"
                                             class="flex items-center space-x-3 text-secondary hover:text-secondary/80 transition-colors group">
                                             <div
                                                 class="bg-secondary/10 rounded-lg p-2 group-hover:bg-secondary/20 transition-colors">
@@ -237,8 +237,7 @@
                                             <div>
                                                 <span class="font-medium font-secondary text-sm">Evidence
                                                     {{ $loop->iteration }}</span>
-                                                <p class="text-xs text-neutral-500 font-secondary">Click to view in new
-                                                    tab</p>
+                                                <p class="text-xs text-neutral-500 font-secondary">Click to download</p>
                                             </div>
                                             <svg xmlns="http://www.w3.org/2000/svg"
                                                 class="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform"
