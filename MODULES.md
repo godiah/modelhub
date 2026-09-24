@@ -358,9 +358,14 @@ cancellation, disputes, and partial payment.
   Verified with real HTTP requests and direct model assertions across every status of all three
   enums (including the previously-mishandled `applicant_accepted` case and the respond.blade.php fix)
   before committing each of the three conversions.
-- 🟡 `jobs/engagements/policy.blade.php` (1,078 lines, a single static cancellation-policy page) and
-  `engagements/disputed-engagements.blade.php` (600 lines) are the largest views in the module and
-  candidates for breaking into partials, following the pattern the rest of this module already
+- ✅ **`policy.blade.php` componentized.** All 9 numbered policy sections shared the exact same
+  wrapper chrome (bordered card, gradient header bar, icon+numbered-title row, content padding) —
+  extracted to `<x-policy.section id number title>` (icon via a named slot, body via the default
+  slot). 1078 → 1013 lines even before accounting for the ~15 lines of wrapper markup the component
+  itself now owns once instead of 9 times. Verified all 9 sections still render with correct IDs,
+  titles, and spot-checked body content before committing.
+- 🟡 `engagements/disputed-engagements.blade.php` (600 lines) is now the largest view in the module
+  and a candidate for breaking into partials, following the pattern the rest of this module already
   uses well.
 
 ---
