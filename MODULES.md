@@ -252,15 +252,34 @@ cancellation, disputes, and partial payment.
   normal field-level error response — FormRequest validation now runs before the controller method,
   outside that catch entirely. Verified with real HTTP requests covering every role×action
   combination (including the fixed `submit()` bypass) before committing.
-- 🔴 **`PartialPaymentController`/`AdminDisputeController` also skip FormRequests** — inline
-  `$request->validate()` calls, same inconsistency.
-- 🔴 **`App\Services\Payments\PartialPaymentService::resolveDispute()` has dead/wrong code**:
-  `$client = $engagement->poster->user;` and `$freelancer = $engagement->applicant->user;` — but
-  `$engagement->poster` and `$engagement->applicant` are *already* `User` models (via
-  `hasOneThrough` on `JobEngagement`), so `->user` resolves to `null` every time. Currently harmless
-  only because the resulting variables are never used (the notification-sending code below them is
-  commented out) — but it's wrong on its face and will bite whoever implements those notifications
-  next, copying the existing (broken) pattern.
+- ✅ **`PartialPaymentController`/`AdminDisputeController` FormRequests added; a third copy of the
+  "is applicant" auth check found and consolidated too.** `processDisputePartialPayment()`'s inline
+  `$request->validate()` → new `ProcessDisputePartialPaymentRequest`; `AdminDisputeController::
+  resolve()`'s inline validate → new `ResolveDisputeRequest` (admin-only is already enforced at the
+  route level via `role:admin` middleware, unaffected). While in this code, found the same
+  poster/applicant duplication pattern again: `$authUser->id !== $engagement->application->
+  applicant_id` was hand-rolled independently in the controller's `disputePartialPayment()` (GET
+  form) and in `PartialPaymentService::acceptPartialPayment()`/`disputePartialPayment()` — three
+  copies of one check. Added `EngagementAuthorizationHelper::canRespondToPartialPayment()` and used
+  it at all three. `PartialPaymentService::canProcessPayment()` has a fourth, related but *not*
+  identical duplicate (poster-or-admin, entangled with cancelled-status/pending-deliverables
+  business rules in one method) — left alone this pass since unwinding it risks the business logic
+  it's mixed with; tracked as its own item below.
+- ✅ **`PartialPaymentService::resolveDispute()` dead/wrong code removed.** `$client = $engagement->
+  poster->user;` / `$freelancer = $engagement->applicant->user;` always resolved to `null` (`poster`/
+  `applicant` are already `User` models via `hasOneThrough`) and were never used — deleted, replaced
+  with a one-line comment for whoever wires up the commented-out notification calls next.
+- 🟡 **New finding: a whole second, unreachable partial-payment flow exists.** The *live* route
+  (`process-partial-payment` → `PartialPaymentController::processPartialPayment()` →
+  `PartialPaymentService::processPartialPayment()`) auto-calculates the amount from the ratio of
+  approved deliverables. But `JobEngagementController::processPartialPayment()` +
+  `EngagementPaymentService::processPartialPayment()` + the `ProcessPartialPaymentRequest`
+  FormRequest form a second, complete implementation that takes a *manually entered* amount instead
+  — and no route points to it. Not touched this pass: unlike the other dead code found so far, this
+  isn't inert (it's a materially different payment mechanism — manual vs. auto-calculated amount),
+  so deleting it is a product call, not a cleanup one. Needs a decision: was manual-amount override
+  meant to ship as an admin/poster option, or is the auto-calculated flow the intended final design
+  with this being an abandoned earlier attempt?
 - 🔴 `EngagementNotificationHelper::sendReviewNotification()` and `::sendPaymentNotification()` are
   empty stub methods — not called from anywhere, not implemented. Either wire them up when review/
   payment notifications are actually built, or remove until then.
