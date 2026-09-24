@@ -6,6 +6,7 @@ use App\Models\JobCancellation;
 use App\Models\JobEngagement;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -79,6 +80,6 @@ class EngagementCancelledNotification extends Notification implements ShouldQueu
 
     public function toBroadcast($notifiable)
     {
-        return broadcast(new \Illuminate\Notifications\Messages\BroadcastMessage($this->toArray($notifiable)));
+        return broadcast(new BroadcastMessage($this->toArray($notifiable)));
     }
 }

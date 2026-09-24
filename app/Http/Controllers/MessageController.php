@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\JobEngagement;
 use App\Models\Message;
+use App\Models\ModelJob;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class MessageController extends Controller
 {
@@ -39,7 +42,7 @@ class MessageController extends Controller
             // Load job safely
             $job = null;
             if ($engagement->application && $engagement->application->job_id) {
-                $job = \App\Models\ModelJob::find($engagement->application->job_id);
+                $job = ModelJob::find($engagement->application->job_id);
             }
 
             // Verify required data exists
@@ -97,7 +100,7 @@ class MessageController extends Controller
             ]);
 
             return response()->json($responseData);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             Log::warning('Authorization failed', [
                 'engagement_id' => $engagement->id,
                 'user_id' => Auth::id(),
@@ -152,9 +155,9 @@ class MessageController extends Controller
                     'read_at' => null,
                 ],
             ]);
-        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+        } catch (AuthorizationException $e) {
             return response()->json(['error' => 'Unauthorized to send message'], 403);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             return response()->json(['error' => 'Validation failed', 'details' => $e->errors()], 422);
         } catch (\Exception $e) {
             // Log the error for debugging

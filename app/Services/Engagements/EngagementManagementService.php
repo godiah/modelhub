@@ -13,12 +13,13 @@ use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Models\JobApplication;
 use App\Models\JobEngagement;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class EngagementManagementService
 {
     // Get user's engagements with filtering
-    public function getUserEngagements(array $filters): \Illuminate\Pagination\LengthAwarePaginator
+    public function getUserEngagements(array $filters): LengthAwarePaginator
     {
         $user = Auth::user();
 
@@ -160,7 +161,7 @@ class EngagementManagementService
     }
 
     // Get archived engagements
-    public function getArchivedEngagements(string $status = 'all'): \Illuminate\Pagination\LengthAwarePaginator
+    public function getArchivedEngagements(string $status = 'all'): LengthAwarePaginator
     {
         $user = Auth::user();
 

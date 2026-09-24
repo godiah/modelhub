@@ -9,6 +9,7 @@ use App\Models\JobApplication;
 use App\Models\ModelJob;
 use App\Services\Jobs\JobImageService;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class ApplicationManagementService
@@ -172,7 +173,7 @@ class ApplicationManagementService
     }
 
     // Get user's applications with filtering
-    public function getUserApplications(array $filters): \Illuminate\Pagination\LengthAwarePaginator
+    public function getUserApplications(array $filters): LengthAwarePaginator
     {
         $query = JobApplication::with('job', 'engagement', 'jobEngagements')
             ->where('applicant_id', Auth::id())
@@ -199,7 +200,7 @@ class ApplicationManagementService
     }
 
     // Get user's draft applications
-    public function getDraftApplications(): \Illuminate\Pagination\LengthAwarePaginator
+    public function getDraftApplications(): LengthAwarePaginator
     {
         return JobApplication::with('job')
             ->where('applicant_id', Auth::id())
@@ -250,7 +251,7 @@ class ApplicationManagementService
     }
 
     // Get archived applications
-    public function getArchivedApplications(): \Illuminate\Pagination\LengthAwarePaginator
+    public function getArchivedApplications(): LengthAwarePaginator
     {
         return JobApplication::with(['job', 'applicant', 'poster'])
             ->where('applicant_id', Auth::id())

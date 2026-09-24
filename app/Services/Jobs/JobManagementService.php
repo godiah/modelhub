@@ -13,6 +13,7 @@ use App\Models\Software;
 use App\Notifications\JobPostedNotification;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -106,7 +107,7 @@ class JobManagementService
     }
 
     // Get user's posted jobs with filtering and sorting
-    public function getUserPostedJobs(array $filters): \Illuminate\Pagination\LengthAwarePaginator
+    public function getUserPostedJobs(array $filters): LengthAwarePaginator
     {
         $query = ModelJob::where('user_id', Auth::id())->unarchived();
 
@@ -167,7 +168,7 @@ class JobManagementService
     }
 
     // Get archived jobs
-    public function getArchivedJobs(): \Illuminate\Pagination\LengthAwarePaginator
+    public function getArchivedJobs(): LengthAwarePaginator
     {
         return ModelJob::where('user_id', Auth::id())
             ->archived()

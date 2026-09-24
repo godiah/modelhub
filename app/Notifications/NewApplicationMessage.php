@@ -6,6 +6,7 @@ use App\Models\ApplicantMessage;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Str;
 
 class NewApplicationMessage extends Notification
 {
@@ -36,7 +37,7 @@ class NewApplicationMessage extends Notification
             'job_title' => $job->title,
             'sender_name' => $this->message->sender->name,
             'subject' => $this->message->subject,
-            'message_preview' => \Illuminate\Support\Str::limit($this->message->message, 100),
+            'message_preview' => Str::limit($this->message->message, 100),
         ];
     }
 
@@ -50,7 +51,7 @@ class NewApplicationMessage extends Notification
             'job_title' => $this->message->application->job->title,
             'sender_name' => $this->message->sender->name,
             'subject' => $this->message->subject,
-            'message_preview' => \Illuminate\Support\Str::limit($this->message->message, 100),
+            'message_preview' => Str::limit($this->message->message, 100),
         ]);
     }
 }
