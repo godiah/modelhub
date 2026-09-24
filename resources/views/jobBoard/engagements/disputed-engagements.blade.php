@@ -1,3 +1,4 @@
+@use('App\Enums\DisputeStatus')
 <x-app-layout>
     <x-slot name="header">
         @if (Auth::user()->hasRole('admin'))
@@ -58,11 +59,11 @@
                     <div class="flex items-center space-x-4">
                         <div class="relative">
                             @php
-                                $status = $dispute->status ?? 'pending';
-                                $iconColor = $status === 'resolved' ? 'bg-green-300' : 'bg-rose-300';
-                                $iconBg = $status === 'resolved' ? 'bg-green-50' : 'bg-rose-50';
-                                $iconText = $status === 'resolved' ? 'text-green-500' : 'text-rose-500';
-                                $pulseClass = $status === 'resolved' ? '' : 'animate-pulse';
+                                $status = $dispute->status ?? DisputeStatus::Pending;
+                                $iconColor = $status === DisputeStatus::Resolved ? 'bg-green-300' : 'bg-rose-300';
+                                $iconBg = $status === DisputeStatus::Resolved ? 'bg-green-50' : 'bg-rose-50';
+                                $iconText = $status === DisputeStatus::Resolved ? 'text-green-500' : 'text-rose-500';
+                                $pulseClass = $status === DisputeStatus::Resolved ? '' : 'animate-pulse';
                             @endphp
 
                             <div
@@ -134,7 +135,7 @@
                         </div>
                         <div class="relative w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
                             @php
-                                $status = $engagement->cancellation->dispute->status ?? 'pending';
+                                $status = $engagement->cancellation->dispute->status?->value ?? 'pending';
                                 $progressPercent =
                                     [
                                         'pending' => '5%',
@@ -300,7 +301,7 @@
                         </div>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <p class="text-sm font-semibold font-secondary text-neutral-800 mb-2">
-                                {{ ucfirst(str_replace('_', ' ', $dispute->status)) }}
+                                {{ $dispute->status->label() }}
                             </p>
                             @if ($dispute->isResolved())
                                 <div class="flex items-center space-x-2 text-green-600 mb-3">

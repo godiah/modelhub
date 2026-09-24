@@ -2,19 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\DisputeStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class JobPaymentDispute extends Model
 {
     use HasFactory;
-
-    // Dispute statuses
-    const STATUS_PENDING = 'pending';
-
-    const STATUS_UNDER_REVIEW = 'under_review';
-
-    const STATUS_RESOLVED = 'resolved';
 
     protected $fillable = [
         'cancellation_id',
@@ -31,6 +25,7 @@ class JobPaymentDispute extends Model
     ];
 
     protected $casts = [
+        'status' => DisputeStatus::class,
         'supporting_evidence' => 'array',
         'resolved_at' => 'datetime',
         'resolution_amount' => 'decimal:2',
@@ -97,7 +92,7 @@ class JobPaymentDispute extends Model
     public function assignAdmin($adminId)
     {
         $this->update([
-            'status' => self::STATUS_UNDER_REVIEW,
+            'status' => DisputeStatus::UnderReview,
             'admin_assigned' => $adminId,
         ]);
 
@@ -110,7 +105,7 @@ class JobPaymentDispute extends Model
     public function resolve($adminId, $notes, $amount = null)
     {
         $this->update([
-            'status' => self::STATUS_RESOLVED,
+            'status' => DisputeStatus::Resolved,
             'resolved_at' => now(),
             'resolved_by' => $adminId,
             'resolution_notes' => $notes,
@@ -130,7 +125,7 @@ class JobPaymentDispute extends Model
      */
     public function isPending()
     {
-        return $this->status === self::STATUS_PENDING;
+        return $this->status === DisputeStatus::Pending;
     }
 
     /**
@@ -138,7 +133,7 @@ class JobPaymentDispute extends Model
      */
     public function isUnderReview()
     {
-        return $this->status === self::STATUS_UNDER_REVIEW;
+        return $this->status === DisputeStatus::UnderReview;
     }
 
     /**
@@ -146,7 +141,7 @@ class JobPaymentDispute extends Model
      */
     public function isResolved()
     {
-        return $this->status === self::STATUS_RESOLVED;
+        return $this->status === DisputeStatus::Resolved;
     }
 
     /**

@@ -1,3 +1,4 @@
+@use('App\Enums\DisputeStatus')
 <x-app-layout>
     <!-- Main Container with Background Pattern -->
     <div class="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100 relative overflow-hidden">
@@ -320,9 +321,9 @@
                         class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-neutral-200/50 overflow-hidden group">
                         <!-- Status Bar -->
                         <div
-                            class="h-1 bg-gradient-to-r 
-                            @if ($dispute->status === 'pending') from-accent to-accent/70
-                            @elseif($dispute->status === 'under_review') from-secondary to-secondary/70 @endif">
+                            class="h-1 bg-gradient-to-r
+                            @if ($dispute->status === DisputeStatus::Pending) from-accent to-accent/70
+                            @elseif($dispute->status === DisputeStatus::UnderReview) from-secondary to-secondary/70 @endif">
                         </div>
 
                         <div class="p-6">
@@ -331,7 +332,7 @@
                                 <div class="flex items-center space-x-4">
                                     <!-- Status Icon -->
                                     <div class="relative">
-                                        @if ($dispute->status === 'pending')
+                                        @if ($dispute->status === DisputeStatus::Pending)
                                             <div class="absolute inset-0 bg-accent/20 rounded-full"></div>
                                             <div
                                                 class="relative bg-accent/10 backdrop-blur-sm rounded-full p-3 border border-accent/30">
@@ -342,7 +343,7 @@
                                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             </div>
-                                        @elseif($dispute->status === 'under_review')
+                                        @elseif($dispute->status === DisputeStatus::UnderReview)
                                             <div
                                                 class="bg-secondary/10 backdrop-blur-sm rounded-full p-3 border border-secondary/30">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary"
@@ -362,16 +363,16 @@
                                         <div class="flex items-center space-x-3">
                                             <span
                                                 class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium font-tertiary
-                                                @if ($dispute->status === 'pending') bg-accent/10 text-accent border border-accent/20
-                                                @elseif($dispute->status === 'under_review') bg-secondary/10 text-secondary border border-secondary/20 
+                                                @if ($dispute->status === DisputeStatus::Pending) bg-accent/10 text-accent border border-accent/20
+                                                @elseif($dispute->status === DisputeStatus::UnderReview) bg-secondary/10 text-secondary border border-secondary/20
                                                 @else bg-green-50 text-green-600 border border-green-500 @endif">
                                                 <div
-                                                    class="w-1.5 h-1.5 
-                                                    @if ($dispute->status === 'pending') bg-accent 
-                                                    @elseif($dispute->status === 'under_review') bg-secondary 
+                                                    class="w-1.5 h-1.5
+                                                    @if ($dispute->status === DisputeStatus::Pending) bg-accent
+                                                    @elseif($dispute->status === DisputeStatus::UnderReview) bg-secondary
                                                     @else bg-green-600 @endif rounded-full mr-2">
                                                 </div>
-                                                {{ ucfirst(str_replace('_', ' ', $dispute->status)) }}
+                                                {{ $dispute->status->label() }}
                                             </span>
                                             <span class="text-neutral-400">•</span>
                                             <span class="text-sm text-neutral-500 font-secondary">
@@ -383,7 +384,7 @@
 
                                 <!-- Priority Indicator -->
                                 <div class="flex items-center space-x-2">
-                                    @if ($dispute->status === 'pending')
+                                    @if ($dispute->status === DisputeStatus::Pending)
                                         <div
                                             class="bg-accent/10 text-accent px-2 py-1 rounded-lg text-xs font-medium font-tertiary">
                                             High Priority

@@ -34,7 +34,7 @@
                     </h3>
                     <div class="flex items-center space-x-2">
                         @php
-                            $status = $engagement->cancellation->dispute->status ?? null;
+                            $status = $engagement->cancellation->dispute->status?->value ?? null;
 
                             $badgeConfig = [
                                 'pending' => [
