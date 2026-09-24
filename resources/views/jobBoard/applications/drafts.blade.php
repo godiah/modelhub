@@ -125,7 +125,7 @@
         </div>
 
         <!-- Footer -->
-        @include('partials\footer-secondary')
+        @include('partials.footer-secondary')
 
         <script>
             function confirmDelete(event, id) {

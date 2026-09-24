@@ -93,7 +93,7 @@
         </div>
     </div>
 
-    @include('partials\footer-secondary')
+    @include('partials.footer-secondary')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

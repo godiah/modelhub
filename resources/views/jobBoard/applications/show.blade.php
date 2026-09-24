@@ -312,6 +312,6 @@
         </div>
 
         <!-- Footer -->
-        @include('partials\footer-secondary')
+        @include('partials.footer-secondary')
     </section>
 </x-app-layout>

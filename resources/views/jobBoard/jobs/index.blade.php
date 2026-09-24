@@ -442,6 +442,6 @@
         </div>
 
         <!-- Footer -->
-        @include('partials\footer-secondary')
+        @include('partials.footer-secondary')
     </div>
 </x-app-layout>

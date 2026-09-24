@@ -249,5 +249,5 @@
         </div>
     </div>
 
-    @include('partials\footer-secondary')
+    @include('partials.footer-secondary')
 </x-app-layout>

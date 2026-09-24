@@ -297,7 +297,7 @@
         </div>
     </div>
 
-    @include('partials\footer-secondary')
+    @include('partials.footer-secondary')
 
     {{-- Sweet Alert Script --}}
     <script>

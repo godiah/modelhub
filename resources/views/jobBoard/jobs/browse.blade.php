@@ -147,7 +147,7 @@
         </div>
 
         <!-- Footer -->
-        @include('partials\footer-secondary')
+        @include('partials.footer-secondary')
     </section>
 
     <!-- JavaScript for enhanced interactivity -->

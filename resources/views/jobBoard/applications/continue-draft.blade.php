@@ -218,7 +218,7 @@
         </div>
 
         <!-- Footer -->
-        @include('partials\footer-secondary')
+        @include('partials.footer-secondary')
 
         <!-- Disable submission -->
         <script>
