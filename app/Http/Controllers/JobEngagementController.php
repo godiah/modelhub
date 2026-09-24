@@ -17,7 +17,6 @@ use App\Http\Requests\Engagement\CancelEngagementRequest;
 use App\Http\Requests\Engagement\LeaveReviewRequest;
 use App\Http\Requests\Engagement\RespondToOfferRequest;
 use App\Http\Requests\Job\ReopenJobRequest;
-use App\Http\Requests\Payment\ProcessPartialPaymentRequest;
 use App\Models\JobEngagement;
 use App\Services\Engagements\EngagementCancellationService;
 use App\Services\Engagements\EngagementManagementService;
@@ -262,21 +261,5 @@ class JobEngagementController extends Controller
         $engagement = $this->engagementManagementService->getEngagementDetails($engagement);
 
         return view('jobBoard.engagements.show', compact('engagement'));
-    }
-
-    // Process partial payment for cancelled engagement
-    public function processPartialPayment(JobEngagement $engagement, ProcessPartialPaymentRequest $request)
-    {
-        $paymentData = $request->getPaymentData();
-        $result = $this->engagementPaymentService->processPartialPayment($engagement, $paymentData);
-
-        if ($result['success']) {
-            return redirect()->route('engagements.show', $engagement)->with([
-                'success' => $result['message'],
-                'alert' => $result['alert'],
-            ]);
-        } else {
-            return back()->with('error', $result['error']);
-        }
     }
 }

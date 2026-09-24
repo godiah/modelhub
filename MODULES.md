@@ -269,17 +269,27 @@ cancellation, disputes, and partial payment.
   poster->user;` / `$freelancer = $engagement->applicant->user;` always resolved to `null` (`poster`/
   `applicant` are already `User` models via `hasOneThrough`) and were never used — deleted, replaced
   with a one-line comment for whoever wires up the commented-out notification calls next.
-- 🟡 **New finding: a whole second, unreachable partial-payment flow exists.** The *live* route
-  (`process-partial-payment` → `PartialPaymentController::processPartialPayment()` →
-  `PartialPaymentService::processPartialPayment()`) auto-calculates the amount from the ratio of
-  approved deliverables. But `JobEngagementController::processPartialPayment()` +
-  `EngagementPaymentService::processPartialPayment()` + the `ProcessPartialPaymentRequest`
-  FormRequest form a second, complete implementation that takes a *manually entered* amount instead
-  — and no route points to it. Not touched this pass: unlike the other dead code found so far, this
-  isn't inert (it's a materially different payment mechanism — manual vs. auto-calculated amount),
-  so deleting it is a product call, not a cleanup one. Needs a decision: was manual-amount override
-  meant to ship as an admin/poster option, or is the auto-calculated flow the intended final design
-  with this being an abandoned earlier attempt?
+- ✅ **The orphaned manual-amount payment flow is now wired up as an option on the live route**,
+  per an explicit product decision (manual override should ship, not be deleted). Consolidated to a
+  single implementation instead of two competing ones: `PartialPaymentController::
+  processPartialPayment()` now takes the (already-live, already-namespaced)
+  `ProcessPartialPaymentRequest`, whose `payment_amount` is now `nullable` rather than `required`
+  — omitted, it auto-calculates from approved deliverables exactly as before; provided, it overrides
+  the calculation. `PartialPaymentService::processPartialPayment($engagement, $manualAmount, $notes)`
+  gained a `$notes` param and a fix: the old code only validated `amount <= 0` on the *auto-calculated*
+  branch, so a manual amount of 0 or less would have silently skipped that guard; also added an
+  upper bound (`$amount > $engagement->net_amount` is rejected) since a free-text override with no
+  ceiling is a real risk on a money field. Deleted the now-fully-superseded duplicate:
+  `JobEngagementController::processPartialPayment()` and `EngagementPaymentService::
+  processPartialPayment()` (the latter's other 4 methods — `getPaymentInfo`/`canProcessPayment`/
+  `getLatestPayment`/`calculatePartialPayment` — are still live and untouched). Added an optional
+  amount input (blank = auto-calculate, with the calculated amount shown as a placeholder) to the
+  "Process Payment" form in `payment-details.blade.php`. Verified auto-calc, manual override,
+  the zero/negative rejection, and the net-amount ceiling with real HTTP requests before committing.
+  Side note, not chased further this pass: `EngagementPaymentService::canProcessPayment()` and
+  `::calculatePartialPayment()` turned out to also have zero external callers (only `getPaymentInfo`/
+  `getLatestPayment` are actually used) — left alone since it wasn't part of the ask, but worth a
+  look next time this service is touched.
 - 🔴 `EngagementNotificationHelper::sendReviewNotification()` and `::sendPaymentNotification()` are
   empty stub methods — not called from anywhere, not implemented. Either wire them up when review/
   payment notifications are actually built, or remove until then.

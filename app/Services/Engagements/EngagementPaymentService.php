@@ -9,12 +9,8 @@
 
 namespace App\Services\Engagements;
 
-use App\Helpers\Engagements\EngagementAuthorizationHelper;
-use App\Helpers\FlashAlertHelper;
 use App\Models\JobEngagement;
 use App\Services\Payments\PartialPaymentService;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class EngagementPaymentService
 {
@@ -23,63 +19,6 @@ class EngagementPaymentService
     public function __construct(PartialPaymentService $partialPaymentService)
     {
         $this->partialPaymentService = $partialPaymentService;
-    }
-
-    // Process partial payment for cancelled engagement
-    public function processPartialPayment(JobEngagement $engagement, array $paymentData): array
-    {
-        $user = Auth::user();
-
-        // Authorization check
-        if (! EngagementAuthorizationHelper::canProcessPayment($engagement, $user)) {
-            return [
-                'success' => false,
-                'error' => 'You are not authorized to process payments for this engagement.',
-            ];
-        }
-
-        DB::beginTransaction();
-        try {
-            // Record the partial payment
-            $engagement->partialPayments()->create([
-                'amount' => $paymentData['payment_amount'],
-                'notes' => $paymentData['payment_notes'] ?? null,
-                'processed_by' => $user->id,
-                'processed_at' => now(),
-            ]);
-
-            // Here you would integrate with your payment processor
-            // processPayment($engagement, $paymentData['payment_amount']);
-
-            // Update the cancellation record if it exists
-            if ($engagement->cancellation) {
-                $engagement->cancellation->update([
-                    'partial_payment_processed' => true,
-                    'partial_payment_processed_at' => now(),
-                ]);
-            }
-
-            DB::commit();
-
-            // Notify the freelancer about the payment (implement if needed)
-            // $engagement->application->applicant->notify(new PaymentProcessed($engagement, $paymentData['payment_amount']));
-
-            return [
-                'success' => true,
-                'message' => 'Payment for partial work has been processed successfully.',
-                'alert' => FlashAlertHelper::success(
-                    'Payment Processed',
-                    'Payment for partial work has been processed successfully.'
-                )['alert'],
-            ];
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return [
-                'success' => false,
-                'error' => 'Failed to process payment: '.$e->getMessage(),
-            ];
-        }
     }
 
     // Get payment information using PartialPaymentService

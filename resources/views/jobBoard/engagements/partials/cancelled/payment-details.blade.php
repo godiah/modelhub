@@ -331,6 +331,21 @@
                         <form action="{{ route('engagements.process-partial-payment', $engagement->id) }}"
                             method="POST">
                             @csrf
+                            <div class="mb-3">
+                                <label for="payment_amount" class="block text-xs font-medium text-neutral-600 mb-1">
+                                    Payment Amount (Ksh) — optional override
+                                </label>
+                                <input type="number" id="payment_amount" name="payment_amount" step="0.01"
+                                    min="0.01" value="{{ old('payment_amount') }}"
+                                    placeholder="Auto: {{ number_format($engagement->calculatePartialPaymentAmount(), 2) }}"
+                                    class="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-secondary/50 focus:border-secondary">
+                                <p class="text-xs text-neutral-500 mt-1">
+                                    Leave blank to use the calculated amount above.
+                                </p>
+                                @error('payment_amount')
+                                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
                             <button type="submit"
                                 class="w-full py-2.5 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg text-sm transition-colors duration-200 flex items-center justify-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Payment\ProcessDisputePartialPaymentRequest;
+use App\Http\Requests\Payment\ProcessPartialPaymentRequest;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
 use App\Services\Payments\PartialPaymentService;
@@ -21,16 +22,21 @@ class PartialPaymentController extends Controller
     }
 
     /**
-     * Process partial payment for a cancelled engagement
+     * Process partial payment for a cancelled engagement. The payment amount
+     * is optional — when omitted, it's auto-calculated from the ratio of
+     * approved deliverables; when provided, it overrides that calculation.
      */
-    public function processPartialPayment($id)
+    public function processPartialPayment(ProcessPartialPaymentRequest $request, $id)
     {
         // Find the engagement by ID
         $engagement = JobEngagement::findOrFail($id);
 
         try {
-            // Process the payment with the calculated amount (no manual input)
-            $partialPayment = $this->partialPaymentService->processPartialPayment($engagement);
+            $partialPayment = $this->partialPaymentService->processPartialPayment(
+                $engagement,
+                $request->getPaymentAmount(),
+                $request->getPaymentNotes()
+            );
 
             return redirect()->route('engagements.show-cancelled', $engagement->id)->with(
                 FlashAlertHelper::success(
