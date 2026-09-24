@@ -46,7 +46,7 @@ stock).
 Profile editing, skills/software, social links, and the real landing dashboard (reviews, activity,
 stats).
 
-- **Routes**: `/profile`, `/dashboard` (stock, see finding below), `/my-dashboard` (real one)
+- **Routes**: `/profile`, `/dashboard` (now the real one — see finding below)
 - **Controller**: `DashBoardController`
 - **Livewire**: `livewire/profile/{delete-user-form,social-links-form,two-factor-form,update-password-form,update-profile-information-form,user-profile-form}.blade.php`
 - **Models**: `UserProfile`, `UserSocialLink`, `SocialNetwork`, `Skill`, `Software` (Skill/Software
@@ -55,13 +55,10 @@ stats).
   `dashboard/index.blade.php` (real, 641 lines)
 
 **Findings**
-- 🔴 **Two competing "dashboard" views.** `dashboard.blade.php` (Breeze stock placeholder) is bound
-  to the `dashboard` route name and is the post-login redirect target. `dashboard/index.blade.php`
-  (641 lines, the actual reviews/stats/activity dashboard) is bound to `/my-dashboard` via
-  `DashBoardController`. Needs a decision: either point `dashboard` route at the controller and
-  drop `/my-dashboard`, or rename routes so `dashboard` unambiguously means the real page. Every
-  `route('dashboard', ...)` call site (login redirect, email verification redirect) needs checking
-  once this is resolved.
+- ✅ **Fixed 2026-09-24**: two competing "dashboard" views. `dashboard` route now points directly
+  at `DashBoardController@index`; the redundant `/my-dashboard` route group and the dead Breeze
+  placeholder view are removed. The two nav bar links that pointed at `my-dashboard.index` were
+  updated. Verified via a real authenticated request.
 - 🔴 `DashBoardController::calculateReviewStats()` and `getActivitySummary()` hand-roll raw
   `DB::table(...)` queries for counts that mostly duplicate what Eloquent relationships/scopes
   already express elsewhere (e.g. `job_engagements` status counts are already modeled in
@@ -265,14 +262,12 @@ call sites from other modules)
 - **Access control**: `role:admin` middleware + Spatie permissions (`RolesAndPermissionsSeeder`)
 
 **Findings**
-- 🔴🔴 **Critical, currently-broken feature.** `AdminDisputeController` imports
-  `App\Services\PartialPaymentService`, but that class doesn't exist — the real class is
-  `App\Services\Payments\PartialPaymentService` (note the `Payments` sub-namespace). Since it's
-  constructor-injected, **every single request to `/admin/disputes` throws a fatal
-  `Class "App\Services\PartialPaymentService" not found" error.** The entire admin dispute
-  resolution panel — the only place `JobPaymentDispute` records ever get resolved — is dead on
-  arrival right now. This should be the first fix when this module's turn comes (it's a one-line
-  `use` statement fix), independent of the rest of the module-by-module cleanup order.
+- ✅ **Fixed 2026-09-24**: `AdminDisputeController` imported `App\Services\PartialPaymentService`
+  (doesn't exist) instead of `App\Services\Payments\PartialPaymentService`, throwing a fatal error
+  on every request. One-line `use` fix, verified via container resolution and a real authenticated
+  request to `/admin/disputes` (200 OK). The rest of Module 9's cleanup (inline validation instead
+  of a FormRequest — see the cross-cutting note) is still open for when this module's full turn
+  comes.
 
 ---
 
@@ -306,24 +301,25 @@ call sites from other modules)
 
 ## Proposed cleanup order
 
-1. **Module 9 fix first, standalone** — the `AdminDisputeController` namespace bug is a one-line,
-   zero-risk fix that unbreaks a completely dead feature. Do this immediately, not as part of a
-   full module pass.
-2. **Cross-cutting flash-alert trait** — highest leverage, touches every module, best done once
+1. ✅ **Module 9 fix first, standalone** — the `AdminDisputeController` namespace bug. Done
+   2026-09-24.
+2. ✅ **Dashboard routing** — pulled forward from Module 2 alongside the fix above since it was
+   the other quick, standalone win. Done 2026-09-24.
+3. **Cross-cutting flash-alert trait** — highest leverage, touches every module, best done once
    before further module work so later modules don't add a 5th reimplementation of the same thing.
-3. **Module 1 (Auth) → Module 2 (Profile/Dashboard)** — small, foundational, and Module 2 has a
-   real routing decision (`/dashboard` vs `/my-dashboard`) that other modules' links depend on.
-4. **Module 5 (Engagements)** — already the best-structured module; cleanup here is mostly
+4. **Module 1 (Auth) → Module 2 (Profile/Dashboard)** — small, foundational; the routing decision
+   is already resolved (above), so what's left is the rest of Module 2's findings.
+5. **Module 5 (Engagements)** — already the best-structured module; cleanup here is mostly
    consolidating the Policy/Helper duplication and fixing `JobDeliverableController`'s
    inconsistency, plus some view componentization. Low risk, good template-setting work.
-5. **Module 4 (Applications) using Module 5 as the template** — the controller-split and
+6. **Module 4 (Applications) using Module 5 as the template** — the controller-split and
    authorization-centralization work benefits from having just done the equivalent in Module 5.
-6. **Module 3 (Jobs)** — wire up `JobFilterTrait`, resolve the `JobImageService` cross-domain
+7. **Module 3 (Jobs)** — wire up `JobFilterTrait`, resolve the `JobImageService` cross-domain
    leak, componentize `apply.blade.php`/`new.blade.php`.
-7. **Module 6 (Projects)** — fold into `EngagementManagementService` once Module 5 is settled.
-8. **Module 7 (Messaging)** — needs a product decision (real-time or not) before code changes.
-9. **Module 8 (Notifications)** — hasn't had a deep pass yet; do that pass as part of this module's
-   turn.
+8. **Module 6 (Projects)** — fold into `EngagementManagementService` once Module 5 is settled.
+9. **Module 7 (Messaging)** — needs a product decision (real-time or not) before code changes.
+10. **Module 8 (Notifications)** — hasn't had a deep pass yet; do that pass as part of this
+    module's turn.
 
 This order is a proposal, not a commitment — reorder freely based on what matters most next.
 
@@ -332,3 +328,6 @@ This order is a proposal, not a commitment — reorder freely based on what matt
 - **2026-09-24**: Initial full-codebase read and module map written. No cleanup changes made yet
   beyond what was already fixed in earlier sessions (footer-secondary include paths, 2FA bool cast,
   login redirect target, Pint formatting, dependency security updates).
+- **2026-09-24 (later)**: Two quick fixes landed — `AdminDisputeController`'s fatal-error import bug
+  (Module 9) and the `/dashboard` routing consolidation (Module 2). Both verified with real
+  authenticated requests before committing. Next up: the cross-cutting flash-alert trait.
