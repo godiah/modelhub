@@ -213,6 +213,8 @@ class JobApplicationController extends Controller
     // View job application details
     public function showApplications(JobApplication $application)
     {
+        $this->authorize('manage', $application);
+
         $data = $this->applicationBrowsingService->getApplicationDetails($application);
 
         return view('jobBoard.posted.applications.show', $data);
@@ -221,9 +223,7 @@ class JobApplicationController extends Controller
     // Update application status
     public function updateStatus(UpdateApplicationStatusRequest $request, JobApplication $application)
     {
-        if (! $this->applicationHiringService->authorizeStatusUpdate($application)) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('manage', $application);
 
         // Check if hiring confirmation is required
         if ($this->applicationHiringService->requiresHireConfirmation($application, $request->status)) {
@@ -242,6 +242,8 @@ class JobApplicationController extends Controller
     // Confirm hire and create engagement
     public function confirmHire(ConfirmHireRequest $request, JobApplication $application)
     {
+        $this->authorize('manage', $application);
+
         $deliverables = $request->hasDeliverables() ? $request->getDeliverables() : [];
 
         $engagement = $this->applicationHiringService->confirmHire($application, $deliverables);
@@ -252,9 +254,7 @@ class JobApplicationController extends Controller
     // Send message to applicant
     public function sendMessage(SendMessageRequest $request, JobApplication $application)
     {
-        if (! $this->applicationMessagingService->authorizeMessageSending($application)) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('manage', $application);
 
         $messageData = $request->getMessageData();
         $this->applicationMessagingService->sendMessage($application, $messageData);

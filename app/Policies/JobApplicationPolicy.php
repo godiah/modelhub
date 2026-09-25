@@ -33,4 +33,13 @@ class JobApplicationPolicy
     {
         return $user->id === $application->applicant_id && $application->is_archived;
     }
+
+    /**
+     * Determine whether the user can manage the application as its job's poster
+     * (view details, update status, message the applicant, confirm hire).
+     */
+    public function manage(User $user, JobApplication $application)
+    {
+        return $user->id === $application->poster_id;
+    }
 }

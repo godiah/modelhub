@@ -52,11 +52,6 @@ class ApplicationBrowsingService
     // Get application details with reviews and stats
     public function getApplicationDetails(JobApplication $application): array
     {
-        // Ensure the current user is the owner of this job posting
-        if (Auth::user()->id !== $application->job->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
-
         // Get reviews for this applicant
         $reviews = JobReview::where('reviewee_id', $application->applicant_id)
             ->with(['reviewer', 'engagement.application.job'])
@@ -85,12 +80,6 @@ class ApplicationBrowsingService
             'topSkill' => $topSkill,
             'ratingFilter' => 'all',
         ];
-    }
-
-    // Check authorization for application viewing
-    public function authorizeApplicationView(JobApplication $application): bool
-    {
-        return Auth::user()->id === $application->job->user_id;
     }
 
     // Get the most frequently mentioned skill/tag for an applicant
