@@ -230,8 +230,7 @@ class PartialPaymentService
             // For example: $this->paymentGateway->transferFunds($payment->amount, $engagement->applicant);
 
             // Notify the client about acceptance
-            // $client = $engagement->poster->user;
-            // $client->notify(new PaymentAcceptedNotification($engagement, $payment));
+            EngagementNotificationHelper::sendPaymentAcceptedNotification($engagement, $payment);
 
             Log::info('Partial payment accepted', [
                 'engagement_id' => $engagement->id,
@@ -311,13 +310,11 @@ class PartialPaymentService
             // Mark engagement as disputed
             $engagement->markAsDisputed();
 
-            // Notify the client about dispute
-            // $client = $engagement->poster->user;
-            // $client->notify(new PaymentDisputedNotification($engagement, $payment, $dispute));
+            // Notify the client about the dispute
+            EngagementNotificationHelper::sendPaymentDisputedNotification($engagement, $payment, $dispute);
 
-            // Notify admins
-            // $admins = User::role('admin')->get();
-            // Notification::send($admins, new PaymentDisputeAdminNotification($engagement, $payment));
+            // Notify admins a dispute needs review (same helper cancellation disputes already use)
+            EngagementNotificationHelper::sendDisputeNotification($engagement, $cancellation);
 
             Log::info('Partial payment disputed', [
                 'engagement_id' => $engagement->id,

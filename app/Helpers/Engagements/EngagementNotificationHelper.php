@@ -10,11 +10,16 @@
 namespace App\Helpers\Engagements;
 
 use App\Models\JobEngagement;
+use App\Models\JobPartialPayment;
+use App\Models\JobPaymentDispute;
 use App\Models\User;
 use App\Notifications\DisputeCreatedNotification;
 use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
 use App\Notifications\PartialPaymentProcessedNotification;
+use App\Notifications\PaymentAcceptedNotification;
+use App\Notifications\PaymentDisputedNotification;
+use App\Notifications\ReviewSubmittedNotification;
 use Illuminate\Support\Facades\Notification;
 
 class EngagementNotificationHelper
@@ -48,16 +53,27 @@ class EngagementNotificationHelper
         Notification::send($adminUsers, new DisputeCreatedNotification($engagement, $cancellation));
     }
 
-    // Send review notification (if needed in future)
+    // Send review notification to the reviewee
     public static function sendReviewNotification(JobEngagement $engagement, $review): void
     {
-        // No Notification class exists for this yet — needs a product decision, not a
-        // silent implementation. See MODULES.md (Module 5) for the open finding.
+        $review->reviewee->notify(new ReviewSubmittedNotification($review));
     }
 
     // Send partial payment processed notification to the freelancer
     public static function sendPaymentNotification(JobEngagement $engagement, $payment): void
     {
         $engagement->applicant->notify(new PartialPaymentProcessedNotification($engagement, $payment));
+    }
+
+    // Send partial payment accepted notification to the client
+    public static function sendPaymentAcceptedNotification(JobEngagement $engagement, JobPartialPayment $payment): void
+    {
+        $engagement->poster->notify(new PaymentAcceptedNotification($engagement, $payment));
+    }
+
+    // Send partial payment disputed notification to the client
+    public static function sendPaymentDisputedNotification(JobEngagement $engagement, JobPartialPayment $payment, JobPaymentDispute $dispute): void
+    {
+        $engagement->poster->notify(new PaymentDisputedNotification($engagement, $payment, $dispute));
     }
 }
