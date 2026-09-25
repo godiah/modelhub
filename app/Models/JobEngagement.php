@@ -286,20 +286,6 @@ class JobEngagement extends Model
     }
 
     /**
-     * Check if user can process partial payment
-     */
-    public function canProcessPartialPayment($userId)
-    {
-        // Only client or admin can process payments
-        $isClient = $this->application->poster_id === $userId;
-        $isAdmin = auth()->user()->hasRole('admin'); // Assuming you have a role system
-
-        return ($isClient || $isAdmin) &&
-            $this->status === EngagementStatus::Cancelled &&
-            ! $this->hasPendingDeliverables();
-    }
-
-    /**
      * Mark engagement as settled after payment acceptance
      */
     public function markAsSettled()

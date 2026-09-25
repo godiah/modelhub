@@ -23,7 +23,7 @@ class AdminDisputeController extends Controller
     {
         $status = $request->get('status', 'all');
 
-        $query = JobPaymentDispute::with(['assignedAdmin', 'resolvedBy', 'cancellation.engagement'])
+        $query = JobPaymentDispute::with(['assignedAdmin', 'cancellation'])
             ->latest();
 
         // Filter by status if specified
@@ -44,9 +44,8 @@ class AdminDisputeController extends Controller
         return view('admin.disputes.index', compact('disputes', 'status', 'statusCounts'));
     }
 
-    public function assign($id)
+    public function assign(JobPaymentDispute $dispute)
     {
-        $dispute = JobPaymentDispute::findOrFail($id);
         $dispute->assignAdmin(Auth::id());
 
         return redirect()->back()->with('success', 'Dispute assigned to you successfully.');
@@ -61,9 +60,9 @@ class AdminDisputeController extends Controller
                 $request->input('resolution_amount')
             );
 
-            return redirect()->route('admin.disputes.index')->with('success', 'Dispute resolved successfully.');
+            return redirect()->back()->with('success', 'Dispute resolved successfully.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.disputes.index')->with('error', 'Failed to resolve dispute: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Failed to resolve dispute: '.$e->getMessage());
         }
     }
 }

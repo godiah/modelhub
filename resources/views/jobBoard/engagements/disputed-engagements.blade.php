@@ -3,7 +3,7 @@
 <x-app-layout>
     <x-slot name="header">
         @php
-            $isAdminViewer = Auth::user()->hasRole('admin');
+            $isAdminViewer = Auth::user()->can('view disputes');
         @endphp
         <div class="flex justify-between items-center">
             <div>

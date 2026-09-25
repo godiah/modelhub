@@ -718,19 +718,131 @@ Cross-cutting: every other module fires into this one.
 
 ---
 
-## Module 9 — Admin & Dispute Resolution 🔴
+## Module 9 — Admin & Dispute Resolution 🟢
 
-- **Controller**: `Admin\AdminDisputeController`
-- **Views**: `resources/views/admin/disputes/*`
-- **Access control**: `role:admin` middleware + Spatie permissions (`RolesAndPermissionsSeeder`)
+- **Controllers**: `Admin\AdminDisputeController`, `Admin\AdminStaffController` (new)
+- **Services**: `Payments\PartialPaymentService` (dispute resolution lives here, shared with
+  Module 5), `Admin\StaffManagementService` (new)
+- **Requests**: `Dispute\ResolveDisputeRequest`, `Admin\UpdateStaffRoleRequest` (new)
+- **Views**: `resources/views/admin/disputes/*`, `resources/views/admin/staff/*` (new)
+- **Access control**: Spatie permissions, checked directly (`permission:*` route middleware,
+  `$user->can()`) — no longer hardcoded to the `admin` role name. See `CONVENTIONS.md` item 4.
+- **Tests**: `tests/Feature/Admin/DisputeResolutionTest.php` (new, kept — not a temp/delete-after
+  verification pass; see this module's last finding below)
 
 **Findings**
 - ✅ **Fixed 2026-09-24**: `AdminDisputeController` imported `App\Services\PartialPaymentService`
   (doesn't exist) instead of `App\Services\Payments\PartialPaymentService`, throwing a fatal error
   on every request. One-line `use` fix, verified via container resolution and a real authenticated
-  request to `/admin/disputes` (200 OK). The rest of Module 9's cleanup (inline validation instead
-  of a FormRequest — see the cross-cutting note) is still open for when this module's full turn
-  comes.
+  request to `/admin/disputes` (200 OK).
+- **Correction to a stale note in this file**: the placeholder above used to say Module 9's
+  "inline validation instead of a FormRequest" cleanup was still open. That was already wrong by
+  the time it was written — Module 5's pass (`AdminDisputeController::resolve()`'s inline validate
+  → new `ResolveDisputeRequest`) had already fixed this, `CONVENTIONS.md` item 3's exception list
+  just never got updated to drop `AdminDisputeController` from it. Corrected here and in
+  `CONVENTIONS.md`; no code change needed, `resolve()` was already using the FormRequest.
+- ✅ **The whole non-admin RBAC setup was dead — now wired up, admin-tier only (explicit user
+  decision).** `RolesAndPermissionsSeeder` creates `client`/`freelancer`/`support`/`dispute_manager`
+  roles and granular permissions (`view disputes`, `resolve disputes`, `view users`, `manage
+  users`, etc.), but grepping the entire codebase found no user anywhere ever assigned any role
+  except `admin` (only `AdminUserSeeder` calls `assignRole`), and every real authorization check —
+  the `role:admin` route middleware, `JobEngagementPolicy::view()`, `PartialPaymentService`, the
+  `JobEngagement` model — hardcoded `hasRole('admin')` literally, never a permission. The one place
+  a permission *was* checked (`@can('resolve disputes')` gating the resolution form in
+  `disputed-engagements.blade.php`) was decorative: always true for an admin (who holds every
+  permission) and unreachable for anyone else, since `JobEngagementPolicy::view()` already blocked
+  non-admins from that page by role, not permission — a `dispute_manager`, seeded specifically to
+  resolve disputes, could never reach a dispute anywhere in the app. Asked the user whether to
+  strip the dead roles down to just `admin` or build the RBAC out properly; they chose to build it
+  out, scoped explicitly to the admin/support/dispute_manager tier (not retrofitting `client`/
+  `freelancer` as a second authorization layer on top of the existing ownership checks across
+  Modules 3–8 — a much larger, separate decision that would touch many already-closed files).
+  Concretely:
+  - `routes/web.php`'s `admin.*` group dropped the blanket `role:admin` gate for per-route
+    `permission:*` middleware (`view disputes` for the index, `resolve disputes` for assign/
+    resolve, `view users`/`manage users` for the new staff screen below) — works for `admin` too
+    since it holds every permission via `givePermissionTo(Permission::all())`.
+  - `JobEngagementPolicy::view()`'s `hasRole('admin')` branch → `$user->can('view disputes')`.
+    Safe to broaden beyond "any engagement" in practice: `EngagementCancellationService::
+    getDisputedEngagementDetails()` (what this Policy actually gates for a staff viewer, via
+    `engagements.show-disputed`) already throws for any engagement not in `Settled`/`Disputed`
+    status, so a `support`/`dispute_manager` still can't use this to browse arbitrary active
+    engagements — confirmed by reading that method, not assumed.
+  - `PartialPaymentService::resolveDispute()`'s `hasRole('admin')` guard → `$authUser->can('resolve
+    disputes')`.
+  - `disputed-engagements.blade.php`'s `$isAdminViewer = Auth::user()->hasRole('admin')` (controls
+    the back-button destination/label) → `Auth::user()->can('view disputes')`. The page's existing
+    `@can('resolve disputes')` around the resolution form needed no change — it was already
+    checking the right permission, just unreachable until the surrounding Policy gate above was
+    fixed.
+  - **New, since nothing existed to actually assign `support`/`dispute_manager` to a user**:
+    `Admin\AdminStaffController` + `Admin\StaffManagementService` + `admin/staff/index.blade.php`,
+    gated by `view users`/`manage users`. Lists every non-admin user with a role selector (None/
+    Support/Dispute Manager). Deliberately excludes existing admins from the list and refuses to
+    change an admin's role even if targeted directly (`StaffManagementService::updateRole()`
+    throws) — this flow grants/revokes staff-tier access only, never admin, so it can't be used to
+    create or demote an admin account. Nav links (`Disputed Engagements`, `Staff Roles`) added to
+    the user dropdown in `livewire/layout/navigation.blade.php`, each gated by the matching
+    permission — there was no way to reach `/admin/disputes` from the UI at all before this (URL
+    only).
+  - **A second UI/permission mismatch found and fixed while verifying the above**: opening
+    `admin.disputes.index` to `view disputes` (not just `admin`) meant `support` — who can view but
+    not resolve — would now see the "Assign to Me" button on every dispute row and get a 403 on
+    click, the same class of mismatch already fixed for the resolution form. Wrapped that button in
+    `@can('resolve disputes')` too.
+  - `RolesAndPermissionsSeeder` itself needed no changes — the roles/permissions were already
+    correctly defined, just never checked anywhere.
+- ✅ **`assign()` now uses route-model binding** (`JobPaymentDispute $dispute`) instead of a manual
+  `JobPaymentDispute::findOrFail($id)` — the only action in this controller not already doing so,
+  inconsistent with `resolve()` and the rest of the app (`CONVENTIONS.md` item 13). Route path
+  changed from `/disputes/{id}/assign` to `/disputes/{dispute}/assign` to match.
+- ✅ **Real bug fixed: `resolve()` always redirected to `admin.disputes.index`, orphaning the
+  confirmation state on the page the form actually lives on.** The resolution form only ever
+  appears on `disputed-engagements.blade.php` (Module 5's engagement page) — the admin index has no
+  such form — yet both the success and error paths redirected away to the disputes list instead of
+  back to that page, so the "Dispute Successfully Resolved" detail card already built into that
+  same view (showing the resolution notes/amount just entered) was never actually reachable through
+  the normal submit flow. Also inconsistent with `assign()`'s own `redirect()->back()` in the same
+  controller. Changed both branches to `redirect()->back()`, verified the admin lands back on the
+  engagement page with the resolved-state card now visible.
+- ✅ **Real money-safety gap fixed: `resolution_amount` had no upper bound.** `ResolveDisputeRequest`
+  only validated `nullable|numeric|min:0` — an admin could set a resolution amount arbitrarily
+  higher than the engagement was ever worth, and it flowed straight through `dispute->resolve()` →
+  `cancellation->resolveDispute()` → `payment->finalize()`/`JobPartialPayment::create()` with no
+  ceiling anywhere in the chain. This is the exact class of gap Module 5 already fixed once for the
+  sibling manual-partial-payment-override flow (`$amount > $engagement->net_amount` rejected) — it
+  just never got added here. Fixed in `PartialPaymentService::resolveDispute()` itself (not the
+  FormRequest), matching Module 5's precedent of keeping this specific check next to the business
+  state it depends on (`$engagement->net_amount`) rather than in validation.
+- ✅ **Two more confirmed-dead methods deleted, found while tracing every `hasRole('admin')` call
+  site for the RBAC work above:** `JobEngagement::canProcessPartialPayment($userId)` (zero callers
+  anywhere, called `auth()->user()->hasRole('admin')` directly from inside a Model — breaks the
+  app's own layering and would throw outside an authenticated HTTP context — and was a fifth
+  independent duplicate of the poster-or-admin check Module 5 already flagged as scattered) and
+  `EngagementAuthorizationHelper::getUserRole()` (zero callers). Confirmed dead via grep before
+  deleting, not assumed.
+- ✅ **Minor eager-loading trim.** `AdminDisputeController::index()` loaded `resolvedBy` and
+  `cancellation.engagement` (a `hasOneThrough`), neither of which `admin/disputes/index.blade.php`
+  actually reads — only `assignedAdmin` and `cancellation->engagement_id` (a plain column, no
+  relation traversal) are used. Trimmed to `['assignedAdmin', 'cancellation']`. Also closes one item
+  of `CONVENTIONS.md` item 11's "not yet re-verified against Modules 6–9" note for
+  `preventLazyLoading()` — this page (and the new staff page) render clean under it.
+- ✅ **Debris deleted**: `resources/views/admin/test` (a 0-byte file, not even a `.blade.php`, dated
+  the day this audit began) and `resources/views/layouts/admin.blade.php` (an unreferenced,
+  half-finished layout — grepped for `layouts.admin`, zero matches — with a broken hardcoded script
+  path `../path/to/flowbite/dist/flowbite.min.js` that was never filled in; `admin/disputes/
+  index.blade.php` and the new staff page both correctly use `<x-app-layout>` instead).
+- **Kept, not deleted after verifying**: `tests/Feature/Admin/DisputeResolutionTest.php` (16 tests)
+  covers the full role × route authorization matrix (admin/support/dispute_manager/regular-user
+  against every admin route and the engagement-view Policy), the `resolution_amount` ceiling, the
+  `resolve()`/`assign()` fixes, staff-role assignment (including the admin-role-immutability guard),
+  and both UI-permission-mismatch fixes (nav links, "Assign to Me"). Every previous module's temp
+  verification tests were deleted after confirming a fix — this one wasn't, because it's exactly the
+  two categories `CONVENTIONS.md` item 15 already carves out as permanent non-E2E exceptions
+  (authorization matrices, money/calculation logic), not a workflow test that E2E browser testing
+  will eventually supersede. Doubles as the app's first real business-logic test coverage — see
+  `CONVENTIONS.md` item 15's update. Full existing suite (26 tests) re-run clean before and after;
+  42 total now.
 
 ---
 
@@ -758,14 +870,22 @@ Cross-cutting: every other module fires into this one.
   `applications/continue-draft.blade.php` 498 lines) haven't had the same treatment — same
   technique, just not applied yet.
 - **FormRequest usage is inconsistent.** Modules 3–4 and most of Module 5 use dedicated
-  `Http\Requests\*` classes consistently. `JobDeliverableController`, `PartialPaymentController`,
-  and `AdminDisputeController` all validate inline instead. Worth standardizing one way.
+  `Http\Requests\*` classes consistently. `JobDeliverableController` and `PartialPaymentController`
+  still validate inline. Worth standardizing one way. **Corrected 2026-09-25 (Module 9)**:
+  `AdminDisputeController` was wrongly listed here too — it's been using `ResolveDisputeRequest`
+  since Module 5; this file's own Module 9 placeholder note just never got updated to say so.
 - **Authorization: three different mechanisms coexist** — Policies (`JobApplicationPolicy`,
   `JobEngagementPolicy`), static Helpers (`EngagementAuthorizationHelper`), and inline
   `Auth::id() === ...` checks scattered through services and controllers. Module 5 shows the
   Helper pattern works well when used consistently; Module 4 shows what happens when it isn't
   (10 independent inline copies of the same check). Worth picking one mechanism and using it
-  everywhere — Policies are the Laravel-idiomatic choice given two already exist.
+  everywhere — Policies are the Laravel-idiomatic choice given two already exist. **Module 9
+  (2026-09-25)** added a fourth, for one specific slice: Spatie permissions, now the source of
+  truth for admin/support/dispute_manager-tier checks specifically (`permission:*` middleware,
+  `$user->can()`) — see `CONVENTIONS.md` item 4. Deliberately not applied to the ownership-based
+  checks elsewhere (ownership isn't a role/permission concept); this doesn't reduce the three
+  existing mechanisms, it adds a fourth for a slice of the app that had no real mechanism at all
+  before (every admin check was hardcoded to the literal string `'admin'`).
 - ✅ **`Model::preventLazyLoading()` enabled 2026-09-25 (Module 4)** — stale note, corrected here.
   See `CONVENTIONS.md` item 11 for the smoke-testing status per module.
 - 🔴 **`JobEngagement::getTotalDeliverablesCount()`/`getCompletedDeliverablesCount()` bypass eager
@@ -817,6 +937,15 @@ Cross-cutting: every other module fires into this one.
 10. ✅ **Module 8 (Notifications)** — done 2026-09-25. New `NotificationPresenterHelper` + a
     `present()` method on all 10 Notification classes replaced 6 duplicated FQCN-string branches;
     `JobPostedMail` (dead + broken) deleted.
+11. ✅ **Module 9 (Admin & Dispute Resolution)** — done 2026-09-25. The standalone namespace-bug fix
+    landed back on 2026-09-24 (item 1 above); this closes out the rest of the module. Built out the
+    admin/support/dispute_manager RBAC tier the seeder had always defined but nothing ever checked
+    (user's explicit decision, scoped to admin-tier only), including a new staff-role-assignment
+    screen since nothing existed to assign those roles to a user. Fixed a real money-safety gap
+    (`resolution_amount` had no upper bound) and a real bug (`resolve()` always redirected away from
+    the page its own form lives on). First module to keep its verification tests as permanent
+    coverage rather than deleting them after — they're exactly `CONVENTIONS.md` item 15's
+    authorization-matrix/money-logic exceptions to the E2E-first rule.
 
 This order is a proposal, not a commitment — reorder freely based on what matters most next.
 
@@ -997,3 +1126,39 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   key for the actual message text; queued, so it failed silently in the background with the UI still
   showing success. Both fixes verified with temp Pest tests (deleted after) and the full suite
   re-run clean.
+- **2026-09-25 (Module 9 pass, closed out)**: Found the RBAC system the seeder had always defined
+  (`support`/`dispute_manager` roles, granular permissions) was entirely dead — no user anywhere
+  was ever assigned a non-admin role, and every real authorization check hardcoded `hasRole('admin')`
+  literally instead of checking a permission, including the one place a permission *was* checked
+  (`@can('resolve disputes')` in `disputed-engagements.blade.php`), which was unreachable for
+  anyone but an admin since the surrounding page was already role-gated. Asked the user to choose
+  between stripping the dead roles or building them out; they chose to build out the admin-tier
+  (admin/support/dispute_manager) specifically, not retrofit `client`/`freelancer` as a second
+  authorization layer on already-closed Modules 3-8. Converted every relevant `hasRole('admin')`
+  call site to a permission check (route middleware, `JobEngagementPolicy::view()`,
+  `PartialPaymentService::resolveDispute()`, the disputed-engagements view), and built a new
+  `Admin\AdminStaffController`/`StaffManagementService`/`admin/staff/index.blade.php` screen (plus
+  nav links) since nothing existed to actually assign `support`/`dispute_manager` to a user —
+  deliberately excludes and can't touch existing admins, so it can't be used to create or demote
+  admin access. Found and fixed a second UI/permission mismatch surfaced by opening the disputes
+  index to `support`: the "Assign to Me" button would have shown for a role that can't actually
+  assign. Alongside the RBAC work: fixed a real bug (`resolve()` always redirected to
+  `admin.disputes.index` even though its only form lives on the engagement's own disputed page,
+  orphaning that page's already-built "resolved" confirmation state — now `redirect()->back()`,
+  matching `assign()`'s own pattern in the same controller); fixed a real money-safety gap
+  (`resolution_amount` had no upper bound, unlike the identical check Module 5 already added for
+  the sibling manual-payment-override flow); fixed `assign()`'s route-model-binding inconsistency;
+  deleted two more confirmed-dead methods found while tracing every `hasRole('admin')` site
+  (`JobEngagement::canProcessPartialPayment()`, `EngagementAuthorizationHelper::getUserRole()`);
+  deleted two pieces of debris (`admin/test`, a 0-byte junk file, and the unreferenced, broken
+  `layouts/admin.blade.php`); trimmed an unused eager-load in `AdminDisputeController::index()`;
+  and corrected a stale cross-reference (`CONVENTIONS.md` item 3 and this file's own Module 9
+  placeholder both still said `AdminDisputeController` validated inline — that was already fixed in
+  Module 5, the note just never got updated). Everything verified with a new, *permanent*
+  `tests/Feature/Admin/DisputeResolutionTest.php` (16 tests: the full role x route authorization
+  matrix, the money ceiling, both redirect/binding fixes, staff-role assignment including the
+  admin-immutability guard, both UI-mismatch fixes) — kept rather than deleted after, since it's
+  exactly the authorization-matrix/money-logic exceptions `CONVENTIONS.md` item 15 already carves
+  out as permanent non-E2E tests, and doubles as the app's first real business-logic coverage. Full
+  suite re-run clean before and after (26 -> 42 tests). Module 9 marked green - the module map's
+  audit of all 9 modules is now complete.

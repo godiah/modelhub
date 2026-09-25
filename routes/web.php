@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDisputeController;
+use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
@@ -165,12 +166,23 @@ Route::middleware(['auth'])->prefix('chat')->group(function () {
 });
 
 /**
- * Administrator Routes
+ * Administrator Routes — permission-gated (not hardcoded to the 'admin' role), so
+ * 'support'/'dispute_manager' staff get exactly the access their role's permissions grant.
  */
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
-    Route::post('/disputes/{id}/assign', [AdminDisputeController::class, 'assign'])->name('disputes.assign');
-    Route::post('/disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['permission:view disputes'])->group(function () {
+        Route::get('/disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
+    });
+    Route::middleware(['permission:resolve disputes'])->group(function () {
+        Route::post('/disputes/{dispute}/assign', [AdminDisputeController::class, 'assign'])->name('disputes.assign');
+        Route::post('/disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+    });
+    Route::middleware(['permission:view users'])->group(function () {
+        Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff.index');
+    });
+    Route::middleware(['permission:manage users'])->group(function () {
+        Route::patch('/staff/{user}/role', [AdminStaffController::class, 'updateRole'])->name('staff.update-role');
+    });
 });
 
 require __DIR__.'/auth.php';

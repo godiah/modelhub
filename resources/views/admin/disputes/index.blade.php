@@ -524,7 +524,8 @@
                                         </a>
                                     @endif
 
-                                    @if (!$dispute->assignedAdmin)
+                                    @can('resolve disputes')
+                                        @if (!$dispute->assignedAdmin)
                                         <form action="{{ route('admin.disputes.assign', $dispute->id) }}"
                                             method="POST">
                                             @csrf
@@ -540,7 +541,8 @@
                                                 Assign to Me
                                             </button>
                                         </form>
-                                    @endif
+                                        @endif
+                                    @endcan
                                 </div>
 
                                 <!-- Quick Info -->

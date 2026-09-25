@@ -63,8 +63,10 @@ Dedicated `Http\Requests\{Domain}\{Action}Request` class, never inline `$request
 in a controller or service. The FormRequest also owns any request-data shaping (`getCancellationData()`,
 `getReviewData()`, etc.) so the controller never touches `$request->input()` directly.
 
-**Known exceptions to fix, not copy**: `JobDeliverableController`, `PartialPaymentController`,
-`Admin\AdminDisputeController` all validate inline.
+**Known exceptions to fix, not copy**: `JobDeliverableController`, `PartialPaymentController` still
+validate inline. **Corrected 2026-09-25 (Module 9)**: `Admin\AdminDisputeController` was wrongly
+listed here too — `resolve()` has used `ResolveDisputeRequest` since Module 5; this line just never
+got updated to say so.
 
 ## 4. Authorization: Policies are the source of truth
 
@@ -80,6 +82,23 @@ check.
 check independently; the Helper now calls `Gate::allows()` internally rather than duplicating the
 boolean logic. `JobApplicationPolicy::manage()` (Module 4, 2026-09-25) follows the same shape for
 Applications.
+
+**Admin-tier RBAC wired up, 2026-09-25 (Module 9) — user's explicit decision.** Every admin-facing
+check used to hardcode `hasRole('admin')` literally (route middleware, `JobEngagementPolicy::view()`,
+`PartialPaymentService::resolveDispute()`), even though `RolesAndPermissionsSeeder` had always
+defined `support`/`dispute_manager` roles with real, narrower permissions (`view disputes`,
+`resolve disputes`) — no user was ever assigned those roles and nothing checked the permissions, so
+they were entirely dead. Now Spatie permissions are the source of truth for this slice: `permission:*`
+route middleware on `admin.*` routes, `$user->can('view disputes')`/`can('resolve disputes')`
+everywhere the old `hasRole('admin')` calls were. Scoped deliberately to the admin/support/
+dispute_manager tier only, per the user's explicit choice over the larger alternative (retrofitting
+`client`/`freelancer` as a second authorization layer on top of the existing ownership checks across
+Modules 3–8) — those two roles stay defined in the seeder but unused, since nothing in the app gates
+on them; every existing ownership check (`poster_id`/`applicant_id`) is untouched. New
+`Admin\AdminStaffController`/`StaffManagementService` (`admin/staff/index.blade.php`, gated by
+`view users`/`manage users`) is the only way to actually assign `support`/`dispute_manager` to a
+user — nothing existed for this before. It deliberately excludes and refuses to modify existing
+admins, so it can't be used to grant or revoke the `admin` role itself.
 
 ## 5. Notifications centralized per domain
 
@@ -168,9 +187,11 @@ applicant-review/hiring actions in one class with almost no shared state; split 
   2026-09-25**: `Model::preventLazyLoading(! app()->isProduction())` now set in
   `AppServiceProvider::boot()` (Module 4 pass, done alongside other `AppServiceProvider` work
   rather than waiting for a dedicated pass). Smoke-tested against every read-heavy page in
-  Modules 2–4 with real data before enabling — all clean. Not yet re-verified against Modules 6–9
-  (not started) or re-checked against Module 5 beyond its own prior audit; worth a quick look when
-  each of those modules' turn comes.
+  Modules 2–4 with real data before enabling — all clean. **Module 9 (2026-09-25)**: verified clean
+  against `admin/disputes/index.blade.php` and the new `admin/staff/index.blade.php`; also trimmed
+  that controller's eager-load (`resolvedBy`, `cancellation.engagement` were loaded but never read
+  by the view). Modules 5–8 still not re-checked beyond their own prior audits; worth a quick look
+  if any of them are revisited.
 - **Query scopes over repeated `where` chains** — already the consistent, established pattern
   (`scopeActive`, `scopeArchived`, `scopeActiveForUser`/`scopeArchivedForUser`, `scopeDraft`, etc.
   across `ModelJob`, `JobApplication`, `JobEngagement`). Nothing to change, just keep following it.
@@ -273,6 +294,18 @@ Auth/Profile scaffolding — **zero coverage of any actual business logic** (Job
 Engagements, Payments, Disputes, Messaging). This is a green-field adoption, not a migration away
 from an existing convention.
 
+**First permanent business-logic coverage, 2026-09-25 (Module 9)**: `tests/Feature/Admin/
+DisputeResolutionTest.php` (16 tests) is the first test file in the app kept as permanent coverage
+rather than a temp verification pass deleted after committing. Every module before this one
+verified its changes with real HTTP requests via temp Pest tests, then deleted them — appropriate
+for workflow-shaped changes that a real E2E browser test will eventually supersede once Pest v4
+lands. This file is different: it's a role × route authorization matrix (admin/support/
+dispute_manager/regular-user against every admin route and the engagement-view Policy) plus a
+money-ceiling check (`resolution_amount` vs. `net_amount`) — exactly the two categories the
+"Allowed non-E2E tests" list below already carves out as permanent exceptions to the E2E-first
+rule. Keep following this precedent: an authorization-matrix or money-logic test written while
+verifying a module's changes should stay in the suite, not just serve as a one-off check.
+
 **Tooling — confirmed decision, 2026-09-24**: Pest browser testing (Playwright-based), not Laravel
 Dusk — keeps the whole suite in one framework, matching the already-established Pest-only
 convention, with no second test runner/ChromeDriver process to manage. **Not yet installed**:
@@ -354,3 +387,12 @@ Record findings in `MODULES.md` under that module's section, same format as exis
   11) as a cross-cutting fix done alongside this module rather than a dedicated pass. Also
   corrected item 4's stale text, which still described the Policy/Helper duplication Module 5 had
   already fixed — a documentation gap from that module's own closure, not a Module 4 finding.
+- **2026-09-25 (Module 9 pass)**: Items 3, 4, 11, and 15 updated to reflect Module 9's closure —
+  admin-tier RBAC (admin/support/dispute_manager) wired to real Spatie permissions instead of
+  hardcoded `hasRole('admin')` checks, per the user's explicit decision to build it out rather than
+  strip the dead roles (scoped to admin-tier only, not retrofitting client/freelancer onto the
+  already-closed ownership-based modules). Also corrected item 3's stale text, which still listed
+  `AdminDisputeController` as validating inline — that was already fixed in Module 5, the note just
+  never got updated (same shape as item 4's own stale-text correction during the Module 4 pass).
+  Item 15 records the app's first permanent (non-temp) business-logic test file, on the strength of
+  it matching the authorization-matrix/money-logic exceptions the testing convention already allows.
