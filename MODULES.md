@@ -103,11 +103,11 @@ stats).
 - ✅ **Fixed**: `update-profile-information-form`'s inline "Verification email sent successfully!"
   banner was a third hand-rolled copy of the same status-message concept fixed in Module 1 — now
   uses `<x-auth-session-status>`.
-- 🔴 `DashBoardController::calculateReviewStats()` and `getActivitySummary()` hand-roll raw
-  `DB::table(...)` queries for counts that mostly duplicate what Eloquent relationships/scopes
-  already express elsewhere (e.g. `job_engagements` status counts are already modeled in
-  `JobEngagement` scopes used by `ProjectController` — see Module 6). Left open — lower value,
-  touches Module 6 too, better done when that module's turn comes.
+- ✅ **`getActivitySummary()`'s `job_engagements` counts fixed in the Module 6 pass** (2026-09-25) —
+  they now reuse `JobEngagement::activeForUser()`, closing an archived-engagement mismatch bug
+  between this dashboard and the Projects Dashboard. See Module 6's findings for the detail.
+  `calculateReviewStats()` (a `JobReview` aggregate, no engagement-scope overlap) is unaffected and
+  still a reasonable use of a raw aggregate — not a finding.
 
 ---
 
@@ -458,53 +458,142 @@ whenever picked back up; it doesn't block moving to another module.
 
 ---
 
-## Module 6 — Projects Dashboard 🔴
+## Module 6 — Projects Dashboard 🟢
 
 A read-only, tab-filtered overview of a user's engagements ("My Projects"). Functionally a second
 lens over the same data Module 5 already models.
 
 - **Controller**: `ProjectController`
+- **Service (new)**: `Projects\ProjectDashboardService`
 - **Views**: `resources/views/projects/*`
 
 **Findings**
-- 🔴🔴 **Three routes point to controller methods that don't exist.** `project.engagement.show`
-  (`GET /projects/engagement/{engagement}`), `project.engagement.archive`, and
-  `project.engagement.unarchive` are registered against `ProjectController::show()`/`archive()`/
-  `unarchive()` — but `ProjectController` only implements `index()` (plus two private helpers).
-  Any request to those three routes throws immediately. Found while touching this controller for
-  the Module 5 `EngagementStatus` enum conversion (forced, since it directly queries
-  `JobEngagement::status`) — not a Module 6 pass, so not fixed; needs a decision on what these
-  actions should actually do before they're implemented.
-- 🔴 **Significant overlap with `EngagementManagementService`.** `ProjectController` hand-rolls its
-  own tab-based status filtering (`getEngagementsByTab()`) and stats calculation
-  (`getEngagementStats()`) directly against `JobEngagement`, duplicating query patterns
-  `EngagementManagementService::getUserEngagements()` already expresses (same `activeForUser`/
-  `archivedForUser` scopes, same status enumeration). This controller has no dedicated Service
-  class at all — everything lives in two private controller methods. Worth folding into
-  `EngagementManagementService` (or a new `ProjectDashboardService`) both for consistency with
-  every other controller in the app and to stop the stats logic from silently diverging from the
-  engagements list logic over time.
+- ✅ **Three dead routes deleted, not implemented — traced every actual caller first.** `MODULES.md`
+  had flagged `project.engagement.show`/`archive`/`unarchive` as pointing to `ProjectController`
+  methods that don't exist, framed as "needs a decision on what these actions should do." Tracing
+  it properly this pass (same misdiagnosis-avoidance approach as Module 3's `jobs.show` correction):
+  grepped every view and JS file for `project.engagement.*` and found **zero references anywhere**.
+  `projects/partials/projects-list.blade.php`'s own "View Details"/"Archive"/"Restore" controls
+  already point at the Engagements module's own working routes (`engagements.archived-details`,
+  `engagements.archive`, `engagements.restore` → `JobEngagementController`), which fully implement
+  this functionality (authorization-checked view, per-actor archive/restore) and are what the page
+  has actually been using all along. No decision was needed — the routes weren't a missing feature,
+  they were dead scaffolding for a second implementation of something that already existed and
+  already worked. Deleted the three route registrations; kept `project.index`.
+- ✅ **`ProjectController`'s tab-filtering and stats logic extracted to a new
+  `Projects\ProjectDashboardService`** (`getEngagementsByTab()`/`getStats()`), matching every other
+  module's controller-thin/service-owns-logic pattern (`CONVENTIONS.md` items 1–2). Kept as its own
+  service rather than folding into `EngagementManagementService` — same `JobEngagement` model and
+  `activeForUser`/`archivedForUser` scopes, but a genuinely different shape (in-memory tab/stat
+  breakdown for a dashboard, not `EngagementManagementService`'s paginated/searchable listing) and a
+  different consumer, so it gets its own namespace the same way Applications/Jobs/Engagements each
+  do.
+- ✅ **Fixed a real inefficiency found while extracting the service.** The old controller computed
+  the full `getEngagementStats()` query (a second `JobEngagement` fetch) on *every* request,
+  including the AJAX tab-switch requests that only ever render `projects-list.blade.php` — a partial
+  that never references `$stats` at all. `ProjectController::index()` now only calls
+  `getStats()` on the full-page (non-AJAX) branch, cutting one wasted query per tab click.
+- ✅ **`DashBoardController::getActivitySummary()`'s engagement counts fixed** — pulled forward from
+  Module 2's own note ("touches Module 6 too, better done when that module's turn comes").
+  `active_engagements_count`/`completed_engagements_count` hand-rolled a raw `DB::table('job_engagements')
+  ->join('job_applications', ...)` that duplicated the `activeForUser` scope this module already
+  uses — and, worse, didn't apply the archived-by-applicant/poster filter that scope does. That was
+  a real, user-visible bug: the main dashboard's "Active Engagements" count and the Projects
+  Dashboard's own "Active" tab count could disagree for any user with an archived active engagement,
+  since one respected archiving and the other didn't. Now both read `JobEngagement::activeForUser($userId)
+  ->where('status', EngagementStatus::Active|Completed)->count()`, so the two widgets can no longer
+  drift. `calculateReviewStats()` (a `JobReview` aggregate, unrelated to engagements) and
+  `applications_count`/`jobs_posted_count` (different domains, no engagement-scope overlap) were left
+  as-is — not part of this finding.
+- Verified all of the above with real HTTP requests (temp Pest tests, deleted after): stats/tab
+  correctness including an archived-active engagement excluded from the active count and counted
+  under archived; the three dead routes now 404; the dashboard's activity-summary counts matching
+  the fix. Full existing suite (26 tests) re-run clean before and after.
+- Found in passing, **not fixed here — spans Module 5 too, flagged as cross-cutting instead**:
+  `JobEngagement::getTotalDeliverablesCount()`/`getCompletedDeliverablesCount()` call
+  `$this->deliverables()` (the relation *query builder*) instead of `$this->deliverables` (the
+  loaded collection), so they issue a fresh query per call regardless of eager loading —
+  `completionPercentage()` right next to them in the same model does it the correct way
+  (`$this->deliverables->count()`). `projects-list.blade.php` calls both count methods per row, so
+  the Projects Dashboard N+1s on deliverables despite the controller's own `with(['deliverables'])`.
+  Same two methods are also called from three Module 5 views
+  (`engagements-list.blade.php`, `deliverables-details.blade.php`, `payment-details.blade.php`) and
+  `PartialPaymentService` — a real fix means touching already-closed Module 5 files and a payment
+  service, not just this module, so it's recorded under Cross-cutting concerns below rather than
+  patched narrowly here.
 
 ---
 
-## Module 7 — Messaging / Chat 🔴
+## Module 7 — Messaging / Chat 🟢
 
-Per-engagement chat between client and freelancer.
+Per-engagement chat between poster and applicant, rendered as an Alpine modal inside Module 5's
+`engagements-list.blade.php` (the only place it's used).
 
 - **Controller**: `MessageController`
+- **Service (new)**: `Messaging\MessagingService`
 - **Model**: `Message`
-- **Event**: `Events\NewMessageEvent`
+- **Request (new)**: `Message\StoreMessageRequest`
+- **Resource (new)**: `Http\Resources\MessageResource`
 
 **Findings**
-- 🔴 **`NewMessageEvent` is dead code.** It's fully written (broadcasts on a private channel per
-  engagement) but never dispatched anywhere in the codebase, and it doesn't even implement
-  `ShouldBroadcast` — so even if something did `event(new NewMessageEvent($message))`, Laravel
-  wouldn't actually broadcast it. Chat currently works purely via polling/AJAX
-  (`MessageController::getEngagementData`/`store` return plain JSON). Either this was scaffolded
-  for a real-time upgrade that never landed, or it should be deleted. Needs a decision, not a
-  silent fix — implementing real-time chat is a feature decision, not a cleanup one.
-- `MessageController` has a large commented-out `unreadCount()` method (~30 lines) — dead code to
-  remove or finish.
+- ✅ **Real-time scaffolding removed — user decision: delete, keep polling.** `NewMessageEvent` was
+  fully written (broadcast on a private `engagement.{id}` channel) but never dispatched, didn't
+  implement `ShouldBroadcast`, and `routes/channels.php` had no authorizer for that channel anyway —
+  three independent signs of an abandoned attempt, not a near-complete feature. Confirmed with the
+  user rather than assumed (same as Module 5's payment-flow and public-disk decisions): delete
+  rather than finish. Deleted `NewMessageEvent` entirely (zero other references, verified by grep)
+  and the matching commented-out `unreadCount()` controller method plus its already-commented route.
+  Chat's existing per-engagement unread badge (`engagement-details.blade.php`'s
+  `id="unread-count-{{ $engagement->id }}"`) is **not** part of this dead scaffolding — it's a real,
+  working, server-rendered count that the frontend correctly hides after `markAsRead()` succeeds;
+  initially mischaracterized as dead when first scoping this module, corrected before any code
+  changed.
+- ✅ **Real, confirmed bug fixed: `getEngagementData()` compared `Auth::id()` against
+  `$engagement->client_id`.** `job_engagements` has no `client_id`/`freelancer_id` columns at
+  all (checked every migration) — the real ownership lives on `application->poster_id`/
+  `application->applicant_id`, which every other file in the app correctly goes through. Accessing
+  the nonexistent attribute always returns `null`, so `Auth::id() === null` was always false,
+  meaning the "other chat participant" always resolved to the poster — correct by coincidence for
+  an applicant viewing the chat, wrong for a poster viewing their own chat (would show themselves as
+  the "other user"). Currently invisible to users only because the frontend never rendered
+  `other_user_name`/`other_user_initials` in the modal header, but a real bug once something reads
+  that field. Fixed in the new `MessagingService::getChatData()`, which resolves the other party via
+  `application->poster_id`/`applicant_id` like `JobEngagementPolicy` does. The matching dead
+  `JobEngagement::client()`/`freelancer()` relations (same phantom columns, zero other callers) were
+  deleted too.
+- ✅ **Real bug fixed: `store()`'s error response was a malformed array.**
+  `response()->json(['error', 'Failed to send message'], 500)` used a comma instead of `=>`,
+  producing a numerically-indexed JSON array instead of `{"error": "..."}`. The frontend's
+  `errorData.error || 'Failed to send message'` fallback masked the practical impact (same generic
+  text shown either way), but it's a real defect now fixed as part of the controller rewrite.
+- ✅ **Controller brought in line with the rest of the app's conventions.** `MessageController` had
+  no Service, no FormRequest (inline `$request->validate()`), and hand-rolled the message JSON shape
+  independently in two places (`getEngagementData()` and `store()`). Extracted `Messaging\
+  MessagingService` (`getChatData()`/`sendMessage()`/`markAsRead()` — this is where the `client_id`
+  fix lives), `Message\StoreMessageRequest`, and `Http\Resources\MessageResource` (used by both
+  actions that return a message, closing the duplicate-shaping gap and matching the
+  `MessageTemplateResource` precedent from Module 4). Also removed layered `catch
+  (AuthorizationException)`/`catch (ValidationException)` blocks and per-request `Log::info()` calls
+  on the success path — Laravel's default exception handler already renders both as the correct JSON
+  status/shape for `expectsJson()` requests (verified: no custom handler in `bootstrap/app.php`),
+  and `MessageTemplateController` (the app's other JSON-only controller) doesn't wrap these either,
+  so the heavy try/catch wasn't this app's own convention to begin with. Also dropped the
+  `application`/`job` null-checks (404 fallbacks) in `getEngagementData()` — `job_engagements
+  .application_id` → `job_applications.job_id`/`applicant_id`/`poster_id` are all
+  `onDelete('cascade')` foreign keys, so a `JobEngagement` that exists via route-model-binding can
+  never have a missing `application` or `job`; the checks were guarding an unreachable state.
+- Verified all of the above with real HTTP requests (temp Pest tests, deleted after): a poster and
+  an applicant on the same engagement each see the *other* person's name (the actual bug scenario,
+  not just "it still returns 200"); sending a message returns the right `is_own`/content shape and
+  persists; empty content is rejected with 422 via the new FormRequest; `markAsRead()` flips only
+  the other party's unread messages, not the viewer's own; a third-party user gets 403 from both the
+  view and message endpoints. Full existing 26-test suite re-run clean before and after (31 with
+  the temp verification tests, deleted once confirmed); `composer dump-autoload` run after deleting
+  `NewMessageEvent.php` to clear its stale classmap entry.
+- Found in passing, **not fixed — cosmetic, not a bug**: the chat modal's `showError()` uses a
+  blocking `alert()`, while the app's other AJAX-driven UI (`resources/js/templates.js`) uses a
+  non-blocking toast. Left alone since it's a UX-consistency nit rather than a defect and wasn't
+  part of this module's original findings; worth a look if `resources/js` ever gets its own pass.
 
 ---
 
@@ -579,10 +668,18 @@ call sites from other modules)
   Helper pattern works well when used consistently; Module 4 shows what happens when it isn't
   (10 independent inline copies of the same check). Worth picking one mechanism and using it
   everywhere — Policies are the Laravel-idiomatic choice given two already exist.
-- 🔴 **`Model::preventLazyLoading()` is never set.** `AppServiceProvider::boot()` only registers the
-  `JobApplicationObserver` — no lazy-loading guard for local/testing. Cheap, safe, app-wide fix
-  (`CONVENTIONS.md` item 11); do it whenever any module's turn touches `AppServiceProvider`, no
-  need to wait for a dedicated pass.
+- ✅ **`Model::preventLazyLoading()` enabled 2026-09-25 (Module 4)** — stale note, corrected here.
+  See `CONVENTIONS.md` item 11 for the smoke-testing status per module.
+- 🔴 **`JobEngagement::getTotalDeliverablesCount()`/`getCompletedDeliverablesCount()` bypass eager
+  loading.** Found during the Module 6 pass (2026-09-25): both call `$this->deliverables()` (the
+  relation query builder, always a fresh query) instead of `$this->deliverables` (the loaded
+  collection) — `completionPercentage()` in the same model does it correctly. Causes N+1 queries on
+  every page that lists engagements and shows deliverable counts per row, despite those controllers
+  already eager-loading `deliverables`: `projects/partials/projects-list.blade.php` (Module 6) and
+  three Module 5 views (`engagements-list.blade.php`, `deliverables-details.blade.php`,
+  `payment-details.blade.php`) plus `PartialPaymentService`. Not fixed in the Module 6 pass since a
+  real fix touches already-closed Module 5 files and a payment service — worth a dedicated look
+  rather than a drive-by change to a money-adjacent service.
 - 🔴🔴 **Zero test coverage of any actual business logic.** The whole suite is 26 tests, all Breeze's
   stock Auth/Profile scaffolding — nothing covers Jobs, Applications, Engagements, Payments,
   Disputes, or Messaging. `CONVENTIONS.md` item 15 sets the going-forward testing convention
@@ -613,10 +710,12 @@ call sites from other modules)
    cross-domain leak resolved, query-in-Blade fixed, form-header/budget/deadline componentized
    across `new.blade.php`/`edit.blade.php`. `apply.blade.php`'s own componentization is deferred —
    turned out not to be the same shape as the posting forms (see Module 3 note above).
-8. **Module 6 (Projects)** — fold into `EngagementManagementService` once Module 5 is settled.
-   `DashBoardController`'s raw `DB::table()` stat queries (flagged in Module 2) fit naturally here
-   too.
-9. **Module 7 (Messaging)** — needs a product decision (real-time or not) before code changes.
+8. ✅ **Module 6 (Projects)** — done 2026-09-25. New `ProjectDashboardService`, three dead routes
+   deleted, `DashBoardController`'s raw `DB::table()` engagement counts (flagged in Module 2) fixed
+   alongside.
+9. ✅ **Module 7 (Messaging)** — done 2026-09-25. User decided: delete the dead real-time
+   scaffolding rather than build it out. Also fixed a real `client_id`/`freelancer_id` bug and gave
+   the controller a Service/FormRequest/Resource matching the rest of the app.
 10. **Module 8 (Notifications)** — hasn't had a deep pass yet; do that pass as part of this
     module's turn.
 
@@ -730,3 +829,37 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   before committing; ran the full existing suite after each risk-bearing change. All of Module 4's
   own findings resolved; Modules 5/6-9 not smoke-tested against `preventLazyLoading` remains open,
   worth a quick look when each of those modules' turn comes.
+- **2026-09-25 (Module 6 pass, closed out)**: 1 commit. Traced every actual caller of the three
+  routes flagged as pointing to nonexistent `ProjectController` methods and found they were pure
+  dead scaffolding — nothing linked to them, and `projects-list.blade.php` already used the
+  Engagements module's own working view/archive/restore routes instead. Deleted the three routes
+  rather than implementing them; no product decision needed once traced (same pattern as Module 3's
+  `jobs.show` correction). Extracted `ProjectController`'s inline tab-filtering/stats logic to a new
+  `Projects\ProjectDashboardService`, matching every other module's thin-controller convention, and
+  fixed a real inefficiency found in the process (the full stats query used to run on every AJAX
+  tab-switch request even though the AJAX partial never uses it). Pulled forward and fixed Module
+  2's `DashBoardController::getActivitySummary()` finding: its raw-SQL engagement counts didn't
+  respect archiving the way the `activeForUser` scope does, a real bug that could make the main
+  dashboard and the Projects Dashboard disagree on a user's active-engagement count. Verified with
+  temp Pest HTTP tests (stats/tab correctness, archived-engagement exclusion, the three routes now
+  404ing, the dashboard count fix) before committing; full 26-test suite re-run clean.
+- **2026-09-25 (Module 7 pass, closed out)**: 1 commit. Asked the user to decide on the abandoned
+  real-time-chat scaffolding (`NewMessageEvent` unimplemented/undispatched, no channel authorizer,
+  a commented-out `unreadCount()` method) rather than assume — decision: delete it, current
+  poll-on-open chat works fine. Deleted `NewMessageEvent`, the dead `JobEngagement::client()`/
+  `freelancer()` relations it depended on, the commented method, and its already-commented route;
+  ran `composer dump-autoload` afterward. While scoping the delete, corrected an initial
+  misreading — the per-engagement unread badge is real, working, server-rendered code, not part of
+  the dead scaffolding. Found and fixed a real, confirmed bug along the way:
+  `getEngagementData()`'s "who's the other chat participant" check compared against
+  `$engagement->client_id`, a column that has never existed on `job_engagements` (checked every
+  migration) — always null, so the check always resolved to the poster, silently wrong for a poster
+  viewing their own chat. Rebuilt the controller around a new `Messaging\MessagingService`,
+  `Message\StoreMessageRequest`, and `MessageResource` (fixing the bug in one place instead of two
+  independent copies), matching Module 4's `MessageTemplateController`/`MessageTemplateResource`
+  precedent. Also fixed a malformed error array (`['error', '...']` instead of `['error' => '...']`)
+  and removed redundant `AuthorizationException`/`ValidationException` catches and success-path
+  logging that Laravel's default JSON exception handling already covers. Verified with real HTTP
+  requests (temp Pest tests, deleted after) covering the actual bug scenario (poster vs. applicant
+  each seeing the *other* party's name), message send/validate/mark-read, and third-party
+  authorization denial; full 26-test suite re-run clean before and after.

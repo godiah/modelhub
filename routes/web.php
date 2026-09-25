@@ -155,9 +155,6 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
 // Projects Dashboard
 Route::middleware(['auth'])->prefix('projects')->name('project.')->group(function () {
     Route::get('/', [ProjectController::class, 'index'])->name('index');
-    Route::get('/engagement/{engagement}', [ProjectController::class, 'show'])->name('engagement.show');
-    Route::post('/engagement/{engagement}/archive', [ProjectController::class, 'archive'])->name('engagement.archive');
-    Route::post('/engagement/{engagement}/unarchive', [ProjectController::class, 'unarchive'])->name('engagement.unarchive');
 });
 
 // Client - Freelancer Messaging
@@ -165,7 +162,6 @@ Route::middleware(['auth'])->prefix('chat')->group(function () {
     Route::get('/engagements/{engagement}/data', [MessageController::class, 'getEngagementData'])->name('engagements.data');
     Route::post('/engagements/{engagement}/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::patch('/engagements/{engagement}/messages/read', [MessageController::class, 'markAsRead'])->name('messages.read');
-    // Route::get('/messages/unread-count', [MessageController::class, 'unreadCount'])->name('messages.unread-count');
 });
 
 /**
