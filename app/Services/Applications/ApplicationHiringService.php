@@ -4,6 +4,7 @@
 
 namespace App\Services\Applications;
 
+use App\Enums\ApplicationStatus;
 use App\Mail\ApplicationHired;
 use App\Models\JobApplication;
 use App\Models\JobDeliverable;
@@ -22,7 +23,7 @@ class ApplicationHiringService
     // Check if status change requires hire confirmation
     public function requiresHireConfirmation(JobApplication $application, string $newStatus): bool
     {
-        return $newStatus === 'hired' && $application->status !== 'hired';
+        return $newStatus === ApplicationStatus::Hired->value && $application->status !== ApplicationStatus::Hired;
     }
 
     // Confirm hire and create engagement

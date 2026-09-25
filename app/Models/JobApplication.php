@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ApplicationStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,7 +21,7 @@ class JobApplication extends Model
         'proposal',
         'portfolio',
         'terms_accepted',
-        'status', // 'draft', 'submitted', 'hired, 'rejected', 'reviewed' , 'withdrawn'
+        'status',
         'additional_notes',
         'is_archived',
     ];
@@ -32,6 +33,7 @@ class JobApplication extends Model
         'service_fee' => 'decimal:2',
         'net_amount' => 'decimal:2',
         'is_archived' => 'boolean',
+        'status' => ApplicationStatus::class,
     ];
 
     // Relationship with the job
@@ -113,7 +115,7 @@ class JobApplication extends Model
     // Check if application should show archive option
     public function canBeArchived()
     {
-        return in_array($this->status, ['hired', 'rejected']) || $this->hasOtherEngagement();
+        return in_array($this->status, [ApplicationStatus::Hired, ApplicationStatus::Rejected], true) || $this->hasOtherEngagement();
     }
 
     // Scope to get draft applications

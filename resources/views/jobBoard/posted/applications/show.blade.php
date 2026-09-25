@@ -1,3 +1,4 @@
+@use('App\Enums\ApplicationStatus')
 <x-app-layout>
     <style>
         /* Hide x-cloak elements until Alpine.js loads */
@@ -32,31 +33,31 @@
                     <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
                         <div class="relative px-6 pt-6 pb-4">
                             <div class="absolute top-0 right-0 mt-4 mr-4">
-                                @if ($application->status === 'submitted')
+                                @if ($application->status === ApplicationStatus::Submitted)
                                     <span
                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-amber-100 text-amber-800 border border-amber-200">
                                         <span class="h-2 w-2 rounded-full bg-amber-500 mr-2 animate-pulse"></span>
                                         Submitted
                                     </span>
-                                @elseif($application->status === 'reviewed')
+                                @elseif($application->status === ApplicationStatus::Reviewed)
                                     <span
                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-blue-100 text-blue-800 border border-blue-200">
                                         <span class="h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
                                         Reviewed
                                     </span>
-                                @elseif($application->status === 'hired')
+                                @elseif($application->status === ApplicationStatus::Hired)
                                     <span
                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-green-100 text-green-800 border border-green-200">
                                         <span class="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
                                         Hired
                                     </span>
-                                @elseif($application->status === 'rejected')
+                                @elseif($application->status === ApplicationStatus::Rejected)
                                     <span
                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-red-100 text-red-800 border border-red-200">
                                         <span class="h-2 w-2 rounded-full bg-red-500 mr-2"></span>
                                         Rejected
                                     </span>
-                                @elseif($application->status === 'withdrawn')
+                                @elseif($application->status === ApplicationStatus::Withdrawn)
                                     <span
                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-neutral-100 text-rose-800 border border-neutral-200">
                                         <span class="h-2 w-2 rounded-full bg-rose-500 mr-2"></span>
@@ -66,7 +67,7 @@
                                     <span
                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-neutral-100 text-rose-800 border border-neutral-200">
                                         <span class="h-2 w-2 rounded-full bg-rose-500 mr-2"></span>
-                                        {{ ucfirst($application->status) }}
+                                        {{ $application->status->label() }}
                                     </span>
                                 @endif
                             </div>
@@ -589,7 +590,7 @@
                                 }
                             }" x-cloak>
                                 <!-- Withdrawn Application Notice -->
-                                @if ($application->status === 'withdrawn')
+                                @if ($application->status === ApplicationStatus::Withdrawn)
                                     <div class="bg-red-100 border border-red-200 rounded-lg p-4 mb-4 font-main">
                                         <div class="flex">
                                             <div class="flex-shrink-0">
@@ -659,12 +660,12 @@
                                                         'withdrawn' => 'bg-rose-100 text-rose-800',
                                                     ];
                                                     $statusColor =
-                                                        $statusColors[$application->status] ??
+                                                        $statusColors[$application->status->value] ??
                                                         'bg-neutral-100 text-neutral-800';
                                                 @endphp
                                                 <span
                                                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
-                                                    {{ ucfirst($application->status) }}
+                                                    {{ $application->status->label() }}
                                                 </span>
                                             </div>
 
@@ -1155,7 +1156,7 @@
                                     </div>
                                 </div>
 
-                                @if ($application->status !== 'submitted')
+                                @if ($application->status !== ApplicationStatus::Submitted)
                                     <div class="relative">
                                         <div class="absolute -left-7 mt-0.5">
                                             <div class="h-4 w-4 rounded-full bg-blue-500 border-2 border-white">
@@ -1170,7 +1171,7 @@
                                     </div>
                                 @endif
 
-                                @if ($application->status === 'hired')
+                                @if ($application->status === ApplicationStatus::Hired)
                                     <div class="relative">
                                         <div class="absolute -left-7 mt-0.5">
                                             <div class="h-4 w-4 rounded-full bg-green-500 border-2 border-white"></div>
@@ -1184,7 +1185,7 @@
                                     </div>
                                 @endif
 
-                                @if ($application->status === 'rejected')
+                                @if ($application->status === ApplicationStatus::Rejected)
                                     <div class="relative">
                                         <div class="absolute -left-7 mt-0.5">
                                             <div class="h-4 w-4 rounded-full bg-red-500 border-2 border-white"></div>

@@ -2,13 +2,14 @@
 
 namespace App\Observers;
 
+use App\Enums\ApplicationStatus;
 use App\Models\JobApplication;
 
 class JobApplicationObserver
 {
     public function created(JobApplication $application)
     {
-        if ($application->status === 'submitted') {
+        if ($application->status === ApplicationStatus::Submitted) {
             $application->job()->increment('applicants_count');
         }
     }
@@ -19,9 +20,9 @@ class JobApplicationObserver
             $original = $application->getOriginal('status');
             $new = $application->status;
 
-            if ($original !== 'submitted' && $new === 'submitted') {
+            if ($original !== ApplicationStatus::Submitted && $new === ApplicationStatus::Submitted) {
                 $application->job()->increment('applicants_count');
-            } elseif ($original === 'submitted' && $new !== 'submitted') {
+            } elseif ($original === ApplicationStatus::Submitted && $new !== ApplicationStatus::Submitted) {
                 $application->job()->decrement('applicants_count');
             }
         }
@@ -29,7 +30,7 @@ class JobApplicationObserver
 
     public function deleted(JobApplication $application)
     {
-        if ($application->status === 'submitted') {
+        if ($application->status === ApplicationStatus::Submitted) {
             $application->job()->decrement('applicants_count');
         }
     }

@@ -1,3 +1,5 @@
+@use('App\Enums\ApplicationStatus')
+
 @if ($applications->isEmpty() && $activeFilters)
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
         <div class="p-12 flex flex-col items-center justify-center text-center font-main">
@@ -19,7 +21,7 @@
     <div class="grid gap-6 md:grid-cols-1">
         @foreach ($applications as $application)
             @php
-                $isDisabled = $application->hasOtherEngagement() || $application->status === 'rejected';
+                $isDisabled = $application->hasOtherEngagement() || $application->status === ApplicationStatus::Rejected;
             @endphp
             <div
                 class="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-neutral-200 overflow-hidden group
@@ -87,9 +89,9 @@
                             ];
 
                             $statusClass =
-                                $statusClasses[$application->status] ??
+                                $statusClasses[$application->status->value] ??
                                 'bg-neutral-100 text-neutral-700 border-neutral-200';
-                            $dotClass = $dotClasses[$application->status] ?? 'bg-neutral-500';
+                            $dotClass = $dotClasses[$application->status->value] ?? 'bg-neutral-500';
                         @endphp
 
                         @if ($application->hasOwnEngagement())
@@ -98,7 +100,7 @@
                                 <span class="h-2 w-2 rounded-full bg-green-500 mr-2 pulse-animation"></span>
                                 Hired
                             </span>
-                        @elseif ($isDisabled && $application->status !== 'rejected')
+                        @elseif ($isDisabled && $application->status !== ApplicationStatus::Rejected)
                             <span
                                 class="px-4 py-2 inline-flex items-center text-sm font-medium rounded-full border bg-gray-100 text-gray-700">
                                 <span class="h-2 w-2 rounded-full bg-gray-500 mr-2 pulse-animation"></span>
@@ -108,7 +110,7 @@
                             <span
                                 class="px-4 py-2 inline-flex items-center text-sm font-medium rounded-full border {{ $statusClass }}">
                                 <span class="h-2 w-2 rounded-full {{ $dotClass }} mr-2 pulse-animation"></span>
-                                {{ ucfirst($application->status) }}
+                                {{ $application->status->label() }}
                             </span>
                         @endif
 

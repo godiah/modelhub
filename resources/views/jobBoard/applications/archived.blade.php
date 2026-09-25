@@ -1,3 +1,4 @@
+@use('App\Enums\ApplicationStatus')
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -107,12 +108,12 @@
                                         'withdrawn' => 'bg-neutral-100 text-neutral-700',
                                         'default' => 'bg-tertiary/10 text-tertiary',
                                     ];
-                                    $statusClass = $statusClasses[$application->status] ?? $statusClasses['default'];
+                                    $statusClass = $statusClasses[$application->status->value] ?? $statusClasses['default'];
                                 @endphp
 
                                 <span
                                     class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full {{ $statusClass }}">
-                                    {{ ucfirst($application->status) }}
+                                    {{ $application->status->label() }}
                                 </span>
 
                                 <div class="flex space-x-2">

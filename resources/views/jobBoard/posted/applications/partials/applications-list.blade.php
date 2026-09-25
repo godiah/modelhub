@@ -1,3 +1,5 @@
+@use('App\Enums\ApplicationStatus')
+
 @if ($applications->isEmpty() && $hasFilters)
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
         <div class="p-12 flex flex-col items-center justify-center text-center font-main">
@@ -59,37 +61,37 @@
                     <!-- Application Status -->
                     <div class="flex items-center mt-4 sm:mt-0 font-main">
                         <span class="mr-3 flex items-center">
-                            @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active && $application->status !== 'hired')
+                            @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active && $application->status !== ApplicationStatus::Hired)
                                 <span
                                     class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-amber-100 text-amber-800 border border-amber-200">
                                     <span class="h-2 w-2 rounded-full bg-amber-500 mr-2"></span>
                                     Position Filled
                                 </span>
-                            @elseif ($application->status === 'submitted')
+                            @elseif ($application->status === ApplicationStatus::Submitted)
                                 <span
                                     class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
                                     <span class="h-2 w-2 rounded-full bg-yellow-500 mr-2"></span>
                                     New Application
                                 </span>
-                            @elseif ($application->status === 'reviewed')
+                            @elseif ($application->status === ApplicationStatus::Reviewed)
                                 <span
                                     class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-blue-100 text-blue-800 border border-blue-200">
                                     <span class="h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
                                     Reviewed
                                 </span>
-                            @elseif ($application->status === 'hired')
+                            @elseif ($application->status === ApplicationStatus::Hired)
                                 <span
                                     class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-green-100 text-green-800 border border-green-200">
                                     <span class="h-2 w-2 rounded-full bg-green-600 mr-2"></span>
                                     Hired
                                 </span>
-                            @elseif ($application->status === 'rejected')
+                            @elseif ($application->status === ApplicationStatus::Rejected)
                                 <span
                                     class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-red-100 text-red-800 border border-red-200">
                                     <span class="h-2 w-2 rounded-full bg-red-500 mr-2"></span>
                                     Rejected
                                 </span>
-                            @elseif($application->status === 'withdrawn')
+                            @elseif($application->status === ApplicationStatus::Withdrawn)
                                 <span
                                     class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-neutral-100 text-rose-800 border border-neutral-200">
                                     <span class="h-2 w-2 rounded-full bg-rose-500 mr-2"></span>
@@ -99,11 +101,11 @@
                                 <span
                                     class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
                                     <span class="h-2 w-2 rounded-full bg-neutral-500 mr-2"></span>
-                                    {{ ucfirst($application->status) }}
+                                    {{ $application->status->label() }}
                                 </span>
                             @endif
                         </span>
-                        @if (!$application->job->hasAcceptedEngagement() && $application->job->is_active && $application->status !== 'hired')
+                        @if (!$application->job->hasAcceptedEngagement() && $application->job->is_active && $application->status !== ApplicationStatus::Hired)
                             <div x-data="{ open: false }" class="relative">
                                 <button @click="open = !open" class="p-1 rounded-full hover:bg-neutral-100">
                                     <svg class="h-5 w-5 text-neutral-400 hover:text-primary" fill="currentColor"
@@ -279,7 +281,7 @@
                             <!-- Actions -->
                             <div class="mt-3 font-main">
                                 @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active)
-                                    @if ($application->status === 'hired')
+                                    @if ($application->status === ApplicationStatus::Hired)
                                         <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"
                                             class="block w-full text-center px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90 transition shadow-sm">
                                             View Full Details
