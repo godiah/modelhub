@@ -148,14 +148,23 @@ Creating, editing, browsing, and closing job listings. The "supply" side of the 
   It's a large view and still a componentization candidate, but on its own terms — possibly
   alongside `jobs/show.blade.php`, which also displays job details — not lumped in with this
   batch.
-- 🔴 **`JobController::show()`'s authorization looks backwards.** `JobManagementService::
-  authorizeJobView()` is `$job->user_id === Auth::id()` — the job's own *poster*, not any
-  applicant or guest, is the only one allowed to view `jobs.show`. On a public job board this
-  would mean applicants can never see a job's own detail page to decide whether to apply. Found
-  while smoke-testing Module 4's `preventLazyLoading` change (had to `actingAs($poster)` to get a
-  200 at all); not fixed — this module is already closed and the fix requires knowing what
-  `authorizeJobView()` was actually supposed to gate (perhaps draft/inactive jobs only?) rather
-  than a guess.
+- ✅ **Correction, 2026-09-25**: a Module 4 smoke test flagged `JobController::show()`'s
+  poster-only authorization (`JobManagementService::authorizeJobView()`) as "looks backwards,"
+  reasoning that a public job board shouldn't gate its detail page to the poster. That was a
+  misdiagnosis — traced properly this time by checking every actual caller of the `jobs.show`
+  route rather than just hitting it in isolation. `jobs.show` is **not** the public job-details
+  page; it's exclusively linked from poster-only contexts: the "job posted" confirmation email
+  ("View Your Project"), the poster's own "my posted jobs" grid
+  (`jobBoard/posted/partials/jobs-grid.blade.php`), and the post-create/post-update redirects in
+  `JobController::store()`/`update()`. The view itself (`jobs/show.blade.php`) has an "Edit" link
+  and a "back to my-jobs" link — it's the poster's own job-management preview, parallel to
+  `my-jobs`'s other pages, not a public listing detail page. The actual public job-details +
+  apply flow is `jobs.apply` (`/{job:slug}/apply`), linked from the public browse listing
+  (`jobs-list.blade.php`) and correctly carrying no ownership check at all — already noted above
+  as the real job-details-display page, this just confirms `jobs.show` isn't a second one.
+  `authorizeJobView()`'s poster-only check is correct as written; no fix needed. The stale
+  "Move to a policy" comment on that method (a leftover TODO, unrelated to this) is a real,
+  separate, low-priority item if `Module 3` ever gets a revisit.
 
 ---
 
@@ -235,10 +244,9 @@ hire (which hands off to Module 5).
   data — all clean. Not exercised against Modules 6–9 (not yet started) or re-verified against
   Module 5 beyond its own prior audit; worth a quick re-check when each of those modules' turn
   comes.
-- Found in passing, not fixed (out of this module's scope): `JobManagementService::
-  authorizeJobView()` requires the viewer to *be* the job's poster to view `jobs.show` — meaning an
-  applicant can never see a job's own detail page to decide whether to apply. Squarely Module 3's
-  territory (already closed); flagged in that module's section below rather than fixed here.
+- A `JobManagementService::authorizeJobView()` oddity flagged here in passing during the
+  `preventLazyLoading` smoke test turned out to be a misdiagnosis, not a real bug — corrected in
+  Module 3's own findings section below after tracing the route's actual callers.
 
 ---
 
@@ -713,9 +721,12 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   a real user path — both fixed alongside the cast, not after. Also enabled
   `Model::preventLazyLoading()` app-wide (a cross-cutting item, done here since
   `AppServiceProvider` was already being touched) after smoke-testing it against every read-heavy
-  page in Modules 2–4 with real data. Found and documented (not fixed, out of scope) a likely-
-  backwards authorization check in Module 3's `JobController::show()`. Every change verified with
-  real HTTP requests or direct model/service assertions, temp tests deleted after, before
-  committing; ran the full existing suite after each risk-bearing change. All of Module 4's own
-  findings resolved; two out-of-module items (the `jobs.show` oddity, and Modules 5/6-9 not being
-  smoke-tested against `preventLazyLoading`) documented rather than silently chased.
+  page in Modules 2–4 with real data. Flagged a suspected backwards authorization check in
+  Module 3's `JobController::show()` from that smoke test — **corrected same day**: traced every
+  actual caller of the route and found `jobs.show` is exclusively a poster-only "my posted job"
+  preview (not the public job-details page, which is `jobs.apply`), so the poster-only check was
+  correct all along; see Module 3's findings section for the full trace. Every code change
+  verified with real HTTP requests or direct model/service assertions, temp tests deleted after,
+  before committing; ran the full existing suite after each risk-bearing change. All of Module 4's
+  own findings resolved; Modules 5/6-9 not smoke-tested against `preventLazyLoading` remains open,
+  worth a quick look when each of those modules' turn comes.
