@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EngagementStatus;
+use App\Models\JobEngagement;
 use App\Models\JobReview;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -119,21 +121,11 @@ class DashBoardController extends Controller
             'jobs_posted_count' => DB::table('model_jobs')
                 ->where('user_id', $user->id)
                 ->count(),
-            'active_engagements_count' => DB::table('job_engagements')
-                ->join('job_applications', 'job_engagements.application_id', '=', 'job_applications.id')
-                ->where(function ($query) use ($user) {
-                    $query->where('job_applications.applicant_id', $user->id)
-                        ->orWhere('job_applications.poster_id', $user->id);
-                })
-                ->where('job_engagements.status', 'active')
+            'active_engagements_count' => JobEngagement::activeForUser($user->id)
+                ->where('status', EngagementStatus::Active)
                 ->count(),
-            'completed_engagements_count' => DB::table('job_engagements')
-                ->join('job_applications', 'job_engagements.application_id', '=', 'job_applications.id')
-                ->where(function ($query) use ($user) {
-                    $query->where('job_applications.applicant_id', $user->id)
-                        ->orWhere('job_applications.poster_id', $user->id);
-                })
-                ->where('job_engagements.status', 'completed')
+            'completed_engagements_count' => JobEngagement::activeForUser($user->id)
+                ->where('status', EngagementStatus::Completed)
                 ->count(),
         ];
 

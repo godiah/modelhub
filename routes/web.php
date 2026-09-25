@@ -155,9 +155,6 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
 // Projects Dashboard
 Route::middleware(['auth'])->prefix('projects')->name('project.')->group(function () {
     Route::get('/', [ProjectController::class, 'index'])->name('index');
-    Route::get('/engagement/{engagement}', [ProjectController::class, 'show'])->name('engagement.show');
-    Route::post('/engagement/{engagement}/archive', [ProjectController::class, 'archive'])->name('engagement.archive');
-    Route::post('/engagement/{engagement}/unarchive', [ProjectController::class, 'unarchive'])->name('engagement.unarchive');
 });
 
 // Client - Freelancer Messaging
