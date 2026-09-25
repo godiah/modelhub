@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\MessageTemplate\StoreMessageTemplateRequest;
+use App\Http\Resources\MessageTemplateResource;
 use App\Models\MessageTemplate;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MessageTemplateController extends Controller
@@ -17,25 +18,14 @@ class MessageTemplateController extends Controller
         // Merge both collections
         $templates = $userTemplates->merge($globalTemplates);
 
-        return response()->json($templates);
+        return MessageTemplateResource::collection($templates);
     }
 
-    public function store(Request $request)
+    public function store(StoreMessageTemplateRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string|max:5000',
-        ]);
+        $template = MessageTemplate::create($request->getTemplateData());
 
-        $template = MessageTemplate::create([
-            'user_id' => Auth::id(), // Always associate with current user for regular users
-            'name' => $validated['name'],
-            'subject' => $validated['subject'],
-            'message' => $validated['message'],
-        ]);
-
-        return response()->json($template);
+        return new MessageTemplateResource($template);
     }
 
     public function destroy(MessageTemplate $template)
