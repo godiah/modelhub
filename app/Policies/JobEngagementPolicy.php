@@ -21,10 +21,10 @@ class JobEngagementPolicy
 
     public function view(User $user, JobEngagement $engagement)
     {
-        // User can view if they are the poster or applicant
+        // User can view if they are the poster or applicant, or staff reviewing disputes
         return $user->id === $engagement->application->poster_id ||
             $user->id === $engagement->application->applicant_id ||
-            $user->hasRole('admin');
+            $user->can('view disputes');
     }
 
     /**

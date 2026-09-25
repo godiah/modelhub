@@ -338,14 +338,14 @@ class PartialPaymentService
     }
 
     /**
-     * Resolve a payment dispute (admin only)
+     * Resolve a payment dispute (admin/dispute_manager only, via the "resolve disputes" permission)
      */
     public function resolveDispute(JobPaymentDispute $dispute, $notes, $finalAmount = null)
     {
         $authUser = Auth::user();
 
-        // Ensure user is an admin
-        if (! $authUser->hasRole('admin')) {
+        // Ensure user has permission to resolve disputes
+        if (! $authUser->can('resolve disputes')) {
             throw new \Exception('Only administrators can resolve payment disputes.');
         }
 
@@ -354,11 +354,17 @@ class PartialPaymentService
             throw new \Exception('This dispute has already been resolved.');
         }
 
+        $cancellation = $dispute->cancellation;
+        $engagement = $cancellation->engagement;
+
+        // A resolution amount can't exceed what the engagement was ever worth —
+        // same ceiling as the manual partial-payment override (see processPartialPayment()).
+        if ($finalAmount !== null && $finalAmount > $engagement->net_amount) {
+            throw new \Exception('Resolution amount cannot exceed the engagement\'s net amount.');
+        }
+
         DB::beginTransaction();
         try {
-            // Get related records
-            $cancellation = $dispute->cancellation;
-            $engagement = $cancellation->engagement;
             $payment = JobPartialPayment::where('dispute_id', $dispute->id)->first();
 
             // Update dispute status

@@ -71,22 +71,6 @@ class EngagementAuthorizationHelper
                $user->id === $application->applicant_id;
     }
 
-    // Get user role in engagement (poster, applicant, or admin)
-    public static function getUserRole(JobEngagement $engagement, User $user): string
-    {
-        $application = $engagement->application;
-
-        if ($user->id === $application->poster_id) {
-            return 'poster';
-        } elseif ($user->id === $application->applicant_id) {
-            return 'applicant';
-        } elseif ($user->hasRole('admin')) {
-            return 'admin';
-        }
-
-        return 'unauthorized';
-    }
-
     // Check if user has already reviewed engagement
     public static function hasUserReviewed(JobEngagement $engagement, User $user): bool
     {
