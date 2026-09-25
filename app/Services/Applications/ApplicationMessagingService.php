@@ -16,11 +16,6 @@ class ApplicationMessagingService
     // Send message to applicant
     public function sendMessage(JobApplication $application, array $messageData): ApplicantMessage
     {
-        // Ensure the current user is the owner of this job posting
-        if (Auth::user()->id !== $application->job->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
-
         // Store the message in the database
         $message = ApplicantMessage::create([
             'job_application_id' => $application->id,
@@ -34,12 +29,6 @@ class ApplicationMessagingService
         $this->sendMessageNotifications($message, $application);
 
         return $message;
-    }
-
-    // Check authorization for sending messages
-    public function authorizeMessageSending(JobApplication $application): bool
-    {
-        return Auth::user()->id === $application->job->user_id;
     }
 
     // Send message notifications

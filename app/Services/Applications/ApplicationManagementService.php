@@ -4,6 +4,7 @@
 
 namespace App\Services\Applications;
 
+use App\Enums\ApplicationStatus;
 use App\Helpers\Applications\ApplicationCalculationHelper;
 use App\Helpers\Applications\ApplicationFileHelper;
 use App\Helpers\FlashAlertHelper;
@@ -40,7 +41,7 @@ class ApplicationManagementService
         }
 
         // Update existing draft or create new application
-        if ($existingApplication && $existingApplication->status === 'draft') {
+        if ($existingApplication && $existingApplication->status === ApplicationStatus::Draft) {
             $existingApplication->update($applicationData);
 
             return $existingApplication;
@@ -84,17 +85,23 @@ class ApplicationManagementService
 
         // Validate application constraints
         if ($existingApplication && $isDraft) {
-            $prohibitedStatuses = ['submitted', 'reviewed', 'rejected', 'hired', 'withdrawn'];
-            if (in_array($existingApplication->status, $prohibitedStatuses)) {
+            $prohibitedStatuses = [
+                ApplicationStatus::Submitted,
+                ApplicationStatus::Reviewed,
+                ApplicationStatus::Rejected,
+                ApplicationStatus::Hired,
+                ApplicationStatus::Withdrawn,
+            ];
+            if (in_array($existingApplication->status, $prohibitedStatuses, true)) {
                 return FlashAlertHelper::error(
                     'Action Not Allowed',
-                    'Your application has already been '.$existingApplication->status.'. You cannot create a draft version of it.'
+                    'Your application has already been '.$existingApplication->status->value.'. You cannot create a draft version of it.'
                 );
             }
         }
 
         // Prevent multiple drafts
-        if ($isDraft && $existingApplication && $existingApplication->status === 'draft') {
+        if ($isDraft && $existingApplication && $existingApplication->status === ApplicationStatus::Draft) {
             return FlashAlertHelper::info(
                 'Existing Draft',
                 'You already have a draft application for this job. Please edit the existing draft or submit it.'
@@ -110,7 +117,7 @@ class ApplicationManagementService
         }
 
         // Check for existing submitted application
-        if (! $isDraft && $existingApplication && $existingApplication->status === 'submitted') {
+        if (! $isDraft && $existingApplication && $existingApplication->status === ApplicationStatus::Submitted) {
             return FlashAlertHelper::info(
                 'Your Application Already Exists',
                 'You have already submitted an application for this job. Your previous application is still pending review.'

@@ -75,10 +75,11 @@ Service, or from a Blade view that isn't gating a route), a static Helper class
 place that logic lives**. Never let a Policy and a Helper both independently implement the same
 check.
 
-**Known exception to fix, not copy**: `JobEngagementPolicy::view()` and
-`EngagementAuthorizationHelper::canView()` currently implement the identical poster/applicant/admin
-check independently. Consolidate to one (the Helper should call `Gate::allows()` internally, not
-duplicate the boolean logic) before treating this file as a template for authorization.
+**Fixed 2026-09-24 (Module 5)**: `JobEngagementPolicy::view()` and
+`EngagementAuthorizationHelper::canView()` used to implement the identical poster/applicant/admin
+check independently; the Helper now calls `Gate::allows()` internally rather than duplicating the
+boolean logic. `JobApplicationPolicy::manage()` (Module 4, 2026-09-25) follows the same shape for
+Applications.
 
 ## 5. Notifications centralized per domain
 
@@ -127,16 +128,20 @@ composition) or `components/` (reusable, takes props) depending on whether it's 
 A controller represents one actor's workflow over one concern — not two unrelated actors sharing a
 class because their models are related. Module 5's controllers each own one clear slice
 (`JobEngagementController` = lifecycle, `JobDeliverableController` = deliverables,
-`PartialPaymentController` = payment actions). Contrast with `JobApplicationController` (Module 4),
-which mixes the applicant's own-application actions with the employer's applicant-review/hiring
-actions in one class with almost no shared state — a split candidate, not a pattern to copy.
+`PartialPaymentController` = payment actions). **Fixed 2026-09-25 (Module 4)**:
+`JobApplicationController` used to mix the applicant's own-application actions with the employer's
+applicant-review/hiring actions in one class with almost no shared state; split into
+`JobApplicationController` (applicant) and `PostedJobApplicationController` (employer).
 
 ## 11. Data layer discipline
 
-- **Eager loading** — listings already consistently load relationships via `with()`. **Not yet
-  done**: `Model::preventLazyLoading(! app()->isProduction())` is not set anywhere in
-  `AppServiceProvider::boot()`. Cheap, safe addition — add it so N+1s fail loudly in local/testing
-  instead of silently shipping.
+- **Eager loading** — listings already consistently load relationships via `with()`. **Enabled
+  2026-09-25**: `Model::preventLazyLoading(! app()->isProduction())` now set in
+  `AppServiceProvider::boot()` (Module 4 pass, done alongside other `AppServiceProvider` work
+  rather than waiting for a dedicated pass). Smoke-tested against every read-heavy page in
+  Modules 2–4 with real data before enabling — all clean. Not yet re-verified against Modules 6–9
+  (not started) or re-checked against Module 5 beyond its own prior audit; worth a quick look when
+  each of those modules' turn comes.
 - **Query scopes over repeated `where` chains** — already the consistent, established pattern
   (`scopeActive`, `scopeArchived`, `scopeActiveForUser`/`scopeArchivedForUser`, `scopeDraft`, etc.
   across `ModelJob`, `JobApplication`, `JobEngagement`). Nothing to change, just keep following it.
@@ -146,9 +151,13 @@ actions in one class with almost no shared state — a split candidate, not a pa
   Turned up three real bugs in the process (see Module 5 in `MODULES.md` for details): a dead
   `STATUS_PENDING` constant that never matched any real value, a copy-paste status typo in
   `respond.blade.php` that permanently greyed out a textarea that should've been editable, and three
-  status-display `match` blocks silently missing the `applicant_accepted` case. `JobApplication`/
-  `ModelJob` still use bare string literals — convert when their modules (3/4) come up, following
-  the same one-model-at-a-time, fully-verified pattern established here.
+  status-display `match` blocks silently missing the `applicant_accepted` case. **`JobApplication`
+  converted 2026-09-25** (Module 4) to `App\Enums\ApplicationStatus`, same approach — surfaced a
+  real bug in `JobApplicationObserver` (compared the hydrated attribute against raw strings; would
+  have silently frozen every job's `applicants_count`) and a string-concatenation site that would
+  have thrown a hard `TypeError` on a real user path, both fixed alongside the cast. `ModelJob`
+  still uses bare string literals — convert when its own module (3) gets a revisit, or when
+  Module 6 (a heavy consumer of `ModelJob`/`JobEngagement` status) comes up.
 - **`$fillable`, never `$guarded = []`** — already fully compliant, zero exceptions found.
 - **Money as `decimal:2` casts, never floats** — already fully compliant
   (`offer_amount`/`service_fee`/`net_amount`/`agreed_amount` etc. all cast correctly).
@@ -196,9 +205,9 @@ actions in one class with almost no shared state — a split candidate, not a pa
   routes, not Laravel nested-resource controllers. Revisit only if that structure changes.
 - **Rate limiting on sensitive actions** — **payment processing and dispute submission fixed
   2026-09-24** (`throttle:10,1` on `process-partial-payment`/`accept-partial-payment`/
-  `process-dispute-partial-payment`, Module 5). `apply` (Module 4) still has none — pick up when
-  that module's turn comes. Login (a custom `RateLimiter` inside `LoginForm`) and email verification
-  (`throttle:6,1`) were already protected.
+  `process-dispute-partial-payment`, Module 5). **`applications.store` fixed 2026-09-25** (Module
+  4, same `throttle:10,1` value). Login (a custom `RateLimiter` inside `LoginForm`) and email
+  verification (`throttle:6,1`) were already protected.
 
 ## 14. Structure and consistency
 
@@ -216,9 +225,12 @@ actions in one class with almost no shared state — a split candidate, not a pa
   `jobBoard/jobs/browse.blade.php` querying `Skill::where(...)`/`Software::where(...)` directly in
   the view, was fixed during the Module 3 pass (data now comes from
   `JobBrowsingService::getFilterOptions()` via the controller).
-- **API Resources for JSON endpoints** — not currently used anywhere; e.g.
-  `MessageTemplateController` returns raw Eloquent collections via `response()->json($templates)`.
-  Real, but low priority — this app has very few JSON endpoints so far.
+- **API Resources for JSON endpoints** — **`MessageTemplateController` fixed 2026-09-25** (Module
+  4): now uses `MessageTemplateResource`, the app's first API Resource. Required
+  `JsonResource::withoutWrapping()` in `AppServiceProvider` so responses stay flat (this app has no
+  other JSON endpoint to conflict with that choice) rather than getting wrapped in Laravel's
+  default `data` envelope, which would have broken `resources/js/templates.js`'s existing
+  `fetch()` consumers.
 
 ## 15. Testing: end-to-end first
 
@@ -295,3 +307,11 @@ Record findings in `MODULES.md` under that module's section, same format as exis
   (Events vs. Helper, ServiceResult DTO, E2E tooling) — all three resolved and recorded above. One
   finding (deliverables/dispute-evidence stored on the public disk) flagged as higher-priority than
   a typical style deviation — it's a real confidentiality gap, not just an inconsistency.
+- **2026-09-25 (Module 4 pass)**: Items 4, 10, 11, 13, 14 updated to reflect Module 4's closure —
+  authorization consolidated onto `JobApplicationPolicy::manage()` (also closed a real
+  `confirmHire()` bypass), `JobApplicationController` split by actor, `JobApplication::status`
+  converted to a backed enum, `applications.store` rate limited, and `MessageTemplateController`
+  given the app's first API Resource. Also enabled `Model::preventLazyLoading()` app-wide (item
+  11) as a cross-cutting fix done alongside this module rather than a dedicated pass. Also
+  corrected item 4's stale text, which still described the Policy/Helper duplication Module 5 had
+  already fixed — a documentation gap from that module's own closure, not a Module 4 finding.

@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\JobApplication;
 use App\Observers\JobApplicationObserver;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,5 +24,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         JobApplication::observe(JobApplicationObserver::class);
+
+        // No API Resource in this app wraps intentionally in a "data" envelope -
+        // keep JSON responses flat to match what existing frontend JS (e.g.
+        // resources/js/templates.js) already expects.
+        JsonResource::withoutWrapping();
+
+        // Fail loudly on N+1s in local/testing instead of shipping them silently.
+        Model::preventLazyLoading(! app()->isProduction());
     }
 }

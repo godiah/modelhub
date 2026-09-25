@@ -1,3 +1,4 @@
+@use('App\Enums\ApplicationStatus')
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
@@ -20,24 +21,24 @@
         <div class="container mx-auto max-w-7xl px-4 py-8">
             <!-- Application Status Banner -->
             <div
-                class="mb-6 rounded-lg p-4 {{ $application->status === 'submitted'
+                class="mb-6 rounded-lg p-4 {{ $application->status === ApplicationStatus::Submitted
                     ? 'bg-yellow-100 border-l-4 border-yellow-500'
-                    : ($application->status === 'reviewed'
+                    : ($application->status === ApplicationStatus::Reviewed
                         ? 'bg-blue-100 border-l-4 border-blue-500'
-                        : ($application->status === 'rejected'
+                        : ($application->status === ApplicationStatus::Rejected
                             ? 'bg-red-100 border-l-4 border-red-500'
-                            : ($application->status === 'withdrawn'
+                            : ($application->status === ApplicationStatus::Withdrawn
                                 ? 'bg-rose-100 border-l-4 border-rose-500'
                                 : 'bg-green-100 border-l-4 border-green-500'))) }}">
                 <div class="flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg"
-                        class="h-6 w-6 mr-3 {{ $application->status === 'submitted'
+                        class="h-6 w-6 mr-3 {{ $application->status === ApplicationStatus::Submitted
                             ? 'text-yellow-500'
-                            : ($application->status === 'reviewed'
+                            : ($application->status === ApplicationStatus::Reviewed
                                 ? 'text-blue-500'
-                                : ($application->status === 'rejected'
+                                : ($application->status === ApplicationStatus::Rejected
                                     ? 'text-red-500'
-                                    : ($application->status === 'withdrawn'
+                                    : ($application->status === ApplicationStatus::Withdrawn
                                         ? 'text-rose-500'
                                         : 'text-green-500'))) }}"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -47,16 +48,16 @@
                     <div>
                         <p class="font-medium text-neutral-800">
                             Application Status: <span
-                                class="font-bold {{ $application->status === 'submitted'
+                                class="font-bold {{ $application->status === ApplicationStatus::Submitted
                                     ? 'text-yellow-700'
-                                    : ($application->status === 'reviewed'
+                                    : ($application->status === ApplicationStatus::Reviewed
                                         ? 'text-blue-700'
-                                        : ($application->status === 'rejected'
+                                        : ($application->status === ApplicationStatus::Rejected
                                             ? 'text-red-700'
-                                            : ($application->status === 'withdrawn'
+                                            : ($application->status === ApplicationStatus::Withdrawn
                                                 ? 'text-rose-700'
                                                 : 'text-green-700'))) }}">
-                                {{ ucfirst($application->status) }}</span>
+                                {{ $application->status->label() }}</span>
                         </p>
                         <p class="text-sm text-neutral-600">
                             Applied on {{ $application->created_at->format('F d, Y') }}
@@ -295,7 +296,7 @@
                             class="inline-flex items-center px-4 py-2 bg-neutral-100 text-neutral-800 border border-neutral-300 rounded-lg hover:bg-neutral-200 transition-colors">
                             View Job Details
                         </a>
-                        @if ($application->status === 'submitted')
+                        @if ($application->status === ApplicationStatus::Submitted)
                             <a href="#"
                                 class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"

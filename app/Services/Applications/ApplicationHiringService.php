@@ -4,34 +4,26 @@
 
 namespace App\Services\Applications;
 
+use App\Enums\ApplicationStatus;
 use App\Mail\ApplicationHired;
 use App\Models\JobApplication;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
 use App\Notifications\HiredNotification;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class ApplicationHiringService
 {
     // Update application status
-    public function updateStatus(JobApplication $application, array $updateData): bool
+    public function updateStatus(JobApplication $application, array $updateData): void
     {
-        // Ensure the current user is the owner of this job posting
-        if (Auth::user()->id !== $application->job->user_id) {
-            return false;
-        }
-
-        // Update the application
         $application->update($updateData);
-
-        return true;
     }
 
     // Check if status change requires hire confirmation
     public function requiresHireConfirmation(JobApplication $application, string $newStatus): bool
     {
-        return $newStatus === 'hired' && $application->status !== 'hired';
+        return $newStatus === ApplicationStatus::Hired->value && $application->status !== ApplicationStatus::Hired;
     }
 
     // Confirm hire and create engagement
@@ -59,12 +51,6 @@ class ApplicationHiringService
         $this->sendHireNotifications($application, $engagement);
 
         return $engagement;
-    }
-
-    // Check authorization for status updates
-    public function authorizeStatusUpdate(JobApplication $application): bool
-    {
-        return Auth::user()->id === $application->job->user_id;
     }
 
     // Create deliverables for an engagement

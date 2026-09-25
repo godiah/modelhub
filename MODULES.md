@@ -148,10 +148,18 @@ Creating, editing, browsing, and closing job listings. The "supply" side of the 
   It's a large view and still a componentization candidate, but on its own terms — possibly
   alongside `jobs/show.blade.php`, which also displays job details — not lumped in with this
   batch.
+- 🔴 **`JobController::show()`'s authorization looks backwards.** `JobManagementService::
+  authorizeJobView()` is `$job->user_id === Auth::id()` — the job's own *poster*, not any
+  applicant or guest, is the only one allowed to view `jobs.show`. On a public job board this
+  would mean applicants can never see a job's own detail page to decide whether to apply. Found
+  while smoke-testing Module 4's `preventLazyLoading` change (had to `actingAs($poster)` to get a
+  200 at all); not fixed — this module is already closed and the fix requires knowing what
+  `authorizeJobView()` was actually supposed to gate (perhaps draft/inactive jobs only?) rather
+  than a guess.
 
 ---
 
-## Module 4 — Applications & Hiring 🔴
+## Module 4 — Applications & Hiring 🟢
 
 Covers both sides of the applicant/employer relationship before an engagement exists: applying,
 withdrawing, drafts, the employer's applicant review queue, messaging applicants, and confirming a
@@ -169,29 +177,68 @@ hire (which hands off to Module 5).
   (employer side: posted jobs, applicants-per-job, archived)
 
 **Findings**
-- 🔴 **`JobApplicationController` is really two controllers.** Roughly the first half (`store`,
-  `continueDraft`, `getUserApplications`, drafts, archive/restore/destroy, `show`) is the
-  *applicant's* view of their own applications. The second half (`getUserPostedJobs`,
-  `getJobApplications`, `showApplications`, `updateStatus`, `confirmHire`, `sendMessage`,
-  archived-jobs handling) is the *employer's* review/hiring queue. They share almost no state
-  (different services injected for different halves) and even have their own separate
-  `unauthorizedError()` helper duplicate. Natural split: `JobApplicationController` (applicant) +
-  `PostedJobApplicationController` or similar (employer).
-- 🔴 **Authorization is inline and repeated instead of centralized**, unlike Module 5's Engagement
-  services which all delegate to `EngagementAuthorizationHelper`. Ten occurrences across this
-  module of the same shape (`Auth::user()->id === $application->job->user_id` /
-  `Auth::id() !== $engagement->poster->id`, etc.) live independently in
-  `ApplicationBrowsingService::authorizeApplicationView`,
-  `ApplicationHiringService::{authorizeStatusUpdate,updateStatus}`,
-  `ApplicationMessagingService::{authorizeMessageSending,sendMessage}`, and more. `JobApplicationPolicy`
-  already exists and only covers `view`/`update`/`delete` — extending it (or an
-  `ApplicationAuthorizationHelper` mirroring Module 5's pattern) would collapse all ten into one
-  place, the same fix that already happened for Engagements.
+- ✅ **`confirmHire()` had zero permission check at all — a real authorization bypass, not just a
+  style deviation.** Any authenticated user could `POST` to `my-jobs/applications/{application}/
+  confirm-hire` for an application they had no part in, creating the paid engagement and flipping
+  the application to `hired`. Same class of bug as Module 5's `JobDeliverableController::submit()`
+  bypass. Fixed alongside the authorization-centralization work below rather than as a narrow
+  patch, since the same missing check pattern was the root cause of both.
+- ✅ **Authorization centralized.** `Auth::user()->id === $application->job->user_id` was hand-rolled
+  independently six times (a hard guard plus a duplicate boolean `authorizeXxx()` helper, in each
+  of `ApplicationBrowsingService`, `ApplicationHiringService`, `ApplicationMessagingService`).
+  Added `JobApplicationPolicy::manage()` (poster-only, reading the model's own `poster_id` column
+  rather than traversing `->job->user_id` like the removed checks did) and wired it via
+  `$this->authorize('manage', $application)` at the top of `showApplications`/`updateStatus`/
+  `sendMessage`/`confirmHire` — closing the `confirmHire` gap and replacing all six duplicates plus
+  the three now-fully-dead `authorizeXxx()` service methods (removed). No Helper class added —
+  unlike Engagements, every one of these checks runs at an HTTP-authorization boundary, and
+  `CONVENTIONS.md` item 4 reserves the static-Helper pattern for checks needed outside that
+  context; none of that applies here.
+- ✅ **`JobApplicationController` split by actor**, mirroring Module 5's one-controller-per-concern
+  template. `JobApplicationController` keeps the applicant-side actions (`store`/`continueDraft`/
+  `getUserApplications`/drafts/`archive`/`restore`/`destroy`/`show`). New
+  `PostedJobApplicationController` takes the employer-side actions (`getUserPostedJobs`/
+  `getJobApplications`/`showApplications`/`updateStatus`/`confirmHire`/`sendMessage`/archived-jobs
+  handling) and the `unauthorizedError()` helper those use. Route names unchanged — only the
+  controller class each route points at moved — so no Blade template needed updating.
 - ✅ Flash-message handling already fixed app-wide (including this module) by the cross-cutting
   `FlashAlertHelper` pass — no longer a Module 4-specific finding.
-- 🔴 **No rate limiting on `applications.store` (applying to a job)** — `CONVENTIONS.md` item 13.
-- 🔴 **`MessageTemplateController` returns raw Eloquent collections via `response()->json()`**
-  (`index()`/`store()`) instead of an API Resource — `CONVENTIONS.md` item 14.
+- ✅ **`applications.store` rate limited** (`throttle:10,1`, matching the value Module 5 established
+  for the payment/dispute routes) — `CONVENTIONS.md` item 13.
+- ✅ **`MessageTemplateController` → `MessageTemplateResource`**, the first API Resource in the app
+  — `CONVENTIONS.md` item 14. Required adding `JsonResource::withoutWrapping()` in
+  `AppServiceProvider` so responses stay flat (matching what `resources/js/templates.js` already
+  expects) rather than getting wrapped in a `data` envelope. Also fixed `store()`'s inline
+  `$request->validate([...])` while in this file (a `CONVENTIONS.md` item 3 violation that was
+  never actually on that item's known-exceptions list — an unflagged oversight, not a deliberate
+  deviation) with a new `StoreMessageTemplateRequest`. One harmless wire-format side effect:
+  Laravel auto-sets `201` instead of the previous unconditional `200` when the resource wraps a
+  freshly-created model — still a 2xx `response.ok` for the frontend's `fetch()` call, and more
+  correct REST semantics; left as-is.
+- ✅ **`JobApplication::status` converted to a backed enum** (`App\Enums\ApplicationStatus`),
+  per `CONVENTIONS.md` item 11's standing note that this was due "when Module 3/4's turn comes."
+  Same one-model-at-a-time, fully-verified approach as Module 5's three conversions. Surfaced a
+  real, would-have-been-serious bug: `JobApplicationObserver` (the only thing keeping
+  `model_jobs.applicants_count` in sync) compared the hydrated `status` attribute against raw
+  strings in `created()`/`updated()`/`deleted()` — casting the column without fixing the Observer
+  would have silently frozen every job's applicant count the moment this shipped, with no error
+  anywhere. Fixed alongside the cast. Also fixed a string-concatenation site in
+  `ApplicationManagementService::validateApplicationConstraints()` that would have thrown a hard
+  `TypeError` (enums aren't `Stringable`) the first time a user tried to draft over an
+  already-decided application — this one wouldn't have failed silently, it would have 500'd a real
+  user path. ~30 raw-string comparisons/`ucfirst()`/array-key lookups across 5 Blade views
+  converted to enum comparisons via `@use('App\Enums\ApplicationStatus')`, matching Module 5's
+  `respond.blade.php` convention.
+- Cross-cutting, done alongside this module since `AppServiceProvider` was already being touched
+  for the API Resource work: `Model::preventLazyLoading()` enabled in local/testing per
+  `CONVENTIONS.md` item 11. Smoke-tested against every read-heavy page in Modules 2–4 with real
+  data — all clean. Not exercised against Modules 6–9 (not yet started) or re-verified against
+  Module 5 beyond its own prior audit; worth a quick re-check when each of those modules' turn
+  comes.
+- Found in passing, not fixed (out of this module's scope): `JobManagementService::
+  authorizeJobView()` requires the viewer to *be* the job's poster to view `jobs.show` — meaning an
+  applicant can never see a job's own detail page to decide whether to apply. Squarely Module 3's
+  territory (already closed); flagged in that module's section below rather than fixed here.
 
 ---
 
@@ -551,8 +598,9 @@ call sites from other modules)
 5. **Module 5 (Engagements)** — already the best-structured module; cleanup here is mostly
    consolidating the Policy/Helper duplication and fixing `JobDeliverableController`'s
    inconsistency, plus some view componentization. Low risk, good template-setting work.
-6. **Module 4 (Applications) using Module 5 as the template** — the controller-split and
-   authorization-centralization work benefits from having just done the equivalent in Module 5.
+6. ✅ **Module 4 (Applications) using Module 5 as the template** — done 2026-09-25. Controller
+   split, authorization centralization (which surfaced a real `confirmHire` bypass), rate
+   limiting, an API Resource, and a `JobApplication` status enum conversion.
 7. ✅ **Module 3 (Jobs)** — done 2026-09-24. `JobFilterTrait` wired up, `JobImageService`
    cross-domain leak resolved, query-in-Blade fixed, form-header/budget/deadline componentized
    across `new.blade.php`/`edit.blade.php`. `apply.blade.php`'s own componentization is deferred —
@@ -648,3 +696,26 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   with the user before proceeding rather than assumed. Module 5 marked 🟢; two small, genuinely
   low-priority items left open and documented in the module's own findings section, not blocking
   further work.
+- **2026-09-25 (Module 4 pass, closed out)**: 6 commits. Found and fixed a real authorization
+  bypass on `confirmHire()` (zero permission check anywhere — same class of bug as Module 5's
+  `JobDeliverableController::submit()`) as part of centralizing the module's six duplicated
+  poster-ownership checks into a new `JobApplicationPolicy::manage()` ability, used directly via
+  `$this->authorize()` (no Helper class — every check here runs at an HTTP boundary, unlike
+  Engagements). Split `JobApplicationController` into applicant-side and a new
+  `PostedJobApplicationController` for the employer side, following Module 5's
+  one-controller-per-concern template; route names unchanged, no Blade changes needed. Rate
+  limited `applications.store`. Gave `MessageTemplateController` the app's first API Resource
+  (`MessageTemplateResource`), which required `JsonResource::withoutWrapping()` app-wide to keep
+  `resources/js/templates.js` working, and fixed an unflagged inline-validation gap in the same
+  file. Converted `JobApplication::status` to a backed enum (`App\Enums\ApplicationStatus`),
+  surfacing a real bug in `JobApplicationObserver` that would have silently frozen every job's
+  applicant count, plus a string-concatenation site that would have thrown a hard `TypeError` on
+  a real user path — both fixed alongside the cast, not after. Also enabled
+  `Model::preventLazyLoading()` app-wide (a cross-cutting item, done here since
+  `AppServiceProvider` was already being touched) after smoke-testing it against every read-heavy
+  page in Modules 2–4 with real data. Found and documented (not fixed, out of scope) a likely-
+  backwards authorization check in Module 3's `JobController::show()`. Every change verified with
+  real HTTP requests or direct model/service assertions, temp tests deleted after, before
+  committing; ran the full existing suite after each risk-bearing change. All of Module 4's own
+  findings resolved; two out-of-module items (the `jobs.show` oddity, and Modules 5/6-9 not being
+  smoke-tested against `preventLazyLoading`) documented rather than silently chased.
