@@ -597,26 +597,124 @@ Per-engagement chat between poster and applicant, rendered as an Alpine modal in
 
 ---
 
-## Module 8 — Notifications & Transactional Email 🔴
+## Module 8 — Notifications & Transactional Email 🟢
 
 Cross-cutting: every other module fires into this one.
 
 - **Controller**: `NotificationController`
-- **Notifications** (7): `DisputeCreatedNotification`, `EngagementCancelledNotification`,
+- **Notifications** (10): `DisputeCreatedNotification`, `EngagementCancelledNotification`,
   `EngagementResponseNotification`, `HiredNotification`, `JobPostedNotification`,
-  `NewApplicationMessage`, `PartialPaymentProcessedNotification`
-- **Mail** (5): `ApplicationHired`, `ApplicationMessage`, `DeliverableSubmitted`, `JobPostedMail`,
-  `TwoFactorCode`
+  `NewApplicationMessage`, `PartialPaymentProcessedNotification`, `PaymentAcceptedNotification`,
+  `PaymentDisputedNotification`, `ReviewSubmittedNotification` — corrected count; the doc's
+  placeholder note said 7, missing the three Module 5 added (`PaymentAcceptedNotification`,
+  `PaymentDisputedNotification`, `ReviewSubmittedNotification`).
+- **Mail** (4): `ApplicationHired`, `ApplicationMessage`, `DeliverableSubmitted`, `TwoFactorCode`
+  — `JobPostedMail` deleted this pass, see findings.
+- **Helper (new)**: `NotificationPresenterHelper`
 - **Views**: `resources/views/notifications/*`, `resources/views/emails/*`
 
-**Findings** (lighter pass so far — this module hasn't been read file-by-file yet, only its
-call sites from other modules)
-- `NotificationController::markAsRead()` has a 4-branch `if/elseif` chain keyed on the
-  notification's fully-qualified class name string (`'App\Notifications\NewApplicationMessage'`
-  etc.) to decide both the AJAX response shape and the redirect target. This is the kind of thing
-  that's easy to forget to extend when a new notification type ships (nothing enforces it) — worth
-  a closer look when this module's turn comes, possibly a method on each Notification class instead
-  of a controller-side switch.
+**Findings**
+- ✅ **The real bug behind the doc's placeholder note, now fixed — and it was bigger than one
+  4-branch `if/elseif`.** The FQCN-string branch wasn't just in `NotificationController::
+  markAsRead()`; it was independently duplicated 6 times total — the controller plus
+  `index.blade.php`'s grouping and all 4 render partials (`_notification_icon`,
+  `_notification_title`, `_notification_content`, `_notification_actions`) — and every one of those
+  6 copies only had explicit handling for the 4 oldest notification types. The 6 types Module 5
+  added (`DisputeCreatedNotification`, `PartialPaymentProcessedNotification`,
+  `PaymentAcceptedNotification`, `PaymentDisputedNotification`, `ReviewSubmittedNotification`, plus
+  `JobPostedNotification`) all fell through to generic handling: the title showed the raw PHP class
+  name (e.g. a user literally saw "DisputeCreatedNotification"), the content showed "You have a new
+  notification" with zero detail (5 of the 6 never set the `message` key the fallback read), and the
+  "View details" action did a bare `redirect()->back()` — even though every one of those 6 classes
+  had already computed a correct `url` in its stored `toArray()`/`toDatabase()` data. Confirmed via
+  grep that `data['url']` was read **nowhere** in the app — the exact same shape as the cross-cutting
+  flash-alert dead-data bug (rich data computed, render layer never grew to consume it). User chose
+  the fix direction (static `present(array $data): array` on each Notification class over a single
+  centralized switch) so the presentation logic lives next to the class it describes and a future
+  notification type that skips it degrades gracefully instead of drifting silently. Every one of the
+  10 Notification classes now has `present()`; a new `App\Helpers\NotificationPresenterHelper`
+  resolves `type::present($data)` with a generic (but no longer *broken-looking*) fallback for
+  anything that doesn't implement it. The controller, `index.blade.php`'s grouping, and all 4
+  partials now call the resolver instead of branching on the type string — the controller's
+  redirect logic collapsed from a 4-branch `if/elseif` to one `NotificationPresenterHelper::
+  present($notification)['action_url']` lookup. `index.blade.php`'s grouping was extended (not just
+  simplified) to file all 10 types into real sections (Disputes/Payments/Reviews/Job Postings added)
+  instead of dumping the 6 newer types into "Other Notifications".
+- ✅ **Real, standalone bug found and fixed along the way: `EngagementCancelledNotification::
+  toArray()`'s stored `url` was `'/engagements/'` — no id appended**, unlike every sibling
+  notification's `url`. Harmless today only because nothing read the field (see above); would have
+  been wrong the moment it was wired up. Its own `toMail()` two lines away already builds the
+  correct destination (`route('engagements.show-cancelled', $this->engagement->id)`) — used that as
+  the fix, so the in-app notification and the email now point at the same place.
+  `NewApplicationMessage`, `HiredNotification`, `EngagementResponseNotification`, and
+  `JobPostedNotification` didn't have a `url` field at all (the controller hardcoded their redirect
+  targets separately) — added one to each, matching the shape every other notification already used;
+  `JobPostedNotification` needed `job_slug` added to its stored data first since nothing previously
+  captured it.
+- ✅ **`JobPostedMail` deleted — confirmed dead and broken, not a decision call.** Zero callers
+  anywhere (`JobManagementService` dispatches `JobPostedNotification` instead, which has its own
+  inline `toMail()`) and its `build()` referenced a nonexistent view (`emails.job_posted`; the real
+  view is `emails/jobs/posted.blade.php`) — would have fatal-errored if ever instantiated.
+- **Known consequence, not fixed**: notification rows already sitting in the database from before
+  this pass don't have the newly-added `url`/`job_slug` keys in their stored `data` JSON, so their
+  action link won't render until they're cleared/replaced by newly-dispatched notifications. Not
+  treated as blocking — per Module 5's own note, this app has no production deployment, so there's
+  no real user data affected, only local/dev rows.
+- ✅ **CSS-inlining pipeline inconsistency — fixed, and it was a real (verified, not assumed)
+  regression risk.** Confirmed empirically (rendered both paths and diffed the output, not just read
+  source): `Mail`-class `->markdown()` emails get their own `<style>` block CSS-inlined via
+  `Illuminate\Mail\Markdown::render()`; `Notification::toMail()`'s `MailMessage->view()` emails (8 of
+  10 notification classes) plus `TwoFactorCode` don't. The tempting one-line fix — switch those 8
+  from `->view()` to `MailMessage->markdown()` — was tested and rejected: `Markdown::render()` also
+  merges in Laravel's own bundled default markdown-theme CSS alongside the app's own, and that theme
+  silently overrode this app's actual `body` background/text-color/font-family (confirmed by
+  rendering `emails.jobs.posted` both ways and diffing — `font-family` went from this app's
+  `'Inter', 'Roboto', 'Montserrat'` stack to Laravel's default `-apple-system` stack, `color` and
+  `background-color` both changed too). Fixed instead with a new `App\Helpers\EmailCssInlinerHelper`
+  (`CssToInlineStyles::convert($html)` with **no** second `$css` argument — inlines only the email's
+  *own* embedded `<style>` block, never Laravel's theme CSS) wired into a `MessageSending` event
+  listener in `AppServiceProvider::boot()`. Applies to every outgoing email app-wide, Mail or
+  Notification, `->markdown()` or `->view()`, with zero per-class changes and no risk of a future
+  email class forgetting to opt in. Verified idempotent against already-inlined HTML (the `->markdown()`
+  case) and a no-op against HTML with no `<style>` block at all.
+- ✅ **Applications domain migrated to Module 5's unified notification pattern — user's explicit
+  choice over 2 smaller alternatives.** `ApplicationMessage` (Mail) merged into
+  `NewApplicationMessage` (`via() = ['mail', 'database', 'broadcast']`, `implements ShouldQueue`, own
+  `toMail()`); `ApplicationHired` (Mail) merged into `HiredNotification` the same way. New
+  `App\Helpers\Applications\ApplicationNotificationHelper` (matching `EngagementNotificationHelper`'s
+  shape) now owns both dispatch calls; `ApplicationMessagingService`/`ApplicationHiringService` no
+  longer call `Mail::`/`->notify()` directly. The two now-fully-superseded Mail classes deleted
+  (confirmed zero other references first).
+- ✅ **Real, previously-undetected bug found and fixed while verifying the migration above: every
+  applicant-message email was crashing on render, always, since the feature shipped.** Laravel's
+  `Mailer::send()` unconditionally injects its own `Illuminate\Mail\Message` wrapper object into the
+  view data under the key `'message'` (documented Laravel behavior, for `$message->embed()` inline
+  attachments) — `ApplicationMessage`'s view data used `'message'` for the actual message *text*,
+  which got silently clobbered by Laravel's wrapper before `emails/application-message.blade.php`'s
+  `{{ $message }}` ever rendered, fatal-erroring in `htmlspecialchars()` on a non-string argument
+  every single time. Pre-existing in the original `Mail`-class code (confirmed: same `Mailer::send()`
+  path handles both `->markdown()` and `->view()`, so this predates and is unrelated to the migration
+  above) — surfaced only now because this was the first time anyone rendered this specific mail view
+  end-to-end. Since the class was `ShouldQueue`, this failed silently in the queue worker: the
+  employer's "message sent" flash would have shown success while the actual email never sent. Fixed
+  by renaming the view-data key to `messageBody` in both `NewApplicationMessage::toMail()` and the
+  Blade view; grepped every other email view for the same collision risk, found none.
+- Verified with real HTTP/Blade-render requests (temp Pest tests, deleted after): every one of the
+  10 `present()` implementations produces a non-generic title/content and a correct `action_url`;
+  the fallback path degrades gracefully for an unrecognized type; `notifications.index` renders
+  clean with one instance of every type plus an unknown type present at once; `markAsRead()`
+  redirects to the presenter's `action_url` for a type that was previously generic
+  (`JobPostedNotification`); the 3 AJAX-expandable types (`NewApplicationMessage`,
+  `EngagementResponseNotification`, `EngagementCancelledNotification`) still return their
+  `fullMessage` payload unchanged. Full 26-test suite re-run clean before and after (31 with the temp
+  verification tests). `git rm` used for the `JobPostedMail` deletion.
+- Verified the CSS-inlining fix and the Applications migration the same way (temp Pest tests,
+  deleted after): the `MessageSending` listener adds inline `style=` attributes to a real dispatched
+  `JobPostedNotification` email (previously zero); idempotency against already-inlined HTML and a
+  no-op against HTML with no `<style>` block; a real `sendMessage()`/`confirmHire()` call through
+  each service dispatches exactly one notification row of the right type and one email whose
+  rendered HTML contains the actual message/job content (this is what caught the `$message`
+  collision bug) and has CSS inlined. Full suite re-run clean before and after both changes.
 
 ---
 
@@ -716,8 +814,9 @@ call sites from other modules)
 9. ✅ **Module 7 (Messaging)** — done 2026-09-25. User decided: delete the dead real-time
    scaffolding rather than build it out. Also fixed a real `client_id`/`freelancer_id` bug and gave
    the controller a Service/FormRequest/Resource matching the rest of the app.
-10. **Module 8 (Notifications)** — hasn't had a deep pass yet; do that pass as part of this
-    module's turn.
+10. ✅ **Module 8 (Notifications)** — done 2026-09-25. New `NotificationPresenterHelper` + a
+    `present()` method on all 10 Notification classes replaced 6 duplicated FQCN-string branches;
+    `JobPostedMail` (dead + broken) deleted.
 
 This order is a proposal, not a commitment — reorder freely based on what matters most next.
 
@@ -863,3 +962,38 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   requests (temp Pest tests, deleted after) covering the actual bug scenario (poster vs. applicant
   each seeing the *other* party's name), message send/validate/mark-read, and third-party
   authorization denial; full 26-test suite re-run clean before and after.
+- **2026-09-25 (Module 8 pass, closed out)**: Did the deep file-by-file pass the doc's placeholder
+  note said hadn't happened yet. Found the real bug behind that note was bigger than described: the
+  FQCN-string branch existed in 6 places (controller + `index.blade.php` grouping + 4 view
+  partials), not 1, and all 6 only handled the 4 oldest notification types — the 6 Module 5 added
+  fell through to a raw-class-name title and a contentless "You have a new notification", while
+  their already-correct `url` data was read nowhere in the app (same shape as the cross-cutting
+  flash-alert dead-data bug). Asked the user to pick the fix direction (a `present()` method per
+  Notification class vs. one centralized switch) since it was a real architecture choice, not a safe
+  default — went with per-class `present()` plus a small `NotificationPresenterHelper` resolver.
+  Also fixed a standalone data bug found in passing (`EngagementCancelledNotification`'s stored `url`
+  was missing its id, unlike every sibling) and deleted `JobPostedMail` (confirmed dead, and broken —
+  referenced a nonexistent view). Two items traced and confirmed but deliberately left as flagged
+  decisions rather than fixed: a real CSS-inlining pipeline inconsistency between `Mail`-class
+  `->markdown()` emails and `Notification::toMail()`'s `MailMessage->view()` emails (confirmed by
+  reading Laravel's own source, not assumed) needing real-client verification before calling it
+  broken; and the Applications domain still using the pre-Module-5 split-Mailable+Notification
+  pattern with no domain Helper, unlike Engagements. Verified every `present()` implementation, the
+  fallback path, a full `notifications.index` render across all 10 types plus an unknown type, the
+  `markAsRead()` redirect for a previously-generic type, and the 3 AJAX-expandable types' unchanged
+  behavior — all via temp Pest tests, deleted after. Full 26-test suite re-run clean before and
+  after. Nothing committed yet — left for the user to review.
+- **2026-09-25 (Module 8 follow-up)**: Came back to the two items the pass above deliberately left
+  as flagged decisions rather than fixed. CSS-inlining: tested the obvious one-line fix
+  (`MailMessage->view()` → `->markdown()`) before applying it and found it wasn't actually safe —
+  Laravel's markdown pipeline also pulls in its own bundled theme CSS, which silently overrode this
+  app's real colors/fonts (confirmed by rendering both paths and diffing the output, not assumed).
+  Fixed properly instead with an app-wide `MessageSending` listener
+  (`App\Helpers\EmailCssInlinerHelper`) that inlines only each email's own `<style>` block. Applications
+  domain: user chose to migrate to Module 5's unified pattern (not the smaller "just add a Helper,
+  keep the split" option). Doing that migration surfaced a genuine, previously-undetected bug — every
+  applicant-message email has been crashing on render since the feature shipped, because Laravel
+  reserves the view-data key `'message'` for its own object and the original Mailable used that same
+  key for the actual message text; queued, so it failed silently in the background with the UI still
+  showing success. Both fixes verified with temp Pest tests (deleted after) and the full suite
+  re-run clean.

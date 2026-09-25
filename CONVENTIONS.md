@@ -92,6 +92,35 @@ Don't leave stub methods that are never called (`EngagementNotificationHelper::s
 and `::sendPaymentNotification()` are currently empty and unwired — either implement them when the
 feature is actually built, or delete them; an empty stub isn't a template).
 
+**Fixed 2026-09-25**: the Applications domain (`ApplicationMessagingService`,
+`ApplicationHiringService`) used to have no `ApplicationNotificationHelper` and paired a separate
+`Mailable` with a separate `Notification` per event — migrated onto the Module 5 pattern (user's
+explicit choice over two smaller alternatives). `ApplicationMessage`/`ApplicationHired` Mail classes
+deleted, merged into `NewApplicationMessage`/`HiredNotification` (`via() = ['mail', 'database',
+'broadcast']`, own `toMail()`); new `App\Helpers\Applications\ApplicationNotificationHelper` owns
+both dispatch calls. Surfaced a real pre-existing bug in the process: every applicant-message email
+was crashing on render (Laravel's `Mailer::send()` reserves the view-data key `'message'` for its
+own `Message` wrapper object; the original Mailable used that same key for the message text) — see
+Module 8's findings for the full trace.
+
+**Email CSS (added 2026-09-25, Module 8)**: every outgoing email gets its own `<style>` block
+CSS-inlined via a `MessageSending` listener in `AppServiceProvider::boot()`
+(`App\Helpers\EmailCssInlinerHelper`), regardless of whether it's sent via a `Mail` class or a
+`Notification::toMail()`, `->markdown()` or `->view()`. Do **not** switch a `Notification::toMail()`
+from `MailMessage->view()` to `->markdown()` to get CSS inlining "for free" — confirmed by direct
+testing that Laravel's markdown pipeline also merges in its own bundled default theme CSS, which
+silently overrides this app's own `emails.layouts.master` colors/fonts. The listener is the only
+supported way to get inlining; new email classes don't need to do anything for it.
+
+**Notification display (added 2026-09-25, Module 8)**: every `Notification` class that's rendered in
+the in-app notification center implements a static `present(array $data): array` (returning
+`title`/`icon`/`content`/`action_url`, optionally `action_label`), resolved via
+`App\Helpers\NotificationPresenterHelper::present($notification)`. This replaced 6 independent
+FQCN-string branches (the controller plus `index.blade.php` and all 4 render partials) that only
+handled 4 of the app's 10 notification types — see Module 8's findings for the full story. Any new
+Notification class needs a `present()` method or it falls back to a generic (but not broken-looking)
+title/content via the Helper.
+
 ## 6. Flash messages via `FlashAlertHelper`
 
 Every user-facing redirect that needs a message uses `App\Helpers\FlashAlertHelper::success()`/
@@ -307,6 +336,16 @@ Record findings in `MODULES.md` under that module's section, same format as exis
   (Events vs. Helper, ServiceResult DTO, E2E tooling) — all three resolved and recorded above. One
   finding (deliverables/dispute-evidence stored on the public disk) flagged as higher-priority than
   a typical style deviation — it's a real confidentiality gap, not just an inconsistency.
+- **2026-09-25 (Module 8 pass)**: Item 5 updated with the new `present()`/`NotificationPresenterHelper`
+  notification-display convention and a flagged, not-yet-fixed deviation (Applications domain has no
+  `ApplicationNotificationHelper` and still pairs a separate Mailable+Notification per event, unlike
+  every notification Module 5 added).
+- **2026-09-25 (Module 8 follow-up)**: Both items flagged above resolved, not left open. Applications
+  domain migrated to the unified pattern (user's choice) — item 5 updated again. New email-CSS
+  convention added (a `MessageSending` listener inlines every outgoing email's own `<style>` block;
+  explicitly do not "fix" this by switching a Notification to `->markdown()`, since that pulls in
+  Laravel's own theme CSS and silently overrides this app's colors/fonts — confirmed by testing, not
+  assumed).
 - **2026-09-25 (Module 4 pass)**: Items 4, 10, 11, 13, 14 updated to reflect Module 4's closure —
   authorization consolidated onto `JobApplicationPolicy::manage()` (also closed a real
   `confirmHire()` bypass), `JobApplicationController` split by actor, `JobApplication::status`

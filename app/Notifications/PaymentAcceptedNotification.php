@@ -74,4 +74,16 @@ class PaymentAcceptedNotification extends Notification implements ShouldQueue
             'url' => route('engagements.archived-details', $this->engagement),
         ];
     }
+
+    public static function present(array $data): array
+    {
+        return [
+            'title' => 'Partial Payment Accepted',
+            'icon' => 'success',
+            'content' => ($data['freelancer_name'] ?? 'The freelancer').' accepted the partial payment of '
+                .config('app.currency_symbol').number_format($data['amount'] ?? 0, 2)
+                .' for job: '.($data['job_title'] ?? 'a job posting').'.',
+            'action_url' => $data['url'] ?? null,
+        ];
+    }
 }

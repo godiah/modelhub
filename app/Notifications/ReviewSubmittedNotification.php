@@ -71,4 +71,15 @@ class ReviewSubmittedNotification extends Notification implements ShouldQueue
             'url' => route('engagements.archived-details', $engagement),
         ];
     }
+
+    public static function present(array $data): array
+    {
+        return [
+            'title' => 'New Review Received',
+            'icon' => 'info',
+            'content' => ($data['reviewer_name'] ?? 'Someone').' left you a '.($data['rating'] ?? '?')
+                .'-star review for job: '.($data['job_title'] ?? 'a job posting').'.',
+            'action_url' => $data['url'] ?? null,
+        ];
+    }
 }

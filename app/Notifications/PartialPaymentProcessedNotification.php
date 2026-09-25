@@ -69,4 +69,15 @@ class PartialPaymentProcessedNotification extends Notification implements Should
     {
         return new BroadcastMessage($this->toArray($notifiable));
     }
+
+    public static function present(array $data): array
+    {
+        return [
+            'title' => 'Partial Payment Processed',
+            'icon' => 'success',
+            'content' => 'A partial payment of '.config('app.currency_symbol').number_format($data['amount'] ?? 0, 2)
+                .' was processed for job: '.($data['job_title'] ?? 'a job posting').'.',
+            'action_url' => $data['url'] ?? null,
+        ];
+    }
 }

@@ -10,7 +10,7 @@
 </div>
 
 <div class="mb-4" style="background-color: #F9FAFB; padding: 20px; border-radius: 6px; border-left: 4px solid #14B8A6;">
-    {{ $message }}
+    {{ $messageBody }}
 </div>
 
 @endsection

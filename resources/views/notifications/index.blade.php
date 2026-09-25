@@ -52,28 +52,35 @@
                         <div class="space-y-4" id="notifications-container">
                             {{-- Notification groups --}}
                             @php
-                                // Group notifications by type
-                                $groupedNotifications = $notifications->groupBy(function ($notification) {
-                                    if (strpos($notification->type, 'NewApplicationMessage') !== false) {
-                                        return 'messages';
-                                    } elseif (strpos($notification->type, 'HiredNotification') !== false) {
-                                        return 'hiring';
-                                    } elseif (strpos($notification->type, 'EngagementResponseNotification') !== false) {
-                                        return 'engagements';
-                                    } elseif (
-                                        strpos($notification->type, 'EngagementCancelledNotification') !== false
-                                    ) {
-                                        return 'cancelled';
-                                    } else {
-                                        return 'other';
-                                    }
-                                });
+                                // Maps each notification class's basename to a group key, keeping related
+                                // notification types (even ones added later) filed under a real section
+                                // instead of falling into a catch-all "Other" bucket.
+                                $groupKeyByType = [
+                                    'NewApplicationMessage' => 'messages',
+                                    'HiredNotification' => 'hiring',
+                                    'EngagementResponseNotification' => 'engagements',
+                                    'EngagementCancelledNotification' => 'cancelled',
+                                    'DisputeCreatedNotification' => 'disputes',
+                                    'PartialPaymentProcessedNotification' => 'payments',
+                                    'PaymentAcceptedNotification' => 'payments',
+                                    'PaymentDisputedNotification' => 'payments',
+                                    'ReviewSubmittedNotification' => 'reviews',
+                                    'JobPostedNotification' => 'jobs',
+                                ];
+
+                                $groupedNotifications = $notifications->groupBy(
+                                    fn($notification) => $groupKeyByType[class_basename($notification->type)] ?? 'other',
+                                );
 
                                 // Define the order and labels for groups
                                 $groupOrder = [
                                     'hiring' => 'Hiring Notifications',
                                     'engagements' => 'Engagement Responses',
                                     'cancelled' => 'Cancelled Engagement Responses',
+                                    'disputes' => 'Disputes',
+                                    'payments' => 'Payments',
+                                    'reviews' => 'Reviews',
+                                    'jobs' => 'Job Postings',
                                     'messages' => 'Application Messages',
                                     'other' => 'Other Notifications',
                                 ];
