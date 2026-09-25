@@ -11,6 +11,7 @@ use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
 use App\Http\Controllers\PolicyManagementController;
+use App\Http\Controllers\PostedJobApplicationController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
@@ -63,23 +64,23 @@ Route::middleware(['auth'])->group(function () {
 
 // My Posted Jobs and Applications Management
 Route::middleware(['auth'])->prefix('my-jobs')->name('my-jobs.')->group(function () {
-    Route::get('/', [JobApplicationController::class, 'getUserPostedJobs'])->name('index');
+    Route::get('/', [PostedJobApplicationController::class, 'getUserPostedJobs'])->name('index');
 
     Route::prefix('applications')->name('applications.')->group(function () {
-        Route::get('/{slug}', [JobApplicationController::class, 'getJobApplications'])->name('index');
-        Route::get('/{application}/details', [JobApplicationController::class, 'showApplications'])->name('show');
-        Route::patch('/{application}/status', [JobApplicationController::class, 'updateStatus'])->name('update-status');
-        Route::post('/{application}/message', [JobApplicationController::class, 'sendMessage'])->name('send-message');
-        Route::post('/{application}/confirm-hire', [JobApplicationController::class, 'confirmHire'])->name('confirm-hire');
+        Route::get('/{slug}', [PostedJobApplicationController::class, 'getJobApplications'])->name('index');
+        Route::get('/{application}/details', [PostedJobApplicationController::class, 'showApplications'])->name('show');
+        Route::patch('/{application}/status', [PostedJobApplicationController::class, 'updateStatus'])->name('update-status');
+        Route::post('/{application}/message', [PostedJobApplicationController::class, 'sendMessage'])->name('send-message');
+        Route::post('/{application}/confirm-hire', [PostedJobApplicationController::class, 'confirmHire'])->name('confirm-hire');
     });
 
     Route::prefix('archived')->name('archived.')->group(function () {
-        Route::get('/', [JobApplicationController::class, 'archivedJobs'])->name('posted-jobs');
-        Route::patch('/{job}/restore', [JobApplicationController::class, 'restoreJob'])->name('restore');
-        Route::get('/{job}', [JobApplicationController::class, 'showArchivedJob'])->name('show');
+        Route::get('/', [PostedJobApplicationController::class, 'archivedJobs'])->name('posted-jobs');
+        Route::patch('/{job}/restore', [PostedJobApplicationController::class, 'restoreJob'])->name('restore');
+        Route::get('/{job}', [PostedJobApplicationController::class, 'showArchivedJob'])->name('show');
     });
 
-    Route::patch('/{job}/archive', [JobApplicationController::class, 'archiveJob'])->name('archive');
+    Route::patch('/{job}/archive', [PostedJobApplicationController::class, 'archiveJob'])->name('archive');
 });
 
 // Email Message Templates
