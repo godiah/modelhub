@@ -32,7 +32,7 @@ class PartialPaymentController extends Controller
     public function processPartialPayment(ProcessPartialPaymentRequest $request, $id)
     {
         // Find the engagement by ID
-        $engagement = JobEngagement::findOrFail($id);
+        $engagement = JobEngagement::with(['deliverables'])->findOrFail($id);
 
         try {
             $partialPayment = $this->partialPaymentService->processPartialPayment(

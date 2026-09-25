@@ -74,81 +74,50 @@
                                 <!-- Detail Cards with Interactive Hover -->
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                                     <!-- Deadline Card -->
-                                    <div
-                                        class="group bg-neutral-50 rounded-xl border border-neutral-100 p-5 hover:border-secondary hover:bg-white transition-all duration-300 hover:shadow-md">
-                                        <div class="flex items-start">
-                                            <div
-                                                class="rounded-lg bg-secondary/10 p-3 group-hover:bg-secondary/20 transition-colors duration-300">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </div>
-                                            <div class="ml-4">
-                                                <p
-                                                    class="text-xs uppercase tracking-wider text-neutral-500 font-main font-medium">
-                                                    Deadline</p>
-                                                @if ($job->no_deadline)
-                                                    <p class="text-neutral-800 font-secondary mt-1">No Fixed Deadline
-                                                    </p>
-                                                @else
-                                                    <p class="text-neutral-800 font-secondary font-bold mt-1">
-                                                        {{ $job->deadline->format('F j, Y') }}</p>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <x-jobs.detail-card label="Deadline">
+                                        <x-slot:icon>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </x-slot:icon>
+                                        @if ($job->no_deadline)
+                                            <p class="text-neutral-800 font-secondary mt-1">No Fixed Deadline</p>
+                                        @else
+                                            <p class="text-neutral-800 font-secondary font-bold mt-1">
+                                                {{ $job->deadline->format('F j, Y') }}</p>
+                                        @endif
+                                    </x-jobs.detail-card>
 
                                     <!-- Applicants Card -->
-                                    <div
-                                        class="group bg-neutral-50 rounded-xl border border-neutral-100 p-5 hover:border-secondary hover:bg-white transition-all duration-300 hover:shadow-md">
-                                        <div class="flex items-start">
-                                            <div
-                                                class="rounded-lg bg-secondary/10 p-3 group-hover:bg-secondary/20 transition-colors duration-300">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                                </svg>
-                                            </div>
-                                            <div class="ml-4">
-                                                <p
-                                                    class="text-xs uppercase tracking-wider text-neutral-500 font-main font-medium">
-                                                    Applicants</p>
-                                                <div class="flex items-center mt-1">
-                                                    <p class="text-neutral-800 font-secondary font-bold">
-                                                        {{ $job->applicants_count }}</p>
-                                                    <span class="text-neutral-600 ml-1 font-main">applied</span>
-                                                </div>
-                                            </div>
+                                    <x-jobs.detail-card label="Applicants">
+                                        <x-slot:icon>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                            </svg>
+                                        </x-slot:icon>
+                                        <div class="flex items-center mt-1">
+                                            <p class="text-neutral-800 font-secondary font-bold">
+                                                {{ $job->applicants_count }}</p>
+                                            <span class="text-neutral-600 ml-1 font-main">applied</span>
                                         </div>
-                                    </div>
+                                    </x-jobs.detail-card>
 
                                     <!-- Budget Card -->
-                                    <div
-                                        class="group bg-neutral-50 rounded-xl border border-neutral-100 p-5 hover:border-accent hover:bg-white transition-all duration-300 hover:shadow-md">
-                                        <div class="flex items-start">
-                                            <div
-                                                class="rounded-lg bg-accent/10 p-3 group-hover:bg-accent/20 transition-colors duration-300">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
-                                                    viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                                    <path fill="#f59e0b"
-                                                        d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
-                                                </svg>
-
-                                            </div>
-                                            <div class="ml-4">
-                                                <p
-                                                    class="text-xs uppercase tracking-wider text-neutral-500 font-main font-medium">
-                                                    Budget</p>
-                                                <p class="text-primary font-tertiary font-bold text-xl mt-1">
-                                                    Ksh.{{ number_format($job->budget) }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <x-jobs.detail-card label="Budget" color="accent">
+                                        <x-slot:icon>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
+                                                viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                                                <path fill="#f59e0b"
+                                                    d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
+                                            </svg>
+                                        </x-slot:icon>
+                                        <p class="text-primary font-tertiary font-bold text-xl mt-1">
+                                            Ksh.{{ number_format($job->budget) }}</p>
+                                    </x-jobs.detail-card>
                                 </div>
                             </div>
                         </div>
@@ -170,16 +139,7 @@
 
                             <!-- Markdown Content -->
                             <div class="prose prose-neutral max-w-none font-main">
-                                <div
-                                    class="text-neutral-700 [&>h1]:text-xl [&>h1]:font-tertiary [&>h1]:font-bold [&>h1]:text-primary [&>h1]:mt-6 [&>h1]:mb-4
-                                        [&>h2]:text-lg [&>h2]:font-tertiary [&>h2]:font-semibold [&>h2]:text-primary/90 [&>h2]:mt-5 [&>h2]:mb-3
-                                        [&>h3]:text-base [&>h3]:font-tertiary [&>h3]:font-medium [&>h3]:text-neutral-800 [&>h3]:mt-4 [&>h3]:mb-2
-                                        [&>p]:text-base [&>p]:leading-relaxed [&>p]:text-neutral-700 [&>p]:mb-4
-                                        [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ul]:text-neutral-700
-                                        [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4 [&>ol]:text-neutral-700
-                                        [&>li]:mb-2 [&>a]:text-secondary [&>a]:underline [&>a]:font-medium [&>p]:text-justify">
-                                    {!! Str::markdown($job->description) !!}
-                                </div>
+                                <x-jobs.markdown-description :content="$job->description" />
                             </div>
 
                             <!-- Tags Section for Required Skills/Qualifications -->
@@ -346,80 +306,14 @@
                                     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                         <!-- Main Preview Image -->
                                         @if ($job->images)
-                                            <div class="relative group">
-                                                <div
-                                                    class="overflow-hidden border border-neutral-200 shadow-sm group-hover:shadow-md transition-all duration-300 w-full aspect-square rounded-lg">
-                                                    <img src="{{ asset('storage/' . $job->images) }}"
-                                                        alt="{{ $job->title }} preview"
-                                                        class="w-full h-full object-cover transform group-hover:scale-[1.02] transition-transform duration-500">
-                                                </div>
-
-                                                <!-- Zoom Button -->
-                                                <button
-                                                    class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-neutral-100 text-neutral-700 hover:text-primary transition-colors duration-200"
-                                                    onclick="openImageModal('{{ asset('storage/' . $job->images) }}')">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                                    </svg>
-                                                </button>
-
-                                                <!-- Download Button -->
-                                                <div class="mt-3">
-                                                    <button
-                                                        class="w-full flex items-center justify-center px-3 py-1.5 bg-primary text-white rounded-lg shadow-sm hover:bg-primary-dark transition-colors duration-200 text-sm"
-                                                        onclick="downloadImage('{{ asset('storage/' . $job->images) }}')">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                        </svg>
-                                                        Download Sample
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            <x-jobs.preview-image-card :src="asset('storage/' . $job->images)"
+                                                :alt="$job->title . ' preview'" download-label="Download Sample" />
                                         @endif
 
                                         <!-- Additional Images -->
                                         @foreach ($job->jobImages as $image)
-                                            <div class="relative group">
-                                                <div
-                                                    class="overflow-hidden border border-neutral-200 shadow-sm group-hover:shadow-md transition-all duration-300 w-full aspect-square rounded-lg">
-                                                    <img src="{{ asset('storage/' . $image->image_path) }}"
-                                                        alt="Additional project image"
-                                                        class="w-full h-full object-cover transform group-hover:scale-[1.02] transition-transform duration-500">
-                                                </div>
-
-                                                <!-- Zoom Button -->
-                                                <button
-                                                    class="absolute top-2 right-2 p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-sm border border-neutral-100 text-neutral-700 hover:text-primary transition-colors duration-200"
-                                                    onclick="openImageModal('{{ asset('storage/' . $image->image_path) }}')">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2"
-                                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                                                    </svg>
-                                                </button>
-
-                                                <!-- Download Button -->
-                                                <div class="mt-3">
-                                                    <button
-                                                        class="w-full flex items-center justify-center px-3 py-1.5 bg-primary text-white rounded-lg shadow-sm hover:bg-primary-dark transition-colors duration-200 text-sm"
-                                                        onclick="downloadImage('{{ asset('storage/' . $image->image_path) }}')">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                                        </svg>
-                                                        Download Image
-                                                    </button>
-                                                </div>
-                                            </div>
+                                            <x-jobs.preview-image-card :src="asset('storage/' . $image->image_path)"
+                                                alt="Additional project image" />
                                         @endforeach
                                     </div>
                                 @else
