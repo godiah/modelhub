@@ -297,13 +297,28 @@ cancellation, disputes, and partial payment.
   replacing a commented-out call to a *different*, never-built class name
   (`PartialPaymentReadyNotification`) that had been sitting there as a stale reminder. Verified with
   `Notification::fake()` that the freelancer (not the poster) receives it.
-- 🔴 **Still open, needs a product decision, not a silent build:** `sendReviewNotification()` has no
-  backing `Notification` class at all (unlike the payment one, which just needed wiring up) — building
-  one is new feature work, not a gap-fill. Same story for two other commented-out call sites found
-  in `PartialPaymentService` referencing notification classes that were never created:
-  `PaymentAcceptedNotification` (in `acceptPartialPayment()`) and `PaymentDisputedNotification` (in
-  `disputePartialPayment()`). All three need someone to decide what the notification should say and
-  who receives it before there's anything to wire up.
+- ✅ **All three missing notifications built and wired up**, per explicit user decisions on
+  content/recipient (asked rather than assumed, since this was new feature work):
+  `ReviewSubmittedNotification` (reviewee, shows the star rating, not the full review text — chosen
+  to keep the email short since the public review page already shows the full text),
+  `PaymentAcceptedNotification` (poster, when the freelancer accepts a partial payment), and
+  `PaymentDisputedNotification` (poster, when the freelancer disputes one). All three follow the
+  established pattern exactly (`mail`+`database`+`broadcast`, a dedicated
+  `resources/views/emails/engagements/*` Blade view). The dispute path's admin-notify leg reuses the
+  existing `EngagementNotificationHelper::sendDisputeNotification()` (→ `DisputeCreatedNotification`)
+  rather than a new admin-specific class, per the user's explicit call — note its email content pulls
+  `reason_category`/`reason_details` from the `JobCancellation` record, which for a *payment* dispute
+  still holds the original cancellation's reason (this path doesn't update those fields), not the
+  payment-dispute-specific reason (that lives on the `JobPaymentDispute` instead); the email still
+  correctly alerts admins to go review, and the admin disputes list page already shows the accurate
+  reason, so this wasn't treated as blocking. Also found while tracing this: `PartialPaymentService::
+  disputePartialPayment()`'s `if (! $cancellation)` branch creates a `JobCancellation` without the
+  table's two required (`NOT NULL`, no default) `reason_category`/`reason_details` columns — a latent
+  bug, but currently unreachable given the business rules (a partial payment can only exist for an
+  engagement that went through the normal cancellation flow, which always creates a `JobCancellation`
+  with those fields already set) — not fixed, just noted here since it was found in passing.
+  Verified all three notifications dispatch to the correct recipient and their mail views render
+  without error, via real HTTP requests through the actual controller actions, before committing.
 - ✅ **Deliverable submissions and dispute evidence moved off the public disk.**
   `JobDeliverableController::submit()`/`::destroy()`'s file cleanup and
   `PartialPaymentController::processDisputePartialPayment()` now `store(...,'local')` (Laravel's
@@ -381,12 +396,10 @@ Also removed `EngagementPaymentService::canProcessPayment()`/`::calculatePartial
 dead methods flagged earlier this module's pass, confirmed still zero callers, deleted rather than
 left to bit-rot further.
 
-**Module 5 status: closed out.** The two remaining open items —
-`EngagementNotificationHelper::sendReviewNotification()` plus two other never-built notification
-classes (needs a product decision on content/recipient), and
+**Module 5 status: closed out.** The one remaining open item —
 `PartialPaymentService::canProcessPayment()`'s auth-check entangled with business-rule validation
-(deliberately not unwound, low risk to leave) — are both low-priority and independently actionable
-whenever picked back up; neither blocks moving to another module.
+(deliberately not unwound, low risk to leave) — is low-priority and independently actionable
+whenever picked back up; it doesn't block moving to another module.
 
 ---
 

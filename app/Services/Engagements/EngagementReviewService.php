@@ -10,6 +10,7 @@
 namespace App\Services\Engagements;
 
 use App\Helpers\Engagements\EngagementAuthorizationHelper;
+use App\Helpers\Engagements\EngagementNotificationHelper;
 use App\Helpers\FlashAlertHelper;
 use App\Models\JobEngagement;
 use App\Models\JobReview;
@@ -72,6 +73,8 @@ class EngagementReviewService
             // Get reviewee name for personalized message
             $reviewee = User::find($roles['reviewee_id']);
             $revieweeName = $reviewee ? $reviewee->name : 'the '.($roles['reviewer_type'] === 'employer' ? 'freelancer' : 'client');
+
+            EngagementNotificationHelper::sendReviewNotification($engagement, $review);
 
             return [
                 'success' => true,
