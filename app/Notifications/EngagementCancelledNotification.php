@@ -74,12 +74,29 @@ class EngagementCancelledNotification extends Notification implements ShouldQueu
             'partial_payment_amount' => $this->cancellation->partial_payment_amount,
             'initiated_at' => $this->cancellation->created_at,
             'type' => 'cancellation',
-            'url' => '/engagements/',
+            'url' => route('engagements.show-cancelled', $this->engagement->id),
         ];
     }
 
     public function toBroadcast($notifiable)
     {
         return broadcast(new BroadcastMessage($this->toArray($notifiable)));
+    }
+
+    public static function present(array $data): array
+    {
+        $content = 'Engagement cancelled: "'.($data['job_title'] ?? 'a job posting').'". '
+            .'Cancelled by: '.($data['initiator_type'] ?? 'a party').' — Reason: '.($data['reason_category'] ?? 'not specified');
+
+        if (! empty($data['partial_payment_amount'])) {
+            $content .= '. Partial payment: '.config('app.currency_symbol').number_format($data['partial_payment_amount'], 2);
+        }
+
+        return [
+            'title' => 'Cancelled Engagement',
+            'icon' => 'danger',
+            'content' => $content,
+            'action_url' => $data['url'] ?? null,
+        ];
     }
 }

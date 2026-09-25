@@ -89,4 +89,16 @@ class DisputeCreatedNotification extends Notification implements ShouldQueue
             'url' => '/admin/disputes/'.$this->cancellation->id,
         ]);
     }
+
+    public static function present(array $data): array
+    {
+        return [
+            'title' => 'Dispute Reported: '.($data['job_title'] ?? 'a job'),
+            'icon' => 'danger',
+            'content' => ($data['initiator_name'] ?? 'A user').' reported a dispute for job: '
+                .($data['job_title'] ?? 'a job posting').' — reason: '.($data['reason_category'] ?? 'not specified'),
+            'action_url' => $data['url'] ?? null,
+            'action_label' => 'Review dispute',
+        ];
+    }
 }

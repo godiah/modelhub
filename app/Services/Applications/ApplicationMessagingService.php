@@ -4,12 +4,10 @@
 
 namespace App\Services\Applications;
 
-use App\Mail\ApplicationMessage;
+use App\Helpers\Applications\ApplicationNotificationHelper;
 use App\Models\ApplicantMessage;
 use App\Models\JobApplication;
-use App\Notifications\NewApplicationMessage;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 
 class ApplicationMessagingService
 {
@@ -34,11 +32,6 @@ class ApplicationMessagingService
     // Send message notifications
     protected function sendMessageNotifications(ApplicantMessage $message, JobApplication $application): void
     {
-        // Send email notification (queued)
-        Mail::to($application->applicant->email)
-            ->queue(new ApplicationMessage($message, $application));
-
-        // Create in-app notification
-        $application->applicant->notify(new NewApplicationMessage($message));
+        ApplicationNotificationHelper::sendNewMessageNotification($message, $application);
     }
 }

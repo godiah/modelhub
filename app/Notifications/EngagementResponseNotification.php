@@ -74,6 +74,20 @@ class EngagementResponseNotification extends Notification implements ShouldQueue
             'response' => $this->response,
             'notes' => $this->notes,
             'agreed_amount' => $this->engagement->agreed_amount,
+            'url' => route('engagements.index'),
+        ];
+    }
+
+    public static function present(array $data): array
+    {
+        $accepted = ($data['response'] ?? null) === 'accepted';
+
+        return [
+            'title' => $accepted ? 'Offer Accepted' : 'Offer Declined',
+            'icon' => $accepted ? 'success' : 'danger',
+            'content' => ($data['applicant_name'] ?? 'An applicant').' has '.($data['response'] ?? 'responded to')
+                .' your offer for job: '.($data['job_title'] ?? 'a job posting'),
+            'action_url' => $data['url'] ?? null,
         ];
     }
 

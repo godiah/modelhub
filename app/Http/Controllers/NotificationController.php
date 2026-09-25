@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\FlashAlertHelper;
+use App\Helpers\NotificationPresenterHelper;
 use App\Models\ApplicantMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,28 +46,12 @@ class NotificationController extends Controller
             return response()->json(['success' => true]);
         }
 
-        // Regular redirect for non-AJAX requests
-        if ($notification->type === 'App\Notifications\NewApplicationMessage') {
-            $jobSlug = $notification->data['job_slug'];
+        // Regular redirect for non-AJAX requests: use each notification's own action link.
+        $actionUrl = NotificationPresenterHelper::present($notification)['action_url'];
 
-            return redirect()->route('applications.show', $jobSlug);
-        } elseif ($notification->type === 'App\Notifications\HiredNotification') {
-            $applicationId = $notification->data['application_id'];
-            $jobSlug = $notification->data['job_slug'];
-
-            return redirect()->route('engagements.response-form', $applicationId);
-        } elseif ($notification->type === 'App\Notifications\EngagementResponseNotification') {
-            $applicationId = $notification->data['application_id'];
-            $jobSlug = $notification->data['job_slug'];
-
-            return redirect()->route('engagements.index');
-        } elseif ($notification->type === 'App\Notifications\EngagementCancelledNotification') {
-            $engagementId = $notification->data['engagement_id'];
-
-            return redirect()->route('engagements.index');
-        }
-
-        return redirect()->back()->with(FlashAlertHelper::success('Notification marked as read'));
+        return $actionUrl
+            ? redirect()->to($actionUrl)
+            : redirect()->back()->with(FlashAlertHelper::success('Notification marked as read'));
     }
 
     public function markAllAsRead()

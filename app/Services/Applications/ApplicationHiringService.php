@@ -5,12 +5,10 @@
 namespace App\Services\Applications;
 
 use App\Enums\ApplicationStatus;
-use App\Mail\ApplicationHired;
+use App\Helpers\Applications\ApplicationNotificationHelper;
 use App\Models\JobApplication;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
-use App\Notifications\HiredNotification;
-use Illuminate\Support\Facades\Mail;
 
 class ApplicationHiringService
 {
@@ -70,11 +68,6 @@ class ApplicationHiringService
     // Send hire notifications
     protected function sendHireNotifications(JobApplication $application, JobEngagement $engagement): void
     {
-        // Send email notification (queued) to applicant
-        Mail::to($application->applicant->email)
-            ->queue(new ApplicationHired($application, $engagement));
-
-        // Create in-app notification
-        $application->applicant->notify(new HiredNotification($application, $engagement));
+        ApplicationNotificationHelper::sendHiredNotification($application, $engagement);
     }
 }
