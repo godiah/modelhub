@@ -100,7 +100,7 @@ class JobEngagement extends Model
      */
     public function getTotalDeliverablesCount()
     {
-        return $this->deliverables()->count();
+        return $this->deliverables->count();
     }
 
     /**
@@ -108,7 +108,7 @@ class JobEngagement extends Model
      */
     public function getCompletedDeliverablesCount()
     {
-        return $this->deliverables()->where('status', 'approved')->count();
+        return $this->deliverables->where('status', 'approved')->count();
     }
 
     /**
@@ -116,7 +116,7 @@ class JobEngagement extends Model
      */
     public function getPendingDeliverablesCount()
     {
-        return $this->deliverables()->where('status', 'submitted')->count();
+        return $this->deliverables->where('status', 'submitted')->count();
     }
 
     /**

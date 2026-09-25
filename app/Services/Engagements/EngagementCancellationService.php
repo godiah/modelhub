@@ -110,7 +110,7 @@ class EngagementCancellationService
     // Get cancelled engagement details
     public function getCancelledEngagementDetails(int $engagementId): array
     {
-        $engagement = JobEngagement::findOrFail($engagementId);
+        $engagement = JobEngagement::with(['deliverables'])->findOrFail($engagementId);
         $user = Auth::user();
 
         // Authorization check
