@@ -88,22 +88,6 @@ class JobEngagement extends Model
     }
 
     /**
-     * Get the client for the engagement.
-     */
-    public function client()
-    {
-        return $this->belongsTo(User::class, 'client_id');
-    }
-
-    /**
-     * Get the freelancer for the engagement.
-     */
-    public function freelancer()
-    {
-        return $this->belongsTo(User::class, 'freelancer_id');
-    }
-
-    /**
      * Get the deliverables for this engagement
      */
     public function deliverables()

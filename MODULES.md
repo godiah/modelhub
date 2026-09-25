@@ -524,24 +524,76 @@ lens over the same data Module 5 already models.
 
 ---
 
-## Module 7 — Messaging / Chat 🔴
+## Module 7 — Messaging / Chat 🟢
 
-Per-engagement chat between client and freelancer.
+Per-engagement chat between poster and applicant, rendered as an Alpine modal inside Module 5's
+`engagements-list.blade.php` (the only place it's used).
 
 - **Controller**: `MessageController`
+- **Service (new)**: `Messaging\MessagingService`
 - **Model**: `Message`
-- **Event**: `Events\NewMessageEvent`
+- **Request (new)**: `Message\StoreMessageRequest`
+- **Resource (new)**: `Http\Resources\MessageResource`
 
 **Findings**
-- 🔴 **`NewMessageEvent` is dead code.** It's fully written (broadcasts on a private channel per
-  engagement) but never dispatched anywhere in the codebase, and it doesn't even implement
-  `ShouldBroadcast` — so even if something did `event(new NewMessageEvent($message))`, Laravel
-  wouldn't actually broadcast it. Chat currently works purely via polling/AJAX
-  (`MessageController::getEngagementData`/`store` return plain JSON). Either this was scaffolded
-  for a real-time upgrade that never landed, or it should be deleted. Needs a decision, not a
-  silent fix — implementing real-time chat is a feature decision, not a cleanup one.
-- `MessageController` has a large commented-out `unreadCount()` method (~30 lines) — dead code to
-  remove or finish.
+- ✅ **Real-time scaffolding removed — user decision: delete, keep polling.** `NewMessageEvent` was
+  fully written (broadcast on a private `engagement.{id}` channel) but never dispatched, didn't
+  implement `ShouldBroadcast`, and `routes/channels.php` had no authorizer for that channel anyway —
+  three independent signs of an abandoned attempt, not a near-complete feature. Confirmed with the
+  user rather than assumed (same as Module 5's payment-flow and public-disk decisions): delete
+  rather than finish. Deleted `NewMessageEvent` entirely (zero other references, verified by grep)
+  and the matching commented-out `unreadCount()` controller method plus its already-commented route.
+  Chat's existing per-engagement unread badge (`engagement-details.blade.php`'s
+  `id="unread-count-{{ $engagement->id }}"`) is **not** part of this dead scaffolding — it's a real,
+  working, server-rendered count that the frontend correctly hides after `markAsRead()` succeeds;
+  initially mischaracterized as dead when first scoping this module, corrected before any code
+  changed.
+- ✅ **Real, confirmed bug fixed: `getEngagementData()` compared `Auth::id()` against
+  `$engagement->client_id`.** `job_engagements` has no `client_id`/`freelancer_id` columns at
+  all (checked every migration) — the real ownership lives on `application->poster_id`/
+  `application->applicant_id`, which every other file in the app correctly goes through. Accessing
+  the nonexistent attribute always returns `null`, so `Auth::id() === null` was always false,
+  meaning the "other chat participant" always resolved to the poster — correct by coincidence for
+  an applicant viewing the chat, wrong for a poster viewing their own chat (would show themselves as
+  the "other user"). Currently invisible to users only because the frontend never rendered
+  `other_user_name`/`other_user_initials` in the modal header, but a real bug once something reads
+  that field. Fixed in the new `MessagingService::getChatData()`, which resolves the other party via
+  `application->poster_id`/`applicant_id` like `JobEngagementPolicy` does. The matching dead
+  `JobEngagement::client()`/`freelancer()` relations (same phantom columns, zero other callers) were
+  deleted too.
+- ✅ **Real bug fixed: `store()`'s error response was a malformed array.**
+  `response()->json(['error', 'Failed to send message'], 500)` used a comma instead of `=>`,
+  producing a numerically-indexed JSON array instead of `{"error": "..."}`. The frontend's
+  `errorData.error || 'Failed to send message'` fallback masked the practical impact (same generic
+  text shown either way), but it's a real defect now fixed as part of the controller rewrite.
+- ✅ **Controller brought in line with the rest of the app's conventions.** `MessageController` had
+  no Service, no FormRequest (inline `$request->validate()`), and hand-rolled the message JSON shape
+  independently in two places (`getEngagementData()` and `store()`). Extracted `Messaging\
+  MessagingService` (`getChatData()`/`sendMessage()`/`markAsRead()` — this is where the `client_id`
+  fix lives), `Message\StoreMessageRequest`, and `Http\Resources\MessageResource` (used by both
+  actions that return a message, closing the duplicate-shaping gap and matching the
+  `MessageTemplateResource` precedent from Module 4). Also removed layered `catch
+  (AuthorizationException)`/`catch (ValidationException)` blocks and per-request `Log::info()` calls
+  on the success path — Laravel's default exception handler already renders both as the correct JSON
+  status/shape for `expectsJson()` requests (verified: no custom handler in `bootstrap/app.php`),
+  and `MessageTemplateController` (the app's other JSON-only controller) doesn't wrap these either,
+  so the heavy try/catch wasn't this app's own convention to begin with. Also dropped the
+  `application`/`job` null-checks (404 fallbacks) in `getEngagementData()` — `job_engagements
+  .application_id` → `job_applications.job_id`/`applicant_id`/`poster_id` are all
+  `onDelete('cascade')` foreign keys, so a `JobEngagement` that exists via route-model-binding can
+  never have a missing `application` or `job`; the checks were guarding an unreachable state.
+- Verified all of the above with real HTTP requests (temp Pest tests, deleted after): a poster and
+  an applicant on the same engagement each see the *other* person's name (the actual bug scenario,
+  not just "it still returns 200"); sending a message returns the right `is_own`/content shape and
+  persists; empty content is rejected with 422 via the new FormRequest; `markAsRead()` flips only
+  the other party's unread messages, not the viewer's own; a third-party user gets 403 from both the
+  view and message endpoints. Full existing 26-test suite re-run clean before and after (31 with
+  the temp verification tests, deleted once confirmed); `composer dump-autoload` run after deleting
+  `NewMessageEvent.php` to clear its stale classmap entry.
+- Found in passing, **not fixed — cosmetic, not a bug**: the chat modal's `showError()` uses a
+  blocking `alert()`, while the app's other AJAX-driven UI (`resources/js/templates.js`) uses a
+  non-blocking toast. Left alone since it's a UX-consistency nit rather than a defect and wasn't
+  part of this module's original findings; worth a look if `resources/js` ever gets its own pass.
 
 ---
 
@@ -661,7 +713,9 @@ call sites from other modules)
 8. ✅ **Module 6 (Projects)** — done 2026-09-25. New `ProjectDashboardService`, three dead routes
    deleted, `DashBoardController`'s raw `DB::table()` engagement counts (flagged in Module 2) fixed
    alongside.
-9. **Module 7 (Messaging)** — needs a product decision (real-time or not) before code changes.
+9. ✅ **Module 7 (Messaging)** — done 2026-09-25. User decided: delete the dead real-time
+   scaffolding rather than build it out. Also fixed a real `client_id`/`freelancer_id` bug and gave
+   the controller a Service/FormRequest/Resource matching the rest of the app.
 10. **Module 8 (Notifications)** — hasn't had a deep pass yet; do that pass as part of this
     module's turn.
 
@@ -789,3 +843,23 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   dashboard and the Projects Dashboard disagree on a user's active-engagement count. Verified with
   temp Pest HTTP tests (stats/tab correctness, archived-engagement exclusion, the three routes now
   404ing, the dashboard count fix) before committing; full 26-test suite re-run clean.
+- **2026-09-25 (Module 7 pass, closed out)**: 1 commit. Asked the user to decide on the abandoned
+  real-time-chat scaffolding (`NewMessageEvent` unimplemented/undispatched, no channel authorizer,
+  a commented-out `unreadCount()` method) rather than assume — decision: delete it, current
+  poll-on-open chat works fine. Deleted `NewMessageEvent`, the dead `JobEngagement::client()`/
+  `freelancer()` relations it depended on, the commented method, and its already-commented route;
+  ran `composer dump-autoload` afterward. While scoping the delete, corrected an initial
+  misreading — the per-engagement unread badge is real, working, server-rendered code, not part of
+  the dead scaffolding. Found and fixed a real, confirmed bug along the way:
+  `getEngagementData()`'s "who's the other chat participant" check compared against
+  `$engagement->client_id`, a column that has never existed on `job_engagements` (checked every
+  migration) — always null, so the check always resolved to the poster, silently wrong for a poster
+  viewing their own chat. Rebuilt the controller around a new `Messaging\MessagingService`,
+  `Message\StoreMessageRequest`, and `MessageResource` (fixing the bug in one place instead of two
+  independent copies), matching Module 4's `MessageTemplateController`/`MessageTemplateResource`
+  precedent. Also fixed a malformed error array (`['error', '...']` instead of `['error' => '...']`)
+  and removed redundant `AuthorizationException`/`ValidationException` catches and success-path
+  logging that Laravel's default JSON exception handling already covers. Verified with real HTTP
+  requests (temp Pest tests, deleted after) covering the actual bug scenario (poster vs. applicant
+  each seeing the *other* party's name), message send/validate/mark-read, and third-party
+  authorization denial; full 26-test suite re-run clean before and after.
