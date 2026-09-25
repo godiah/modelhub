@@ -46,7 +46,9 @@ Route::get('/check-title', [JobController::class, 'checkTitle'])->name('jobs.che
 
 // Application Routes (User Applications)
 Route::middleware(['auth'])->prefix('applications')->name('applications.')->group(function () {
-    Route::post('/', [JobApplicationController::class, 'store'])->name('store');
+    Route::middleware(['throttle:10,1'])->group(function () {
+        Route::post('/', [JobApplicationController::class, 'store'])->name('store');
+    });
     Route::get('/continue/{slug}', [JobApplicationController::class, 'continueDraft'])->name('continue');
     Route::get('/applications/archived', [JobApplicationController::class, 'archived'])->name('archived');
     Route::post('/applications/{application}/archive', [JobApplicationController::class, 'archive'])->name('archive');
