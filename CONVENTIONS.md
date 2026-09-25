@@ -63,10 +63,14 @@ Dedicated `Http\Requests\{Domain}\{Action}Request` class, never inline `$request
 in a controller or service. The FormRequest also owns any request-data shaping (`getCancellationData()`,
 `getReviewData()`, etc.) so the controller never touches `$request->input()` directly.
 
-**Known exceptions to fix, not copy**: `JobDeliverableController`, `PartialPaymentController` still
-validate inline. **Corrected 2026-09-25 (Module 9)**: `Admin\AdminDisputeController` was wrongly
-listed here too — `resolve()` has used `ResolveDisputeRequest` since Module 5; this line just never
-got updated to say so.
+**No known exceptions.** `JobDeliverableController`, `PartialPaymentController`, and
+`Admin\AdminDisputeController` were all previously listed here as still validating inline — all
+three were already fully on FormRequests by the end of Module 5 (five `Http\Requests\Deliverable\*`
+classes for the first, `Process(Dispute)PartialPaymentRequest` for the second,
+`ResolveDisputeRequest` for the third). `AdminDisputeController` was corrected 2026-09-25 (Module 9);
+the other two were still wrongly listed until this correction (2026-09-25, cross-cutting pass) —
+confirmed by grepping both controllers directly for `->validate(` (zero matches) rather than trusting
+the prior note.
 
 ## 4. Authorization: Policies are the source of truth
 
@@ -396,3 +400,9 @@ Record findings in `MODULES.md` under that module's section, same format as exis
   never got updated (same shape as item 4's own stale-text correction during the Module 4 pass).
   Item 15 records the app's first permanent (non-temp) business-logic test file, on the strength of
   it matching the authorization-matrix/money-logic exceptions the testing convention already allows.
+- **2026-09-25 (cross-cutting pass)**: Item 3's "known exceptions" note was still stale after the
+  Module 9 correction above — it still listed `JobDeliverableController`/`PartialPaymentController`
+  as validating inline, but both were fully converted to FormRequests during Module 5 itself; the
+  note just never got updated when that happened, same root cause as the `AdminDisputeController`
+  entry fixed a day earlier. Corrected by grepping both controllers directly rather than trusting the
+  existing note.

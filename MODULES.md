@@ -142,12 +142,29 @@ Creating, editing, browsing, and closing job listings. The "supply" side of the 
   checked/dimmed-style props so both the "create" (empty, `old()`-backed) and "edit" (prefilled
   from `$job`) states reuse the same markup. `new.blade.php` dropped ~110 lines, `edit.blade.php`
   ~80.
-- 🟡 **Correction to an earlier note in this file**: `jobs/apply.blade.php` (1,100 lines) is *not*
-  a job-posting form like `new.blade.php`/`edit.blade.php` — it's a job-details display +
-  application-submission form (different concern, shares no real markup with the posting forms).
-  It's a large view and still a componentization candidate, but on its own terms — possibly
-  alongside `jobs/show.blade.php`, which also displays job details — not lumped in with this
-  batch.
+- ✅ **`jobs/apply.blade.php` componentized on its own terms, 2026-09-25.** Earlier note in this
+  file corrected: it's *not* a job-posting form like `new.blade.php`/`edit.blade.php` — it's a
+  job-details display + application-submission form, and shares no real markup with those posting
+  forms. Reading it against `jobs/show.blade.php` (the other job-details page) confirmed the two
+  are also genuinely different layouts (stacked sections + tabs vs. a compact two-column card) —
+  forcing them into shared components beyond one real overlap would have been force-fitting, not
+  reuse. That one real overlap: both pages render `Str::markdown($job->description)` through an
+  almost byte-for-byte identical block of Tailwind arbitrary-variant typography classes (differing
+  only in a `font-secondary` override `show.blade.php` adds) — extracted to
+  `<x-jobs.markdown-description :content :secondary-font />`. Within `apply.blade.php` itself, two
+  real internal duplicates: the "main preview image" block and the "additional images" `@foreach`
+  block were identical (image + zoom button + download button) bar the image source and download
+  label — extracted to `<x-jobs.preview-image-card>`; and the Deadline/Applicants/Budget stat cards
+  shared identical icon-box+label+value wrapper chrome (Budget using the `accent` color instead of
+  `secondary`) — extracted to `<x-jobs.detail-card>` (matching the `<x-disputes.info-card>` pattern
+  Module 5 already established for this exact shape). 1,100 → 994 lines. Verified in a real browser
+  (Playwright) against seeded jobs covering both branches of every conditional touched — with
+  images/deadline/skills/software and without — on both `jobs.apply` (public) and `jobs.show`
+  (poster-only, logged in): all three detail cards, both preview-image cards, and both
+  `markdown-description` variants (plain and `secondary-font`) render pixel-identical to the
+  pre-refactor markup, zero new console errors. Full 42-test suite re-run clean before and after;
+  seeded test data and placeholder images deleted afterward, matching this app's no-real-user-data
+  local/dev state.
 - ✅ **Correction, 2026-09-25**: a Module 4 smoke test flagged `JobController::show()`'s
   poster-only authorization (`JobManagementService::authorizeJobView()`) as "looks backwards,"
   reasoning that a public job board shouldn't gate its detail page to the poster. That was a
@@ -869,11 +886,15 @@ Cross-cutting: every other module fires into this one.
   Modules 3 and 4's views (`jobs/apply.blade.php` 1,100 lines, `jobs/new.blade.php` 469 lines,
   `applications/continue-draft.blade.php` 498 lines) haven't had the same treatment — same
   technique, just not applied yet.
-- **FormRequest usage is inconsistent.** Modules 3–4 and most of Module 5 use dedicated
-  `Http\Requests\*` classes consistently. `JobDeliverableController` and `PartialPaymentController`
-  still validate inline. Worth standardizing one way. **Corrected 2026-09-25 (Module 9)**:
-  `AdminDisputeController` was wrongly listed here too — it's been using `ResolveDisputeRequest`
-  since Module 5; this file's own Module 9 placeholder note just never got updated to say so.
+- ✅ **FormRequest usage — corrected, this note was stale.** Used to say `JobDeliverableController`
+  and `PartialPaymentController` "still validate inline," worth standardizing. That was already
+  false by the time it was written: both were fully converted to `Http\Requests\*` FormRequest
+  classes during Module 5 itself (five `Deliverable\*` requests for the first,
+  `Process(Dispute)PartialPaymentRequest` for the second) — this note just never got updated.
+  Corrected 2026-09-25 (cross-cutting pass) by grepping both controllers directly for `->validate(`
+  (zero matches), not by trusting the existing text — same root cause as the `AdminDisputeController`
+  entry corrected a day earlier (2026-09-25, Module 9). FormRequest usage across the app is now
+  actually consistent; no open item remains here.
 - **Authorization: three different mechanisms coexist** — Policies (`JobApplicationPolicy`,
   `JobEngagementPolicy`), static Helpers (`EngagementAuthorizationHelper`), and inline
   `Auth::id() === ...` checks scattered through services and controllers. Module 5 shows the
@@ -888,16 +909,28 @@ Cross-cutting: every other module fires into this one.
   before (every admin check was hardcoded to the literal string `'admin'`).
 - ✅ **`Model::preventLazyLoading()` enabled 2026-09-25 (Module 4)** — stale note, corrected here.
   See `CONVENTIONS.md` item 11 for the smoke-testing status per module.
-- 🔴 **`JobEngagement::getTotalDeliverablesCount()`/`getCompletedDeliverablesCount()` bypass eager
-  loading.** Found during the Module 6 pass (2026-09-25): both call `$this->deliverables()` (the
-  relation query builder, always a fresh query) instead of `$this->deliverables` (the loaded
-  collection) — `completionPercentage()` in the same model does it correctly. Causes N+1 queries on
-  every page that lists engagements and shows deliverable counts per row, despite those controllers
-  already eager-loading `deliverables`: `projects/partials/projects-list.blade.php` (Module 6) and
-  three Module 5 views (`engagements-list.blade.php`, `deliverables-details.blade.php`,
-  `payment-details.blade.php`) plus `PartialPaymentService`. Not fixed in the Module 6 pass since a
-  real fix touches already-closed Module 5 files and a payment service — worth a dedicated look
-  rather than a drive-by change to a money-adjacent service.
+- ✅ **Fixed 2026-09-25**: `JobEngagement::getTotalDeliverablesCount()`/`getCompletedDeliverablesCount()`/
+  `getPendingDeliverablesCount()` bypassed eager loading. Found during the Module 6 pass: all three
+  called `$this->deliverables()` (the relation query builder, always a fresh query) instead of
+  `$this->deliverables` (the loaded collection) — `completionPercentage()`/`allDeliverablesCompleted()`
+  in the same model already did it correctly. `getPendingDeliverablesCount()` wasn't named in the
+  original Module 6 note but had the identical bug and feeds `hasPendingDeliverables()`/
+  `hasSubmittedOrApprovedDeliverables()`, so it was fixed alongside the other two rather than left half-done.
+  Switched all three to read `$this->deliverables` directly. Tracing every call site to confirm the
+  relation is actually eager-loaded first (required, since converting to the magic-property access
+  makes an unloaded relation a `LazyLoadingViolationException` in local/testing/staging, not just an
+  extra query) turned up two real gaps: `PartialPaymentController::processPartialPayment()`'s
+  `JobEngagement::findOrFail($id)` and `EngagementCancellationService::getCancelledEngagementDetails()`'s
+  `JobEngagement::findOrFail($engagementId)` — both now `->with(['deliverables'])`. Every other call
+  site (`ProjectDashboardService::getEngagementsByTab()`, `EngagementManagementService::
+  getUserEngagements()`/`getEngagementDetails()`) already eager-loaded `deliverables`, confirmed by
+  tracing each one rather than assumed. Verified with temp Pest tests (deleted after): a query-log
+  assertion proving the three count methods issue zero additional queries once eager-loaded (and
+  reproducing the original bug against the pre-fix code, by stashing the fix and re-running the same
+  test, to confirm the test actually catches it); the cancelled-engagement page and the
+  auto-calculated partial-payment flow both render/process without a lazy-loading violation; the
+  auto-calculated payment amount still matches the correct approved/total deliverable ratio. Full
+  42-test suite re-run clean before and after.
 - 🔴🔴 **Zero test coverage of any actual business logic.** The whole suite is 26 tests, all Breeze's
   stock Auth/Profile scaffolding — nothing covers Jobs, Applications, Engagements, Payments,
   Disputes, or Messaging. `CONVENTIONS.md` item 15 sets the going-forward testing convention
@@ -1162,3 +1195,38 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   out as permanent non-E2E tests, and doubles as the app's first real business-logic coverage. Full
   suite re-run clean before and after (26 -> 42 tests). Module 9 marked green - the module map's
   audit of all 9 modules is now complete.
+- **2026-09-25 (Cross-cutting: deliverable-count N+1 fix)**: With all 9 modules closed, picked up
+  the first of the two remaining 🔴 cross-cutting items. Switched `JobEngagement::
+  getTotalDeliverablesCount()`/`getCompletedDeliverablesCount()`/`getPendingDeliverablesCount()`
+  from the relation query builder (`$this->deliverables()`, always a fresh query) to the loaded
+  collection (`$this->deliverables`), matching `completionPercentage()`'s already-correct pattern in
+  the same model; included `getPendingDeliverablesCount()` even though the original note only named
+  the other two, since it had the identical bug. Traced every call site rather than assuming eager
+  loading was already in place — found and fixed two real gaps (`PartialPaymentController::
+  processPartialPayment()`, `EngagementCancellationService::getCancelledEngagementDetails()`), both
+  now `->with(['deliverables'])`. Verified with temp Pest tests (deleted after), including
+  deliberately stashing the fix and re-running the query-log test to confirm it actually catches the
+  original bug rather than passing vacuously. Full 42-test suite re-run clean before and after; no
+  regressions. One cross-cutting item left open: zero business-logic test coverage (`CONVENTIONS.md`
+  item 15).
+- **2026-09-25 (Cross-cutting: stale FormRequest note corrected)**: Found while reviewing what's
+  still open after the N+1 fix above: this file's own cross-cutting section and `CONVENTIONS.md` item
+  3 both still claimed `JobDeliverableController`/`PartialPaymentController` "still validate inline"
+  — the exact same shape of staleness as the `AdminDisputeController` entry corrected in Module 9 a
+  day earlier, just never caught for these two. Verified directly rather than trusting the existing
+  note: grepped both controllers for `->validate(` (zero matches) and confirmed every action already
+  takes a dedicated `Http\Requests\*` FormRequest — both were fully converted during Module 5 itself.
+  Corrected in both docs. Documentation-only, no code changed.
+- **2026-09-25 (Module 3: `jobs/apply.blade.php` componentization)**: Picked up the deferred item
+  Module 3 had explicitly left open "on its own terms." Read `apply.blade.php` against
+  `jobs/show.blade.php` in full rather than assuming the deferred note's framing was still right —
+  confirmed the two pages are genuinely different layouts, so most of the page stayed as-is; found
+  one real cross-file duplicate (the markdown-description typography block) and two real
+  within-file duplicates (the preview-image card, appearing once for the main image and once per
+  additional image; the three Deadline/Applicants/Budget stat cards). Extracted three new
+  components (`<x-jobs.markdown-description>`, `<x-jobs.preview-image-card>`,
+  `<x-jobs.detail-card>`) rather than force-fitting a shared component across the two pages'
+  structurally different sections. `apply.blade.php` 1,100 → 994 lines. Verified with Playwright
+  against seeded jobs (with/without images, with/without a deadline, with/without skills) on both
+  `jobs.apply` and `jobs.show` — visually identical to the pre-refactor rendering, no new console
+  errors. Full suite re-run clean; seeded verification data deleted after.
