@@ -168,8 +168,7 @@
                             <dd class="text-neutral-900">
                                 @switch($payment->status->value)
                                     @case('pending')
-                                        <span
-                                            class="px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium inline-flex items-center">
+                                        <x-badge tone="amber" class="px-2 py-1 text-xs font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -177,12 +176,11 @@
                                                 <polyline points="12 6 12 12 16 14"></polyline>
                                             </svg>
                                             Pending
-                                        </span>
+                                        </x-badge>
                                     @break
 
                                     @case('accepted')
-                                        <span
-                                            class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium inline-flex items-center">
+                                        <x-badge tone="green" class="px-2 py-1 text-xs font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -190,12 +188,11 @@
                                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                             </svg>
                                             Accepted
-                                        </span>
+                                        </x-badge>
                                     @break
 
                                     @case('disputed')
-                                        <span
-                                            class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium inline-flex items-center">
+                                        <x-badge tone="red" class="px-2 py-1 text-xs font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -206,12 +203,11 @@
                                                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
                                             </svg>
                                             Disputed
-                                        </span>
+                                        </x-badge>
                                     @break
 
                                     @case('finalized')
-                                        <span
-                                            class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium inline-flex items-center">
+                                        <x-badge tone="blue" class="px-2 py-1 text-xs font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -219,7 +215,7 @@
                                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                             </svg>
                                             Finalized
-                                        </span>
+                                        </x-badge>
                                     @break
 
                                     @default

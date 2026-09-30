@@ -237,11 +237,10 @@ new class extends Component {
                                     {{ __('Enabled') }}
                                 </span>
                             @else
-                                <span
-                                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <x-badge tone="red" class="px-3 py-1 text-xs font-medium">
                                     <x-icon name="x-circle-solid" class="w-3 h-3 mr-1" />
                                     {{ __('Disabled') }}
-                                </span>
+                                </x-badge>
                             @endif
                         </div>
                     </div>

@@ -60,17 +60,7 @@
                                     {{ $engagement->application->job->title ?? 'Project Title' }}
                                 </h3>
                                 <div class="flex items-center space-x-3 font-secondary">
-                                    @php
-                                        $statusClasses = $engagement->getStatusClasses();
-                                    @endphp
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium {{ $statusClasses['bg'] }} {{ $statusClasses['text'] }} {{ $statusClasses['border'] }} border">
-                                        <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            {!! $engagement->getStatusIconPathAttribute() !!}
-                                        </svg>
-                                        {{ $engagement->getStatusLabelAttribute() }}
-                                    </span>
+                                    <x-engagement.status-badge :status="$engagement->status" class="px-3 py-1 text-xs font-medium" icon-class="w-3 h-3 mr-1.5" />
                                 </div>
                             </div>
                             <div class="text-right">

@@ -52,11 +52,10 @@
                             <div class="flex items-center space-x-2">
                                 <h3 class="font-tertiary font-bold text-lg text-neutral-800">Engagement Cancelled</h3>
                                 @if ($engagement->cancellation && $engagement->cancellation->cancellation_type === 'dispute')
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                                    <x-badge tone="red" class="px-2.5 py-0.5 text-xs font-medium border border-red-200">
                                         <span class="w-1.5 h-1.5 mr-1 bg-red-500 rounded-full animate-pulse"></span>
                                         In Dispute
-                                    </span>
+                                    </x-badge>
                                 @else
                                     @php
                                         $cancellationTypes = [

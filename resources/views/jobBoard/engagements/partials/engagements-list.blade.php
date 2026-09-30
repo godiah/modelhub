@@ -43,14 +43,7 @@
                                     <x-icon name="document-text" class="h-5 w-5 mr-2 flex-shrink-0" />
                                     {{ $engagement->application->job->title }}
                                 </h3>
-                                <span
-                                    class="sm:ml-3 mt-1 sm:mt-0 inline-flex items-center px-3 py-1 text-xs font-medium font-main rounded-full border {{ $engagement->getStatusClasses()['bg'] }} {{ $engagement->getStatusClasses()['text'] }} {{ $engagement->getStatusClasses()['border'] }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        {!! $engagement->statusIconPath !!}
-                                    </svg>
-                                    {{ $engagement->statusLabel }}
-                                </span>
+                                <x-engagement.status-badge :status="$engagement->status" class="sm:ml-3 mt-1 sm:mt-0 px-3 py-1 text-xs font-medium font-main" icon-class="h-3.5 w-3.5 mr-1" />
                             </div>
                         </div>
 

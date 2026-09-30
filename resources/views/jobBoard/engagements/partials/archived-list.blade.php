@@ -41,17 +41,7 @@
 
                             <!-- Status Badge -->
                             <div class="flex-shrink-0 ml-4">
-                                @php
-                                    $statusClasses = $engagement->getStatusClasses();
-                                @endphp
-                                <span
-                                    class="inline-flex items-center px-3 py-1 text-xs font-semibold font-secondary rounded-full 
-                            {{ $statusClasses['bg'] }} {{ $statusClasses['text'] }} border {{ $statusClasses['border'] }}">
-                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        {!! $engagement->statusIconPath !!}
-                                    </svg>
-                                    {{ $engagement->statusLabel }}
-                                </span>
+                                <x-engagement.status-badge :status="$engagement->status" class="px-3 py-1 text-xs font-semibold font-secondary" />
                             </div>
                         </div>
                     </div>

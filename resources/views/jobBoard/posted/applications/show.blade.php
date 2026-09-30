@@ -30,29 +30,25 @@
                         <div class="relative px-6 pt-6 pb-4">
                             <div class="absolute top-0 right-0 mt-4 mr-4">
                                 @if ($application->status === ApplicationStatus::Submitted)
-                                    <span
-                                        class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                                    <x-badge tone="amber" class="px-3 py-1 text-sm font-medium border border-amber-200">
                                         <span class="h-2 w-2 rounded-full bg-amber-500 mr-2 animate-pulse"></span>
                                         Submitted
-                                    </span>
+                                    </x-badge>
                                 @elseif($application->status === ApplicationStatus::Reviewed)
-                                    <span
-                                        class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                    <x-badge tone="blue" class="px-3 py-1 text-sm font-medium border border-blue-200">
                                         <span class="h-2 w-2 rounded-full bg-blue-500 mr-2"></span>
                                         Reviewed
-                                    </span>
+                                    </x-badge>
                                 @elseif($application->status === ApplicationStatus::Hired)
-                                    <span
-                                        class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-green-100 text-green-800 border border-green-200">
+                                    <x-badge tone="green" class="px-3 py-1 text-sm font-medium border border-green-200">
                                         <span class="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
                                         Hired
-                                    </span>
+                                    </x-badge>
                                 @elseif($application->status === ApplicationStatus::Rejected)
-                                    <span
-                                        class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-red-100 text-red-800 border border-red-200">
+                                    <x-badge tone="red" class="px-3 py-1 text-sm font-medium border border-red-200">
                                         <span class="h-2 w-2 rounded-full bg-red-500 mr-2"></span>
                                         Rejected
-                                    </span>
+                                    </x-badge>
                                 @elseif($application->status === ApplicationStatus::Withdrawn)
                                     <span
                                         class="px-3 py-1 inline-flex items-center text-sm font-medium rounded-full bg-neutral-100 text-rose-800 border border-neutral-200">
