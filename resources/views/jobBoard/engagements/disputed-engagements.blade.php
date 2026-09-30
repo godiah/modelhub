@@ -12,8 +12,7 @@
                 </h2>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ $isAdminViewer ? route('admin.disputes.index') : route('engagements.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ $isAdminViewer ? route('admin.disputes.index') : route('engagements.index') }}">
                     @if ($isAdminViewer)
                         <x-icon name="scale" class="h-5 w-5 mr-2" />
                         Disputed Engagements
@@ -21,7 +20,7 @@
                         <x-icon name="chat-bubble-text" class="h-5 w-5 mr-2" stroke-width="1.5" />
                         My Engagements
                     @endif
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>

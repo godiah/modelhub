@@ -7,11 +7,10 @@
                 </h2>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('jobs.browse') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-main text-sm font-medium">
+                <x-button variant="secondary" class="text-sm" href="{{ route('jobs.browse') }}">
                     <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
                     Browse Jobs
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>
@@ -64,11 +63,10 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex items-center space-x-3">
-                                    <a href="{{ route('applications.continue', ['slug' => $draft->job->slug]) }}"
-                                        class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-main text-sm font-medium">
+                                    <x-button class="text-sm" href="{{ route('applications.continue', ['slug' => $draft->job->slug]) }}">
                                         <x-icon name="pencil" class="h-4 w-4 mr-2" />
                                         Continue
-                                    </a>
+                                    </x-button>
                                     <form action="{{ route('destroy.drafts', ['application' => $draft->id]) }}"
                                         method="POST" class="inline-block" id="delete-form-{{ $draft->id }}">
                                         @csrf

@@ -6,11 +6,10 @@
             </h2>
 
             <div class="flex space-x-3">
-                <a href="{{ route('my-jobs.archived.posted-jobs') }}"
-                    class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
                     <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
                     Archived Jobs
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>

@@ -13,11 +13,10 @@
                 search terms.
             </p>
 
-            <a href="#" id="clearEngagementFilters"
-                class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-150">
+            <x-button href="#" id="clearEngagementFilters">
                 <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
                 Clear All Filters
-            </a>
+            </x-button>
         </div>
     </div>
 @else

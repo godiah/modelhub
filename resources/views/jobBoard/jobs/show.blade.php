@@ -7,17 +7,15 @@
                 </h2>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('jobs.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button class="text-sm shadow-sm" href="{{ route('jobs.index') }}">
                     <x-icon name="home-solid" class="h-5 w-5 mr-2" aria-hidden="true" />
                     Home
-                </a>
+                </x-button>
 
-                <a href="{{ route('project.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('project.index') }}">
                     <x-icon name="briefcase" class="h-5 w-5 mr-2" stroke-width="1.5" />
                     Project Dashboard
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>

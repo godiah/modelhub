@@ -6,17 +6,15 @@
             </h2>
 
             <div class="flex space-x-3">
-                <a href="{{ route('jobs.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
+                <x-button variant="secondary" class="shadow-sm" href="{{ route('jobs.create') }}">
                     <x-icon name="plus-solid" class="h-5 w-5 mr-2" />
                     Post New Job
-                </a>
+                </x-button>
 
-                <a href="{{ route('my-jobs.archived.posted-jobs') }}"
-                    class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
                     <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
                     Archived Jobs
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>
@@ -28,11 +26,10 @@
                     <div class="p-12 flex flex-col items-center justify-center">
                         <x-icon name="document-text" class="h-24 w-24 text-neutral-300" stroke-width="1.5" />
                         <p class="mt-6 text-neutral-500 font-main text-lg">You haven't posted any jobs yet.</p>
-                        <a href="{{ route('jobs.create') }}"
-                            class="mt-4 inline-flex items-center px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg transition-colors duration-200">
+                        <x-button variant="secondary" class="mt-4" href="{{ route('jobs.create') }}">
                             <x-icon name="plus-solid" class="h-5 w-5 mr-2" />
                             Post Your First Job
-                        </a>
+                        </x-button>
                     </div>
                 </div>
             @else

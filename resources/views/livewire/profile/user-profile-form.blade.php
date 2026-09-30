@@ -514,9 +514,7 @@ new class extends Component {
                     {{ __('All fields are optional but help create a complete profile') }}
                 </div>
 
-                <button type="submit"
-                    class="text-sm inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 font-main"
-                    wire:loading.attr="disabled">
+                <x-button size="lg" class="text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="submit" wire:loading.attr="disabled">
 
                     <span wire:loading.remove wire:target="updateProfile" class="flex items-center">
                         <x-icon name="check" class="w-4 h-4 mr-2" />
@@ -535,7 +533,7 @@ new class extends Component {
                         <span>{{ __('Updating...') }}</span>
                     </span>
 
-                </button>
+                </x-button>
             </div>
         </form>
     </div>

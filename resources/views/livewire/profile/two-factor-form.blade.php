@@ -305,18 +305,16 @@ new class extends Component {
                     </div>
 
                     <div class="flex space-x-3 pt-2">
-                        <button type="submit"
-                            class="inline-flex items-center text-sm px-6 py-3 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 font-main">
+                        <x-button variant="secondary" size="lg" class="text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" type="submit">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                             </svg>
                             {{ __('Continue') }}
-                        </button>
-                        <button type="button" wire:click="cancel"
-                            class="inline-flex items-center text-sm px-6 py-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 font-main">
+                        </x-button>
+                        <x-button variant="neutral" size="lg" class="text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2" type="button" wire:click="cancel">
                             {{ __('Cancel') }}
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -361,15 +359,13 @@ new class extends Component {
                     </div>
 
                     <div class="flex space-x-3 pt-2 text-sm">
-                        <button type="submit"
-                            class="inline-flex text-sm items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-main">
+                        <x-button variant="danger" size="lg" class="text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" type="submit">
                             <x-icon name="x-mark" class="w-4 h-4 mr-2" />
                             {{ __('Disable Two-Factor Authentication') }}
-                        </button>
-                        <button type="button" wire:click="cancel"
-                            class="inline-flex text-sm items-center px-6 py-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 font-main">
+                        </x-button>
+                        <x-button variant="neutral" size="lg" class="text-sm focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2" type="button" wire:click="cancel">
                             {{ __('Cancel') }}
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -416,15 +412,13 @@ new class extends Component {
                             <x-icon name="shield-check" class="w-4 h-4 mr-2" />
                             {{ __('Enable Two-Factor Authentication') }}
                         </button>
-                        <button type="button" wire:click="resendCode"
-                            class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 font-main">
+                        <x-button size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" type="button" wire:click="resendCode">
                             <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
                             {{ __('Resend Code') }}
-                        </button>
-                        <button type="button" wire:click="cancel"
-                            class="inline-flex items-center px-6 py-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 font-main">
+                        </x-button>
+                        <x-button variant="neutral" size="lg" class="focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2" type="button" wire:click="cancel">
                             {{ __('Cancel') }}
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -466,20 +460,18 @@ new class extends Component {
                     </div>
 
                     <div class="flex flex-wrap gap-3 pt-2 text-sm">
-                        <button type="submit"
-                            class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-main">
+                        <x-button variant="danger" size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" type="submit">
                             <x-icon name="x-mark" class="w-4 h-4 mr-2" />
                             {{ __('Disable Two-Factor Authentication') }}
-                        </button>
+                        </x-button>
                         <button type="button" wire:click="resendDisableCode"
                             class="inline-flex items-center px-6 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 font-main">
                             <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
                             {{ __('Resend Code') }}
                         </button>
-                        <button type="button" wire:click="cancel"
-                            class="inline-flex items-center px-6 py-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 font-main">
+                        <x-button variant="neutral" size="lg" class="focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2" type="button" wire:click="cancel">
                             {{ __('Cancel') }}
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>

@@ -354,10 +354,7 @@ new class extends Component {
                     </x-dropdown>
                 @else
                     <!-- Login Button for Guests -->
-                    <a href="{{ route('login') }}" wire:navigate
-                        class="inline-flex items-center px-4 py-2 bg-primary text-white font-medium text-sm 
-                        rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 
-                        transition-all duration-200 font-main uppercase">
+                    <x-button class="text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 uppercase" href="{{ route('login') }}" wire:navigate>
                         <!-- SVG Icon -->
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -365,7 +362,7 @@ new class extends Component {
                                 d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                         </svg>
                         Log In
-                    </a>
+                    </x-button>
 
                 @endauth
 

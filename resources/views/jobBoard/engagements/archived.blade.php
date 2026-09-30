@@ -5,15 +5,14 @@
                 <x-icon name="archive-box" class="h-6 w-6 mr-2" />
                 {{ __('Archived Engagements') }}
             </h2>
-            <a href="{{ route('engagements.index') }}"
-                class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+            <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('engagements.index') }}">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="h-5 w-5 mr-2">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 16l-4-4m0 0l4-4m-4 4h18" />
                 </svg>
                 Back to Active Engagements
-            </a>
+            </x-button>
         </div>
     </x-slot>
 

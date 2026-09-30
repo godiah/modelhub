@@ -125,8 +125,7 @@
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-between font-main">
                             <div class="flex items-center space-x-3">
-                                <a href="{{ route('engagements.archived-details', $engagement->id) }}"
-                                    class="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors">
+                                <x-button class="text-sm" href="{{ route('engagements.archived-details', $engagement->id) }}">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M15 12a3 3 0 11-6 0 3 3 0 016 0z">
@@ -136,7 +135,7 @@
                                         </path>
                                     </svg>
                                     View Details
-                                </a>
+                                </x-button>
 
                             </div>
 

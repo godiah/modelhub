@@ -9,11 +9,10 @@
 
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('applications.my') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('applications.my') }}">
                     <x-icon name="clipboard-check" class="h-5 w-5 mr-2" />
                     Back to Active Applications
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>
@@ -154,10 +153,9 @@
                             <h3 class="text-xl font-bold text-neutral-800 mb-2 font-tertiary">No Archived Applications
                             </h3>
                             <p class="text-tertiary mb-6 font-main">You haven't archived any job applications yet.</p>
-                            <a href="{{ route('applications.my') }}"
-                                class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors duration-200 font-main">
+                            <x-button size="lg" class="justify-center border border-transparent text-base" href="{{ route('applications.my') }}">
                                 View Active Applications
-                            </a>
+                            </x-button>
                         </div>
                     </x-card>
                 @endforelse

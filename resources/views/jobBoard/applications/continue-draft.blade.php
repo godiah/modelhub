@@ -7,11 +7,10 @@
                 </h2>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('applications.drafts') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-main text-sm font-medium">
+                <x-button variant="secondary" class="text-sm" href="{{ route('applications.drafts') }}">
                     <x-icon name="pencil-square" class="h-5 w-5 mr-2" />
                     Draft Applications
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>

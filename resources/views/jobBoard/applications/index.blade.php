@@ -8,16 +8,14 @@
                 {{-- <p class="text-tertiary mt-2 font-main text-xs">Track and manage your job applications</p> --}}
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('jobs.browse') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('jobs.browse') }}">
                     <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
                     Browse More Jobs
-                </a>
-                <a href="{{ route('applications.archived') }}"
-                    class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                </x-button>
+                <x-button class="text-sm shadow-sm" href="{{ route('applications.archived') }}">
                     <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
                     View Archived
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>

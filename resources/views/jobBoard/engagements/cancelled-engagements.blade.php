@@ -7,11 +7,10 @@
                 </h2>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('engagements.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('engagements.index') }}">
                     <x-icon name="chat-bubble-text" class="h-5 w-5 mr-2" stroke-width="1.5" />
                     My Engagements
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>

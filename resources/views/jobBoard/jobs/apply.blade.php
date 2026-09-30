@@ -5,11 +5,10 @@
             <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
                 {{ __('3D Project Application') }}
             </h2>
-            <a href="{{ route('jobs.browse') }}"
-                class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+            <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('jobs.browse') }}">
                 <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
                 Browse More Jobs
-            </a>
+            </x-button>
         </div>
     </x-slot>
 

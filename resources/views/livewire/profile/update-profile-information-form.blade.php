@@ -147,11 +147,10 @@ new class extends Component {
             <!-- Action Buttons -->
             <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
                 <div class="flex items-center space-x-4">
-                    <button type="submit"
-                        class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 font-main text-sm">
+                    <x-button size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-sm" type="submit">
                         <x-icon name="check" class="w-4 h-4 mr-2" />
                         {{ __('Save Changes') }}
-                    </button>
+                    </x-button>
 
                     <x-success-toast event="profile-info-updated" :message="__('Profile updated successfully!')" />
                 </div>

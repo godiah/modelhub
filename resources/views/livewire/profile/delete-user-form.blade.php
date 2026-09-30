@@ -76,11 +76,10 @@ new class extends Component {
 
         <!-- Delete Button -->
         <div class="flex justify-end">
-            <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-                class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-main text-sm">
+            <x-button variant="danger" size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 text-sm" x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')">
                 <x-icon name="trash" class="w-4 h-4 mr-2" />
                 {{ __('Delete Account') }}
-            </button>
+            </x-button>
         </div>
     </div>
 

@@ -352,15 +352,13 @@ new class extends Component {
 
                     <!-- Form Actions -->
                     <div class="flex items-center justify-end space-x-3 pt-6 border-t border-neutral-200 text-sm">
-                        <button type="button" wire:click="cancel"
-                            class="inline-flex items-center px-6 py-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 font-main">
+                        <x-button variant="neutral" size="lg" class="focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2" type="button" wire:click="cancel">
                             {{ __('Cancel') }}
-                        </button>
-                        <button type="submit"
-                            class="inline-flex items-center px-6 py-3 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 font-main">
+                        </x-button>
+                        <x-button variant="secondary" size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" type="submit">
                             <x-icon name="check" class="w-4 h-4 mr-2" />
                             {{ $editingId ? __('Update Link') : __('Add Link') }}
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -377,11 +375,10 @@ new class extends Component {
                     {{ __('Connect your social media profiles and professional links to showcase your online presence.') }}
                 </p>
                 @if (!$showAddForm)
-                    <button wire:click="showAdd"
-                        class="inline-flex items-center px-6 py-3 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 font-main">
+                    <x-button variant="secondary" size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" wire:click="showAdd">
                         <x-icon name="plus" class="w-4 h-4 mr-2" />
                         {{ __('Add Your First Link') }}
-                    </button>
+                    </x-button>
                 @endif
             </div>
         @else

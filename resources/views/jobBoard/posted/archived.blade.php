@@ -8,11 +8,10 @@
 
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('my-jobs.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
                     <x-icon name="clipboard-check" class="h-5 w-5 mr-2" />
                     Back to Active Jobs
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>
@@ -29,15 +28,14 @@
                     <p class="text-neutral-600 font-main mb-8 text-center max-w-sm">
                         You haven't archived any jobs yet. Archived jobs will appear here when you close them.
                     </p>
-                    <a href="{{ route('my-jobs.index') }}"
-                        class="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                    <x-button size="lg" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                         </svg>
                         View Active Jobs
-                    </a>
+                    </x-button>
                 </x-card>
             @else
                 <div class="grid gap-6">
@@ -153,11 +151,10 @@
                                         </svg>
                                         View Details
                                     </a>
-                                    <button @click="showingRestore = true"
-                                        class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium">
+                                    <x-button variant="secondary" class="text-sm" @click="showingRestore = true">
                                         <x-icon name="arrow-path" class="h-4 w-4 mr-2" />
                                         Restore Job
-                                    </button>
+                                    </x-button>
                                 </div>
                             </div>
 
