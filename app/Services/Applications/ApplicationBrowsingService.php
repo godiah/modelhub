@@ -21,7 +21,7 @@ class ApplicationBrowsingService
             ->firstOrFail();
 
         // Build the base query
-        $query = $job->applications()->with('applicant');
+        $query = $job->applications()->with(['applicant', 'job']);
 
         // Apply search filter
         if (! empty($filters['search'])) {
