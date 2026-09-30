@@ -7,7 +7,9 @@ use App\Models\JobApplication;
 use App\Models\JobEngagement;
 use App\Models\ModelJob;
 use App\Models\User;
+use App\Notifications\ApplicationWithdrawnNotification;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
 /*
@@ -432,4 +434,79 @@ it('does not show my application to anyone else', function () {
     $this->actingAs(User::factory()->create());
 
     $this->get(route('applications.show', $job->slug))->assertNotFound();
+});
+
+/** ---------------------------------------------------------------- withdrawing */
+it('offers to withdraw a submitted or reviewed application, and nothing else', function () {
+    $submitted = maApplication($jobA = maJob());
+    $reviewed = maApplication($jobB = maJob(), ['status' => ApplicationStatus::Reviewed]);
+    $rejected = maApplication($jobC = maJob(), ['status' => ApplicationStatus::Rejected]);
+    $hired = maApplication($jobD = maJob(), ['status' => ApplicationStatus::Hired]);
+    maEngagement($hired, EngagementStatus::EmployerAccepted);
+
+    $this->get(route('applications.show', $jobA->slug))->assertOk()->assertSee('Withdraw application')->assertSee(route('applications.withdraw', $submitted), false);
+    $this->get(route('applications.show', $jobB->slug))->assertOk()->assertSee(route('applications.withdraw', $reviewed), false);
+    $this->get(route('applications.show', $jobC->slug))->assertOk()->assertDontSee('Withdraw application');
+    $this->get(route('applications.show', $jobD->slug))->assertOk()->assertDontSee('Withdraw application');
+});
+
+it('withdraws an application, tells the poster and locks the status', function () {
+    Notification::fake();
+    $job = maJob();
+    $application = maApplication($job);
+    $job->refresh();
+    $before = $job->applicants_count;
+
+    $this->post(route('applications.withdraw', $application))->assertRedirect(route('applications.show', $job->slug));
+
+    expect($application->fresh()->status)->toBe(ApplicationStatus::Withdrawn)
+        ->and($application->fresh()->isStatusLocked())->toBeTrue()
+        ->and($application->fresh()->canBeArchived())->toBeTrue()
+        ->and($job->fresh()->applicants_count)->toBe(max(0, $before - 1));
+    Notification::assertSentTo($this->client, ApplicationWithdrawnNotification::class, fn ($n) => $n->application->is($application));
+
+    $this->get(route('applications.show', $job->slug))->assertOk()->assertSee('Withdrawn')->assertSee('You withdrew from this project.')
+        ->assertSeeInOrder(['Applied', 'Reviewed', 'Withdrawn']);
+    $this->get(route('applications.my', ['status' => 'withdrawn']))->assertOk()->assertSee($job->title);
+});
+
+it('cannot reapply after withdrawing', function () {
+    $job = maJob();
+    $application = maApplication($job);
+    $this->post(route('applications.withdraw', $application));
+
+    $this->post(route('applications.store'), ['job_id' => $job->id, 'action' => 'submitted', 'offer' => 500, 'terms' => '1'])->assertRedirect();
+
+    expect(JobApplication::where('job_id', $job->id)->where('applicant_id', $this->me->id)->count())->toBe(1)
+        ->and($application->fresh()->status)->toBe(ApplicationStatus::Withdrawn);
+});
+
+it('refuses to withdraw once hired, rejected, already withdrawn, a draft or someone elses', function () {
+    Notification::fake();
+    $hired = maApplication(maJob(), ['status' => ApplicationStatus::Hired]);
+    maEngagement($hired, EngagementStatus::Active);
+    $rejected = maApplication(maJob(), ['status' => ApplicationStatus::Rejected]);
+    $withdrawn = maApplication(maJob(), ['status' => ApplicationStatus::Withdrawn]);
+    $draft = maApplication(maJob(), ['status' => ApplicationStatus::Draft]);
+    $theirs = maApplication(maJob(), [], User::factory()->create());
+
+    foreach ([$hired, $rejected, $withdrawn, $draft] as $application) {
+        $status = $application->status;
+        $this->post(route('applications.withdraw', $application))->assertRedirect()->assertSessionHas('error');
+        expect($application->fresh()->status)->toBe($status);
+    }
+
+    $this->post(route('applications.withdraw', $theirs))->assertForbidden();
+    expect($theirs->fresh()->status)->toBe(ApplicationStatus::Submitted);
+    Notification::assertNothingSent();
+});
+
+it('shows the poster a withdrawn application they can no longer hire', function () {
+    $job = maJob(['title' => 'Withdrawal watch']);
+    $application = maApplication($job);
+    $this->post(route('applications.withdraw', $application));
+
+    $this->actingAs($this->client);
+    $this->get(route('my-jobs.applications.index', $job->slug))->assertOk()->assertSee('Withdrawn');
+    expect($application->fresh()->hireBlocker())->toBe('This applicant withdrew their application.');
 });

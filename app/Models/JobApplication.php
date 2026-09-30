@@ -100,6 +100,13 @@ class JobApplication extends Model
         return ! $this->is_archived && $this->standing()['finished'];
     }
 
+    /** A sent application can be withdrawn until the client hires: after that the offer is declined from the engagement. */
+    public function canBeWithdrawn(): bool
+    {
+        return in_array($this->status, [ApplicationStatus::Submitted, ApplicationStatus::Reviewed], true)
+            && $this->standing()['engagement'] === null;
+    }
+
     /**
      * Where this application stands, from the applicant's point of view: label, badge tone, a one-line hint,
      * whether it is finished (nothing more will happen) and the engagement when they were hired. Uses the

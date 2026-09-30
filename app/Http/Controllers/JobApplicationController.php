@@ -120,6 +120,20 @@ class JobApplicationController extends Controller
         return view('jobBoard.applications.archived', compact('applications'));
     }
 
+    // Withdraw a sent application
+    public function withdraw(JobApplication $application)
+    {
+        $this->authorize('update', $application);
+
+        if ($error = $this->applicationManagementService->withdrawApplication($application)) {
+            return back()->with(FlashAlertHelper::error('Cannot withdraw', $error));
+        }
+
+        return redirect()->route('applications.show', $application->job->slug)->with(
+            FlashAlertHelper::success('Application withdrawn', 'The client has been told. It stays in My applications as Withdrawn.')
+        );
+    }
+
     // Archive an application
     public function archive(JobApplication $application)
     {
