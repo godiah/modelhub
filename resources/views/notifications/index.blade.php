@@ -1,12 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
-                Notifications
-            </h2>
-        </div>
-    </x-slot>
-
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-lg sm:rounded-xl">
@@ -215,5 +207,4 @@
         action-bind="'{{ route('notifications.delete', '__ID__') }}'.replace('__ID__', payload.id)"
         message="Are you sure you want to delete this notification?" />
 
-    @include('partials.footer-secondary')
 </x-app-layout>

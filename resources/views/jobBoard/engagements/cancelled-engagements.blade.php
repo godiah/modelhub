@@ -1,20 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                    {{ $engagement->job->title }}
-                </h2>
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('engagements.index') }}">
-                    <x-icon name="chat-bubble-text" class="h-5 w-5 mr-2" stroke-width="1.5" />
-                    My Engagements
-                </x-button>
-            </div>
-        </div>
-    </x-slot>
-
+<x-app-layout :crumb="$engagement->job->title">
     <div class="container mx-auto max-w-7xl px-4 py-8 pb-24 font-main text-neutral-800">
         <!--  Status Banner -->
         <div class="mb-8 relative overflow-hidden">

@@ -1,17 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                {{ __('Applications for') }}: <span class="text-secondary">{{ $job->title }}</span>
-            </h2>
-            <a href="{{ route('my-jobs.index', ['slug' => $job->slug]) }}"
-                class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
-                <x-icon name="arrow-left" class="h-4 w-4 mr-2" />
-                Back to My Jobs
-            </a>
-        </div>
-    </x-slot>
-
+<x-app-layout :crumb="'Applications: '.$job->title">
     <div class="py-10">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Job Summary Card -->
@@ -150,8 +137,6 @@
             </div>
         </div>
     </div>
-
-    @include('partials.footer-secondary')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -1,19 +1,16 @@
-<x-app-layout>
-
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                {{ __('3D Project Application') }}
-            </h2>
+<x-app-layout title="3D Project Application" :crumb="$job->title">
+    <x-slot name="toolbar">
+        @guest
             <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('jobs.browse') }}">
                 <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
                 Browse More Jobs
             </x-button>
-        </div>
+        @endguest
     </x-slot>
 
+
     <section>
-        <div class="container mx-auto max-w-7xl px-4 mb-24 pt-16">
+        <div class="container mx-auto max-w-7xl px-4 mb-24 pt-8">
             <!-- Main Content Container -->
             <div class="space-y-8">
                 <!-- Job Details Card -->
@@ -528,9 +525,6 @@
                 </section>
             @endif
         </div>
-
-        <!-- Footer -->
-        @include('partials.footer-secondary')
 
         <!-- Disable submission -->
         <script>

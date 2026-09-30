@@ -1,20 +1,4 @@
-<x-app-layout>
-
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                    {{ __('Edit') }}: <span class="text-secondary">{{ $job->title }}</span>
-                </h2>
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
-                    <x-icon name="briefcase" class="h-5 w-5 mr-2" stroke-width="1.5" />
-                    Back to Jobs
-                </x-button>
-            </div>
-        </div>
-    </x-slot>
+<x-app-layout :crumb="'Edit: '.$job->title">
 
     <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <x-card rounded="2xl" shadow="xl" clip class="transition-all duration-300 hover:shadow-2xl">
@@ -75,6 +59,4 @@
         <script src="{{ asset('js/submit-btn-edit.js') }}"></script>
     </div>
 
-    <!-- Footer -->
-    @include('partials.footer-secondary')
 </x-app-layout>

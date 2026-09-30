@@ -1,11 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
-                <x-icon name="chat-bubble-text" class="h-6 w-6 mr-2" stroke-width="1.5" />
-                Job Engagements
-            </h2>
-            <div class="flex items-center text-sm font-tertiary font-medium text-neutral-500">
+    <x-slot name="toolbar">
+        <div class="flex items-center text-sm font-tertiary font-medium text-neutral-500">
                 <span class="hidden md:inline-flex items-center mr-4">
                     <x-icon name="clock" class="h-4 w-4 mr-1 text-secondary" />
                     Active: {{ $engagements->where('status', 'active')->count() }}
@@ -33,7 +28,6 @@
                     Withdrawn: {{ $engagements->where('status', 'cancelled')->count() }}
                 </span>
             </div>
-        </div>
     </x-slot>
 
     <div class="container mx-auto max-w-7xl px-4 py-8 pb-24">

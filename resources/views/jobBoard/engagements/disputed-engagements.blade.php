@@ -1,28 +1,13 @@
 @use('App\Enums\DisputeStatus')
 @use('App\Enums\EngagementStatus')
-<x-app-layout>
-    <x-slot name="header">
-        @php
-            $isAdminViewer = Auth::user()->can('view disputes');
-        @endphp
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                    {{ $engagement->job->title }}
-                </h2>
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ $isAdminViewer ? route('admin.disputes.index') : route('engagements.index') }}">
-                    @if ($isAdminViewer)
-                        <x-icon name="scale" class="h-5 w-5 mr-2" />
-                        Disputed Engagements
-                    @else
-                        <x-icon name="chat-bubble-text" class="h-5 w-5 mr-2" stroke-width="1.5" />
-                        My Engagements
-                    @endif
-                </x-button>
-            </div>
-        </div>
+<x-app-layout :crumb="$engagement->job->title">
+    <x-slot name="toolbar">
+        @can('view disputes')
+            <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('admin.disputes.index') }}">
+                <x-icon name="scale" class="h-5 w-5 mr-2" />
+                Disputed engagements
+            </x-button>
+        @endcan
     </x-slot>
 
     <div class="container mx-auto max-w-7xl px-4 py-8 pb-24 font-main text-neutral-800">

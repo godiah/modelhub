@@ -1,15 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
-                <x-icon name="scale" class="h-6 w-6 mr-2" />
-                Engagement Dispute
-            </h2>
-        </div>
-    </x-slot>
-
+<x-app-layout crumb="Dispute">
     <!--  Payment Dispute Form -->
-    <div class="min-h-screen bg-gradient-to-br from-primary/5 to-neutral-100 font-main py-12">
+    <div class="font-main py-8">
         <div class="container mx-auto px-4">
             <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
                 <!-- Header Section with Gradient Background -->

@@ -4,7 +4,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<title>{{ config('app.name', 'Laravel') }}</title>
+<title>{{ isset($pageTitle) && $pageTitle ? $pageTitle.' · ' : '' }}{{ config('app.name', 'Laravel') }}</title>
 @include('partials.favicon')
 
 <!-- Fonts -->

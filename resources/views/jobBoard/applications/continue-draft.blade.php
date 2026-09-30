@@ -1,20 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
-                    {{ __('Resume Application') }}
-                </h2>
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm" href="{{ route('applications.drafts') }}">
-                    <x-icon name="pencil-square" class="h-5 w-5 mr-2" />
-                    Draft Applications
-                </x-button>
-            </div>
-        </div>
-    </x-slot>
-
+<x-app-layout crumb="Resume application">
     <section>
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-lg p-6 shadow">
@@ -185,9 +169,6 @@
                 </form>
             </div>
         </div>
-
-        <!-- Footer -->
-        @include('partials.footer-secondary')
 
         <!-- Disable submission -->
         <script>

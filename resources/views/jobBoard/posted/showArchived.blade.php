@@ -1,20 +1,12 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                {{ __('Archived Job') }}: <span class="text-secondary">{{ $job->title }}</span>
-            </h2>
-
-            <div class="flex space-x-3">
-                <x-button class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
-                    <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
-                    Archived Jobs
-                </x-button>
-            </div>
-        </div>
+<x-app-layout :crumb="$job->title">
+    <x-slot name="toolbar">
+        <x-button class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
+            <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
+            Archived Jobs
+        </x-button>
     </x-slot>
 
-    <div class="py-10 bg-gradient-to-b from-neutral-50 to-white min-h-screen">
+    <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Job Information Card -->
             <x-card clip class="mb-8">

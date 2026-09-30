@@ -25,7 +25,7 @@ final class SidebarMenu
             $items = [];
 
             foreach ($group['items'] as $item) {
-                if (isset($item['can']) && ! $user->can($item['can'])) {
+                if (($item['hidden'] ?? false) || (isset($item['can']) && ! $user->can($item['can']))) {
                     continue;
                 }
 
@@ -49,22 +49,36 @@ final class SidebarMenu
     }
 
     /**
-     * The group and item matching the current route, for the top-bar breadcrumb.
+     * Breadcrumb for the top bar: group, the matching menu item (linked when a tail follows) and an optional
+     * page-supplied tail (a project title, "Archived", ...). Also resolves pages that are reachable but not
+     * listed in the sidebar (Profile, Cancellation policy), which is why it walks the full definition.
      *
-     * @param  array<int, array{label: string, items: array<int, array{label: string, active: bool}>}>  $groups
-     * @return array{group: string, item: string}|null
+     * @return list<array{label: string, url: string|null}>
      */
-    public static function current(array $groups): ?array
+    public static function breadcrumb(?string $tail = null): array
     {
-        foreach ($groups as $group) {
+        $crumbs = [];
+
+        foreach (self::definition() as $group) {
             foreach ($group['items'] as $item) {
-                if ($item['active']) {
-                    return ['group' => $group['label'], 'item' => $item['label']];
+                if (! self::isActive($item)) {
+                    continue;
                 }
+
+                $crumbs = [
+                    ['label' => $group['label'], 'url' => null],
+                    ['label' => $item['label'], 'url' => $tail !== null ? route($item['route']) : null],
+                ];
+
+                break 2;
             }
         }
 
-        return null;
+        if ($tail !== null && $tail !== '') {
+            $crumbs[] = ['label' => $tail, 'url' => null];
+        }
+
+        return $crumbs;
     }
 
     /**
@@ -93,7 +107,6 @@ final class SidebarMenu
                 'items' => [
                     ['label' => 'Post a project', 'route' => 'jobs.create', 'icon' => 'plus', 'match' => ['jobs.create']],
                     ['label' => 'Posted projects', 'route' => 'my-jobs.index', 'icon' => 'briefcase', 'match' => ['my-jobs.index', 'my-jobs.applications.*', 'my-jobs.archived.*', 'jobs.show', 'jobs.edit']],
-                    ['label' => 'Message templates', 'route' => 'my-jobs.message-templates', 'icon' => 'chat-bubble-text', 'match' => ['my-jobs.message-templates*']],
                 ],
             ],
             [
@@ -110,10 +123,18 @@ final class SidebarMenu
                     ['label' => 'Staff roles', 'route' => 'admin.staff.index', 'icon' => 'users', 'match' => ['admin.staff.*'], 'can' => 'manage users'],
                 ],
             ],
+            // Reachable pages that are not sidebar entries (profile lives in the user menu, the policy in the
+            // footer); listed so the breadcrumb still resolves for them.
+            [
+                'label' => 'Account',
+                'items' => [
+                    ['label' => 'Profile', 'route' => 'profile', 'icon' => 'user', 'match' => ['profile'], 'hidden' => true],
+                ],
+            ],
             [
                 'label' => 'Help',
                 'items' => [
-                    ['label' => 'Cancellation policy', 'route' => 'engagements.policy', 'icon' => 'scale', 'match' => ['engagements.policy']],
+                    ['label' => 'Cancellation policy', 'route' => 'engagements.policy', 'icon' => 'scale', 'match' => ['engagements.policy'], 'hidden' => true],
                 ],
             ],
         ];

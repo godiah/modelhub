@@ -1,13 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
-                <x-icon name="squares-2x2" class="h-6 w-6 mr-2" stroke-width="1.5" />
-                {{ __('Dashboard') }}
-            </h2>
-        </div>
-    </x-slot>
-
     <div>
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

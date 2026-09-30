@@ -1,5 +1,8 @@
 @php
     $menu = \App\Support\Navigation\SidebarMenu::for(auth()->user());
+    $breadcrumb = \App\Support\Navigation\SidebarMenu::breadcrumb($crumb ?? null);
+    // Browser-tab title: the most specific breadcrumb segment.
+    $pageTitle = $breadcrumb ? end($breadcrumb)['label'] : null;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
@@ -31,21 +34,22 @@
 
         <div
             class="flex min-h-screen flex-col transition-[padding] duration-200 ease-out lg:pl-64 lg:[.sidebar-collapsed_&]:pl-[72px]">
-            <x-topbar :crumb="\App\Support\Navigation\SidebarMenu::current($menu)" />
+            <x-topbar :crumbs="$breadcrumb" />
 
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="border-b border-neutral-200/70 bg-white">
-                    <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
+            <!-- Page toolbar: contextual actions / summary supplied by the page (titles live in the breadcrumb) -->
+            @if (isset($toolbar) && trim((string) $toolbar) !== '')
+                <div class="container mx-auto flex max-w-7xl flex-wrap items-center justify-end gap-3 px-4 pt-5">
+                    {{ $toolbar }}
+                </div>
             @endif
 
             <!-- Page Content -->
             <main class="flex-1">
+                <h1 class="sr-only">{{ $pageTitle ?? config('app.name') }}</h1>
                 {{ $slot }}
             </main>
+
+            @include('partials.footer-app')
         </div>
     </div>
     @include('partials.app-scripts')

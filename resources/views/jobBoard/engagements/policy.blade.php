@@ -1,13 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
-                <x-icon name="document-text-2" class="h-6 w-6 mr-2" />
-                Cancellation & Payment Policy
-            </h2>
-        </div>
-    </x-slot>
-
     <div class="py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Introduction Card with Gradient Background -->

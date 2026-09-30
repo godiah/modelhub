@@ -59,24 +59,67 @@ it('shows the administration group to staff according to their permissions', fun
     $this->actingAs($admin)->get(route('dashboard'))->assertSee('Administration')->assertSee('Staff roles');
 });
 
-it('marks exactly the matching item active, with the policy page not lighting up Engagements', function () {
+it('marks exactly the matching sidebar item active; unlisted pages light up nothing', function () {
     $user = User::factory()->create();
-
-    $this->actingAs($user)->get(route('engagements.policy'));
-    $active = collect(SidebarMenu::for($user))->flatMap->items->where('active', true)->pluck('label')->all();
-    expect($active)->toBe(['Cancellation policy']);
+    $activeLabels = fn () => collect(SidebarMenu::for($user))->flatMap->items->where('active', true)->pluck('label')->all();
 
     $this->actingAs($user)->get(route('engagements.index'));
-    $active = collect(SidebarMenu::for($user))->flatMap->items->where('active', true)->pluck('label')->all();
-    expect($active)->toBe(['Engagements']);
+    expect($activeLabels())->toBe(['Engagements']);
+
+    // The policy page lives in the footer, not the sidebar, and must not light up Engagements.
+    $this->actingAs($user)->get(route('engagements.policy'));
+    expect($activeLabels())->toBe([]);
 });
 
-it('builds the breadcrumb from the active item', function () {
+it('builds the breadcrumb from the active item, linking it when the page adds a tail', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)->get(route('applications.my'));
 
-    expect(SidebarMenu::current(SidebarMenu::for($user)))->toBe(['group' => 'Find work', 'item' => 'My applications']);
+    expect(SidebarMenu::breadcrumb())->toBe([
+        ['label' => 'Find work', 'url' => null],
+        ['label' => 'My applications', 'url' => null],
+    ]);
+
+    expect(SidebarMenu::breadcrumb('Archived'))->toBe([
+        ['label' => 'Find work', 'url' => null],
+        ['label' => 'My applications', 'url' => route('applications.my')],
+        ['label' => 'Archived', 'url' => null],
+    ]);
+});
+
+it('resolves breadcrumbs for pages that are not sidebar entries', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->get(route('profile'));
+    expect(SidebarMenu::breadcrumb())->toBe([
+        ['label' => 'Account', 'url' => null],
+        ['label' => 'Profile', 'url' => null],
+    ]);
+
+    $this->actingAs($user)->get(route('engagements.policy'));
+    expect(collect(SidebarMenu::breadcrumb())->pluck('label')->all())->toBe(['Help', 'Cancellation policy']);
+});
+
+it('gives signed-in users the slim app footer and guests the marketing footer', function () {
+    $this->get(route('jobs.browse'))->assertSee('Connect With Us')->assertDontSee('Cancellation &amp; payment policy', false);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('dashboard'))
+        ->assertSee('Cancellation &amp; payment policy', false)
+        ->assertDontSee('Connect With Us');
+});
+
+it('keeps guests on the public shell with the page title in the header band', function () {
+    $this->get(route('jobs.browse'))
+        ->assertOk()
+        ->assertDontSee(SIDEBAR_MARKER, false)
+        ->assertSee('Browse Available Jobs')
+        ->assertSee('Connect With Us');
+});
+
+it('shows the landing page footer to guests', function () {
+    $this->get('/')->assertOk()->assertSee('Connect With Us');
 });
 
 it('renders the sidebar collapsed when the collapse cookie is set', function () {

@@ -1,4 +1,4 @@
-@props(['crumb' => null])
+@props(['crumbs' => []])
 
 <!-- Sticky top bar -->
 <div
@@ -11,12 +11,33 @@
         </svg>
     </button>
 
-    <!-- Breadcrumb -->
-    @if ($crumb)
-        <nav aria-label="{{ __('Breadcrumb') }}" class="hidden min-w-0 items-center gap-2 text-sm sm:flex">
-            <span class="text-tertiary">{{ $crumb['group'] }}</span>
-            <span class="text-neutral-300" aria-hidden="true">/</span>
-            <span class="truncate font-semibold text-neutral-900">{{ $crumb['item'] }}</span>
+    <!-- Breadcrumb: full trail from sm up, current page only on phones -->
+    @if ($crumbs)
+        <nav aria-label="{{ __('Breadcrumb') }}" class="min-w-0">
+            <ol class="flex min-w-0 items-center gap-2 text-sm">
+                @foreach ($crumbs as $crumb)
+                    @php($isLast = $loop->last)
+                    <li @class([
+                        'flex min-w-0 items-center gap-2',
+                        'hidden sm:flex' => !$isLast,
+                    ])>
+                        @if (!$loop->first)
+                            <span class="hidden text-neutral-300 sm:inline" aria-hidden="true">/</span>
+                        @endif
+
+                        @if ($crumb['url'])
+                            <a href="{{ $crumb['url'] }}" wire:navigate
+                                class="truncate text-tertiary transition-colors duration-150 hover:text-teal-700 focus:outline-none focus-visible:underline">{{ $crumb['label'] }}</a>
+                        @else
+                            <span @class([
+                                'truncate',
+                                'font-semibold text-neutral-900' => $isLast,
+                                'text-tertiary' => !$isLast,
+                            ]) @if ($isLast) aria-current="page" @endif>{{ $crumb['label'] }}</span>
+                        @endif
+                    </li>
+                @endforeach
+            </ol>
         </nav>
     @endif
 

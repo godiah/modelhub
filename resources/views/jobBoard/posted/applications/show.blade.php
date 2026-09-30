@@ -1,25 +1,20 @@
 @use('App\Enums\ApplicationStatus')
-<x-app-layout>
+<x-app-layout crumb="Application details">
+    <x-slot name="toolbar">
+        <a href="{{ route('my-jobs.applications.index', ['slug' => $job->slug]) }}"
+            class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
+            <x-icon name="arrow-left" class="h-4 w-4 mr-2" />
+            Back to Applications
+        </a>
+    </x-slot>
+
     <style>
         /* Hide x-cloak elements until Alpine.js loads */
         [x-cloak] {
             display: none !important;
         }
     </style>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                Application details
-            </h2>
-            <a href="{{ route('my-jobs.applications.index', ['slug' => $job->slug]) }}"
-                class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
-                <x-icon name="arrow-left" class="h-4 w-4 mr-2" />
-                Back to Applications
-            </a>
-        </div>
-    </x-slot>
-
-    <section class="bg-neutral-50 min-h-screen py-10">
+    <section class="py-8">
         <div class="container max-w-7xl mx-auto px-4">
             <!-- Application Details Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
