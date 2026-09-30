@@ -8,6 +8,7 @@ use App\Models\JobApplication;
 use App\Models\JobReview;
 use App\Models\ModelJob;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 
 class ApplicationBrowsingService
@@ -105,7 +106,7 @@ class ApplicationBrowsingService
     }
 
     // Apply search filter to applications query
-    protected function applySearchFilter(Builder $query, string $search): void
+    protected function applySearchFilter(Builder|Relation $query, string $search): void
     {
         $query->whereHas('applicant', function ($q) use ($search) {
             $q->where('name', 'like', '%'.$search.'%')
