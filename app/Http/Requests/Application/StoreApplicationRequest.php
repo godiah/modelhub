@@ -5,6 +5,7 @@
 
 namespace App\Http\Requests\Application;
 
+use App\Models\ModelJob;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreApplicationRequest extends FormRequest
@@ -20,8 +21,7 @@ class StoreApplicationRequest extends FormRequest
 
         $rules = [
             'job_id' => 'required|exists:model_jobs,id',
-            'poster_id' => 'required|exists:users,id',
-            'applicant_id' => 'required|exists:users,id',
+            'portfolio' => 'nullable|array|max:5',
             'portfolio.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240', // 10MB max
             'existing_portfolio' => 'sometimes|array',
             'removed_files' => 'sometimes|array',
@@ -50,12 +50,16 @@ class StoreApplicationRequest extends FormRequest
         return $this->isDraft() ? 'draft' : 'submitted';
     }
 
+    // The applicant is always the signed-in user and the poster is always the job's owner — neither is
+    // read from the form, or an applicant could name themselves as the poster of someone else's job.
     public function getProcessedData(): array
     {
+        $job = ModelJob::findOrFail($this->job_id);
+
         $data = [
-            'job_id' => $this->job_id,
-            'applicant_id' => $this->applicant_id,
-            'poster_id' => $this->poster_id,
+            'job_id' => $job->id,
+            'applicant_id' => $this->user()->id,
+            'poster_id' => $job->user_id,
             'offer_amount' => $this->offer ?? 0,
             'proposal' => $this->proposal,
             'status' => $this->getStatus(),

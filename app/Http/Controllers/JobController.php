@@ -93,17 +93,19 @@ class JobController extends Controller
     public function browseJobs(BrowseJobsRequest $request)
     {
         $filters = $request->getFilters();
-        $jobs = $this->jobBrowsingService->browseJobs($filters);
+        $jobs = $this->jobBrowsingService->browseJobs($filters, $request->user());
+        $statuses = $this->jobBrowsingService->applicationStatuses($request->user(), $jobs);
 
-        // If it's an AJAX request, return only the jobs list partial
+        // If it's an AJAX request, return only the results partial
         if ($request->isAjaxRequest()) {
-            return view('jobBoard.jobs.partials.jobs-list', compact('jobs'));
+            return view('jobBoard.jobs.partials.jobs-list', compact('jobs', 'statuses'));
         }
 
         $filterOptions = $this->jobBrowsingService->getFilterOptions();
 
         return view('jobBoard.jobs.browse', [
             'jobs' => $jobs,
+            'statuses' => $statuses,
             'filters' => $filters,
             'skills' => $filterOptions['skills'],
             'software' => $filterOptions['software'],
@@ -113,14 +115,20 @@ class JobController extends Controller
     // Apply for a job
     public function apply(ModelJob $job)
     {
-        $similarJobs = $this->jobBrowsingService->getSimilarJobs($job);
-
-        // If job is not active, return error
-        if ($similarJobs->isEmpty() && (! $job->is_active || ! $job->isActive())) {
+        // Only projects that are open for applications have an apply page
+        if (! $job->isOpenForApplications()) {
             return $this->jobClosedError();
         }
 
-        return view('jobBoard.jobs.apply', compact('job', 'similarJobs'));
+        $similarJobs = $this->jobBrowsingService->getSimilarJobs($job, auth()->user());
+
+        $job->loadMissing(['user.profile', 'jobImages']);
+
+        return view('jobBoard.jobs.apply', [
+            'job' => $job,
+            'similarJobs' => $similarJobs,
+            'applicationStatus' => $this->jobBrowsingService->applicationStatuses(auth()->user(), [$job])[$job->id] ?? null,
+        ]);
     }
 
     // Check if project title exists

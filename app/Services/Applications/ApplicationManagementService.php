@@ -62,13 +62,18 @@ class ApplicationManagementService
     {
         // Check if the job exists and is active
         $job = ModelJob::findOrFail($processedData['job_id']);
-        if (! $job->is_active || ! $job->isActive()) {
+        if (! $job->isOpenForApplications()) {
             return ['error' => 'This job is no longer accepting new applications'];
         }
 
         // Check if the user is authorized to apply
         if ($processedData['applicant_id'] != Auth::id()) {
             return ['error' => 'Unauthorized action'];
+        }
+
+        // Posters cannot apply to their own projects
+        if ($job->user_id === $processedData['applicant_id']) {
+            return FlashAlertHelper::error('Action Not Allowed', 'You cannot apply to your own project.');
         }
 
         // Check for existing applications

@@ -47,6 +47,60 @@ trait JobFilterTrait
         return $query;
     }
 
+    // Jobs that need ANY of the given skills (browse filter: ticking more boxes widens the results)
+    public function scopeWithAnySkill(Builder $query, ?array $skills): Builder
+    {
+        return $this->matchAnyJsonValue($query, 'skills', $skills);
+    }
+
+    // Jobs that need ANY of the given software
+    public function scopeWithAnySoftware(Builder $query, ?array $software): Builder
+    {
+        return $this->matchAnyJsonValue($query, 'software', $software);
+    }
+
+    // Budget between the given bounds; either bound may be omitted
+    public function scopeWithBudgetBetween(Builder $query, ?float $min, ?float $max): Builder
+    {
+        if ($min !== null) {
+            $query->where('budget', '>=', $min);
+        }
+
+        if ($max !== null) {
+            $query->where('budget', '<=', $max);
+        }
+
+        return $query;
+    }
+
+    // Posted within the last day / week / month
+    public function scopePostedWithin(Builder $query, ?string $window): Builder
+    {
+        $since = match ($window) {
+            'day' => now()->subDay(),
+            'week' => now()->subWeek(),
+            'month' => now()->subMonth(),
+            default => null,
+        };
+
+        return $since ? $query->where('created_at', '>=', $since) : $query;
+    }
+
+    private function matchAnyJsonValue(Builder $query, string $column, ?array $values): Builder
+    {
+        $values = array_values(array_filter((array) $values));
+
+        if ($values === []) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($column, $values) {
+            foreach ($values as $value) {
+                $q->orWhereJsonContains($column, $value);
+            }
+        });
+    }
+
     // Apply sorting to job query
     public function scopeWithSorting(Builder $query, string $sort = 'newest'): Builder
     {
