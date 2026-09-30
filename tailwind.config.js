@@ -21,6 +21,7 @@ export default {
                 primary: "#1E3A8A", // Deep blue for a strong, modern base
                 secondary: "#14B8A6", // Teal for interactive and accent elements
                 tertiary: "#6B7280", // Cool gray for secondary text and UI components
+                paper: "#F7F3ED", // Warm off-white matching the logo artwork background (auth brand panel)
                 accent: "#F59E0B", // Warm amber for CTAs and alerts
                 neutral: {
                     50: "#F9FAFB",

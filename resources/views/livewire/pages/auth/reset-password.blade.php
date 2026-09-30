@@ -67,46 +67,22 @@ new #[Layout('layouts.guest')] class extends Component {
     }
 }; ?>
 
-<x-auth-card :title="__('Reset Password')" subtitle="Enter your new password below">
+<x-auth-layout :title="__('Reset password')" :subtitle="__('Choose a new password for your account.')"
+    :panelTitle="__('Almost back in')"
+    :panelText="__('Pick a strong password you haven’t used elsewhere and you’ll be back to your jobs in seconds.')">
 
     <!-- Password Reset Form -->
-    <form wire:submit="resetPassword" class="space-y-4 font-main">
+    <form wire:submit="resetPassword" class="space-y-5">
+        <x-auth-field name="email" type="email" :label="__('Email')" wire:model="email"
+            placeholder="you@example.com" required autofocus autocomplete="username" />
 
-            <!-- Email Address -->
-            <div>
-                <x-input-label for="email" :value="__('Email')" class="sr-only" />
-                <x-text-input wire:model="email" id="email"
-                    class="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all duration-200 focus:outline-none"
-                    type="email" name="email" placeholder="{{ __('Email') }}" required autofocus
-                    autocomplete="username" />
-                <x-input-error :messages="$errors->get('email')" class="mt-2" />
-            </div>
+        <x-auth-field name="password" type="password" :label="__('New password')" wire:model="password"
+            placeholder="{{ __('Enter a new password') }}" required autocomplete="new-password" />
 
-            <!-- Password -->
-            <div>
-                <x-input-label for="password" :value="__('Password')" class="sr-only" />
-                <x-text-input wire:model="password" id="password"
-                    class="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all duration-200 focus:outline-none"
-                    type="password" name="password" placeholder="{{ __('New Password') }}" required
-                    autocomplete="new-password" />
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
-            </div>
+        <x-auth-field name="password_confirmation" type="password" :label="__('Confirm password')"
+            wire:model="password_confirmation" placeholder="{{ __('Repeat your new password') }}" required
+            autocomplete="new-password" />
 
-            <!-- Confirm Password -->
-            <div>
-                <x-input-label for="password_confirmation" :value="__('Confirm Password')" class="sr-only" />
-                <x-text-input wire:model="password_confirmation" id="password_confirmation"
-                    class="w-full px-4 py-3 bg-neutral-50 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 transition-all duration-200 focus:outline-none"
-                    type="password" name="password_confirmation" placeholder="{{ __('Confirm Password') }}" required
-                    autocomplete="new-password" />
-                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-            </div>
-
-            <!-- Submit Button -->
-            <x-primary-button
-                class="font-secondary inline-flex items-center justify-center w-full px-6 py-3 bg-secondary border border-transparent rounded-xl font-semibold text-sm text-white tracking-widest hover:bg-teal-600 focus:bg-teal-600 active:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-secondary focus:ring-offset-2 focus:ring-secondary/50 transition-all duration-200 transform hover:shadow-lg hover:shadow-secondary/30">
-                {{ __('Reset Password') }}
-            </x-primary-button>
-
+        <x-auth-button wire:target="resetPassword">{{ __('Reset password') }}</x-auth-button>
     </form>
-</x-auth-card>
+</x-auth-layout>

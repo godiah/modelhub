@@ -49,8 +49,7 @@ new class extends Component {
                 <div class="shrink-0">
                     <a href="{{ route('home') }}" wire:navigate
                         class="flex items-center group transition-transform duration-200 hover:scale-105">
-                        <x-application-logo
-                            class="block h-9 w-auto fill-current text-primary group-hover:text-secondary transition-colors duration-200" />
+                        <x-application-logo variant="mark" class="block h-9 w-auto" />
                     </a>
                 </div>
 
