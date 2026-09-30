@@ -98,10 +98,9 @@
 
                         <!-- Filter Reset Button -->
                         <div class="flex justify-end">
-                            <button id="reset-filters"
-                                class="px-4 py-2 text-neutral-600 border border-neutral-300 hover:bg-neutral-100 rounded-lg transition-colors text-sm font-medium">
+                            <x-btn variant="secondary" id="reset-filters">
                                 Reset Filters
-                            </button>
+                            </x-btn>
                         </div>
                     </div>
                 </div>

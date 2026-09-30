@@ -10,11 +10,10 @@
                         <p class="text-neutral-500 mb-6 max-w-md mx-auto font-secondary">You don't have any saved drafts
                             yet. Start
                             applying for jobs and save your progress along the way.</p>
-                        <a href="{{ route('jobs.browse') }}"
-                            class="inline-flex items-center px-5 py-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors font-main font-medium">
+                        <x-btn size="lg" href="{{ route('jobs.browse') }}">
                             Explore Opportunities
                             <x-icon name="arrow-right" class="h-5 w-5 ml-2" />
-                        </a>
+                        </x-btn>
                     </div>
                 </x-card>
             @else
@@ -55,12 +54,10 @@
                                         method="POST" class="inline-block" id="delete-form-{{ $draft->id }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit"
-                                            class="inline-flex items-center px-4 py-2 bg-white border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors font-main text-sm font-medium"
-                                            onclick="confirmDelete(event, {{ $draft->id }})">
-                                            <x-icon name="trash" class="h-4 w-4 mr-2 text-red-500" />
+                                        <x-btn variant="secondary" type="submit" onclick="confirmDelete(event, {{ $draft->id }})">
+                                            <x-icon name="trash" class="h-4 w-4 text-red-500" />
                                             Delete
-                                        </button>
+                                        </x-btn>
                                     </form>
                                 </div>
                             </div>

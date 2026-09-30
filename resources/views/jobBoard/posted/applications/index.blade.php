@@ -93,11 +93,9 @@
                                     <option value="hired">Hired</option>
                                     <option value="rejected">Rejected</option>
                                 </select>
-                                <a href="#" id="clearFiltersButton"
-                                    style="display: {{ $hasFilters ? 'inline-flex' : 'none' }}"
-                                    class="items-center gap-1 px-3 py-1.5 border border-neutral-300 text-sm rounded-md text-neutral-700 bg-white hover:bg-neutral-100 hover:border-primary hover:text-primary transition-colors duration-200">
+                                <x-btn variant="secondary" size="sm" href="#" id="clearFiltersButton" style="display: {{ $hasFilters ? 'inline-flex' : 'none' }}">
                                     Clear Filters
-                                </a>
+                                </x-btn>
 
                             </div>
                         @endif
@@ -115,14 +113,12 @@
                                 recently posted or it hasn't gained visibility yet.
                             </p>
                             <div class="space-x-4 pt-2 font-secondary">
-                                <a href="{{ route('jobs.edit', ['job' => $job->slug]) }}"
-                                    class="px-4 py-2 text-sm font-medium text-primary bg-white border border-primary rounded-md shadow-sm hover:bg-primary hover:text-white transition">
+                                <x-btn variant="secondary" href="{{ route('jobs.edit', ['job' => $job->slug]) }}">
                                     Edit Job Details
-                                </a>
-                                <a href=""
-                                    class="px-4 py-2 text-sm font-medium text-white bg-secondary rounded-md shadow-sm hover:bg-secondary/90 transition">
+                                </x-btn>
+                                <x-btn variant="secondary" href="">
                                     Share Job
-                                </a>
+                                </x-btn>
                             </div>
                         </div>
                     @else

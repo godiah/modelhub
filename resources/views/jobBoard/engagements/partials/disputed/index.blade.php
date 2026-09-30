@@ -124,12 +124,11 @@
         <div
             class="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0 sm:space-x-4">
             <!-- View Dispute Details Button -->
-            <a href="{{ route('engagements.show-disputed', $engagement->id) }}"
-                class="group inline-flex items-center px-5 py-2.5 bg-secondary text-white text-sm font-medium font-main rounded-lg shadow-sm hover:bg-secondary/90 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 focus:ring-2 focus:ring-secondary/20 focus:outline-none">
-                <x-icon name="document-text" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+            <x-btn href="{{ route('engagements.show-disputed', $engagement->id) }}">
+                <x-icon name="document-text" class="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                 View Dispute Details
                 <x-icon name="chevron-right" class="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform duration-200" />
-            </a>
+            </x-btn>
 
             <!-- Support Contact -->
             <div class="flex items-center space-x-2 text-sm text-neutral-600 font-main">

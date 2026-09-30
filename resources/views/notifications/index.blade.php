@@ -9,20 +9,18 @@
                             @if (Auth::user()->unreadNotifications->count() > 0)
                                 <form action="{{ route('notifications.read-all') }}" method="POST" class="inline">
                                     @csrf
-                                    <button type="submit"
-                                        class="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition">
-                                        <x-icon name="check" class="h-4 w-4 mr-2" />
+                                    <x-btn variant="secondary" type="submit">
+                                        <x-icon name="check" class="h-4 w-4" />
                                         Mark all as read
-                                    </button>
+                                    </x-btn>
                                 </form>
                             @endif
 
                             @if ($notifications->count() > 0)
-                                <button type="button" x-data x-on:click="$dispatch('open-modal', 'clear-notifications')"
-                                    class="inline-flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
-                                    <x-icon name="trash" class="h-4 w-4 mr-2" />
+                                <x-btn variant="danger-outline" type="button" x-data x-on:click="$dispatch('open-modal', 'clear-notifications')">
+                                    <x-icon name="trash" class="h-4 w-4" />
                                     Clear all notifications
-                                </button>
+                                </x-btn>
                             @endif
                         </div>
                     </div>

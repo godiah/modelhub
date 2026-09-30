@@ -274,29 +274,27 @@
                             <form action="{{ route('engagements.accept-partial-payment', $payment->id) }}"
                                 method="POST" class="">
                                 @csrf
-                                <button type="submit"
-                                    class="w-full py-2.5 px-4 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg text-sm transition-colors duration-200 flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" width="24"
-                                        height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <x-btn class="w-full" type="submit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" width="24"
+                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                         <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                     </svg>
                                     Accept Payment
-                                </button>
+                                </x-btn>
                             </form>
-                            <button type="button" x-data x-on:click="$dispatch('open-modal', 'dispute-warning')"
-                                class="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition-colors duration-200 flex items-center justify-center flex-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" width="24"
-                                    height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <x-btn variant="danger" class="w-full flex-1" type="button" x-data x-on:click="$dispatch('open-modal', 'dispute-warning')">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" width="24"
+                  height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z">
                                     </path>
                                     <line x1="12" y1="9" x2="12" y2="13"></line>
                                     <line x1="12" y1="17" x2="12.01" y2="17"></line>
                                 </svg>
                                 Dispute Payment
-                            </button>
+                            </x-btn>
                         </div>
                     </div>
                 @endif
@@ -333,15 +331,14 @@
                                 </p>
                                 <x-form.error name="payment_amount" variant="plain" class="mt-1" />
                             </div>
-                            <button type="submit"
-                                class="w-full py-2.5 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg text-sm transition-colors duration-200 flex items-center justify-center">
+                            <x-btn class="w-full" type="submit">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="h-5 w-5 mr-2">
+                  stroke-width="1.5" stroke="currentColor" class="h-5 w-5">
                                     <path stroke-linecap="round" stroke-linejoin="round"
                                         d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672Zm-7.518-.267A8.25 8.25 0 1 1 20.25 10.5M8.288 14.212A5.25 5.25 0 1 1 17.25 10.5" />
                                 </svg>
                                 Process Payment
-                            </button>
+                            </x-btn>
                         </form>
                     @elseif(Auth::user()->id === $engagement->application->applicant_id)
                         <div class="p-4 bg-amber-50 border border-amber-200 rounded-lg shadow-sm">

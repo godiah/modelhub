@@ -236,16 +236,14 @@
                         </p>
                     </div>
                     {{-- <div class="flex space-x-4">
-                        <a href="{{ route('jobs.apply', ['job' => $application->job->slug]) }}"
-                            class="inline-flex items-center px-4 py-2 bg-neutral-100 text-neutral-800 border border-neutral-300 rounded-lg hover:bg-neutral-200 transition-colors">
+                        <x-btn variant="secondary" href="{{ route('jobs.apply', ['job' => $application->job->slug]) }}">
                             View Job Details
-                        </a>
+                        </x-btn>
                         @if ($application->status === ApplicationStatus::Submitted)
-                            <a href="#"
-                                class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-                                <x-icon name="document-text" class="h-5 w-5 mr-2" />
+                            <x-btn href="#">
+                                <x-icon name="document-text" class="h-5 w-5" />
                                 Contact Client
-                            </a>
+                            </x-btn>
                         @endif
                     </div> --}}
                 </div>

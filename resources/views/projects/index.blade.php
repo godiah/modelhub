@@ -204,9 +204,9 @@
                                 </div>
                                 <h3 class="text-lg font-medium text-neutral-900 mb-2">Error Loading Projects</h3>
                                 <p class="text-neutral-500 mb-4">There was an error loading the projects. Please try again.</p>
-                                <button onclick="location.reload()" class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors">
+                                <x-btn onclick="location.reload()">
                                     Reload Page
-                                </button>
+                                </x-btn>
                             </div>
                         `;
                         })

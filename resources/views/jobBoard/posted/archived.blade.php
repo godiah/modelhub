@@ -123,17 +123,16 @@
 
                                 <!-- Action Buttons -->
                                 <div class="mt-6 pt-6 border-t border-neutral-100 flex flex-wrap justify-end gap-3">
-                                    <a href="{{ route('my-jobs.archived.show', $job) }}"
-                                        class="inline-flex items-center px-4 py-2 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors duration-200 font-main text-sm font-medium">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
+                                    <x-btn variant="secondary" href="{{ route('my-jobs.archived.show', $job) }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                         </svg>
                                         View Details
-                                    </a>
+                                    </x-btn>
                                     <x-btn variant="secondary" class="text-sm" @click="showingRestore = true">
                                         <x-icon name="arrow-path" class="h-4 w-4" />
                                         Restore Job

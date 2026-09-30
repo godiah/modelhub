@@ -221,29 +221,24 @@
                             <div class="mt-3 font-main">
                                 @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active)
                                     @if ($application->status === ApplicationStatus::Hired)
-                                        <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"
-                                            class="block w-full text-center px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90 transition shadow-sm">
+                                        <x-btn class="w-full" href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}">
                                             View Full Details
-                                        </a>
-                                        <a href="#"
-                                            class="block w-full text-center px-4 py-2 text-sm font-medium bg-white text-primary border border-primary rounded mt-2 hover:bg-primary/5 transition">
+                                        </x-btn>
+                                        <x-btn variant="secondary" class="w-full mt-2" href="#">
                                             Contact Freelancer
-                                        </a>
+                                        </x-btn>
                                     @else
-                                        <button disabled
-                                            class="block w-full text-center px-4 py-2 text-sm font-medium bg-neutral-100 text-neutral-400 rounded cursor-not-allowed border border-neutral-200">
+                                        <x-btn variant="secondary" class="w-full" disabled>
                                             Position Filled
-                                        </button>
+                                        </x-btn>
                                     @endif
                                 @else
-                                    <a href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}"
-                                        class="block w-full text-center px-4 py-2 text-sm font-medium bg-primary text-white rounded hover:bg-primary/90 transition shadow-sm">
+                                    <x-btn class="w-full" href="{{ route('my-jobs.applications.show', ['application' => $application->id]) }}">
                                         View Full Details
-                                    </a>
-                                    <a href="#"
-                                        class="block w-full text-center px-4 py-2 text-sm font-medium bg-white text-primary border border-primary rounded mt-2 hover:bg-primary/5 transition">
+                                    </x-btn>
+                                    <x-btn variant="secondary" class="w-full mt-2" href="#">
                                         Contact Applicant
-                                    </a>
+                                    </x-btn>
                                 @endif
                             </div>
                         </x-card>

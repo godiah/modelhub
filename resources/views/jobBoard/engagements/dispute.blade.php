@@ -161,20 +161,18 @@
 
                         <!-- Action Buttons -->
                         <div class="pt-4 flex justify-between items-center border-t border-neutral-200">
-                            <a href="{{ route('engagements.show-cancelled', $engagement->id) }}"
-                                class="px-5 py-2.5 border border-neutral-300 rounded-lg shadow-sm text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500 transition duration-200">
+                            <x-btn variant="secondary" href="{{ route('engagements.show-cancelled', $engagement->id) }}">
                                 Cancel
-                            </a>
-                            <button type="submit"
-                                class="px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-secondary hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition duration-200 flex items-center">
+                            </x-btn>
+                            <x-btn type="submit">
                                 <span>Submit Dispute</span>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round">
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round">
                                     <line x1="5" y1="12" x2="19" y2="12"></line>
                                     <polyline points="12 5 19 12 12 19"></polyline>
                                 </svg>
-                            </button>
+                            </x-btn>
                         </div>
                     </form>
                 </div>

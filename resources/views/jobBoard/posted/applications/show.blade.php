@@ -1,11 +1,10 @@
 @use('App\Enums\ApplicationStatus')
 <x-app-layout crumb="Application details">
     <x-slot name="toolbar">
-        <a href="{{ route('my-jobs.applications.index', ['slug' => $job->slug]) }}"
-            class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
-            <x-icon name="arrow-left" class="h-4 w-4 mr-2" />
+        <x-btn variant="secondary" href="{{ route('my-jobs.applications.index', ['slug' => $job->slug]) }}">
+            <x-icon name="arrow-left" class="h-4 w-4" />
             Back to Applications
-        </a>
+        </x-btn>
     </x-slot>
 
     <style>
@@ -587,13 +586,11 @@
                                             </div>
 
                                             <!-- Submit Button -->
-                                            <button type="submit" x-show="selectedStatus !== 'hired'"
-                                                class="w-full py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors flex items-center justify-center 
-                                            @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) opacity-50 cursor-not-allowed @endif"
-                                                @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>
-                                                <x-icon name="check" class="h-5 w-5 mr-2" />
+                                            @php($statusLocked = $application->job->hasAcceptedEngagement() && !$application->job->is_active)
+                                            <x-btn type="submit" block size="lg" x-show="selectedStatus !== 'hired'" :disabled="$statusLocked">
+                                                <x-icon name="check" class="h-5 w-5" />
                                                 Update Status
-                                            </button>
+                                            </x-btn>
                                         </div>
                                     </form>
 
@@ -664,12 +661,10 @@
                                                 <p class="text-neutral-500 mb-4">Add deliverables to create
                                                     clear
                                                     milestones for this project</p>
-                                                <button
-                                                    @click.prevent="deliverables.push({title: '', description: '', due_date: ''})"
-                                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                                                    <x-icon name="plus-2" class="h-5 w-5 mr-2" />
+                                                <x-btn @click.prevent="deliverables.push({title: '', description: '', due_date: ''})">
+                                                    <x-icon name="plus-2" class="h-5 w-5" />
                                                     Add First Deliverable
-                                                </button>
+                                                </x-btn>
                                             </div>
 
                                             <!-- Deliverables list -->
@@ -811,11 +806,10 @@
                                     </div>
 
                                     <!-- Submit Button -->
-                                    <button type="submit"
-                                        class="w-full py-3 px-4 bg-secondary text-white rounded-lg font-medium hover:bg-secondary-dark focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 transition-colors flex items-center justify-center">
-                                        <x-icon name="paper-airplane" class="h-5 w-5 mr-2" />
+                                    <x-btn size="lg" class="w-full" type="submit">
+                                        <x-icon name="paper-airplane" class="h-5 w-5" />
                                         Send Message
-                                    </button>
+                                    </x-btn>
                                 </div>
                             </form>
                         </div>

@@ -35,11 +35,10 @@
 
                         <div class="sm:ml-4 flex font-main">
                             @if ($isApplicant && $engagement->status === EngagementStatus::EmployerAccepted)
-                                <a href="{{ route('engagements.response-form', ['applicationId' => $engagement->application_id]) }}"
-                                    class="mr-3 inline-flex items-center px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full border border-primary/20 hover:bg-primary/20 transition-colors">
-                                    <x-icon name="check" class="h-3.5 w-3.5 mr-1" />
+                                <x-btn size="sm" class="mr-3" href="{{ route('engagements.response-form', ['applicationId' => $engagement->application_id]) }}">
+                                    <x-icon name="check" class="h-3.5 w-3.5" />
                                     Respond
-                                </a>
+                                </x-btn>
                             @endif
 
                             <button class="flex items-center text-neutral-500 hover:text-neutral-700" x-cloak>
@@ -237,13 +236,10 @@
                                             @if ($deliverable->rejected_at)
                                                 <div x-show="expanded" x-collapse
                                                     class="border-neutral-200 px-5 pb-5 bg-neutral-50 rounded-b-md">
-                                                    <button
-                                                        x-on:click="$dispatch('open-modal', 'resubmit-deliverable-{{ $deliverable->id }}')"
-                                                        type="button"
-                                                        class="px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-tertiary font-medium text-sm rounded-md shadow-sm transition-colors duration-200 flex items-center">
-                                                        <x-icon name="cloud-arrow-up" class="h-4 w-4 mr-1.5" />
+                                                    <x-btn x-on:click="$dispatch('open-modal', 'resubmit-deliverable-{{ $deliverable->id }}')" type="button">
+                                                        <x-icon name="cloud-arrow-up" class="h-4 w-4" />
                                                         Resubmit Deliverable
-                                                    </button>
+                                                    </x-btn>
                                                 </div>
                                             @endif
 
@@ -488,11 +484,10 @@
                                                         @endif
 
                                                         <div class="flex justify-end">
-                                                            <button type="submit"
-                                                                class="px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-tertiary font-medium text-sm rounded-md shadow-sm transition-colors duration-200 flex items-center">
-                                                                <x-icon name="check" class="h-4 w-4 mr-1.5" />
+                                                            <x-btn type="submit">
+                                                                <x-icon name="check" class="h-4 w-4" />
                                                                 {{ $deliverable->rejected_at ? 'Resubmit Deliverable' : 'Submit Deliverable' }}
-                                                            </button>
+                                                            </x-btn>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -595,11 +590,10 @@
 
                                     <!-- Add Deliverable Button -->
                                     @if (!$engagement->isCompleted() && !$engagement->isCancelled())
-                                        <button type="button" x-data x-on:click="$dispatch('open-modal', 'add-deliverable-{{ $engagement->id }}')"
-                                            class="font-tertiary inline-flex items-center px-4 py-2 rounded-lg text-white bg-secondary hover:bg-secondary/90 transition-colors shadow-sm">
-                                            <x-icon name="plus" class="h-5 w-5 mr-2" />
+                                        <x-btn type="button" x-data x-on:click="$dispatch('open-modal', 'add-deliverable-{{ $engagement->id }}')">
+                                            <x-icon name="plus" class="h-5 w-5" />
                                             Add Deliverable
-                                        </button>
+                                        </x-btn>
                                     @endif
 
                                 </div>
@@ -815,35 +809,27 @@
                                                 <div class="flex flex-wrap items-center gap-3 mt-2">
                                                     <!-- Approve/Reject Deliverable -->
                                                     @if ($deliverable->status === 'submitted' && $engagement->status === EngagementStatus::Active)
-                                                        <button x-data
-                                                            x-on:click="$dispatch('open-modal', 'approve-deliverable-{{ $deliverable->id }}')"
-                                                            class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-white bg-secondary hover:bg-secondary/90 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
-                                                            <x-icon name="check" class="h-4 w-4 mr-1.5" />
+                                                        <x-btn x-data x-on:click="$dispatch('open-modal', 'approve-deliverable-{{ $deliverable->id }}')">
+                                                            <x-icon name="check" class="h-4 w-4" />
                                                             Approve
-                                                        </button>
+                                                        </x-btn>
 
-                                                        <button x-data
-                                                            x-on:click="$dispatch('open-modal', 'reject-deliverable-{{ $deliverable->id }}')"
-                                                            class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-accent border border-accent/30 bg-white hover:bg-accent/5 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
-                                                            <x-icon name="x-mark" class="h-4 w-4 mr-1.5" />
+                                                        <x-btn variant="secondary" x-data x-on:click="$dispatch('open-modal', 'reject-deliverable-{{ $deliverable->id }}')">
+                                                            <x-icon name="x-mark" class="h-4 w-4" />
                                                             Request Changes
-                                                        </button>
+                                                        </x-btn>
                                                     @endif
 
                                                     <!-- Edit/Delete Deliverable -->
                                                     @if ($deliverable->status === 'pending' && $engagement->status === EngagementStatus::Active)
-                                                        <button x-data
-                                                            x-on:click="$dispatch('open-modal', 'edit-deliverable-{{ $deliverable->id }}')"
-                                                            class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-primary border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/40">
-                                                            <x-icon name="pencil-square" class="h-4 w-4 mr-1.5" />
+                                                        <x-btn variant="secondary" x-data x-on:click="$dispatch('open-modal', 'edit-deliverable-{{ $deliverable->id }}')">
+                                                            <x-icon name="pencil-square" class="h-4 w-4" />
                                                             Edit
-                                                        </button>
-                                                        <button x-data
-                                                            x-on:click="$dispatch('open-modal', 'remove-deliverable-{{ $deliverable->id }}')"
-                                                            class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500/40">
-                                                            <x-icon name="trash" class="h-4 w-4 mr-1.5" />
+                                                        </x-btn>
+                                                        <x-btn variant="danger-outline" x-data x-on:click="$dispatch('open-modal', 'remove-deliverable-{{ $deliverable->id }}')">
+                                                            <x-icon name="trash" class="h-4 w-4" />
                                                             Remove
-                                                        </button>
+                                                        </x-btn>
                                                     @endif
                                                 </div>
                                             </div>
@@ -947,11 +933,10 @@
                             <textarea x-model="newMessage" rows="2" required @keydown.enter.prevent="sendMessage()"
                                 class="flex-grow rounded-md border-neutral-300 shadow-sm text-sm font-main resize-none focus:border-secondary focus:ring-secondary"
                                 placeholder="Type your message..."></textarea>
-                            <button type="submit" :disabled="sending || !newMessage.trim()"
-                                class="ml-3 inline-flex items-center justify-center rounded-md px-4 py-2 bg-secondary text-white hover:bg-secondary/90 disabled:opacity-50">
+                            <x-btn class="ml-3" type="submit" ::disabled="sending || !newMessage.trim()">
                                 <x-icon name="paper-airplane" x-show="!sending" class="h-5 w-5" />
                                 <x-spinner class="h-5 w-5" x-show="sending" />
-                            </button>
+                            </x-btn>
                         </div>
                     </form>
                 </div>

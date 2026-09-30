@@ -57,11 +57,10 @@
                 </div>
                 <div>
                     @if ($hasArchivedEngagements)
-                        <a href="{{ route('engagements.archived') }}"
-                            class="inline-flex items-center px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-tertiary text-sm font-medium shadow-sm">
-                            <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
+                        <x-btn variant="secondary" href="{{ route('engagements.archived') }}">
+                            <x-icon name="archive-box-2" class="h-5 w-5" />
                             View Archived
-                        </a>
+                        </x-btn>
                     @endif
                 </div>
             </div>
@@ -76,11 +75,10 @@
                     <p class="text-neutral-500 font-main max-w-md mx-auto mb-6">You don't have any active job
                         engagements at
                         the moment. Apply to job posts to receive offers.</p>
-                    <a href="{{ route('jobs.browse') }}"
-                        class="inline-flex items-center px-5 py-3 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 transition-all">
-                        <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
+                    <x-btn size="lg" href="{{ route('jobs.browse') }}">
+                        <x-icon name="magnifying-glass" class="h-5 w-5" />
                         Browse Available Jobs
-                    </a>
+                    </x-btn>
                 </x-card>
             @else
                 @include('jobBoard.engagements.partials.engagements-list', [

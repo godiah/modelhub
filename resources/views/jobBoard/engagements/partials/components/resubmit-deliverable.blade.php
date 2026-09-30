@@ -117,10 +117,9 @@
                                 <p class="text-xs text-neutral-500 font-main">Upload up
                                     to 5 files</p>
 
-                                <button type="button" @click="$refs.fileInput.click()"
-                                    class="mt-2 px-4 py-2 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 text-sm font-medium text-neutral-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
+                                <x-btn variant="secondary" class="mt-2" type="button" @click="$refs.fileInput.click()">
                                     Browse Files
-                                </button>
+                                </x-btn>
                             </div>
                         </div>
                         <input type="file" name="submission_files[]" multiple x-ref="fileInput" class="hidden"
@@ -245,16 +244,13 @@
 
                 <!-- Actions -->
                 <div class="flex justify-end gap-3">
-                    <button type="button"
-                        @click="$dispatch('close-modal', 'resubmit-deliverable-{{ $deliverable->id }}')"
-                        class="px-4 py-2 text-sm font-medium text-neutral-700 bg-white border border-neutral-300 rounded-md hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">
+                    <x-btn variant="secondary" type="button" @click="$dispatch('close-modal', 'resubmit-deliverable-{{ $deliverable->id }}')">
                         Cancel
-                    </button>
-                    <button type="submit"
-                        class="px-4 py-2 text-sm font-medium text-white bg-secondary rounded-md hover:bg-secondary/90 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
-                        <x-icon name="check" class="h-4 w-4 mr-1.5 inline" />
+                    </x-btn>
+                    <x-btn type="submit">
+                        <x-icon name="check" class="h-4 w-4 inline" />
                         Resubmit Deliverable
-                    </button>
+                    </x-btn>
                 </div>
             </form>
         </div>

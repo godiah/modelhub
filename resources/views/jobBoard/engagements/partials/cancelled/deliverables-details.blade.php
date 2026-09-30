@@ -102,20 +102,18 @@
                                     <form method="POST"
                                         action="{{ route('engagements.deliverables.approve', $deliverable->id) }}">
                                         @csrf
-                                        <button
-                                            class="inline-flex items-center gap-1 bg-green-100 hover:bg-green-200 text-green-700 font-medium px-4 py-2 rounded-md transition duration-200">
+                                        <x-btn size="sm">
                                             <x-icon name="check" class="h-4 w-4" />
                                             Approve
-                                        </button>
+                                        </x-btn>
                                     </form>
                                     <form method="POST"
                                         action="{{ route('engagements.deliverables.reject', $deliverable->id) }}">
                                         @csrf
-                                        <button
-                                            class="inline-flex items-center gap-1 bg-red-100 hover:bg-red-200 text-red-700 font-medium px-4 py-2 rounded-md transition duration-200">
+                                        <x-btn variant="danger-outline" size="sm">
                                             <x-icon name="x-mark" class="h-4 w-4" />
                                             Reject
-                                        </button>
+                                        </x-btn>
                                     </form>
                                 </div>
                             @endif

@@ -157,11 +157,10 @@
 
                     <!-- Action Buttons -->
                     <div class="flex flex-col justify-end sm:flex-row gap-3 pt-2">
-                        <button type="submit" name="action" value="submitted"
-                            class="bg-secondary hover:bg-secondary/90 focus:ring-2 focus:ring-offset-2 focus:ring-secondary text-white font-medium px-3 py-1.5 rounded-lg shadow-sm transition duration-150 ease-in-out flex items-center justify-center">
-                            <x-icon name="chevron-double-right" class="h-5 w-5 mr-2" />
+                        <x-btn size="sm" type="submit" name="action" value="submitted">
+                            <x-icon name="chevron-double-right" class="h-5 w-5" />
                             Submit Application
-                        </button>
+                        </x-btn>
                     </div>
 
                     <!-- Hidden field for tracking existing portfolio files -->

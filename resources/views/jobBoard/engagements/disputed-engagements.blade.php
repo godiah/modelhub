@@ -379,11 +379,10 @@
 
                         <!-- Submit Button -->
                         <div class="flex items-center justify-end space-x-4 pt-1 border-t border-neutral-200/50">
-                            <button type="submit"
-                                class="group inline-flex items-center px-6 py-3 bg-green-600 text-white text-sm font-bold font-main rounded-xl shadow-lg hover:bg-green-700 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
-                                <x-icon name="check-circle" class="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                            <x-btn size="lg" type="submit">
+                                <x-icon name="check-circle" class="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
                                 Finalize Resolution
-                            </button>
+                            </x-btn>
                         </div>
                     </form>
                 @else

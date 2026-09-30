@@ -316,10 +316,8 @@ new class extends Component {
                         <!-- Inline delete confirmation -->
                         <div x-show="confirming" x-cloak class="ml-auto flex shrink-0 items-center gap-2 text-sm">
                             <span class="hidden text-tertiary sm:inline">{{ __('Delete this link?') }}</span>
-                            <button type="button" wire:click="delete({{ $link['id'] }})"
-                                class="rounded-lg bg-red-600 px-3 py-1.5 font-semibold text-white transition-colors hover:bg-red-700">{{ __('Delete') }}</button>
-                            <button type="button" @click="confirming = false"
-                                class="rounded-lg border border-neutral-300 px-3 py-1.5 font-semibold text-neutral-700 transition-colors hover:bg-neutral-50">{{ __('Keep') }}</button>
+                            <x-btn variant="danger" size="sm" type="button" wire:click="delete({{ $link['id'] }})">{{ __('Delete') }}</x-btn>
+                            <x-btn variant="secondary" size="sm" type="button" @click="confirming = false">{{ __('Keep') }}</x-btn>
                         </div>
                     </li>
                 @endforeach
