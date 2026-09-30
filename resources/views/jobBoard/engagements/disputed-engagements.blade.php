@@ -12,24 +12,15 @@
                 </h2>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ $isAdminViewer ? route('admin.disputes.index') : route('engagements.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ $isAdminViewer ? route('admin.disputes.index') : route('engagements.index') }}">
                     @if ($isAdminViewer)
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="h-5 w-5 mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                        </svg>
+                        <x-icon name="scale" class="h-5 w-5 mr-2" />
                         Disputed Engagements
                     @else
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="h-5 w-5 mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
-                        </svg>
+                        <x-icon name="chat-bubble-text" class="h-5 w-5 mr-2" stroke-width="1.5" />
                         My Engagements
                     @endif
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>
@@ -83,13 +74,7 @@
                                 <h3 class="font-tertiary font-bold text-lg text-neutral-800">Engagement Disputed</h3>
                             </div>
                             <p class="text-sm text-neutral-700 mt-1 flex items-center">
-                                <svg class="w-4 h-4 mr-1.5 text-neutral-500" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
+                                <x-icon name="calendar-2" class="w-4 h-4 mr-1.5 text-neutral-500" />
                                 <span class="font-medium text-neutral-700">Disputed on</span> <span
                                     class="font-medium text-neutral-700 ml-1">
                                     {{ optional(optional($engagement->cancellation)->dispute)->created_at?->format('M d, Y h:i A') ?? '—' }}
@@ -97,13 +82,7 @@
 
                                 @if ($dispute->isResolved())
                                     <span class="mx-2">-</span>
-                                    <svg class="w-4 h-4 mr-1.5 text-green-700" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"
-                                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                            stroke-linejoin="round" />
-                                    </svg>
+                                    <x-icon name="calendar-2" class="w-4 h-4 mr-1.5 text-green-700" />
                                     <span class="font-medium text-green-700">Resolved on</span> <span
                                         class="font-medium text-green-700 ml-1">
                                         {{ $dispute->resolved_at->format('M j, Y \a\t g:i A') }}
@@ -163,11 +142,7 @@
                     <!-- Dispute Reason Card -->
                     <x-disputes.info-card title="Dispute Reason" color="accent">
                         <x-slot:icon>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <x-icon name="question-mark-circle" class="h-5 w-5 text-accent" />
                         </x-slot:icon>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <p class="text-neutral-700 font-secondary text-sm">
@@ -179,11 +154,7 @@
                     <!-- Dispute Details Card -->
                     <x-disputes.info-card title="Detailed Description" color="primary">
                         <x-slot:icon>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                            <x-icon name="document-text" class="h-5 w-5 text-primary" />
                         </x-slot:icon>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <p class="text-neutral-700 font-secondary leading-relaxed text-sm">
@@ -210,25 +181,14 @@
                                             class="flex items-center space-x-3 text-secondary hover:text-secondary/80 transition-colors group">
                                             <div
                                                 class="bg-secondary/10 rounded-lg p-2 group-hover:bg-secondary/20 transition-colors">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                </svg>
+                                                <x-icon name="arrow-top-right-on-square" class="h-4 w-4" />
                                             </div>
                                             <div>
                                                 <span class="font-medium font-secondary text-sm">Evidence
                                                     {{ $loop->iteration }}</span>
                                                 <p class="text-xs text-neutral-500 font-secondary">Click to download</p>
                                             </div>
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 5l7 7-7 7" />
-                                            </svg>
+                                            <x-icon name="chevron-right" class="h-4 w-4 ml-auto group-hover:translate-x-1 transition-transform" />
                                         </a>
                                     </div>
                                 @endforeach
@@ -242,11 +202,7 @@
                     <!-- Filed By Card -->
                     <x-disputes.info-card title="Filed By" color="tertiary">
                         <x-slot:icon>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-tertiary" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                            </svg>
+                            <x-icon name="user" class="h-5 w-5 text-tertiary" />
                         </x-slot:icon>
                         <div class="flex items-center space-x-3">
                             <div
@@ -269,11 +225,7 @@
                     <!-- Current Status Card -->
                     <x-disputes.info-card title="Current Status" color="accent">
                         <x-slot:icon>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
+                            <x-icon name="chart-bar" class="h-5 w-5 text-accent" />
                         </x-slot:icon>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <p class="text-sm font-semibold font-secondary text-neutral-800 mb-2">
@@ -281,11 +233,7 @@
                             </p>
                             @if ($dispute->isResolved())
                                 <div class="flex items-center space-x-2 text-green-600 mb-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle" class="h-4 w-4" />
                                     <span class="text-xs font-medium font-secondary">Dispute has been resolved</span>
                                 </div>
                                 @if ($dispute->resolution_amount)
@@ -325,11 +273,7 @@
                     <!-- Resolution Notes Card -->
                     <x-disputes.info-card title="Resolution Notes" color="secondary">
                         <x-slot:icon>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
+                            <x-icon name="pencil-square" class="h-5 w-5 text-secondary" />
                         </x-slot:icon>
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             @if ($dispute->resolution_notes)
@@ -338,11 +282,7 @@
                                 </p>
                             @else
                                 <div class="flex items-center space-x-2 text-neutral-500 text-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="clock" class="h-4 w-4" />
                                     <span class="font-secondary italic">Awaiting resolution</span>
                                 </div>
                             @endif
@@ -358,11 +298,7 @@
                 <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 p-6">
                     <div class="flex items-center space-x-3 mb-4">
                         <div class="bg-green-100 rounded-lg p-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-                            </svg>
+                            <x-icon name="banknotes" class="h-6 w-6 text-green-600" stroke-width="2" />
                         </div>
                         <h3 class="text-lg font-bold font-main text-neutral-800">Partial Payment Information</h3>
                     </div>
@@ -370,25 +306,17 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <div class="flex items-center space-x-2 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-                                </svg>
+                                <x-icon name="banknotes" class="h-4 w-4 text-neutral-500" stroke-width="2" />
                                 <span class="text-sm font-medium text-neutral-600 font-tertiary">Amount</span>
                             </div>
                             <p class="text-xl font-bold text-green-600 font-main">
-                                Ksh{{ number_format($partialPayment->amount, 2) }}
+                                <x-money :amount="$partialPayment->amount" />
                             </p>
                         </div>
 
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <div class="flex items-center space-x-2 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
+                                <x-icon name="chart-bar" class="h-4 w-4 text-neutral-500" />
                                 <span class="text-sm font-medium text-neutral-600 font-tertiary">Status</span>
                             </div>
                             <p class="text-lg font-semibold text-neutral-800 font-secondary">
@@ -398,11 +326,7 @@
 
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-200/50">
                             <div class="flex items-center space-x-2 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-neutral-500"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
+                                <x-icon name="user" class="h-4 w-4 text-neutral-500" />
                                 <span class="text-sm font-medium text-neutral-600 font-tertiary">Processed By</span>
                             </div>
                             <div>
@@ -425,11 +349,7 @@
                 class="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl border-2 border-dashed border-primary/20 p-6">
                 <div class="flex items-center space-x-3 mb-6">
                     <div class="bg-primary/10 rounded-lg p-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
+                        <x-icon name="shield-check-2" class="h-6 w-6 text-primary" />
                     </div>
                     <h3 class="text-xl font-bold font-main text-neutral-800">Admin Resolution Panel</h3>
                     <span
@@ -476,12 +396,7 @@
                         <div class="flex items-center justify-end space-x-4 pt-1 border-t border-neutral-200/50">
                             <button type="submit"
                                 class="group inline-flex items-center px-6 py-3 bg-green-600 text-white text-sm font-bold font-main rounded-xl shadow-lg hover:bg-green-700 hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:ring-2 focus:ring-green-500/20 focus:outline-none">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <x-icon name="check-circle" class="h-5 w-5 mr-2 group-hover:scale-110 transition-transform duration-200" />
                                 Finalize Resolution
                             </button>
                         </div>
@@ -494,11 +409,7 @@
                         <div class="flex items-start space-x-4 mb-4">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center shadow-md">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle" class="h-6 w-6 text-white" />
                                 </div>
                             </div>
                             <div class="flex-1">

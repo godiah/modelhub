@@ -80,11 +80,7 @@
         <div class="bg-white/70 backdrop-blur-sm rounded-lg p-4 border border-neutral-200/50 mb-4">
             <div class="flex items-start space-x-3">
                 <div class="flex-shrink-0 mt-0.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
+                    <x-icon name="lock-closed" class="h-5 w-5 text-accent" />
                 </div>
                 <div class="flex-1">
                     <h4 class="font-tertiary font-semibold text-neutral-800 mb-2">Job Temporarily Frozen</h4>
@@ -101,11 +97,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
             <div class="bg-white/50 backdrop-blur-sm rounded-lg p-3 border border-neutral-200/30">
                 <div class="flex items-center space-x-2 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-                    </svg>
+                    <x-icon name="banknotes" class="h-5 w-5 text-secondary" stroke-width="2" />
                     <span class="text-xs font-bold text-neutral-600 font-tertiary">Payments</span>
                 </div>
                 <p class="text-sm text-neutral-500 font-main">Suspended</p>
@@ -113,11 +105,7 @@
 
             <div class="bg-white/50 backdrop-blur-sm rounded-lg p-3 border border-neutral-200/30">
                 <div class="flex items-center space-x-2 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
+                    <x-icon name="document-text" class="h-5 w-5 text-secondary" />
                     <span class="text-xs font-bold text-neutral-600 font-tertiary">Deliverables</span>
                 </div>
                 <p class="text-sm text-neutral-500 font-main">On Hold</p>
@@ -125,11 +113,7 @@
 
             <div class="bg-white/50 backdrop-blur-sm rounded-lg p-3 border border-neutral-200/30">
                 <div class="flex items-center space-x-2 mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
+                    <x-icon name="chat-bubble-dots" class="h-5 w-5 text-secondary" />
                     <span class="text-xs font-bold text-neutral-600 font-tertiary">Communication</span>
                 </div>
                 <p class="text-sm text-neutral-500 font-main">Limited</p>
@@ -142,18 +126,9 @@
             <!-- View Dispute Details Button -->
             <a href="{{ route('engagements.show-disputed', $engagement->id) }}"
                 class="group inline-flex items-center px-5 py-2.5 bg-secondary text-white text-sm font-medium font-main rounded-lg shadow-sm hover:bg-secondary/90 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 focus:ring-2 focus:ring-secondary/20 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <x-icon name="document-text" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                 View Dispute Details
-                <svg xmlns="http://www.w3.org/2000/svg"
-                    class="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform duration-200" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+                <x-icon name="chevron-right" class="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform duration-200" />
             </a>
 
             <!-- Support Contact -->

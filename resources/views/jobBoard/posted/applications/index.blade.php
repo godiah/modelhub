@@ -6,11 +6,7 @@
             </h2>
             <a href="{{ route('my-jobs.index', ['slug' => $job->slug]) }}"
                 class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
+                <x-icon name="arrow-left" class="h-4 w-4 mr-2" />
                 Back to My Jobs
             </a>
         </div>
@@ -26,32 +22,20 @@
                             <h3 class="text-xl font-main font-semibold text-neutral-800">{{ $job->title }}</h3>
                             <div class="mt-2 flex flex-wrap items-center gap-4 font-secondary">
                                 <p class="text-sm text-neutral-500 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    Posted on {{ $job->created_at->format('M d, Y') }}
+                                    <x-icon name="calendar" class="h-4 w-4 mr-1 text-secondary" />
+                                    Posted on <x-date :date="$job->created_at" format="M d, Y" />
                                 </p>
                                 <p class="text-sm text-neutral-500 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-accent"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="clock" class="h-4 w-4 mr-1 text-accent" />
                                     @if ($job->no_deadline)
                                         No deadline
                                     @else
-                                        Deadline: {{ $job->deadline->format('M d, Y') }}
+                                        Deadline: <x-date :date="$job->deadline" format="M d, Y" />
                                     @endif
                                 </p>
                                 <p class="text-sm text-neutral-500 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="#1e3a8a"
-                                        class="h-4 w-4 mr-1 text-primary" viewBox="0 0 512 512">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
-                                    </svg>
-                                    Budget: <span class="font-medium">Ksh.{{ number_format($job->budget) }}</span>
+                                    <x-icon name="coins" class="h-4 w-4 mr-1 text-primary" fill="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    Budget: <span class="font-medium"><x-money :amount="$job->budget" :decimals="0" /></span>
                                 </p>
                             </div>
                         </div>
@@ -98,11 +82,7 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-tertiary font-semibold text-neutral-800 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                            <x-icon name="document-text" class="h-5 w-5 mr-2 text-primary" />
                             <span>{{ $applications->count() }} Applications</span>
                             @if ($applications->count() > 0)
                                 <span
@@ -116,12 +96,7 @@
                                 <div class="relative">
                                     <input id="searchInput" type="text" placeholder="Search applications"
                                         class="pl-9 pr-3 py-2 border border-neutral-300 rounded-md text-sm focus:ring-2 focus:ring-secondary focus:border-secondary">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="h-4 w-4 absolute left-3 top-2.5 text-neutral-400" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
+                                    <x-icon name="magnifying-glass" class="h-4 w-4 absolute left-3 top-2.5 text-neutral-400" />
                                 </div>
                                 <select id="statusFilter"
                                     class="pl-3 pr-8 py-2 border border-neutral-300 rounded-md text-sm focus:ring-2 focus:ring-secondary focus:border-secondary">
@@ -145,11 +120,7 @@
                         <div
                             class="flex flex-col items-center justify-center p-10 space-y-4 text-center rounded-lg bg-neutral-50 border border-neutral-100">
                             <div class="p-6 rounded-full bg-white shadow-sm">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-14 w-14 text-neutral-300"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
+                                <x-icon name="envelope" class="h-14 w-14 text-neutral-300" />
                             </div>
                             <h3 class="text-xl font-secondary font-semibold text-neutral-800">No Applications Yet</h3>
                             <p class="text-neutral-500 max-w-md font-main">

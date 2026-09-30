@@ -196,19 +196,13 @@ new class extends Component {
     <x-section-header :title="__('Social Links')"
         :subtitle="__('Manage your social media profiles and website links')">
         <x-slot:icon>
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
-                </path>
-            </svg>
+            <x-icon name="link" class="w-5 h-5 text-white" />
         </x-slot:icon>
         @if (!$showAddForm)
             <x-slot:action>
                 <button wire:click="showAdd"
                     class="inline-flex items-center px-4 py-2 bg-white/20 hover:bg-white/30 text-white font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary font-main">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
+                    <x-icon name="plus" class="w-4 h-4 mr-2" />
                     {{ __('Add Link') }}
                 </button>
             </x-slot:action>
@@ -222,10 +216,7 @@ new class extends Component {
             <div class="bg-secondary/5 border border-secondary/20 rounded-lg p-6 mb-8">
                 <div class="flex items-start space-x-3 mb-6">
                     <div class="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                            </path>
-                        </svg>
+                        <x-icon name="plus" class="w-4 h-4 text-secondary" />
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-neutral-900 font-main">
@@ -242,9 +233,9 @@ new class extends Component {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Social Network Selection -->
                         <div class="space-y-2">
-                            <label for="social_network_id" class="block text-sm font-medium text-neutral-700 font-main">
+                            <x-form.label class="font-main" for="social_network_id">
                                 {{ __('Platform') }}
-                            </label>
+                            </x-form.label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
@@ -261,32 +252,18 @@ new class extends Component {
                                     @endforeach
                                 </select>
                             </div>
-                            @error('social_network_id')
-                                <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span>{{ $message }}</span>
-                                </div>
-                            @enderror
+                            <x-form.error name="social_network_id" />
                         </div>
 
                         <!-- Username -->
                         <div class="space-y-2">
-                            <label for="username" class="block text-sm font-medium text-neutral-700 font-main">
+                            <x-form.label class="font-main" for="username">
                                 {{ __('Username') }} <span
                                     class="text-neutral-500 font-normal">({{ __('Optional') }})</span>
-                            </label>
+                            </x-form.label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
-                                        </path>
-                                    </svg>
+                                    <x-icon name="user" class="h-5 w-5 text-neutral-400" />
                                 </div>
                                 <input type="text" wire:model.live="username" id="username"
                                     class="text-sm block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
@@ -294,87 +271,50 @@ new class extends Component {
                             </div>
                             <p class="text-xs text-neutral-500 font-main">
                                 {{ __('Will auto-generate URL for known platforms') }}</p>
-                            @error('username')
-                                <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span>{{ $message }}</span>
-                                </div>
-                            @enderror
+                            <x-form.error name="username" />
                         </div>
                     </div>
 
                     <!-- URL -->
                     <div class="space-y-2">
-                        <label for="url" class="block text-sm font-medium text-neutral-700 font-main">
+                        <x-form.label class="font-main" for="url">
                             {{ __('URL') }}
-                        </label>
+                        </x-form.label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
-                                    </path>
-                                </svg>
+                                <x-icon name="link" class="h-5 w-5 text-neutral-400" />
                             </div>
                             <input type="url" wire:model="url" id="url"
                                 class="text-sm block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
                                 placeholder="{{ __('https://example.com/profile') }}" required>
                         </div>
-                        @error('url')
-                            <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
+                        <x-form.error name="url" />
                     </div>
 
                     <!-- Display Name and Public Toggle Row -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Display Name -->
                         <div class="space-y-2">
-                            <label for="display_name" class="block text-sm font-medium text-neutral-700 font-main">
+                            <x-form.label class="font-main" for="display_name">
                                 {{ __('Display Name') }} <span
                                     class="text-neutral-500 font-normal">({{ __('Optional') }})</span>
-                            </label>
+                            </x-form.label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z">
-                                        </path>
-                                    </svg>
+                                    <x-icon name="tag" class="h-5 w-5 text-neutral-400" />
                                 </div>
                                 <input type="text" wire:model="display_name" id="display_name"
                                     class="text-sm block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
                                     placeholder="{{ __('Custom display name') }}">
                             </div>
-                            @error('display_name')
-                                <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span>{{ $message }}</span>
-                                </div>
-                            @enderror
+                            <x-form.error name="display_name" />
                         </div>
 
                         <!-- Public Toggle -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-neutral-700 font-main">
+                            <x-form.label class="font-main">
                                 {{ __('Visibility') }}
-                            </label>
+                            </x-form.label>
                             <div class="flex items-center space-x-3 pt-3">
                                 <div class="relative inline-flex items-center">
                                     <input type="checkbox" wire:model="is_public" id="is_public"
@@ -392,18 +332,13 @@ new class extends Component {
 
                     <!-- Form Actions -->
                     <div class="flex items-center justify-end space-x-3 pt-6 border-t border-neutral-200 text-sm">
-                        <button type="button" wire:click="cancel"
-                            class="inline-flex items-center px-6 py-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2 font-main">
+                        <x-button variant="neutral" size="lg" class="focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:ring-offset-2" type="button" wire:click="cancel">
                             {{ __('Cancel') }}
-                        </button>
-                        <button type="submit"
-                            class="inline-flex items-center px-6 py-3 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 font-main">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7"></path>
-                            </svg>
+                        </x-button>
+                        <x-button variant="secondary" size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" type="submit">
+                            <x-icon name="check" class="w-4 h-4 mr-2" />
                             {{ $editingId ? __('Update Link') : __('Add Link') }}
-                        </button>
+                        </x-button>
                     </div>
                 </form>
             </div>
@@ -413,25 +348,17 @@ new class extends Component {
         @if (empty($social_links))
             <div class="text-center py-12">
                 <div class="w-16 h-16 mx-auto bg-neutral-100 rounded-full flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
-                        </path>
-                    </svg>
+                    <x-icon name="link" class="w-8 h-8 text-neutral-400" />
                 </div>
                 <h3 class="text-lg font-semibold text-neutral-900 font-main mb-2">{{ __('No social links yet') }}</h3>
                 <p class="text-neutral-600 font-main mb-6">
                     {{ __('Connect your social media profiles and professional links to showcase your online presence.') }}
                 </p>
                 @if (!$showAddForm)
-                    <button wire:click="showAdd"
-                        class="inline-flex items-center px-6 py-3 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 font-main">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4">
-                            </path>
-                        </svg>
+                    <x-button variant="secondary" size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2" wire:click="showAdd">
+                        <x-icon name="plus" class="w-4 h-4 mr-2" />
                         {{ __('Add Your First Link') }}
-                    </button>
+                    </x-button>
                 @endif
             </div>
         @else
@@ -490,12 +417,7 @@ new class extends Component {
                                     <a href="{{ $link['url'] }}" target="_blank" rel="noopener noreferrer"
                                         class="text-sm text-secondary hover:text-secondary/80 font-main truncate block transition-colors duration-200">
                                         {{ $link['url'] }}
-                                        <svg class="w-3 h-3 inline ml-1" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14">
-                                            </path>
-                                        </svg>
+                                        <x-icon name="arrow-top-right-on-square" class="w-3 h-3 inline ml-1" />
                                     </a>
                                 </div>
                             </div>
@@ -520,11 +442,7 @@ new class extends Component {
                                     <button wire:click="moveDown({{ $link['id'] }})"
                                         class="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-white rounded-lg transition-all duration-200"
                                         title="{{ __('Move down') }}">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 9l-7 7-7-7"></path>
-                                        </svg>
+                                        <x-icon name="chevron-down" class="w-4 h-4" />
                                     </button>
                                 @endif
 
@@ -532,11 +450,7 @@ new class extends Component {
                                 <button wire:click="edit({{ $link['id'] }})"
                                     class="p-2 text-secondary hover:text-secondary/80 hover:bg-secondary/10 rounded-lg transition-all duration-200"
                                     title="{{ __('Edit') }}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
-                                        </path>
-                                    </svg>
+                                    <x-icon name="pencil-square" class="w-4 h-4" />
                                 </button>
 
                                 <!-- Delete Button -->
@@ -544,11 +458,7 @@ new class extends Component {
                                     wire:confirm="{{ __('Are you sure you want to delete this social link?') }}"
                                     class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
                                     title="{{ __('Delete') }}">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                        </path>
-                                    </svg>
+                                    <x-icon name="trash" class="w-4 h-4" />
                                 </button>
                             </div>
                         </div>

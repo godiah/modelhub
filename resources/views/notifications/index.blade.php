@@ -19,31 +19,18 @@
                                     @csrf
                                     <button type="submit"
                                         class="inline-flex items-center px-4 py-2 bg-primary/10 text-primary rounded-lg text-sm font-medium hover:bg-primary/20 transition">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 13l4 4L19 7" />
-                                        </svg>
+                                        <x-icon name="check" class="h-4 w-4 mr-2" />
                                         Mark all as read
                                     </button>
                                 </form>
                             @endif
 
                             @if ($notifications->count() > 0)
-                                <form action="{{ route('notifications.delete-all') }}" method="POST" class="inline"
-                                    onsubmit="return confirm('Are you sure you want to delete all notifications? This action cannot be undone.')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        class="inline-flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        Clear all notifications
-                                    </button>
-                                </form>
+                                <button type="button" x-data x-on:click="$dispatch('open-modal', 'clear-notifications')"
+                                    class="inline-flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                                    <x-icon name="trash" class="h-4 w-4 mr-2" />
+                                    Clear all notifications
+                                </button>
                             @endif
                         </div>
                     </div>
@@ -123,33 +110,6 @@
                                                         } else {
                                                             this.expanded = !this.expanded;
                                                         }
-                                                    },
-                                                    deleteNotification() {
-                                                        if (confirm('Are you sure you want to delete this notification?')) {
-                                                            fetch('{{ route('notifications.delete', $notification->id) }}', {
-                                                                    method: 'DELETE',
-                                                                    headers: {
-                                                                        'X-Requested-With': 'XMLHttpRequest',
-                                                                        'Content-Type': 'application/json',
-                                                                        'Accept': 'application/json',
-                                                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
-                                                                    }
-                                                                })
-                                                                .then(response => response.json())
-                                                                .then(data => {
-                                                                    if (data.success) {
-                                                                        const element = document.getElementById('notification-{{ $notification->id }}');
-                                                                        element.remove();
-                                                
-                                                                        // Check if there are any notifications left
-                                                                        if (document.getElementById('notifications-container').children.length === 0) {
-                                                                            location.reload();
-                                                                        }
-                                                                    }
-                                                                }).catch(error => {
-                                                                    console.error('Error:', error);
-                                                                });
-                                                        }
                                                     }
                                                 }"
                                                     class="p-5 border {{ $notification->read_at ? 'border-neutral-200 bg-white' : 'border-l-4 border-l-secondary border-r border-t border-b border-neutral-200 bg-neutral-50' }} rounded-xl shadow-sm transition-all duration-200 hover:shadow-md">
@@ -179,16 +139,10 @@
                                                                 {{ $notification->created_at->diffForHumans() }}
                                                             </span>
 
-                                                            <button @click="deleteNotification"
+                                                            <button type="button" @click="$dispatch('open-modal', { name: 'delete-notification', id: '{{ $notification->id }}' })"
                                                                 class="p-1.5 rounded-full text-neutral-400 hover:text-red-500 hover:bg-neutral-100 transition-colors duration-150"
                                                                 type="button" title="Delete notification">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                                    fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                </svg>
+                                                                <x-icon name="trash" class="h-4 w-4" />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -241,11 +195,7 @@
                         <div
                             class="flex flex-col items-center justify-center py-12 bg-neutral-50 rounded-xl border border-dashed border-neutral-300">
                             <div class="mb-4 p-3 bg-primary/10 text-primary rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
+                                <x-icon name="bell" class="h-8 w-8" />
                             </div>
                             <p class="text-lg font-tertiary text-neutral-600">You don't have any notifications yet.</p>
                             <p class="text-neutral-500 mt-1">When you receive notifications, they will appear here.</p>
@@ -255,6 +205,15 @@
             </div>
         </div>
     </div>
+
+    <x-confirm-dialog name="clear-notifications" title="Clear all notifications" icon="trash" confirm-icon="trash"
+        confirm-label="Clear all" method="DELETE" :action="route('notifications.delete-all')"
+        message="Are you sure you want to delete all notifications? This action cannot be undone." />
+
+    <x-confirm-dialog name="delete-notification" title="Delete notification" icon="trash" confirm-icon="trash"
+        confirm-label="Delete" method="DELETE"
+        action-bind="'{{ route('notifications.delete', '__ID__') }}'.replace('__ID__', payload.id)"
+        message="Are you sure you want to delete this notification?" />
 
     @include('partials.footer-secondary')
 </x-app-layout>

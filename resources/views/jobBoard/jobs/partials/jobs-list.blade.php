@@ -1,8 +1,6 @@
 <!-- resources/views/jobBoard/jobs/partials/jobs-list.blade.php -->
 @forelse ($jobs as $job)
-    <div
-        class="bg-white rounded-xl shadow-lg overflow-hidden border border-neutral-200 hover:shadow-xl transition-all duration-300 
-                md:flex md:h-40">
+    <x-card shadow="lg" clip class="hover:shadow-xl transition-all duration-300 md:flex md:h-40">
 
         <!-- Job Image Section (Top on mobile, Left on desktop) -->
         <div class="relative h-auto w-full md:w-40 md:min-w-40 md:h-full">
@@ -12,11 +10,7 @@
             @else
                 <div
                     class="w-full h-full bg-gradient-to-r from-primary/90 to-primary/70 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white/80" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
+                    <x-icon name="briefcase-2" class="h-10 w-10 text-white/80" stroke-width="1.5" />
                 </div>
             @endif
         </div>
@@ -31,7 +25,7 @@
                         {{ $job->title }}
                     </h2>
                     <p class="text-xs text-gray-500 mt-0.5">
-                        Posted on {{ $job->created_at->format('M d, Y') }}
+                        Posted on <x-date :date="$job->created_at" format="M d, Y" />
                     </p>
                 </div>
 
@@ -44,12 +38,8 @@
                     @else
                         <span
                             class="bg-secondary text-white font-semibold px-2 py-0.5 rounded-full md:flex md:items-center text-xs">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="hidden md:block h-3 w-3 mr-0.5"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            {{ $job->deadline->format('M d') }}
+                            <x-icon name="calendar" class="hidden md:block h-3 w-3 mr-0.5" />
+                            <x-date :date="$job->deadline" format="M d" />
                         </span>
                     @endif
                 </div>
@@ -101,22 +91,18 @@
                     <div>
                         <p class="text-xs text-neutral-500 font-tertiary">Budget</p>
                         <p class="text-primary font-secondary font-bold text-sm whitespace-nowrap">
-                            Ksh. {{ number_format($job->budget) }}
+                            <x-money :amount="$job->budget" :decimals="0" />
                         </p>
                     </div>
                     <a href="{{ route('jobs.apply', $job->slug) }}"
                         class="inline-flex items-center px-3 py-1.5 bg-secondary hover:bg-secondary/90 text-white rounded transition-colors text-xs font-semibold whitespace-nowrap">
                         Apply
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
+                        <x-icon name="arrow-right" class="h-3 w-3 ml-1" />
                     </a>
                 </div>
             </div>
         </div>
-    </div>
+    </x-card>
 @empty
     <div class="bg-white rounded-xl shadow p-6 text-center max-w-2xl mx-auto">
         <div class="mx-auto w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-3">

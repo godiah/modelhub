@@ -8,31 +8,21 @@
                 </h2>
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('my-jobs.index') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-5 w-5 mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z" />
-                    </svg>
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
+                    <x-icon name="briefcase" class="h-5 w-5 mr-2" stroke-width="1.5" />
                     Back to Jobs
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>
 
     <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        <div
-            class="rounded-2xl shadow-xl overflow-hidden bg-white transition-all duration-300 hover:shadow-2xl border border-neutral-200">
+        <x-card rounded="2xl" shadow="xl" clip class="transition-all duration-300 hover:shadow-2xl">
 
             <x-jobs.form-header title="Edit 3D Design Project"
                 subtitle="Update your project brief to refine your search for the ideal 3D design professional.">
                 <x-slot:icon>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-accent" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
+                    <x-icon name="pencil" class="h-8 w-8 mr-3 text-accent" />
                 </x-slot:icon>
                 <x-slot:decoration>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -64,15 +54,9 @@
                             Active
                         </label>
                     </div>
-                    @error('is_active')
-                        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                    @enderror
+                    <x-form.error name="is_active" variant="plain" />
                     <p class="text-xs text-tertiary mt-2 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <x-icon name="information-circle" class="h-4 w-4 mr-1 text-secondary" />
                         Uncheck to mark project as closed and hide it from public view
                     </p>
                 </div>
@@ -81,16 +65,12 @@
                 <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8 border-t border-neutral-200 pt-6">
                     <button type="submit" id="submit-btn"
                         class="px-6 py-3 bg-secondary text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary font-secondary transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-md hover:shadow-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                        <x-icon name="arrow-path" class="h-5 w-5 mr-2" />
                         Update Project Details
                     </button>
                 </div>
             </form>
-        </div>
+        </x-card>
 
         <script src="{{ asset('js/submit-btn-edit.js') }}"></script>
     </div>

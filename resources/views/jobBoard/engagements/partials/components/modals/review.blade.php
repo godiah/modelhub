@@ -1,56 +1,16 @@
-<!-- Review Modal -->
-<div x-data="{ open: false, rating: 0, reviewText: '', tags: [], isPublic: true, engagement: null }" x-on:open-review-modal.window="engagement = $event.detail; open = true" class="relative z-50"
-    x-cloak>
+<!-- Review Modal (single instance; opened with $dispatch('open-modal', { name: 'review-engagement', id, status })) -->
+<x-modal name="review-engagement" focusable>
+    <x-modal.header variant="brand" title="Leave a Review" icon="chat-bubble-text" />
 
-    <!-- Modal Backdrop -->
-    <div x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
-        class="fixed inset-0 bg-neutral-900/70 backdrop-blur-sm" @click="open = false">
-    </div>
-
-    <!-- Modal Content -->
-    <div x-show="open" x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 translate-y-4" class="fixed inset-0 flex items-center justify-center p-4">
-
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-auto overflow-hidden max-h-[90vh] overflow-y-auto"
-            @click.outside="open = false">
-            <!-- Modal Header -->
-            <div class="bg-gradient-to-r from-primary to-primary/90 p-5">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xl font-tertiary font-bold text-white flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
-                        </svg>
-                        Leave a Review
-                    </h3>
-                    <button @click="open = false" class="text-white hover:text-neutral-200 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="p-6 font-main">
-                <form id="reviewForm" x-bind:action="'/engagements/' + engagement.id + '/review'" method="POST">
+    <div class="p-6 font-main" x-data="{ rating: 0, reviewText: '', tags: [], isPublic: true }">
+        <form x-bind:action="'/engagements/' + payload.id + '/review'" method="POST">
                     @csrf
 
-                    <template x-if="engagement.status === 'cancelled'">
+                    <template x-if="payload.status === 'cancelled'">
                         <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
                             <div class="flex">
                                 <div class="flex-shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="information-circle" class="h-5 w-5 text-yellow-400" />
                                 </div>
                                 <div class="ml-3">
                                     <p class="text-sm text-yellow-700">
@@ -90,8 +50,8 @@
 
                     <!-- Review Text -->
                     <div class="mb-3">
-                        <label for="review" class="block text-neutral-700 font-medium mb-1">Review</label>
-                        <textarea id="review" name="review" x-model="reviewText" rows="4"
+                        <label for="engagement-review" class="block text-neutral-700 font-medium mb-1">Review</label>
+                        <textarea id="engagement-review" name="review" x-model="reviewText" rows="4"
                             class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors"
                             placeholder="Share your experience working on this project..." required></textarea>
                         <div class="text-xs text-neutral-500 mt-1 flex justify-between">
@@ -135,27 +95,10 @@
                     </div>
 
                     <!-- Action Buttons -->
-                    <div class="flex justify-end space-x-3 mt-4">
-                        <button type="button" @click="open = false"
-                            class="px-5 py-2.5 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors">
-                            Cancel
-                        </button>
-                        {{-- <button type="submit" @click="submitForm()"
-                            :disabled="rating === 0 || reviewText.length < 10"
-                            :class="{
-                                'opacity-50 cursor-not-allowed': rating === 0 || reviewText
-                                    .length < 10
-                            }"
-                            class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300">
-                            Submit Review
-                        </button> --}}
-                        <button type="submit"
-                            class="px-4 py-2 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white rounded-lg transition-colors">
-                            Submit Review
-                        </button>
+                    <div class="mt-4 flex justify-end gap-3">
+                        <x-button type="button" variant="neutral" x-on:click="dismiss()">Cancel</x-button>
+                        <x-button type="submit">Submit Review</x-button>
                     </div>
                 </form>
-            </div>
-        </div>
     </div>
-</div>
+</x-modal>

@@ -7,11 +7,7 @@
             </h2>
             <a href="{{ route('applications.my') }}"
                 class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
+                <x-icon name="arrow-left" class="h-5 w-5 mr-2" />
                 Back to Applications
             </a>
         </div>
@@ -60,14 +56,14 @@
                                 {{ $application->status->label() }}</span>
                         </p>
                         <p class="text-sm text-neutral-600">
-                            Applied on {{ $application->created_at->format('F d, Y') }}
+                            Applied on <x-date :date="$application->created_at" format="F d, Y" />
                         </p>
                     </div>
                 </div>
             </div>
 
             <!-- Job and Application Details -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-200">
+            <x-card shadow="md" clip>
                 <!-- Job Header Section -->
                 <div class="md:flex">
                     <!-- Job Image -->
@@ -78,11 +74,7 @@
                                     alt="{{ $application->job->title }}" class="h-full w-full object-cover">
                             @else
                                 <div class="flex flex-col items-center justify-center text-neutral-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                                    <x-icon name="photo" class="h-16 w-16" />
                                     <p class="mt-2">No Image Available</p>
                                 </div>
                             @endif
@@ -96,20 +88,12 @@
 
                         <div class="flex items-center mt-3 text-tertiary text-sm">
                             <span class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                Posted on {{ $application->job->created_at->format('M d, Y') }}
+                                <x-icon name="calendar" class="h-4 w-4 mr-1" />
+                                Posted on <x-date :date="$application->job->created_at" format="M d, Y" />
                             </span>
                             <span class="mx-3">•</span>
                             <span class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
+                                <x-icon name="user" class="h-4 w-4 mr-1" />
                                 By {{ $application->poster->name }}
                             </span>
                         </div>
@@ -118,7 +102,7 @@
                             <div class="bg-neutral-100 rounded-lg px-5 py-3 text-center">
                                 <p class="text-sm text-neutral-500">Job Budget</p>
                                 <p class="text-base font-bold text-primary mt-1">
-                                    Ksh{{ number_format($application->job->budget) }}</p>
+                                    <x-money :amount="$application->job->budget" :decimals="0" /></p>
                             </div>
                         </div>
                     </div>
@@ -131,24 +115,24 @@
                     <h2 class="text-lg font-semibold text-neutral-800 mb-4 font-secondary">Financial Details</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white rounded-lg p-4 border border-neutral-200">
+                        <x-card rounded="lg" shadow="none" class="p-4">
                             <p class="text-sm text-neutral-500 mb-1">Your Offer</p>
                             <p class="text-xl font-bold text-primary">
-                                Ksh{{ number_format($application->offer_amount, 2) }}</p>
-                        </div>
+                                <x-money :amount="$application->offer_amount" /></p>
+                        </x-card>
 
-                        <div class="bg-white rounded-lg p-4 border border-neutral-200">
+                        <x-card rounded="lg" shadow="none" class="p-4">
                             <p class="text-sm text-neutral-500 mb-1">Service Fee</p>
                             <p class="text-xl font-bold text-tertiary">
-                                Ksh{{ number_format($application->service_fee, 2) }}</p>
-                        </div>
+                                <x-money :amount="$application->service_fee" /></p>
+                        </x-card>
 
-                        <div class="bg-white rounded-lg p-4 border border-neutral-200">
+                        <x-card rounded="lg" shadow="none" class="p-4">
                             <p class="text-sm text-neutral-500 mb-1">You'll Receive</p>
                             <p class="text-xl font-bold text-secondary">
-                                Ksh{{ number_format($application->net_amount, 2) }}
+                                <x-money :amount="$application->net_amount" />
                             </p>
-                        </div>
+                        </x-card>
                     </div>
                 </div>
 
@@ -164,11 +148,7 @@
                         </div>
                     @else
                         <div class="bg-neutral-50 rounded-lg p-4 border border-neutral-100 flex items-center gap-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-neutral-400" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <x-icon name="exclamation-circle" class="h-6 w-6 text-neutral-400" />
                             <div class="text-neutral-500 text-sm">
                                 No proposal was provided for this application.
                             </div>
@@ -205,7 +185,7 @@
 
                                 @if ($isImage)
                                     <!-- Image Preview -->
-                                    <div class="bg-white rounded-lg border border-neutral-200 overflow-hidden group">
+                                    <x-card rounded="lg" shadow="none" clip class="group">
                                         <div class="aspect-square w-full overflow-hidden bg-neutral-100">
                                             <img src="{{ asset('storage/' . $item) }}" alt="Portfolio image"
                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
@@ -215,65 +195,42 @@
                                                 class="text-sm text-neutral-500 truncate">{{ basename($item) }}</span>
                                             <a href="{{ asset('storage/' . $item) }}" target="_blank"
                                                 class="text-primary hover:text-primary/80">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                </svg>
+                                                <x-icon name="arrow-top-right-on-square" class="h-5 w-5" />
                                             </a>
                                         </div>
-                                    </div>
+                                    </x-card>
                                 @elseif($isDocument)
                                     <!-- Document Preview -->
-                                    <div class="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                                    <x-card rounded="lg" shadow="none" clip>
                                         <div
                                             class="aspect-square w-full flex items-center justify-center bg-neutral-50 p-4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-neutral-300"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
+                                            <x-icon name="document-text" class="h-16 w-16 text-neutral-300" />
                                         </div>
                                         <div class="p-3 flex justify-between items-center">
                                             <span
                                                 class="text-sm text-neutral-500 truncate">{{ basename($item) }}</span>
                                             <a href="{{ asset('storage/' . $item) }}" target="_blank"
                                                 class="text-primary hover:text-primary/80">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                                                </svg>
+                                                <x-icon name="cloud-arrow-down" class="h-5 w-5" />
                                             </a>
                                         </div>
-                                    </div>
+                                    </x-card>
                                 @else
                                     <!-- Other File Types -->
-                                    <div class="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                                    <x-card rounded="lg" shadow="none" clip>
                                         <div
                                             class="aspect-square w-full flex items-center justify-center bg-neutral-50 p-4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-neutral-300"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-                                            </svg>
+                                            <x-icon name="folder-open" class="h-16 w-16 text-neutral-300" />
                                         </div>
                                         <div class="p-3 flex justify-between items-center">
                                             <span
                                                 class="text-sm text-neutral-500 truncate">{{ basename($item) }}</span>
                                             <a href="{{ asset('storage/' . $item) }}"
                                                 class="text-primary hover:text-primary/80">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                                                </svg>
+                                                <x-icon name="cloud-arrow-down" class="h-5 w-5" />
                                             </a>
                                         </div>
-                                    </div>
+                                    </x-card>
                                 @endif
                             @endforeach
                         </div>
@@ -299,17 +256,13 @@
                         @if ($application->status === ApplicationStatus::Submitted)
                             <a href="#"
                                 class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                                <x-icon name="document-text" class="h-5 w-5 mr-2" />
                                 Contact Client
                             </a>
                         @endif
                     </div> --}}
                 </div>
-            </div>
+            </x-card>
         </div>
 
         <!-- Footer -->

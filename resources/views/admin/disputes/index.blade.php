@@ -20,11 +20,7 @@
                         <div class="flex items-center space-x-4">
                             <!-- Admin Icon -->
                             <div class="bg-gradient-to-br from-primary to-primary/80 rounded-xl p-3 shadow-lg">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
+                                <x-icon name="shield-check-2" class="h-8 w-8 text-white" />
                             </div>
                             <div>
                                 <h1 class="text-2xl font-bold font-main text-neutral-800 mb-1">Disputed Engagements</h1>
@@ -77,10 +73,7 @@
                                            @if ($status === 'all') bg-primary/10 text-primary
                                            @else 
                                                bg-neutral-100 text-tertiary group-hover:bg-primary/10 group-hover:text-primary @endif">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                                    </svg>
+                                    <x-icon name="inbox" class="w-4 h-4" />
                                 </div>
 
                                 <div class="flex flex-col items-start">
@@ -118,10 +111,7 @@
                                            @if ($status === 'pending') bg-accent/10 text-accent animate-pulse
                                            @else 
                                                bg-neutral-100 text-tertiary group-hover:bg-accent/10 group-hover:text-accent @endif">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="clock" class="w-4 h-4" />
                                 </div>
 
                                 <div class="flex flex-col items-start">
@@ -161,10 +151,7 @@
                                            @if ($status === 'under_review') bg-secondary/10 text-secondary
                                            @else 
                                                bg-neutral-100 text-tertiary group-hover:bg-secondary/10 group-hover:text-secondary @endif">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                    </svg>
+                                    <x-icon name="clipboard-check-2" class="w-4 h-4" />
                                 </div>
 
                                 <div class="flex flex-col items-start">
@@ -201,10 +188,7 @@
                                            @if ($status === 'resolved') bg-green-100 text-green-600
                                            @else 
                                                bg-neutral-100 text-tertiary group-hover:bg-green-100 group-hover:text-green-600 @endif">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle" class="w-4 h-4" />
                                 </div>
 
                                 <div class="flex flex-col items-start">
@@ -336,12 +320,7 @@
                                             <div class="absolute inset-0 bg-accent/20 rounded-full"></div>
                                             <div
                                                 class="relative bg-accent/10 backdrop-blur-sm rounded-full p-3 border border-accent/30">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                                <x-icon name="clock" class="h-5 w-5 text-accent" />
                                             </div>
                                         @elseif($dispute->status === DisputeStatus::UnderReview)
                                             <div
@@ -400,12 +379,7 @@
                                     <!-- Dispute Reason -->
                                     <div class="bg-neutral-50/80 rounded-lg p-4 border border-neutral-200/50">
                                         <div class="flex items-center space-x-1 mb-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-500"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <x-icon name="question-mark-circle" class="h-5 w-5 text-neutral-500" />
                                             <span class="text-sm font-medium text-neutral-700 font-tertiary">Dispute
                                                 Reason</span>
                                         </div>
@@ -417,12 +391,7 @@
                                     <!-- Filed By -->
                                     <div class="bg-neutral-50/80 rounded-lg p-4 border border-neutral-200/50">
                                         <div class="flex items-center space-x-1 mb-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-500"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
+                                            <x-icon name="user" class="h-5 w-5 text-neutral-500" />
                                             <span class="text-sm font-medium text-neutral-700 font-tertiary">Filed
                                                 By</span>
                                         </div>
@@ -442,12 +411,7 @@
                                     <!-- Dispute Details -->
                                     <div class="bg-neutral-50/80 rounded-lg p-4 border border-neutral-200/50">
                                         <div class="flex items-center space-x-1 mb-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-500"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
+                                            <x-icon name="document-text" class="h-5 w-5 text-neutral-500" />
                                             <span
                                                 class="text-sm font-medium text-neutral-700 font-tertiary">Details</span>
                                         </div>
@@ -460,12 +424,7 @@
                                     <!-- Assigned Admin -->
                                     <div class="bg-neutral-50/80 rounded-lg p-4 border border-neutral-200/50">
                                         <div class="flex items-center space-x-1 mb-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-500"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                            </svg>
+                                            <x-icon name="shield-check-2" class="h-5 w-5 text-neutral-500" />
                                             <span class="text-sm font-medium text-neutral-700 font-tertiary">Assigned
                                                 Admin</span>
                                         </div>
@@ -484,12 +443,7 @@
                                                 <div class="flex items-center space-x-2 text-neutral-500">
                                                     <div
                                                         class="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                            stroke-width="2">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                        </svg>
+                                                        <x-icon name="plus-2" class="h-4 w-4" />
                                                     </div>
                                                     <span class="font-secondary">Unassigned</span>
                                                 </div>
@@ -506,21 +460,9 @@
                                     @if ($dispute->admin_assigned && auth()->id() === $dispute->admin_assigned)
                                         <a href="{{ route('engagements.show-disputed', $dispute->cancellation->engagement_id) }}"
                                             class="group inline-flex items-center px-5 py-2.5 bg-secondary text-white text-sm font-medium font-main rounded-lg shadow-sm hover:bg-secondary/90 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 focus:ring-2 focus:ring-secondary/20 focus:outline-none">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
+                                            <x-icon name="document-text" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                                             View Dispute Details
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform duration-200"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 5l7 7-7 7" />
-                                            </svg>
+                                            <x-icon name="chevron-right" class="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform duration-200" />
                                         </a>
                                     @endif
 
@@ -531,13 +473,7 @@
                                             @csrf
                                             <button type="submit"
                                                 class="group inline-flex items-center px-5 py-2.5 bg-primary text-white text-sm font-medium font-main rounded-lg shadow-sm hover:bg-primary/90 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 focus:ring-2 focus:ring-primary/20 focus:outline-none">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                </svg>
+                                                <x-icon name="plus-2" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
                                                 Assign to Me
                                             </button>
                                         </form>
@@ -548,12 +484,7 @@
                                 <!-- Quick Info -->
                                 <div class="flex items-center space-x-4 text-xs text-neutral-500 font-secondary">
                                     <span class="flex items-center space-x-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-secondary"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                            stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <x-icon name="clock" class="h-4 w-4 text-secondary" />
                                         <span>ID: {{ $dispute->id }}</span>
                                     </span>
                                 </div>
@@ -567,11 +498,7 @@
                         <div class="max-w-md mx-auto">
                             <div
                                 class="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-neutral-400"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <x-icon name="check-circle" class="h-12 w-12 text-neutral-400" stroke-width="1.5" />
                             </div>
                             <h3 class="text-xl font-bold text-neutral-800 font-main mb-2">No Disputed Engagements</h3>
                             <p class="text-neutral-600 font-secondary">

@@ -1,4 +1,4 @@
-<div class="bg-white rounded-2xl shadow-lg border border-neutral-100 overflow-hidden">
+<x-card rounded="2xl" shadow="lg" border="neutral-100" clip>
     <!-- Header Section -->
     <div class="relative bg-gradient-to-r from-primary to-primary/90 px-8 py-6">
         <!-- Background Pattern -->
@@ -17,10 +17,7 @@
         <div class="relative flex items-start justify-between">
             <div class="flex-1">
                 <div class="flex items-center space-x-3 mb-2">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z" />
-                    </svg>
+                    <x-icon name="briefcase" class="w-6 h-6 text-white" />
                     <h2 class="text-xl font-bold text-white font-main">Job Details</h2>
                 </div>
                 <h3 class="text-2xl font-bold text-white font-main leading-tight">
@@ -95,10 +92,7 @@
     <!-- Skills & Software Section -->
     <div class="px-8 pb-6 bg-gradient-to-r from-neutral-50/50 to-transparent">
         <div class="flex items-center mb-4">
-            <svg class="w-5 h-5 text-secondary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-            </svg>
+            <x-icon name="light-bulb" class="w-5 h-5 text-secondary mr-2" />
             <h4 class="text-lg font-semibold text-neutral-800 font-main">Required Skills & Software
             </h4>
         </div>
@@ -149,15 +143,12 @@
             <div class="bg-gradient-to-br from-accent/5 to-accent/10 rounded-xl p-4 border border-accent/20">
                 <div class="flex items-center mb-2">
                     <div class="w-8 h-8 bg-accent/20 rounded-lg flex items-center justify-center mr-3">
-                        <svg class="w-4 h-4 text-accent" fill="#f59e0b" stroke="currentColor" viewBox="0 0 512 512">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
-                        </svg>
+                        <x-icon name="coins" class="w-4 h-4 text-accent" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </div>
                     <span class="text-sm font-medium text-neutral-600 font-secondary">Budget</span>
                 </div>
                 <p class="text-lg font-bold text-accent font-main">
-                    Ksh {{ number_format($engagement->application->job->budget, 2) }}
+                    <x-money :amount="$engagement->application->job->budget" />
                 </p>
             </div>
 
@@ -165,15 +156,12 @@
             <div class="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-4 border border-primary/20">
                 <div class="flex items-center mb-2">
                     <div class="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center mr-3">
-                        <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                        <x-icon name="calendar" class="w-4 h-4 text-primary" />
                     </div>
                     <span class="text-sm font-medium text-neutral-600 font-secondary">Posted</span>
                 </div>
                 <p class="text-lg font-bold text-primary font-main">
-                    {{ $engagement->application->job->created_at->format('M j, Y') }}
+                    <x-date :date="$engagement->application->job->created_at" />
                 </p>
             </div>
 
@@ -181,11 +169,7 @@
             <div class="bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-xl p-4 border border-secondary/20">
                 <div class="flex items-center mb-2">
                     <div class="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center mr-3">
-                        <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <x-icon name="clock" class="w-4 h-4 text-secondary" />
                     </div>
                     <span class="text-sm font-medium text-neutral-600 font-secondary">Deadline</span>
                 </div>
@@ -195,4 +179,4 @@
             </div>
         </div>
     </div>
-</div>
+</x-card>

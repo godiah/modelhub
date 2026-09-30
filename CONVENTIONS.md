@@ -356,6 +356,29 @@ same as any other deviation — not a separate, lower-priority category of gap.
 
 ---
 
+## 16. Blade components (reuse before you write markup)
+
+Added 2026-09-30 after a repetition audit of all 138 views. Before hand-writing any of the
+following, use the component — and if a variant is missing, add a prop rather than copy the markup:
+
+| Need | Use |
+|---|---|
+| Icon | `<x-icon name="check" class="h-5 w-5" />` — registry in `config/icons.php` (Heroicons-style names; `-2`/`-3` = alternate drawings, `-solid` = filled 20px). Add new icons to the registry, never inline an `<svg>` for a reusable glyph. |
+| Amount / date | `<x-money :amount="$x" />` (or `App\Support\Money::format()` in expressions), `<x-date :date="$x" />` (null-safe). Currency symbol lives in `config('app.currency_symbol')`. |
+| Panel | `<x-card rounded shadow border clip>`; empty list results: `<x-empty-state icon title description>` |
+| Pill / status | `<x-badge tone>`, `<x-engagement.status-badge :status>` |
+| Button / link-button | `<x-button variant size href>` (primary/secondary/danger/neutral, md/lg) |
+| Form label / field error | `<x-form.label>`, `<x-form.error name="field">` |
+| Modal | `<x-modal name="…">` opened with `$dispatch('open-modal', 'name')` or `{ name, ...payload }` (payload readable as `payload`), or `bind="alpineVar"`; compose with `<x-modal.header>`/`<x-modal.footer>` |
+| Destructive/confirming action | `<x-confirm-dialog name title message action method>` — **never** `confirm()`/`alert()`; one shared instance per page with a payload beats one per list row |
+| Loading indicator | `<x-spinner class="h-4 w-4" />` |
+
+Deliberately *not* componentised (would be a visual redesign, not a refactor): input/select/textarea
+styling (80 controls, 28+ class sets), bespoke status->colour switches for applications/disputes/payments,
+the two deliverable-row layouts in `engagements-list` (applicant vs poster read different fields), and the
+`jobs/apply` image lightbox. Component classes must never conflict with classes passed in (e.g. a
+`text-base` next to a component `text-sm`) — skip conversion instead.
+
 ## How to use this doc during a module review
 
 For each file in the module being reviewed, check it against the numbered items above. A finding

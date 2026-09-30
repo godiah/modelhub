@@ -17,10 +17,7 @@
             <!-- Logo or Illustration Placeholder -->
             <div
                 class="w-48 h-48 mx-auto mb-8 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                <svg class="w-24 h-24 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+                <x-icon name="check-circle" class="w-24 h-24 text-white" />
             </div>
             <h2 class="text-xl font-bold mb-4 font-tertiary">{{ config('app.name', 'ModelHub') }}</h2>
             <p class="text-white/90 text-base leading-relaxed">

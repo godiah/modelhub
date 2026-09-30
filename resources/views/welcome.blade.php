@@ -46,11 +46,7 @@
                 <div class="bg-white rounded-2xl shadow-xl p-2 mb-8">
                     <div class="relative flex items-center">
                         <div class="pl-4 pr-2">
-                            <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                            <x-icon name="magnifying-glass" class="h-5 w-5 text-neutral-400" />
                         </div>
                         <input type="text" placeholder="Search in more than 2 million 3D models"
                             class="w-full py-3 px-2 border-none focus:ring-0 font-secondary text-neutral-700">
@@ -94,10 +90,7 @@
                         class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
                         <div
                             class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                            </svg>
+                            <x-icon name="calculator" class="w-7 h-7" />
                         </div>
                         <span
                             class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Discounts</span>
@@ -164,10 +157,7 @@
                         class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
                         <div
                             class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <x-icon name="clock" class="w-7 h-7" />
                         </div>
                         <span
                             class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Interior</span>
@@ -244,10 +234,7 @@
                         <a href="{{ route('register') }}"
                             class="inline-flex items-center bg-gradient-to-r from-secondary to-secondary/80 hover:from-primary hover:to-primary/80 text-white font-medium px-6 py-3 rounded-lg transition duration-300 shadow-md hover:shadow-lg">
                             <span>Get started for Free!</span>
-                            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
+                            <x-icon name="arrow-right" class="w-5 h-5 ml-2" />
                         </a>
                         <a href="#"
                             class="inline-flex items-center bg-white border border-neutral-200 hover:border-secondary/50 text-neutral-700 hover:text-secondary font-medium px-6 py-3 rounded-lg transition duration-300 shadow-sm hover:shadow">
@@ -337,10 +324,7 @@
     <div class="fixed bottom-6 right-6">
         <button
             class="w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-lg hover:bg-teal-600">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
+            <x-icon name="chat-bubble-dots" class="w-6 h-6" />
         </button>
     </div>
 </body>

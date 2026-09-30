@@ -1,4 +1,4 @@
-<div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden relative">
+<x-card rounded="2xl" shadow="lg" clip class="relative">
     <!-- Subtle background pattern -->
     <div class="absolute inset-0 opacity-5">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -38,7 +38,7 @@
                 <span class="text-neutral-700 font-medium text-sm">Engagement Cancelled</span>
             </div>
             <div class="text-sm text-neutral-500">
-                {{ $engagement->cancelled_at->format('M d, Y h:i A') }}
+                <x-date :date="$engagement->cancelled_at" format="M d, Y h:i A" />
             </div>
         </div>
     </div>
@@ -59,7 +59,7 @@
                     </svg>
                     Initiated by
                 </h3>
-                <div class="flex items-center bg-white p-3 rounded-lg border border-neutral-200 shadow-sm">
+                <x-card rounded="lg" class="flex items-center p-3">
 
                     @if ($engagement->cancellation->initiator_id === $engagement->application->poster->id)
                         <div
@@ -89,7 +89,7 @@
                             @endif
                         </h4>
                     </div>
-                </div>
+                </x-card>
             </div>
 
             <!-- Cancellation Type -->
@@ -102,7 +102,7 @@
                     </svg>
                     Cancellation Type
                 </h3>
-                <div class="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm">
+                <x-card rounded="lg" class="p-3">
                     @php
                         $cancellationTypes = [
                             'mutual' => 'Mutual Agreement',
@@ -127,20 +127,16 @@
                         class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium {{ $typeColorClass }}">
                         {{ $cancellationType }}
                     </span>
-                </div>
+                </x-card>
             </div>
 
             <!-- Reason Category -->
             <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
                 <h3 class="font-secondary text-md font-semibold text-neutral-700 mb-3 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-5 w-5 mr-2 text-tertiary">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-                    </svg>
+                    <x-icon name="chat-bubble-left-right" class="h-5 w-5 mr-2 text-tertiary" />
                     Reason
                 </h3>
-                <div class="bg-white p-4 rounded-lg border border-neutral-200 shadow-sm">
+                <x-card rounded="lg" class="p-4">
                     @php
                         $reasonCategories = [
                             'schedule_conflict' => 'Schedule Conflict',
@@ -165,8 +161,8 @@
                     <div class="text-neutral-700 text-sm mt-3 bg-neutral-50 p-3 rounded-lg border border-neutral-100">
                         {{ $engagement->cancellation->reason_details }}
                     </div>
-                </div>
+                </x-card>
             </div>
         </div>
     </div>
-</div>
+</x-card>

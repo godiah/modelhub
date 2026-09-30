@@ -9,15 +9,10 @@
 
             </div>
             <div class="flex space-x-3">
-                <a href="{{ route('applications.my') }}"
-                    class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                    </svg>
+                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('applications.my') }}">
+                    <x-icon name="clipboard-check" class="h-5 w-5 mr-2" />
                     Back to Active Applications
-                </a>
+                </x-button>
             </div>
         </div>
     </x-slot>
@@ -31,7 +26,7 @@
                 @endphp
 
                 @foreach (['hired' => 'green', 'rejected' => 'red', 'withdrawn' => 'gray', 'other' => 'neutral'] as $status => $color)
-                    <div class="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+                    <x-card class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-tertiary font-secondary">{{ ucfirst($status) }}</p>
@@ -63,15 +58,14 @@
                                 </svg>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 @endforeach
             </div>
 
             {{-- Archived Applications List --}}
             <div class="grid gap-4 md:grid-cols-1">
                 @forelse ($applications as $application)
-                    <div
-                        class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200">
+                    <x-card clip class="hover:shadow-md transition-all duration-200">
                         <div class="p-6 flex flex-col md:flex-row gap-6 items-start md:items-center">
                             {{-- Job Details --}}
                             <div class="flex items-center flex-grow">
@@ -81,11 +75,7 @@
                                         <img src="{{ asset('storage/' . $application->job->images) }}"
                                             alt="{{ $application->job->slug }}" class="h-full w-full object-cover">
                                     @else
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary/70"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                        </svg>
+                                        <x-icon name="briefcase-2" class="h-6 w-6 text-secondary/70" />
                                     @endif
                                 </div>
                                 <div>
@@ -93,8 +83,8 @@
                                         {{ $application->job->title }}
                                     </h2>
                                     <p class="text-sm text-tertiary font-main mt-1">
-                                        Applied: {{ $application->created_at->format('M d, Y') }} &bull;
-                                        Archived: {{ $application->updated_at->format('M d, Y') }}
+                                        Applied: <x-date :date="$application->created_at" format="M d, Y" /> &bull;
+                                        Archived: <x-date :date="$application->updated_at" format="M d, Y" />
                                     </p>
                                 </div>
                             </div>
@@ -142,41 +132,27 @@
                                         </button>
                                     </form>
 
-                                    <form action="{{ route('applications.destroy', $application) }}" method="POST"
-                                        onsubmit="return confirm('Are you sure you want to permanently delete this application?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="p-2 text-red-600 hover:text-red-800 bg-neutral-50 hover:bg-neutral-100 rounded-full transition-colors"
-                                            title="Delete Application">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    <button type="button" x-data x-on:click="$dispatch('open-modal', { name: 'delete-application', id: {{ $application->id }} })"
+                                        class="p-2 text-red-600 hover:text-red-800 bg-neutral-50 hover:bg-neutral-100 rounded-full transition-colors"
+                                        title="Delete Application">
+                                        <x-icon name="trash" class="h-5 w-5" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 @empty
-                    <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-neutral-200">
+                    <x-card class="p-12 text-center">
                         <div class="max-w-md mx-auto">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-neutral-400 mb-4"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                            </svg>
+                            <x-icon name="clipboard-check" class="h-16 w-16 mx-auto text-neutral-400 mb-4" />
                             <h3 class="text-xl font-bold text-neutral-800 mb-2 font-tertiary">No Archived Applications
                             </h3>
                             <p class="text-tertiary mb-6 font-main">You haven't archived any job applications yet.</p>
-                            <a href="{{ route('applications.my') }}"
-                                class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-primary hover:bg-primary/90 transition-colors duration-200 font-main">
+                            <x-button size="lg" class="justify-center border border-transparent text-base" href="{{ route('applications.my') }}">
                                 View Active Applications
-                            </a>
+                            </x-button>
                         </div>
-                    </div>
+                    </x-card>
                 @endforelse
             </div>
             {{-- Pagination --}}
@@ -187,4 +163,9 @@
             @endif
         </div>
     </section>
+
+    <x-confirm-dialog name="delete-application" title="Delete Application" icon="trash" confirm-icon="trash"
+        confirm-label="Delete permanently" method="DELETE"
+        action-bind="'{{ route('applications.destroy', '__ID__') }}'.replace('__ID__', payload.id)"
+        message="Are you sure you want to permanently delete this application? This action cannot be undone." />
 </x-app-layout>

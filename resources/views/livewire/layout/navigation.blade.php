@@ -58,11 +58,7 @@ new class extends Component {
                 <div class="hidden lg:block flex-1 w-96 max-w-lg">
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-neutral-400 group-focus-within:text-secondary transition-colors duration-200"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                            <x-icon name="magnifying-glass" class="h-5 w-5 text-neutral-400 group-focus-within:text-secondary transition-colors duration-200" />
                         </div>
                         <input type="text" placeholder="Search in more than a million 3D models..."
                             class="w-full py-2.5 pl-12 pr-4 bg-neutral-50 border border-neutral-200 rounded-xl 
@@ -88,12 +84,7 @@ new class extends Component {
                         class="flex items-center px-4 py-2 text-sm md:text-base font-medium text-neutral-700 hover:text-primary 
                                    hover:bg-neutral-50 rounded-lg transition-all duration-200 font-main group uppercase">
                         Designers
-                        <svg class="ml-1 h-4 w-4 transition-transform duration-200"
-                            :class="designersOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
+                        <x-icon name="chevron-down" class="ml-1 h-4 w-4 transition-transform duration-200" ::class="designersOpen ? 'rotate-180' : ''" />
                     </button>
 
                     <!-- Designers Dropdown Menu -->
@@ -106,20 +97,12 @@ new class extends Component {
                         class="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50">
                         <a href="{{ route('jobs.index') }}" wire:navigate
                             class="flex items-center px-4 py-3 text-sm text-neutral-700 hover:text-primary hover:bg-neutral-50 transition-colors duration-150 font-main">
-                            <svg class="h-4 w-4 mr-3 text-neutral-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
+                            <x-icon name="magnifying-glass" class="h-4 w-4 mr-3 text-neutral-400" />
                             Find Jobs
                         </a>
                         <a href="{{ route('jobs.index') }}" wire:navigate
                             class="flex items-center px-4 py-3 text-sm text-neutral-700 hover:text-primary hover:bg-neutral-50 transition-colors duration-150 font-main">
-                            <svg class="h-4 w-4 mr-3 text-neutral-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4"></path>
-                            </svg>
+                            <x-icon name="plus" class="h-4 w-4 mr-3 text-neutral-400" />
                             Post Jobs
                         </a>
                     </div>
@@ -131,12 +114,7 @@ new class extends Component {
                         class="flex items-center px-4 py-2 text-sm md:text-base font-medium text-neutral-700 hover:text-primary 
                                    hover:bg-neutral-50 rounded-lg transition-all duration-200 font-main uppercase">
                         3D Models
-                        <svg class="ml-1 h-4 w-4 transition-transform duration-200"
-                            :class="modelsOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
-                            </path>
-                        </svg>
+                        <x-icon name="chevron-down" class="ml-1 h-4 w-4 transition-transform duration-200" ::class="modelsOpen ? 'rotate-180' : ''" />
                     </button>
 
                     <!-- 3D Models Dropdown Menu -->
@@ -149,22 +127,12 @@ new class extends Component {
                         class="absolute top-full left-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50">
                         <a href="#" wire:navigate
                             class="flex items-center px-4 py-3 text-sm text-neutral-700 hover:text-primary hover:bg-neutral-50 transition-colors duration-150 font-main">
-                            <svg class="h-4 w-4 mr-3 text-neutral-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10">
-                                </path>
-                            </svg>
+                            <x-icon name="inbox" class="h-4 w-4 mr-3 text-neutral-400" />
                             Browse Models
                         </a>
                         <a href="#" wire:navigate
                             class="flex items-center px-4 py-3 text-sm text-neutral-700 hover:text-primary hover:bg-neutral-50 transition-colors duration-150 font-main">
-                            <svg class="h-4 w-4 mr-3 text-neutral-400" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
-                                </path>
-                            </svg>
+                            <x-icon name="cloud-arrow-up" class="h-4 w-4 mr-3 text-neutral-400" />
                             Publish Models
                         </a>
                     </div>
@@ -179,11 +147,7 @@ new class extends Component {
                     <button @click="supportOpen = !supportOpen"
                         class="p-2 text-neutral-600 hover:text-primary hover:bg-neutral-50 rounded-lg 
                                    transition-all duration-200 group">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                            </path>
-                        </svg>
+                        <x-icon name="question-mark-circle" class="h-6 w-6" />
                     </button>
 
                     <!-- Support Dropdown -->
@@ -258,11 +222,7 @@ new class extends Component {
                             <a href="{{ route('notifications.index') }}"
                                 class="relative text-neutral-600 hover:text-primary hover:bg-neutral-50 rounded-lg 
                                   transition-all duration-200 group">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
+                                <x-icon name="bell" class="h-6 w-6" />
 
                                 @if (auth()->user()->unreadNotifications->count() > 0)
                                     <span
@@ -301,12 +261,7 @@ new class extends Component {
                                 @endif
 
                                 <!-- Dropdown Arrow -->
-                                <svg class="h-4 w-4 transition-transform duration-200 hidden sm:block"
-                                    :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7"></path>
-                                </svg>
+                                <x-icon name="chevron-down" class="h-4 w-4 transition-transform duration-200 hidden sm:block" ::class="open ? 'rotate-180' : ''" />
                             </button>
                         </x-slot>
 
@@ -391,12 +346,7 @@ new class extends Component {
                                 <button wire:click="logout"
                                     class="flex items-center w-full px-4 py-3 text-sm text-red-600 hover:bg-red-50 
                                            transition-colors duration-200 font-main group">
-                                    <svg class="h-4 w-4 mr-3 group-hover:scale-110 transition-transform duration-200"
-                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
-                                        </path>
-                                    </svg>
+                                    <x-icon name="arrow-right-on-rectangle" class="h-4 w-4 mr-3 group-hover:scale-110 transition-transform duration-200" />
                                     {{ __('Log Out') }}
                                 </button>
                             </div>
@@ -404,10 +354,7 @@ new class extends Component {
                     </x-dropdown>
                 @else
                     <!-- Login Button for Guests -->
-                    <a href="{{ route('login') }}" wire:navigate
-                        class="inline-flex items-center px-4 py-2 bg-primary text-white font-medium text-sm 
-                        rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 
-                        transition-all duration-200 font-main uppercase">
+                    <x-button class="text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 uppercase" href="{{ route('login') }}" wire:navigate>
                         <!-- SVG Icon -->
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" stroke-width="1.5"
                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -415,7 +362,7 @@ new class extends Component {
                                 d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
                         </svg>
                         Log In
-                    </a>
+                    </x-button>
 
                 @endauth
 
@@ -445,10 +392,7 @@ new class extends Component {
         <div class="px-4 pt-4 pb-2">
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <x-icon name="magnifying-glass" class="h-5 w-5 text-neutral-400" />
                 </div>
                 <input type="text" placeholder="Search..."
                     class="w-full py-2.5 pl-10 pr-4 bg-neutral-50 border border-neutral-200 rounded-lg 
@@ -552,30 +496,21 @@ new class extends Component {
                     <a href="{{ route('dashboard') }}" wire:navigate
                         class="flex items-center px-3 py-2 text-sm text-neutral-700 hover:text-primary 
                               hover:bg-neutral-50 rounded-lg transition-all duration-200 font-main">
-                        <svg class="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                        </svg>
+                        <x-icon name="squares-2x2" class="h-4 w-4 mr-3" />
                         Dashboard
                     </a>
 
                     <a href="{{ route('project.index') }}" wire:navigate
                         class="flex items-center px-3 py-2 text-sm text-neutral-700 hover:text-primary 
                               hover:bg-neutral-50 rounded-lg transition-all duration-200 font-main">
-                        <svg class="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
-                        </svg>
+                        <x-icon name="clipboard-document" class="h-4 w-4 mr-3" stroke-width="2" />
                         My Projects
                     </a>
 
                     <a href="{{ route('profile') }}" wire:navigate
                         class="flex items-center px-3 py-2 text-sm text-neutral-700 hover:text-primary 
                               hover:bg-neutral-50 rounded-lg transition-all duration-200 font-main">
-                        <svg class="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+                        <x-icon name="user" class="h-4 w-4 mr-3" />
                         Profile
                     </a>
 
@@ -583,10 +518,7 @@ new class extends Component {
                         class="flex items-center justify-between px-3 py-2 text-sm text-neutral-700 hover:text-primary 
                               hover:bg-neutral-50 rounded-lg transition-all duration-200 font-main">
                         <div class="flex items-center">
-                            <svg class="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
+                            <x-icon name="bell" class="h-4 w-4 mr-3" />
                             Notifications
                         </div>
                         @if (auth()->user()->unreadNotifications->count() > 0)
@@ -622,11 +554,7 @@ new class extends Component {
                     <button wire:click="logout"
                         class="flex items-center w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 
                                rounded-lg transition-all duration-200 font-main mt-4 border-t border-neutral-200 pt-4">
-                        <svg class="h-4 w-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
-                            </path>
-                        </svg>
+                        <x-icon name="arrow-right-on-rectangle" class="h-4 w-4 mr-3" />
                         Log Out
                     </button>
                 </div> --}}

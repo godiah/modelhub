@@ -1,7 +1,7 @@
 @use('App\Enums\PartialPaymentStatus')
 <div class="space-y-6">
     {{-- Payment Summary Card --}}
-    <div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
+    <x-card rounded="2xl" shadow="lg" clip>
         <!-- Header with gradient background -->
         <div class="bg-gradient-to-r from-accent to-accent/80 p-6 border-b border-neutral-200 relative">
             <!-- Abstract visual element -->
@@ -58,11 +58,7 @@
                 </div>
                 <div class="pt-5 border-t border-neutral-200">
                     <dt class="text-sm font-bold text-neutral-800 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="#f59e0b"
-                            class="h-4 w-4 text-accent mr-2" viewBox="0 0 512 512">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
-                        </svg>
+                        <x-icon name="coins" class="h-4 w-4 text-accent mr-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         Payable Amount
                     </dt>
                     <dd class="mt-1 text-lg font-bold text-primary font-tertiary">
@@ -71,10 +67,10 @@
                 </div>
             </dl>
         </div>
-    </div>
+    </x-card>
 
     {{-- Payment Status Card --}}
-    <div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
+    <x-card rounded="2xl" shadow="lg" clip>
         <div class="bg-gradient-to-r from-accent to-accent/80 p-6 border-b border-neutral-200 relative">
             <!-- Abstract visual element for summary -->
             <div class="absolute right-0 bottom-0 transform translate-y-1/3 translate-x-1/6 opacity-20">
@@ -153,14 +149,10 @@
                     <dl class="grid grid-cols-1 gap-4 text-sm">
                         <div class="p-3 bg-white rounded-lg shadow-sm">
                             <dt class="font-medium text-neutral-500 flex items-center mb-1 text-xs">
-                                <svg xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="#1e3a8a"
-                                    class="h-4 w-4 text-primary mr-2" viewBox="0 0 512 512">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
-                                </svg>
+                                <x-icon name="coins" class="h-4 w-4 text-primary mr-2" fill="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 Amount
                             </dt>
-                            <dd class="text-neutral-900">Ksh{{ number_format($payment->amount, 2) }}</dd>
+                            <dd class="text-neutral-900"><x-money :amount="$payment->amount" /></dd>
                         </div>
                         <div class="p-3 bg-white rounded-lg shadow-sm">
                             <dt class="font-medium text-neutral-500 flex items-center mb-1 text-xs">
@@ -176,8 +168,7 @@
                             <dd class="text-neutral-900">
                                 @switch($payment->status->value)
                                     @case('pending')
-                                        <span
-                                            class="px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-medium inline-flex items-center">
+                                        <x-badge tone="amber" class="px-2 py-1 text-xs font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -185,12 +176,11 @@
                                                 <polyline points="12 6 12 12 16 14"></polyline>
                                             </svg>
                                             Pending
-                                        </span>
+                                        </x-badge>
                                     @break
 
                                     @case('accepted')
-                                        <span
-                                            class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium inline-flex items-center">
+                                        <x-badge tone="green" class="px-2 py-1 text-xs font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -198,12 +188,11 @@
                                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                             </svg>
                                             Accepted
-                                        </span>
+                                        </x-badge>
                                     @break
 
                                     @case('disputed')
-                                        <span
-                                            class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium inline-flex items-center">
+                                        <x-badge tone="red" class="px-2 py-1 text-xs font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -214,12 +203,11 @@
                                                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
                                             </svg>
                                             Disputed
-                                        </span>
+                                        </x-badge>
                                     @break
 
                                     @case('finalized')
-                                        <span
-                                            class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium inline-flex items-center">
+                                        <x-badge tone="blue" class="px-2 py-1 text-xs font-medium">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" width="24"
                                                 height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -227,7 +215,7 @@
                                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                             </svg>
                                             Finalized
-                                        </span>
+                                        </x-badge>
                                     @break
 
                                     @default
@@ -297,7 +285,7 @@
                                     Accept Payment
                                 </button>
                             </form>
-                            <button type="button" onclick="openDisputeModal()"
+                            <button type="button" x-data x-on:click="$dispatch('open-modal', 'dispute-warning')"
                                 class="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition-colors duration-200 flex items-center justify-center flex-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" width="24"
                                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -343,9 +331,7 @@
                                 <p class="text-xs text-neutral-500 mt-1">
                                     Leave blank to use the calculated amount above.
                                 </p>
-                                @error('payment_amount')
-                                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
-                                @enderror
+                                <x-form.error name="payment_amount" variant="plain" class="mt-1" />
                             </div>
                             <button type="submit"
                                 class="w-full py-2.5 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg text-sm transition-colors duration-200 flex items-center justify-center">
@@ -389,5 +375,5 @@
                 @endif
             @endif
         </div>
-    </div>
+    </x-card>
 </div>
