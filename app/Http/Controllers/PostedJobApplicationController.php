@@ -24,6 +24,7 @@ use App\Services\Applications\ApplicationHiringService;
 use App\Services\Applications\ApplicationMessagingService;
 use App\Services\Jobs\JobManagementService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Gate;
 
 class PostedJobApplicationController extends Controller
 {
@@ -55,16 +56,19 @@ class PostedJobApplicationController extends Controller
         $filters = [
             'status' => $request->getStatusFilter(),
             'sort' => $request->getSortOption(),
+            'search' => $request->getSearch(),
         ];
 
         $postedJobs = $this->jobManagementService->getUserPostedJobs($filters);
-        $hasFilters = $request->hasActiveFilters();
 
-        if ($request->isAjaxRequest()) {
-            return view('jobBoard.posted.partials.jobs-grid', compact('postedJobs', 'hasFilters'))->render();
-        }
-
-        return view('jobBoard.posted.index', compact('postedJobs', 'hasFilters'));
+        return view('jobBoard.posted.index', [
+            'postedJobs' => $postedJobs,
+            'insights' => $this->jobManagementService->getPostedJobInsights($postedJobs->items()),
+            'stats' => $this->jobManagementService->getPostedJobStats(),
+            'counts' => $this->jobManagementService->getPostedJobCounts(),
+            'filters' => $filters,
+            'hasFilters' => $request->hasActiveFilters(),
+        ]);
     }
 
     // Display applications for a given job
@@ -137,50 +141,49 @@ class PostedJobApplicationController extends Controller
     }
 
     // View Archived Posted Jobs
-    public function archivedJobs()
+    public function archivedJobs(BrowsePostedJobsRequest $request)
     {
-        $archivedJobs = $this->jobManagementService->getArchivedJobs();
-
-        return view('jobBoard.posted.archived', compact('archivedJobs'));
+        return view('jobBoard.posted.archived', [
+            'archivedJobs' => $this->jobManagementService->getArchivedJobs($request->getSearch()),
+            'search' => $request->getSearch(),
+        ]);
     }
 
     // Archive a job
     public function archiveJob(ModelJob $job)
     {
-        if (! $this->jobManagementService->archiveJob($job)) {
-            return $this->unauthorizedError();
+        if ($error = $this->jobManagementService->archiveJob($job)) {
+            return redirect()->back()->with(FlashAlertHelper::error($error));
         }
 
-        return redirect()->back()->with(FlashAlertHelper::success('Job Archived!', 'Job archived successfully.'));
+        return redirect()->back()->with(FlashAlertHelper::success('Project archived', 'You can find it under Archived and restore it any time.'));
     }
 
     // Restore an archived job
     public function restoreJob(ModelJob $job)
     {
-        if (! $this->jobManagementService->restoreJob($job)) {
-            return $this->unauthorizedError();
+        if ($error = $this->jobManagementService->restoreJob($job)) {
+            return redirect()->back()->with(FlashAlertHelper::error($error));
         }
 
-        return redirect()->back()->with(FlashAlertHelper::success('Job Restored!', 'Job restored successfully.'));
+        return redirect()->back()->with($job->fresh()->is_active
+            ? FlashAlertHelper::success('Project restored', 'It is open for applications again.')
+            : FlashAlertHelper::success('Project restored', 'It is closed to applications for now. Edit it to accept applications again.'));
     }
 
     // View archived job details
     public function showArchivedJob(ModelJob $job)
     {
-        if (! $this->jobManagementService->authorizeArchivedJobAccess($job)) {
+        if (Gate::denies('view', $job)) {
             return $this->unauthorizedError();
         }
 
-        // Load applications with their related applicant data
-        $job->load([
-            'applications' => function ($query) {
-                $query->with('applicant');
-            },
-        ]);
+        // Only archived projects belong here; anything else has its normal project page.
+        if (! $job->is_archived) {
+            return redirect()->route('jobs.show', $job->slug);
+        }
 
-        $job->loadCount('applications');
-
-        return view('jobBoard.posted.showArchived', compact('job'));
+        return view('jobBoard.posted.showArchived', ['job' => $job] + $this->jobManagementService->getArchivedJobOverview($job));
     }
 
     // Handle unauthorized access error

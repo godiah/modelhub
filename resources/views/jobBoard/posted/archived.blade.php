@@ -1,154 +1,123 @@
+@php
+    $fieldClass = 'block w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors hover:border-neutral-400 focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25';
+@endphp
 <x-app-layout crumb="Archived">
-    <section>
-        <div class="container mx-auto max-w-7xl px-4 py-8">
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <!-- Header -->
+        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Archived projects') }}</h1>
+                <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Finished or closed projects you have put away. Freelancers cannot see them and they stay out of Posted projects. Restore one any time.') }}</p>
+            </div>
+            <x-btn variant="secondary" size="sm" href="{{ route('my-jobs.index') }}" class="shrink-0">
+                <x-icon name="arrow-left" class="h-4 w-4" />
+                {{ __('Posted projects') }}
+            </x-btn>
+        </div>
+
+        @if ($archivedJobs->isEmpty() && $search === null)
+            <x-empty-state icon="archive-box" :title="__('Nothing archived')"
+                :description="__('When a project is closed you can archive it from Posted projects, and it will be kept here.')">
+                <x-btn href="{{ route('my-jobs.index') }}">{{ __('Go to Posted projects') }}</x-btn>
+            </x-empty-state>
+        @else
+            <form method="GET" action="{{ route('my-jobs.archived.posted-jobs') }}" role="search" class="mb-6 flex max-w-xl gap-3">
+                <div class="relative min-w-0 flex-1">
+                    <x-icon name="magnifying-glass" class="pointer-events-none absolute left-3.5 top-2.5 h-5 w-5 text-neutral-400" />
+                    <label for="search" class="sr-only">{{ __('Search archived projects') }}</label>
+                    <input type="search" id="search" name="search" value="{{ $search }}" maxlength="100" placeholder="{{ __('Search archived projects…') }}" class="{{ $fieldClass }} pl-11">
+                </div>
+                <x-btn type="submit">{{ __('Search') }}</x-btn>
+                @if ($search !== null)
+                    <x-btn variant="secondary" href="{{ route('my-jobs.archived.posted-jobs') }}">{{ __('Clear') }}</x-btn>
+                @endif
+            </form>
+
             @if ($archivedJobs->isEmpty())
-                <x-card class="flex flex-col items-center justify-center min-h-[300px] p-12">
-                    <div class="relative">
-                        <div class="absolute inset-0 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
-                        <x-icon name="archive-box" class="relative h-24 w-24 text-primary mb-6" stroke-width="1.5" />
-                    </div>
-                    <h3 class="text-xl font-tertiary font-semibold text-neutral-800 mb-3">No Archived Jobs</h3>
-                    <p class="text-neutral-600 font-main mb-8 text-center max-w-sm">
-                        You haven't archived any jobs yet. Archived jobs will appear here when you close them.
-                    </p>
-                    <x-btn size="lg" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-                        </svg>
-                        View Active Jobs
-                    </x-btn>
-                </x-card>
+                <x-empty-state icon="magnifying-glass" :title="__('No archived projects match')" :description="__('Try a different search.')" />
             @else
-                <div class="grid gap-6">
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                     @foreach ($archivedJobs as $job)
-                        <x-card clip class="hover:shadow-lg transition-all duration-300 group" x-data="{ showingRestore: false }">
-                            <div class="p-6">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex-grow">
-                                        <div class="flex items-center">
-                                            <h3
-                                                class="text-xl font-semibold font-tertiary text-neutral-800 group-hover:text-primary transition-colors">
-                                                {{ $job->title }}
-                                            </h3>
-                                            <span
-                                                class="ml-3 px-3 py-1 text-xs font-medium font-main rounded-full bg-neutral-100 text-neutral-700">
-                                                Archived
-                                            </span>
-                                        </div>
+                        @php
+                            $skills = array_slice(array_values(array_filter((array) $job->skills)), 0, 2);
+                            $software = array_slice(array_values(array_filter((array) $job->software)), 0, 1);
+                            $moreTags = count(array_filter((array) $job->skills)) + count(array_filter((array) $job->software)) - count($skills) - count($software);
+                        @endphp
+                        <article x-data="{ showingRestore: false }" class="group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+                            <a href="{{ route('my-jobs.archived.show', $job) }}" tabindex="-1" aria-hidden="true" class="relative block aspect-[16/9] bg-neutral-100">
+                                @if ($job->images)
+                                    <img src="{{ asset('storage/'.$job->images) }}" alt="" loading="lazy" class="h-full w-full object-cover grayscale transition duration-300 group-hover:grayscale-0">
+                                @else
+                                    <span class="flex h-full w-full items-center justify-center text-neutral-300"><x-icon name="photo" class="h-10 w-10" /></span>
+                                @endif
+                                <x-badge tone="neutral" class="absolute left-3 top-3 px-2.5 py-0.5 text-xs font-medium shadow-sm">
+                                    <x-icon name="archive-box-2" class="mr-1 h-3.5 w-3.5" />{{ __('Archived') }}
+                                </x-badge>
+                            </a>
 
-                                        <div
-                                            class="mt-3 flex flex-wrap items-center text-sm text-neutral-500 gap-x-4 font-secondary">
-                                            <div class="flex items-center">
-                                                <x-icon name="calendar" class="h-4 w-4 mr-2 text-neutral-400" />
-                                                @if ($job->no_deadline)
-                                                    <span>No deadline</span>
-                                                @else
-                                                    <span>Deadline: <x-date :date="$job->deadline" format="M d, Y" /></span>
-                                                @endif
-                                            </div>
-                                            <div class="flex items-center">
-                                                <x-icon name="coins" class="h-4 w-4 mr-2 text-neutral-400" fill="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                <span>Budget: <x-money :amount="$job->budget" /></span>
-                                            </div>
-                                            <div class="flex items-center">
-                                                <x-icon name="users" class="h-4 w-4 mr-2 text-neutral-400" />
-                                                <span>{{ $job->applicants_count }}
-                                                    {{ Str::plural('application', $job->applicants_count) }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="flex flex-1 flex-col p-4">
+                                <h2 class="font-tertiary text-base font-semibold leading-snug text-neutral-900">
+                                    <a href="{{ route('my-jobs.archived.show', $job) }}" class="rounded transition-colors hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">{{ $job->title }}</a>
+                                </h2>
+                                <p class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-tertiary">
+                                    <span class="font-medium tabular-nums text-neutral-700"><x-money :amount="$job->budget" :decimals="0" /></span>
+                                    <span class="inline-flex items-center gap-1">
+                                        <x-icon name="calendar" class="h-3.5 w-3.5" />
+                                        {{ $job->no_deadline || ! $job->deadline ? __('No deadline') : __('Due :date', ['date' => $job->deadline->format('M j, Y')]) }}
+                                    </span>
+                                    <span>{{ __('Posted :date', ['date' => $job->created_at->format('M j, Y')]) }}</span>
+                                </p>
 
-                                <!-- Job Description -->
-                                <div x-data="{ expanded: false, shouldShowMore: false }" x-init="$nextTick(() => {
-                                    const el = $refs.content;
-                                    shouldShowMore = el.scrollHeight > (window.innerWidth < 768 ? 80 : 40); // Approximate 5rem/2.5rem in pixels
-                                })"
-                                    class="mt-4 bg-neutral-50 rounded-lg p-4 border border-neutral-100">
+                                <ul class="mb-5 mt-3 flex flex-wrap gap-1.5">
+                                    @foreach ($skills as $tag)
+                                        <li class="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-0.5 text-xs text-neutral-700">{{ $tag }}</li>
+                                    @endforeach
+                                    @foreach ($software as $tag)
+                                        <li class="rounded-full border border-teal-100 bg-teal-50 px-2.5 py-0.5 text-xs text-teal-800">{{ $tag }}</li>
+                                    @endforeach
+                                    @if ($moreTags > 0)
+                                        <li class="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs text-tertiary">+{{ $moreTags }}</li>
+                                    @endif
+                                </ul>
 
-                                    <!-- Markdown content div with reference -->
-                                    <div x-ref="content"
-                                        class="prose prose-sm max-w-none text-neutral-700 text-sm font-main transition-all duration-300 overflow-hidden
-                                        [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-1 
-                                        [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-1
-                                        [&>blockquote]:border-l-4 [&>blockquote]:border-neutral-200 [&>blockquote]:pl-4 [&>blockquote]:italic [&>blockquote]:my-2
-                                        [&>h1]:text-lg [&>h1]:font-bold [&>h1]:mb-2 [&>h1]:mt-3
-                                        [&>h2]:text-base [&>h2]:font-bold [&>h2]:mb-1.5 [&>h2]:mt-2.5
-                                        [&>h3]:text-sm [&>h3]:font-bold [&>h3]:mb-1 [&>h3]:mt-2
-                                        [&>h4,&>h5,&>h6]:text-sm [&>h4,&>h5,&>h6]:font-semibold [&>h4,&>h5,&>h6]:mb-1 [&>h4,&>h5,&>h6]:mt-2
-                                        [&>p]:mb-1"
-                                        :class="expanded ? 'max-h-none' : 'max-h-[5rem] md:max-h-[2.5rem]'">
-                                        {!! Str::markdown($job->description) !!}
-                                    </div>
-
-                                    <!-- Toggle button that only shows when needed -->
-                                    <button x-show="shouldShowMore" x-on:click="expanded = !expanded"
-                                        class="mt-2 text-secondary text-sm font-medium font-main hover:text-primary transition"
-                                        x-text="expanded ? 'Show less' : 'Read more'"></button>
-                                </div>
-
-                                <!-- Skills and Software -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-                                    <div>
-                                        <h4 class="text-sm font-medium text-neutral-700 flex items-center font-main">
-                                            <x-icon name="light-bulb" class="h-4 w-4 mr-2 text-primary" />
-                                            Skills Required
-                                        </h4>
-                                        <div class="mt-2 flex flex-wrap gap-1.5">
-                                            @foreach ($job->skills as $skill)
-                                                <span
-                                                    class="px-2.5 py-1 text-xs font-medium font-secondary rounded-full bg-blue-50 text-primary border border-blue-100">
-                                                    {{ $skill }}
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-sm font-medium text-neutral-700 flex items-center font-main">
-                                            <x-icon name="cpu-chip" class="h-4 w-4 mr-2 text-secondary" />
-                                            Software Required
-                                        </h4>
-                                        <div class="mt-2 flex flex-wrap gap-1.5">
-                                            @foreach ($job->software as $software)
-                                                <span
-                                                    class="px-2.5 py-1 text-xs font-medium font-secondary rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
-                                                    {{ $software }}
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="mt-6 pt-6 border-t border-neutral-100 flex flex-wrap justify-end gap-3">
-                                    <x-btn variant="secondary" href="{{ route('my-jobs.archived.show', $job) }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                      viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                        View Details
-                                    </x-btn>
-                                    <x-btn variant="secondary" class="text-sm" @click="showingRestore = true">
-                                        <x-icon name="arrow-path" class="h-4 w-4" />
-                                        Restore Job
-                                    </x-btn>
+                                <div class="mt-auto flex items-center justify-between gap-3 border-t border-neutral-100 pt-4">
+                                    <span class="text-xs text-tertiary">{{ trans_choice(':count application|:count applications', $job->applications_count, ['count' => $job->applications_count]) }}</span>
+                                    <span class="flex items-center gap-2">
+                                        <x-btn size="sm" variant="secondary" href="{{ route('my-jobs.archived.show', $job) }}">{{ __('View') }}</x-btn>
+                                        <x-btn size="sm" type="button" @click="showingRestore = true">
+                                            <x-icon name="arrow-path" class="h-4 w-4" />
+                                            {{ __('Restore') }}
+                                        </x-btn>
+                                    </span>
                                 </div>
                             </div>
 
-                            <!-- Restore Confirmation Modal -->
-                            <x-confirm-dialog bind="showingRestore" title="Restore Job" icon="arrow-path" tone="success"
-                                confirm-label="Restore" method="PATCH"
+                            <x-confirm-dialog bind="showingRestore" title="Restore project" icon="arrow-path" tone="success" confirm-label="Restore" method="PATCH"
                                 :action="route('my-jobs.archived.restore', $job)"
-                                message="Are you sure you want to restore this job? This will make the job active again." />
-                        </x-card>
+                                message="This brings the project back to Posted projects. It will accept applications again unless a freelancer is working on it or its deadline has passed." />
+                        </article>
                     @endforeach
                 </div>
+
+                @if ($archivedJobs->hasPages())
+                    <nav role="navigation" aria-label="{{ __('Pagination') }}" class="mt-6 flex items-center justify-between gap-3">
+                        <p class="text-sm text-tertiary">{{ __('Showing :from–:to of :total', ['from' => $archivedJobs->firstItem(), 'to' => $archivedJobs->lastItem(), 'total' => $archivedJobs->total()]) }}</p>
+                        <div class="flex items-center gap-2">
+                            @if ($archivedJobs->onFirstPage())
+                                <x-btn variant="secondary" size="sm" type="button" disabled>{{ __('Previous') }}</x-btn>
+                            @else
+                                <x-btn variant="secondary" size="sm" href="{{ $archivedJobs->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</x-btn>
+                            @endif
+                            <span class="px-1 text-sm tabular-nums text-tertiary">{{ $archivedJobs->currentPage() }} / {{ $archivedJobs->lastPage() }}</span>
+                            @if ($archivedJobs->hasMorePages())
+                                <x-btn variant="secondary" size="sm" href="{{ $archivedJobs->nextPageUrl() }}" rel="next">{{ __('Next') }}</x-btn>
+                            @else
+                                <x-btn variant="secondary" size="sm" type="button" disabled>{{ __('Next') }}</x-btn>
+                            @endif
+                        </div>
+                    </nav>
+                @endif
             @endif
-        </div>
-    </section>
+        @endif
+    </div>
 </x-app-layout>

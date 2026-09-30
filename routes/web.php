@@ -36,6 +36,7 @@ Route::prefix('jobs')->name('jobs.')->group(function () {
     Route::get('/browse', [JobController::class, 'browseJobs'])->name('browse');
     Route::get('/create', [JobController::class, 'new'])->middleware('auth')->name('create');
     Route::post('/', [JobController::class, 'store'])->middleware('auth')->name('store');
+    Route::post('/preview', [JobController::class, 'previewDescription'])->middleware(['auth', 'throttle:60,1'])->name('preview');
 
     Route::get('/{job:slug}', [JobController::class, 'show'])->name('show');
     Route::get('/{job:slug}/apply', [JobController::class, 'apply'])->name('apply');
@@ -44,7 +45,7 @@ Route::prefix('jobs')->name('jobs.')->group(function () {
 });
 
 // Check if a job title already exists
-Route::get('/check-title', [JobController::class, 'checkTitle'])->name('jobs.check-title');
+Route::get('/check-title', [JobController::class, 'checkTitle'])->middleware('auth')->name('jobs.check-title');
 
 // Application Routes (User Applications)
 Route::middleware(['auth'])->prefix('applications')->name('applications.')->group(function () {

@@ -1,255 +1,194 @@
+@use('App\Enums\ApplicationStatus')
+@php
+    [$statusLabel, $statusTone] = $job->listingStatus();
+    $skills = array_values(array_filter((array) $job->skills));
+    $software = array_values(array_filter((array) $job->software));
+    $gallery = collect([$job->images])->merge($job->jobImages->pluck('image_path'))->filter()->map(fn ($path) => asset('storage/'.$path))->values();
+    $deadlineSoon = $job->deadlineIsSoon();
+    $applicationTone = [
+        ApplicationStatus::Submitted->value => 'blue',
+        ApplicationStatus::Reviewed->value => 'amber',
+        ApplicationStatus::Hired->value => 'green',
+        ApplicationStatus::Rejected->value => 'red',
+        ApplicationStatus::Withdrawn->value => 'neutral',
+    ];
+    $canArchive = $job->canBeArchived();
+@endphp
 <x-app-layout :crumb="$job->title">
-    <div class="container mx-auto max-w-7xl">
-        <div class="max-w-7xl mx-auto px-4 py-14 sm:px-6 lg:px-8">
-            <x-card rounded="2xl" shadow="xl" clip class="transition-all duration-300 hover:shadow-2xl">
-                <!-- Header Section -->
-                <div class="bg-gradient-to-r from-primary to-primary/90 text-white p-6 relative overflow-hidden">
-                    <!-- Background Pattern -->
-                    <div class="absolute inset-0 opacity-10">
-                        <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <pattern id="pattern-circles" x="0" y="0" width="20" height="20"
-                                patternUnits="userSpaceOnUse" patternContentUnits="userSpaceOnUse">
-                                <circle id="pattern-circle" cx="10" cy="10" r="1.5" fill="#ffffff">
-                                </circle>
-                            </pattern>
-                            <rect x="0" y="0" width="100%" height="100%" fill="url(#pattern-circles)"></rect>
-                        </svg>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <!-- Header -->
+        <x-card class="mb-6 rounded-2xl">
+            <div class="flex flex-col gap-4 p-6 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0">
+                    <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Your project') }}</p>
+                    <div class="mt-1 flex flex-wrap items-center gap-3">
+                        <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ $job->title }}</h1>
+                        <x-badge :tone="$statusTone" class="px-2.5 py-0.5 text-xs font-medium">{{ $statusLabel }}</x-badge>
                     </div>
-
-                    <!-- Job Status Badge -->
-                    <div class="relative z-10 mb-1">
-                        <span
-                            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium space-x-2 {{ $job->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                            @if ($job->is_active)
-                                <!-- Checkmark icon -->
-                                <x-icon name="check-circle-solid" class="w-5 h-5" />
-                                <span>Active</span>
-                            @else
-                                <!-- Exclamation icon -->
-                                <x-icon name="exclamation-triangle-solid" class="w-5 h-5" />
-                                <span>Closed</span>
-                            @endif
-                        </span>
-                    </div>
-
-                    <!-- Title & Budget -->
-                    <div class="relative z-10 flex flex-wrap justify-between items-start gap-4">
-                        <h1 class="text-xl sm:text-2xl font-bold font-main">{{ $job->title }}</h1>
-                        <div class="flex flex-col items-end">
-                            <span class="text-xs font-tertiary uppercase tracking-wider text-neutral-100">Budget</span>
-                            <span class="text-lg sm:text-xl font-semibold font-secondary">
-                                <x-money :amount="$job->budget" />
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Job Meta Info -->
-                    <div class="relative z-10 mt-2 flex flex-wrap items-center gap-3 text-sm">
-                        <span class="bg-white/15 backdrop-blur-sm text-white px-3 py-1 rounded-full flex items-center">
-                            <x-icon name="calendar" class="h-4 w-4 mr-1.5" />
-                            Posted on {{ \Carbon\Carbon::parse($job->created_at)->format('F j, Y') }}
-                        </span>
-                        <span class="bg-white/15 backdrop-blur-sm text-white px-3 py-1 rounded-full flex items-center">
-                            <x-icon name="clock" class="h-4 w-4 mr-1.5" />
-                            @if ($job->deadline)
-                                Deadline: {{ \Carbon\Carbon::parse($job->deadline)->format('F j, Y') }}
-                            @else
-                                No Fixed Deadline
-                            @endif
-                        </span>
-                    </div>
+                    <p class="mt-1.5 text-sm text-tertiary">{{ __('Posted :date', ['date' => $job->created_at->format('M j, Y')]) }}</p>
                 </div>
 
-                <!-- Main Content Section -->
-                <div class="flex flex-col md:flex-row">
-                    <!-- Left Column - Job Image -->
-                    <div class="md:w-2/5 border-r border-neutral-200">
-                        @if ($job->images)
-                            <div class="aspect-w-16 aspect-h-10 overflow-hidden">
-                                <img src="{{ asset('storage/' . $job->images) }}" alt="{{ $job->title }}"
-                                    class="w-full h-full object-cover transition-all duration-500 hover:scale-105"
-                                    id="mainImage">
-                            </div>
-                        @else
-                            <div class="aspect-w-16 aspect-h-10 bg-neutral-100 flex items-center justify-center">
-                                <x-icon name="photo" class="h-16 w-16 text-neutral-300" stroke-width="1.5" />
-                            </div>
+                <div class="flex shrink-0 flex-wrap items-center gap-2" x-data="{ copied: false, async copy() { try { await navigator.clipboard.writeText(@js($publicUrl)); this.copied = true; setTimeout(() => this.copied = false, 2000); } catch (e) {} } }">
+                    <x-btn size="sm" href="{{ route('my-jobs.applications.index', $job->slug) }}">
+                        <x-icon name="user-group" class="h-4 w-4" />
+                        {{ __('Applications') }}
+                        @if ($counts['new'] > 0)
+                            <span class="rounded-full bg-white/25 px-1.5 text-xs font-semibold">{{ $counts['new'] }}</span>
                         @endif
-                        <!-- Image Gallery -->
-                        @if ($job->jobImages && $job->jobImages->isNotEmpty())
-                            <div class="p-4 border-t border-neutral-200">
-                                <div class="grid grid-cols-5 gap-2" id="imageGallery">
-                                    @if ($job->images)
-                                        <div
-                                            class="aspect-w-1 aspect-h-1 cursor-pointer border-2 border-secondary rounded-md overflow-hidden">
-                                            <img src="{{ asset('storage/' . $job->images) }}"
-                                                alt="{{ $job->title }}" class="w-full h-full object-cover"
-                                                onclick="changeMainImage('{{ asset('storage/' . $job->images) }}')">
-                                        </div>
-                                    @endif
-
-                                    @foreach ($job->jobImages as $image)
-                                        <div
-                                            class="aspect-w-1 aspect-h-1 cursor-pointer border-2 border-transparent hover:border-secondary rounded-md overflow-hidden transition-all">
-                                            <img src="{{ asset('storage/' . $image->image_path) }}" alt="Job Image"
-                                                class="w-full h-full object-cover"
-                                                onclick="changeMainImage('{{ asset('storage/' . $image->image_path) }}')">
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-
-                        <!-- Quick Actions -->
-                        <div class="p-4 border-t border-neutral-200 bg-neutral-50">
-                            <h3 class="text-sm font-tertiary uppercase text-tertiary mb-3 tracking-wider">Quick Actions
-                            </h3>
-                            <div class="flex flex-wrap gap-2">
-                                <x-btn variant="secondary" size="sm" onclick="copyToClipboard('{{ $jobUrl }}')" id="shareButton">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                    viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                    </svg>
-                                    Share
-                                </x-btn>
-                                <x-btn variant="secondary" size="sm" href="{{ route('jobs.edit', ['job' => $job->slug]) }}">
-                                    <x-icon name="pencil-square" class="h-4 w-4" />
-                                    Edit
-                                </x-btn>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column - Job Details -->
-                    <div class="md:w-3/5 p-6">
-                        <!-- Description -->
-                        @if ($job->description)
-                            <div class="mb-6">
-                                <h2 class="text-lg font-bold text-primary mb-3 flex items-center font-tertiary">
-                                    <x-icon name="document-text" class="h-5 w-5 mr-2 text-secondary" />
-                                    Job Description
-                                </h2>
-                                <div class="border-l-4 border-secondary/20 pl-4">
-                                    <x-jobs.markdown-description :content="$job->description" secondary-font />
-                                </div>
-                            </div>
-                        @endif
-
-                        <!-- Skills & Software -->
-                        @php
-                            $skills = is_string($job->skills) ? json_decode($job->skills, true) : $job->skills;
-                            $software = is_string($job->software) ? json_decode($job->software, true) : $job->software;
-                        @endphp
-
-                        <div class="space-y-6">
-                            <!-- Skills -->
-                            @if (!empty($skills))
-                                <div
-                                    class="bg-neutral-50 rounded-xl p-4 border border-neutral-200 hover:border-secondary/30 transition-colors">
-                                    <h2 class="text-lg font-bold text-primary mb-3 flex items-center font-tertiary">
-                                        <x-icon name="light-bulb" class="h-5 w-5 mr-2 text-secondary" />
-                                        Skills Required
-                                    </h2>
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach ($skills as $skill)
-                                            <span
-                                                class="bg-secondary/10 text-secondary px-3 py-1.5 rounded-full text-sm font-medium hover:bg-secondary/20 transition-colors">
-                                                {{ $skill }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-
-                            <!-- Software -->
-                            @if (!empty($software))
-                                <div
-                                    class="bg-neutral-50 rounded-xl p-4 border border-neutral-200 hover:border-primary/30 transition-colors">
-                                    <h2 class="text-lg font-bold text-primary mb-3 flex items-center font-tertiary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                            fill="currentColor" class="h-5 w-5 mr-2 text-secondary">
-                                            <path d="M16.5 7.5h-9v9h9v-9Z" />
-                                            <path fill-rule="evenodd"
-                                                d="M8.25 2.25A.75.75 0 0 1 9 3v.75h2.25V3a.75.75 0 0 1 1.5 0v.75H15V3a.75.75 0 0 1 1.5 0v.75h.75a3 3 0 0 1 3 3v.75H21A.75.75 0 0 1 21 9h-.75v2.25H21a.75.75 0 0 1 0 1.5h-.75V15H21a.75.75 0 0 1 0 1.5h-.75v.75a3 3 0 0 1-3 3h-.75V21a.75.75 0 0 1-1.5 0v-.75h-2.25V21a.75.75 0 0 1-1.5 0v-.75H9V21a.75.75 0 0 1-1.5 0v-.75h-.75a3 3 0 0 1-3-3v-.75H3A.75.75 0 0 1 3 15h.75v-2.25H3a.75.75 0 0 1 0-1.5h.75V9H3a.75.75 0 0 1 0-1.5h.75v-.75a3 3 0 0 1 3-3h.75V3a.75.75 0 0 1 .75-.75ZM6 6.75A.75.75 0 0 1 6.75 6h10.5a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V6.75Z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                        Required Software
-                                    </h2>
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach ($software as $soft)
-                                            <span
-                                                class="bg-secondary/10 text-secondary px-3 py-1.5 rounded-full text-sm font-medium hover:bg-primary/20 transition-colors">
-                                                {{ $soft }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Footer Actions -->
-                <div
-                    class="bg-gradient-to-r from-neutral-50 to-neutral-100 p-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-neutral-200">
-                    <x-btn variant="ghost" href="{{ route('my-jobs.index') }}">
-                        <x-icon name="arrow-left" class="h-5 w-5" />
-                        Back to My Jobs
                     </x-btn>
-
-                    <div class="flex items-center gap-3">
-                        <x-btn href="{{ route('jobs.create') }}">
-                            <x-icon name="plus" class="h-5 w-5" />
-                            Create New Project
-                        </x-btn>
-                    </div>
+                    <x-btn size="sm" variant="secondary" href="{{ route('jobs.edit', $job->slug) }}">
+                        <x-icon name="pencil-square" class="h-4 w-4" />
+                        {{ __('Edit') }}
+                    </x-btn>
+                    <x-btn size="sm" variant="secondary" type="button" @click="copy()">
+                        <x-icon name="link" class="h-4 w-4" />
+                        <span x-text="copied ? @js(__('Link copied')) : @js(__('Copy link'))">{{ __('Copy link') }}</span>
+                    </x-btn>
                 </div>
-            </x-card>
+            </div>
+
+            <dl class="grid grid-cols-1 divide-y divide-neutral-100 border-t border-neutral-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                <div class="px-6 py-4">
+                    <dt class="text-xs text-tertiary">{{ __('Budget') }}</dt>
+                    <dd class="mt-1 font-tertiary text-xl font-semibold tabular-nums text-neutral-900"><x-money :amount="$job->budget" :decimals="0" /></dd>
+                </div>
+                <div class="px-6 py-4">
+                    <dt class="text-xs text-tertiary">{{ __('Deadline') }}</dt>
+                    <dd @class(['mt-1 text-base font-semibold', 'text-amber-700' => $deadlineSoon, 'text-neutral-900' => ! $deadlineSoon])>
+                        {{ $job->no_deadline || ! $job->deadline ? __('No fixed deadline') : $job->deadline->format('M j, Y') }}
+                    </dd>
+                </div>
+                <div class="px-6 py-4">
+                    <dt class="text-xs text-tertiary">{{ __('Applications') }}</dt>
+                    <dd class="mt-1 text-base font-semibold text-neutral-900">
+                        {{ $counts['total'] }}
+                        @if ($counts['new'] > 0)
+                            <span class="ml-1 text-sm font-medium text-teal-700">{{ __(':count new', ['count' => $counts['new']]) }}</span>
+                        @endif
+                    </dd>
+                </div>
+            </dl>
+        </x-card>
+
+        @if (! $job->isOpenForApplications() && ! $engagement)
+            <div class="mb-6 flex items-start gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700" role="status">
+                <x-icon name="information-circle" class="mt-0.5 h-5 w-5 shrink-0 text-neutral-400" />
+                <p>{{ __('This project is not visible on Browse projects, so freelancers cannot apply.') }}
+                    <a href="{{ route('jobs.edit', $job->slug) }}" class="font-medium text-teal-700 hover:underline">{{ __('Edit the project') }}</a> {{ __('to reopen it.') }}</p>
+            </div>
+        @endif
+
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+            <div class="space-y-6">
+                <x-panel :title="__('Description')">
+                    <x-jobs.markdown-description :content="$job->description" />
+                </x-panel>
+
+                @if ($skills || $software)
+                    <x-panel :title="__('What you asked for')">
+                        <div class="space-y-5">
+                            @foreach ([__('Skills') => [$skills, 'border-neutral-200 bg-neutral-50 text-neutral-700'], __('Software') => [$software, 'border-teal-100 bg-teal-50 text-teal-800']] as $label => [$items, $tone])
+                                @if ($items)
+                                    <div>
+                                        <h3 class="mb-2 text-xs font-medium uppercase tracking-wide text-tertiary">{{ $label }}</h3>
+                                        <ul class="flex flex-wrap gap-2">
+                                            @foreach ($items as $item)
+                                                <li class="rounded-full border px-3 py-1 text-xs font-medium {{ $tone }}">{{ $item }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </x-panel>
+                @endif
+
+                @if ($gallery->isNotEmpty())
+                    <x-panel :title="__('Images')" x-data="{ src: null }" @keydown.escape.window="src = null">
+                        <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                            @foreach ($gallery as $image)
+                                <li>
+                                    <button type="button" @click="src = @js($image)" class="group block w-full overflow-hidden rounded-xl border border-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"
+                                        aria-label="{{ __('View image :number full size', ['number' => $loop->iteration]) }}">
+                                        <img src="{{ $image }}" alt="{{ $loop->first ? __('Cover image') : __('Extra image :number', ['number' => $loop->iteration - 1]) }}" loading="lazy"
+                                            class="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+                                    </button>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                        <div x-show="src" x-cloak x-transition.opacity @click.self="src = null" role="dialog" aria-modal="true" aria-label="{{ __('Project image') }}"
+                            class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/80 p-4 backdrop-blur-sm">
+                            <div class="relative max-h-full max-w-5xl">
+                                <img :src="src" alt="" class="max-h-[85vh] rounded-xl bg-white object-contain shadow-2xl">
+                                <button type="button" @click="src = null" class="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-neutral-700 shadow hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40" aria-label="{{ __('Close') }}"><x-icon name="x-mark" class="h-5 w-5" /></button>
+                            </div>
+                        </div>
+                    </x-panel>
+                @endif
+            </div>
+
+            <aside class="space-y-6 lg:sticky lg:top-24">
+                @if ($engagement)
+                    <x-panel :title="__('Hired')">
+                        <p class="text-sm text-neutral-700">
+                            {{ $engagement->status === \App\Enums\EngagementStatus::EmployerAccepted ? __('You made an offer and are waiting for the freelancer to respond.') : __('This project has an engagement.') }}
+                        </p>
+                        <x-btn block class="mt-4" href="{{ route('engagements.show', $engagement) }}">{{ __('Open engagement') }}</x-btn>
+                    </x-panel>
+                @endif
+
+                <x-panel :title="__('Applications')" :description="$counts['total'] ? trans_choice(':count application|:count applications', $counts['total'], ['count' => $counts['total']]) : null">
+                    @forelse ($recent as $application)
+                        @if ($loop->first)
+                            <ul class="-my-3 divide-y divide-neutral-100">
+                        @endif
+                        <li>
+                            <a href="{{ route('my-jobs.applications.show', $application) }}" class="-mx-2 flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
+                                <x-user-avatar :user="$application->applicant" size="h-9 w-9" />
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-medium text-neutral-900">{{ $application->applicant->name }}</span>
+                                    <span class="block text-xs text-tertiary"><x-money :amount="$application->offer_amount" :decimals="0" /> · {{ $application->created_at->diffForHumans() }}</span>
+                                </span>
+                                <x-badge :tone="$applicationTone[$application->status->value] ?? 'neutral'" class="px-2 py-0.5 text-xs font-medium">{{ $application->status->label() }}</x-badge>
+                            </a>
+                        </li>
+                        @if ($loop->last)
+                            </ul>
+                        @endif
+                    @empty
+                        <p class="text-sm text-neutral-700">{{ __('No applications yet. Share the link so freelancers can find this project.') }}</p>
+                    @endforelse
+
+                    @if ($counts['total'] > 0)
+                        <x-btn block variant="secondary" class="mt-6" href="{{ route('my-jobs.applications.index', $job->slug) }}">{{ __('See all applications') }}</x-btn>
+                    @endif
+                </x-panel>
+
+                <x-panel :title="__('Manage')">
+                    <div class="space-y-2">
+                        <x-btn block variant="secondary" href="{{ route('jobs.edit', $job->slug) }}">
+                            <x-icon name="pencil-square" class="h-4 w-4" />
+                            {{ __('Edit project') }}
+                        </x-btn>
+                        <x-btn block variant="secondary" href="{{ $publicUrl }}">
+                            <x-icon name="eye" class="h-4 w-4" />
+                            {{ __('View the public page') }}
+                        </x-btn>
+                        @if ($canArchive)
+                            <form action="{{ route('my-jobs.archive', $job) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <x-btn block variant="secondary" type="submit">
+                                    <x-icon name="archive-box" class="h-4 w-4" />
+                                    {{ __('Archive project') }}
+                                </x-btn>
+                            </form>
+                        @endif
+                    </div>
+                    <p class="mt-4 text-xs text-tertiary">{{ __('The public page is what freelancers see when they open your link.') }}</p>
+                </x-panel>
+            </aside>
         </div>
     </div>
-
-    <!-- Image Gallery -->
-    <script>
-        function changeMainImage(src) {
-            document.getElementById('mainImage').src = src;
-
-            // Update border colors to show active thumbnail
-            const galleryItems = document.querySelectorAll('#imageGallery > div');
-            galleryItems.forEach(item => {
-                const img = item.querySelector('img');
-                if (img.getAttribute('src') === src) {
-                    item.classList.add('border-secondary');
-                    item.classList.remove('border-transparent');
-                } else {
-                    item.classList.remove('border-secondary');
-                    item.classList.add('border-transparent');
-                }
-            });
-        }
-    </script>
-    <!-- Copy to Clipboard Function -->
-    <script>
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(function() {
-                // Visual feedback
-                const button = document.getElementById('shareButton');
-                const originalText = button.innerHTML;
-
-                button.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Copied!
-        `;
-
-                setTimeout(function() {
-                    button.innerHTML = originalText;
-                }, 2000);
-            }).catch(function(err) {
-                console.error('Could not copy text: ', err);
-            });
-        }
-    </script>
 </x-app-layout>

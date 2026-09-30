@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EngagementStatus;
 use App\Helpers\Jobs\JobCacheHelper;
 use App\Traits\JobFilterTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -59,6 +60,66 @@ class ModelJob extends Model
         return $this->hasMany(JobImage::class, 'model_job_id');
     }
 
+    /** Engagements that came out of this project's applications. */
+    public function engagements()
+    {
+        return $this->hasManyThrough(JobEngagement::class, JobApplication::class, 'job_id', 'application_id');
+    }
+
+    /**
+     * True while a hired freelancer is working (or has finished/disputed the work), so the project must not
+     * be reopened to new applications from the edit form. Cancelled engagements are reopened on purpose.
+     */
+    public function hasEngagementInProgress(): bool
+    {
+        return $this->engagements()
+            ->whereIn('job_engagements.status', [EngagementStatus::Active, EngagementStatus::Disputed, EngagementStatus::Completed])
+            ->exists();
+    }
+
+    /**
+     * Archiving tidies away a finished or abandoned project, so it must already be closed to applications and
+     * have nobody working on it (a completed engagement is fine; an active or disputed one is not).
+     */
+    public function canBeArchived(): bool
+    {
+        if ($this->is_archived || $this->isOpenForApplications()) {
+            return false;
+        }
+
+        $engagements = $this->relationLoaded('engagements') ? $this->engagements : $this->engagements()->get();
+
+        return ! $engagements->contains(fn ($e) => in_array($e->status, [EngagementStatus::Active, EngagementStatus::Disputed], true));
+    }
+
+    /**
+     * What the poster sees as the project's state: [label, badge tone]. Needs `engagements` loaded.
+     *
+     * @return array{0: string, 1: string}
+     */
+    public function listingStatus(): array
+    {
+        $engagement = $this->engagements->sortByDesc('id')->first(fn ($e) => in_array($e->status, [
+            EngagementStatus::Active, EngagementStatus::Disputed, EngagementStatus::Completed, EngagementStatus::EmployerAccepted,
+        ], true));
+
+        if ($engagement) {
+            return match ($engagement->status) {
+                EngagementStatus::EmployerAccepted => [__('Offer sent'), 'amber'],
+                EngagementStatus::Completed => [__('Completed'), 'green'],
+                EngagementStatus::Disputed => [__('In dispute'), 'red'],
+                default => [__('In progress'), 'blue'],
+            };
+        }
+
+        return match (true) {
+            $this->is_archived => [__('Archived'), 'neutral'],
+            $this->isOpenForApplications() => [__('Open'), 'green'],
+            $this->is_active => [__('Expired'), 'neutral'],
+            default => [__('Closed'), 'neutral'],
+        };
+    }
+
     public function hasAcceptedEngagement()
     {
         return $this->applications()
@@ -66,6 +127,20 @@ class ModelJob extends Model
                 $query->whereIn('status', ['applicant_accepted', 'active', 'completed']);
             })
             ->exists();
+    }
+
+    /**
+     * True when the project has a deadline within the next few days (today included), for "closing soon" cues.
+     */
+    public function deadlineIsSoon(int $days = 3): bool
+    {
+        if ($this->no_deadline || $this->deadline === null) {
+            return false;
+        }
+
+        $left = today()->diffInDays($this->deadline, false);
+
+        return $left >= 0 && $left <= $days;
     }
 
     /**
@@ -83,6 +158,20 @@ class ModelJob extends Model
                     ->orWhereNull('deadline')
                     ->orWhere('deadline', '>=', today());
             });
+    }
+
+    /**
+     * The complement of scopeOpenForApplications(): switched off, archived or past its deadline.
+     */
+    public function scopeNotOpenForApplications($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('is_active', false)
+                ->orWhere('is_archived', true)
+                ->orWhere(function ($expired) {
+                    $expired->where('no_deadline', false)->whereNotNull('deadline')->where('deadline', '<', today());
+                });
+        });
     }
 
     /**
@@ -135,9 +224,15 @@ class ModelJob extends Model
      */
     public function unarchive()
     {
+        // Restoring takes the project out of the archive; it only accepts applications again when that is
+        // safe: nobody is working on it and its deadline has not passed. Otherwise it comes back closed
+        // and the poster reopens it (with a new deadline) from Edit.
+        $reopen = ! $this->hasEngagementInProgress()
+            && ($this->no_deadline || $this->deadline === null || ! $this->deadline->isBefore(today()));
+
         $this->update([
             'is_archived' => false,
-            'is_active' => true,
+            'is_active' => $reopen,
         ]);
     }
 

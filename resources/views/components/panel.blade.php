@@ -4,7 +4,8 @@
     Settings card: title + description on top, body, optional footer for actions (slot `footer`) and header
     actions (slot `actions`). The quiet replacement for the old gradient section headers.
 --}}
-<section {{ $attributes->class(['overflow-hidden rounded-2xl border bg-white shadow-sm', 'border-neutral-200' => !$danger, 'border-red-200' => $danger]) }}>
+{{-- No overflow-hidden on the card itself: dropdowns (tag pickers, menus) inside must be able to extend past its edge. `flush` bodies clip their own content. --}}
+<section {{ $attributes->class(['rounded-2xl border bg-white shadow-sm', 'border-neutral-200' => !$danger, 'border-red-200' => $danger]) }}>
     @if ($title || isset($actions))
         <header class="flex items-start justify-between gap-4 px-6 pt-6">
             <div class="min-w-0">
@@ -25,12 +26,12 @@
         </header>
     @endif
 
-    <div @class(['px-6 pb-6', 'pt-5' => $title || isset($actions), 'pt-6' => !$title && !isset($actions), 'px-0 pb-0' => $flush])>
+    <div @class(['px-6 pb-6' => ! $flush, 'overflow-hidden rounded-b-2xl' => $flush, 'pt-5' => $title || isset($actions), 'pt-6' => !$title && !isset($actions)])>
         {{ $slot }}
     </div>
 
     @isset($footer)
-        <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-100 bg-neutral-50/60 px-6 py-4">
+        <footer class="flex flex-wrap items-center justify-between gap-3 rounded-b-2xl border-t border-neutral-100 bg-neutral-50/60 px-6 py-4">
             {{ $footer }}
         </footer>
     @endisset

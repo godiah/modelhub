@@ -21,7 +21,7 @@
     $shownSoftware = array_slice($software, 0, $compact ? 1 : 2);
     $moreTags = (count($skills) - count($shownSkills)) + (count($software) - count($shownSoftware));
 
-    $deadlineSoon = ! $job->no_deadline && $job->deadline && $job->deadline->isFuture() && $job->deadline->diffInDays(now()) <= 3;
+    $deadlineSoon = $job->deadlineIsSoon();
     $statusTone = [
         ApplicationStatus::Submitted->value => 'blue',
         ApplicationStatus::Reviewed->value => 'amber',

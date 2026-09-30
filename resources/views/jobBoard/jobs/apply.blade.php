@@ -5,7 +5,7 @@
     $feePercent = \App\Helpers\Applications\ApplicationCalculationHelper::getServiceFeePercentage();
     $skills = array_values(array_filter((array) $job->skills));
     $software = array_values(array_filter((array) $job->software));
-    $deadlineSoon = ! $job->no_deadline && $job->deadline && $job->deadline->isFuture() && $job->deadline->diffInDays(now()) <= 3;
+    $deadlineSoon = $job->deadlineIsSoon();
 
     $gallery = collect([$job->images])
         ->merge($job->jobImages->pluck('image_path'))
