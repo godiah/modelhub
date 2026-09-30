@@ -166,11 +166,7 @@ new class extends Component {
     <x-section-header :title="__('Two-Factor Authentication')"
         :subtitle="__('Add additional security to your account using two-factor authentication')">
         <x-slot:icon>
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                </path>
-            </svg>
+            <x-icon name="shield-check" class="w-5 h-5 text-white" />
         </x-slot:icon>
     </x-section-header>
 
@@ -180,11 +176,7 @@ new class extends Component {
         @if (session('status') === 'verification-code-sent')
             <div class="mb-6 bg-secondary/10 border border-secondary/30 rounded-lg p-4">
                 <div class="flex items-center space-x-3">
-                    <svg class="w-5 h-5 text-secondary" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd"></path>
-                    </svg>
+                    <x-icon name="check-circle-solid" class="w-5 h-5 text-secondary" />
                     <p class="text-sm font-medium text-secondary font-main">
                         {{ __('A verification code has been sent to your email address.') }}
                     </p>
@@ -195,11 +187,7 @@ new class extends Component {
         @if (session('status') === 'disable-verification-code-sent')
             <div class="mb-6 bg-accent/10 border border-accent/30 rounded-lg p-4">
                 <div class="flex items-center space-x-3">
-                    <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                            clip-rule="evenodd"></path>
-                    </svg>
+                    <x-icon name="exclamation-triangle-solid" class="w-5 h-5 text-accent" />
                     <p class="text-sm font-medium text-accent font-main">
                         {{ __('A verification code has been sent to your email address to disable two-factor authentication.') }}
                     </p>
@@ -210,11 +198,7 @@ new class extends Component {
         @if (session('status') === 'two-factor-enabled')
             <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
                 <div class="flex items-center space-x-3">
-                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clip-rule="evenodd"></path>
-                    </svg>
+                    <x-icon name="check-circle-solid" class="w-5 h-5 text-green-600" />
                     <p class="text-sm font-medium text-green-800 font-main">
                         {{ __('Two-factor authentication has been successfully enabled.') }}
                     </p>
@@ -225,11 +209,7 @@ new class extends Component {
         @if (session('status') === 'two-factor-disabled')
             <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
                 <div class="flex items-center space-x-3">
-                    <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clip-rule="evenodd"></path>
-                    </svg>
+                    <x-icon name="x-circle-solid" class="w-5 h-5 text-red-600" />
                     <p class="text-sm font-medium text-red-800 font-main">
                         {{ __('Two-factor authentication has been disabled.') }}
                     </p>
@@ -243,12 +223,7 @@ new class extends Component {
                 <div class="flex items-center space-x-4">
                     <div
                         class="w-12 h-12 rounded-lg flex items-center justify-center {{ $twoFactorEnabled ? 'bg-secondary/20' : 'bg-neutral-200' }}">
-                        <svg class="w-6 h-6 {{ $twoFactorEnabled ? 'text-secondary' : 'text-neutral-500' }}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                            </path>
-                        </svg>
+                        <x-icon name="shield-check" class="w-6 h-6 {{ $twoFactorEnabled ? 'text-secondary' : 'text-neutral-500' }}" />
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-neutral-900 font-main">
@@ -258,21 +233,13 @@ new class extends Component {
                             @if ($twoFactorEnabled)
                                 <span
                                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-secondary/20 text-secondary">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
+                                    <x-icon name="check-circle-solid" class="w-3 h-3 mr-1" />
                                     {{ __('Enabled') }}
                                 </span>
                             @else
                                 <span
                                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
+                                    <x-icon name="x-circle-solid" class="w-3 h-3 mr-1" />
                                     {{ __('Disabled') }}
                                 </span>
                             @endif
@@ -305,11 +272,7 @@ new class extends Component {
             <div class="bg-secondary/5 border border-secondary/20 rounded-lg p-6 mb-6">
                 <div class="flex items-start space-x-3 mb-4">
                     <div class="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                            </path>
-                        </svg>
+                        <x-icon name="lock-closed" class="w-4 h-4 text-secondary" />
                     </div>
                     <div>
                         <h4 class="text-lg font-semibold text-neutral-900 font-main">
@@ -328,12 +291,7 @@ new class extends Component {
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                    </path>
-                                </svg>
+                                <x-icon name="lock-closed" class="h-5 w-5 text-neutral-400" />
                             </div>
                             <input type="password" wire:model="password" id="password"
                                 class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
@@ -341,11 +299,7 @@ new class extends Component {
                         </div>
                         @error('password')
                             <div class="flex items-center space-x-2 text-red-600 text-sm font-main mt-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
+                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                                 <span>{{ $message }}</span>
                             </div>
                         @enderror
@@ -374,11 +328,7 @@ new class extends Component {
             <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
                 <div class="flex items-start space-x-3 mb-4">
                     <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z">
-                            </path>
-                        </svg>
+                        <x-icon name="exclamation-triangle-2" class="w-5 h-5 text-red-600" />
                     </div>
                     <div>
                         <h4 class="text-lg font-semibold text-red-900 font-main">
@@ -397,12 +347,7 @@ new class extends Component {
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                                    </path>
-                                </svg>
+                                <x-icon name="lock-closed" class="h-5 w-5 text-red-400" />
                             </div>
                             <input type="password" wire:model="password" id="disable_password"
                                 class="block w-full pl-10 pr-3 py-3 border border-red-300 rounded-lg shadow-sm placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 font-main"
@@ -410,11 +355,7 @@ new class extends Component {
                         </div>
                         @error('password')
                             <div class="flex items-center space-x-2 text-red-600 text-sm font-main mt-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
+                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                                 <span>{{ $message }}</span>
                             </div>
                         @enderror
@@ -423,10 +364,7 @@ new class extends Component {
                     <div class="flex space-x-3 pt-2 text-sm">
                         <button type="submit"
                             class="inline-flex text-sm items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-main">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+                            <x-icon name="x-mark" class="w-4 h-4 mr-2" />
                             {{ __('Disable Two-Factor Authentication') }}
                         </button>
                         <button type="button" wire:click="cancel"
@@ -443,12 +381,7 @@ new class extends Component {
             <div class="bg-secondary/5 border border-secondary/20 rounded-lg p-6 mb-6">
                 <div class="flex items-start space-x-3 mb-4">
                     <div class="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                            </path>
-                        </svg>
+                        <x-icon name="envelope-3" class="w-4 h-4 text-secondary" />
                     </div>
                     <div>
                         <h4 class="text-lg font-semibold text-neutral-900 font-main">
@@ -472,11 +405,7 @@ new class extends Component {
                             required />
                         @error('verification_code')
                             <div class="flex items-center space-x-2 text-red-600 text-sm font-main mt-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
+                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                                 <span>{{ $message }}</span>
                             </div>
                         @enderror
@@ -485,20 +414,12 @@ new class extends Component {
                     <div class="flex flex-wrap gap-3 pt-2 text-sm">
                         <button type="submit"
                             class="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 font-main">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                                </path>
-                            </svg>
+                            <x-icon name="shield-check" class="w-4 h-4 mr-2" />
                             {{ __('Enable Two-Factor Authentication') }}
                         </button>
                         <button type="button" wire:click="resendCode"
                             class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 font-main">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                </path>
-                            </svg>
+                            <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
                             {{ __('Resend Code') }}
                         </button>
                         <button type="button" wire:click="cancel"
@@ -515,11 +436,7 @@ new class extends Component {
             <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
                 <div class="flex items-start space-x-3 mb-4">
                     <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                            </path>
-                        </svg>
+                        <x-icon name="envelope-3" class="w-4 h-4 text-red-600" />
                     </div>
                     <div>
                         <h4 class="text-lg font-semibold text-red-900 font-main">
@@ -543,11 +460,7 @@ new class extends Component {
                             required />
                         @error('verification_code')
                             <div class="flex items-center space-x-2 text-red-600 text-sm font-main mt-2">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
+                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                                 <span>{{ $message }}</span>
                             </div>
                         @enderror
@@ -556,19 +469,12 @@ new class extends Component {
                     <div class="flex flex-wrap gap-3 pt-2 text-sm">
                         <button type="submit"
                             class="inline-flex items-center px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-main">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+                            <x-icon name="x-mark" class="w-4 h-4 mr-2" />
                             {{ __('Disable Two-Factor Authentication') }}
                         </button>
                         <button type="button" wire:click="resendDisableCode"
                             class="inline-flex items-center px-6 py-3 bg-accent hover:bg-accent/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 font-main">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                                </path>
-                            </svg>
+                            <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
                             {{ __('Resend Code') }}
                         </button>
                         <button type="button" wire:click="cancel"
@@ -585,11 +491,7 @@ new class extends Component {
             <div class="bg-secondary/10 border border-secondary/20 rounded-lg p-6">
                 <div class="flex items-start space-x-3">
                     <div class="w-8 h-8 bg-secondary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-4 h-4 text-secondary" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="information-circle-solid-2" class="w-4 h-4 text-secondary" />
                     </div>
                     <div>
                         <h4 class="font-semibold text-secondary font-main">
@@ -598,19 +500,11 @@ new class extends Component {
                         <div
                             class="mt-3 flex items-center space-x-4 text-sm text-neutral-600 font-tertiary font-medium">
                             <div class="flex items-center space-x-1">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
+                                <x-icon name="check-circle-solid" class="w-3 h-3" />
                                 <span>{{ __('Email verification required') }}</span>
                             </div>
                             <div class="flex items-center space-x-1">
-                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
+                                <x-icon name="check-circle-solid" class="w-3 h-3" />
                                 <span>{{ __('Enhanced security') }}</span>
                             </div>
                         </div>

@@ -8,21 +8,13 @@
             <div class="flex space-x-3">
                 <a href="{{ route('jobs.create') }}"
                     class="inline-flex items-center px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                            clip-rule="evenodd" />
-                    </svg>
+                    <x-icon name="plus-solid" class="h-5 w-5 mr-2" />
                     Post New Job
                 </a>
 
                 <a href="{{ route('my-jobs.archived.posted-jobs') }}"
                     class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-5 w-5 mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                    </svg>
+                    <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
                     Archived Jobs
                 </a>
             </div>
@@ -34,20 +26,11 @@
             @if ($postedJobs->isEmpty() && !$hasFilters)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
                     <div class="p-12 flex flex-col items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-neutral-300" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                        <x-icon name="document-text" class="h-24 w-24 text-neutral-300" stroke-width="1.5" />
                         <p class="mt-6 text-neutral-500 font-main text-lg">You haven't posted any jobs yet.</p>
                         <a href="{{ route('jobs.create') }}"
                             class="mt-4 inline-flex items-center px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-medium rounded-lg transition-colors duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            <x-icon name="plus-solid" class="h-5 w-5 mr-2" />
                             Post Your First Job
                         </a>
                     </div>

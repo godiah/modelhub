@@ -21,10 +21,7 @@
         <!-- Header Content -->
         <div class="relative flex items-center">
             <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center mr-4">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                <x-icon name="chart-bar" class="w-6 h-6 text-white" />
             </div>
             <h2 class="text-xl font-bold text-white font-main">Project Timeline</h2>
         </div>
@@ -44,10 +41,7 @@
                         <!-- Timeline Dot -->
                         <div
                             class="relative z-10 flex items-center justify-center w-12 h-12 bg-gradient-to-br from-secondary to-secondary/80 rounded-full shadow-lg border-4 border-white">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
+                            <x-icon name="check" class="w-5 h-5 text-white" />
                         </div>
 
                         <!-- Content -->
@@ -60,11 +54,7 @@
                                 </h3>
                                 <span
                                     class="inline-flex items-center px-3 py-1 text-xs font-medium font-secondary bg-secondary/20 text-secondary rounded-full">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="check-circle-solid" class="w-3 h-3 mr-1" />
                                     Approved
                                 </span>
                             </div>
@@ -118,10 +108,7 @@
                         <!-- Timeline Dot -->
                         <div
                             class="relative z-10 flex items-center justify-center w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg border-4 border-white">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <x-icon name="check-circle" class="w-5 h-5 text-white" />
                         </div>
 
                         <!-- Content -->
@@ -134,11 +121,7 @@
                                 </h3>
                                 <span
                                     class="inline-flex items-center px-3 py-1 text-xs font-medium font-secondary bg-green-200 text-green-700 rounded-full">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="check-circle-solid" class="w-3 h-3 mr-1" />
                                     Finished
                                 </span>
                             </div>
@@ -155,11 +138,7 @@
                         <!-- Timeline Dot -->
                         <div
                             class="relative z-10 flex items-center justify-center w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full shadow-lg border-4 border-white">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <x-icon name="x-mark" class="w-5 h-5 text-white" />
                         </div>
 
                         <!-- Content -->
@@ -172,11 +151,7 @@
                                 </h3>
                                 <span
                                     class="inline-flex items-center px-3 py-1 text-xs font-medium font-secondary bg-red-200 text-red-700 rounded-full">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="x-circle-solid" class="w-3 h-3 mr-1" />
                                     Terminated
                                 </span>
                             </div>
@@ -196,11 +171,7 @@
                         <!-- Timeline Dot -->
                         <div
                             class="relative z-10 flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full shadow-lg border-4 border-white">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
+                            <x-icon name="cash" class="w-5 h-5 text-white" />
                         </div>
 
                         <!-- Content -->
@@ -213,11 +184,7 @@
                                 </h3>
                                 <span
                                     class="inline-flex items-center px-3 py-1 text-xs font-medium font-secondary bg-blue-200 text-blue-700 rounded-full">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="check-circle-solid" class="w-3 h-3 mr-1" />
                                     Settled
                                 </span>
                             </div>
@@ -234,11 +201,7 @@
                         <!-- Timeline Dot -->
                         <div
                             class="relative z-10 flex items-center justify-center w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full shadow-lg border-4 border-white">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <x-icon name="check-circle" class="w-5 h-5 text-white" />
                         </div>
 
                         <!-- Content -->
@@ -251,11 +214,7 @@
                                 </h3>
                                 <span
                                     class="inline-flex items-center px-3 py-1 text-xs font-medium font-secondary bg-purple-200 text-purple-700 rounded-full">
-                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="check-circle-solid" class="w-3 h-3 mr-1" />
                                     Resolved
                                 </span>
                             </div>

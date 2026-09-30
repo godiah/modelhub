@@ -5,11 +5,7 @@
     <!-- Started Date -->
     <div class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <x-icon name="calendar" class="h-5 w-5 text-primary" />
         </div>
         <div>
             <p class="text-xs text-neutral-500 font-main">Started on</p>
@@ -22,11 +18,7 @@
     <!-- Agreed Amount -->
     <div class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                stroke="currentColor" class="h-5 w-5 text-secondary">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
-            </svg>
+            <x-icon name="banknotes" class="h-5 w-5 text-secondary" stroke-width="1.5" />
         </div>
         <div>
             <p class="text-xs text-neutral-500 font-main">Agreed amount</p>
@@ -91,11 +83,7 @@
             @if ($engagement->status === EngagementStatus::Active || $engagement->status === EngagementStatus::Cancelled)
                 <button @click="$dispatch('open-message-modal', { engagementId: {{ $engagement->id }} })"
                     class="relative mt-1 inline-flex items-center px-3 py-1 text-xs font-medium rounded-full text-accent bg-accent/10 hover:bg-accent/20 transition-colors border border-accent/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
+                    <x-icon name="plus-2" class="h-3 w-3 mr-1" />
                     <span class="font-secondary">Message</span>
                     @php
                         $unreadCount = $engagement

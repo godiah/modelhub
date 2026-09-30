@@ -43,11 +43,7 @@
             <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-700 relative">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 p-2 rounded-full bg-gradient-to-br from-accent to-accent/70">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                        </svg>
+                        <x-icon name="archive-box-3" class="h-6 w-6 text-white" />
                     </div>
                     <h3 class="ml-3 text-lg font-semibold font-tertiary text-neutral-800 dark:text-white">
                         Archive Engagement
@@ -57,11 +53,7 @@
                 <!-- Close Button -->
                 <button @click="open = false"
                     class="absolute top-4 right-4 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <x-icon name="x-mark" class="h-5 w-5" />
                 </button>
             </div>
 
@@ -75,11 +67,7 @@
 
                 <div class="mt-4 p-4 bg-gradient-to-r from-accent/10 to-accent/5 rounded-lg border border-accent/20">
                     <div class="flex items-start">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent flex-shrink-0 mr-2 mt-0.5"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                        <x-icon name="information-circle" class="h-5 w-5 text-accent flex-shrink-0 mr-2 mt-0.5" />
                         <p class="text-sm text-white font-medium font-secondary">
                             Note: The other party will still have access to view this engagement.
                         </p>

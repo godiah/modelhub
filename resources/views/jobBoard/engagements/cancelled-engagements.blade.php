@@ -9,11 +9,7 @@
             <div class="flex space-x-3">
                 <a href="{{ route('engagements.index') }}"
                     class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-5 w-5 mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
-                    </svg>
+                    <x-icon name="chat-bubble-text" class="h-5 w-5 mr-2" stroke-width="1.5" />
                     My Engagements
                 </a>
             </div>
@@ -47,11 +43,7 @@
                         <div class="relative">
                             <div class="absolute -inset-1 bg-accent/20 rounded-full animate-pulse opacity-75"></div>
                             <div class="relative bg-accent/10 text-accent rounded-full p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                </svg>
+                                <x-icon name="exclamation-triangle-3" class="w-10 h-10" />
                             </div>
                         </div>
 
@@ -99,13 +91,7 @@
                                 @endif
                             </div>
                             <p class="text-sm text-neutral-600 mt-1 flex items-center">
-                                <svg class="w-4 h-4 mr-1.5 text-neutral-500" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M8 7V3M16 7V3M7 11H17M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"
-                                        stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-                                        stroke-linejoin="round" />
-                                </svg>
+                                <x-icon name="calendar-2" class="w-4 h-4 mr-1.5 text-neutral-500" />
                                 Cancelled on <span
                                     class="font-medium text-neutral-700 ml-1">{{ $engagement->cancelled_at->format('M d, Y') }}</span>
                             </p>
@@ -166,11 +152,7 @@
         <div class="bg-white rounded-lg shadow-lg p-6 max-w-5xl w-full">
             <div class="mb-5 flex flex-row items-center justify-center text-center bg-red-100 rounded-full">
                 <div class="p-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-7 h-7 text-red-600">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
+                    <x-icon name="exclamation-triangle-4" class="w-7 h-7 text-red-600" />
                 </div>
                 <h3 class="text-xl font-semibold text-gray-900 font-main">
                     Important: Before Disputing Payment
@@ -185,12 +167,7 @@
                 <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            <x-icon name="exclamation-triangle-solid" class="h-5 w-5 text-amber-600" />
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-amber-800 font-medium">
@@ -217,12 +194,7 @@
                 <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-2">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z"
-                                    clip-rule="evenodd" />
-                            </svg>
+                            <x-icon name="information-circle-solid" class="h-5 w-5 text-blue-600" />
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-blue-700">

@@ -20,11 +20,7 @@
             </svg>
         </div>
         <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white mr-2" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
+            <x-icon name="clipboard-list" class="h-6 w-6 text-white mr-2" />
             <h2 class="font-tertiary font-semibold text-lg text-white">Project Deliverables</h2>
         </div>
     </div>
@@ -55,22 +51,12 @@
                             </div>
                             <div class="flex-shrink-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center shadow-sm"
                                 title="Created on {{ $deliverable->created_at->format('M d, Y h:i A') }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                                <x-icon name="plus-solid" class="h-3 w-3 text-white" />
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium text-neutral-800">Created</p>
                                 <p class="text-xs text-neutral-500 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" viewBox="0 0 20 20"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="clock-solid" class="h-3 w-3 mr-1" />
                                     {{ $deliverable->created_at->format('M d, Y h:i A') }}
                                 </p>
                             </div>
@@ -84,22 +70,12 @@
                                 </div>
                                 <div class="flex-shrink-0 w-6 h-6 rounded-full bg-secondary flex items-center justify-center shadow-sm"
                                     title="Submitted on {{ $deliverable->submitted_at->format('M d, Y h:i A') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white"
-                                        viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="check-solid" class="h-3 w-3 text-white" />
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-neutral-800">Submitted</p>
                                     <p class="text-xs text-neutral-500 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <x-icon name="clock-solid" class="h-3 w-3 mr-1" />
                                         {{ $deliverable->submitted_at->format('M d, Y h:i A') }}
                                     </p>
                                 </div>
@@ -116,22 +92,12 @@
                                 @endif
                                 <div class="flex-shrink-0 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center shadow-sm"
                                     title="Approved on {{ $deliverable->approved_at->format('M d, Y h:i A') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white"
-                                        viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="check-solid" class="h-3 w-3 text-white" />
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-green-700">Approved</p>
                                     <p class="text-xs text-neutral-500 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <x-icon name="clock-solid" class="h-3 w-3 mr-1" />
                                         {{ $deliverable->approved_at->format('M d, Y h:i A') }}
                                     </p>
                                 </div>
@@ -143,22 +109,12 @@
                             <div class="flex items-start relative">
                                 <div class="flex-shrink-0 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center shadow-sm"
                                     title="Rejected on {{ $deliverable->rejected_at->format('M d, Y h:i A') }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-white"
-                                        viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="x-mark-solid" class="h-3 w-3 text-white" />
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-red-700">Rejected</p>
                                     <p class="text-xs text-neutral-500 flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <x-icon name="clock-solid" class="h-3 w-3 mr-1" />
                                         {{ $deliverable->rejected_at->format('M d, Y h:i A') }}
                                     </p>
                                 </div>

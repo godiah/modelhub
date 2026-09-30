@@ -9,11 +9,7 @@
             <div class="flex space-x-3">
                 <a href="{{ route('applications.drafts') }}"
                     class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors font-main text-sm font-medium">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
+                    <x-icon name="pencil-square" class="h-5 w-5 mr-2" />
                     Draft Applications
                 </a>
             </div>
@@ -36,11 +32,7 @@
                     <div class="flex flex-col md:flex-row md:space-x-6">
                         <div class="w-full md:w-1/2 relative">
                             <label for="offer" class="block text-sm font-medium text-primary mb-2 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-secondary"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
+                                <x-icon name="currency-dollar" class="h-4 w-4 mr-2 text-secondary" />
                                 Your Offer Amount
                             </label>
                             <div class="mt-1 relative rounded-md shadow-sm">
@@ -58,11 +50,7 @@
                         <div
                             class="w-full md:w-1/2 mt-6 md:mt-0 bg-gradient-to-r from-secondary/5 to-primary/5 p-6 rounded-xl border border-neutral-200">
                             <h3 class="text-sm font-semibold text-primary mb-4 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-secondary"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                </svg>
+                                <x-icon name="calculator" class="h-5 w-5 mr-2 text-secondary" />
                                 Earnings Breakdown
                             </h3>
                             <div class="space-y-3">
@@ -112,11 +100,7 @@
                         <div
                             class="mt-1 border-2 border-dashed border-neutral-300 rounded-lg bg-neutral-50 transition-all duration-200 ease-in-out hover:bg-neutral-100 hover:border-secondary/50">
                             <div class="flex flex-col items-center justify-center py-6 px-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-secondary/60"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
+                                <x-icon name="cloud-arrow-up" class="h-12 w-12 text-secondary/60" />
                                 <p class="mt-3 text-sm text-neutral-700">
                                     <span class="font-medium text-secondary">Drop files here</span> or
                                     <label for="file-upload" class="relative cursor-pointer">
@@ -146,13 +130,7 @@
                                                         @else
                                                             <div
                                                                 class="w-full h-full flex items-center justify-center bg-neutral-100">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-6 w-6 text-neutral-500" fill="none"
-                                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                </svg>
+                                                                <x-icon name="document-text" class="h-6 w-6 text-neutral-500" />
                                                             </div>
                                                         @endif
                                                     </div>
@@ -163,11 +141,7 @@
                                                     <button type="button"
                                                         class="text-neutral-400 hover:text-red-500 ml-2 remove-file"
                                                         data-file-path="{{ $filePath }}">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
+                                                        <x-icon name="x-mark" class="h-5 w-5" />
                                                     </button>
                                                     <input type="hidden" name="existing_portfolio[]"
                                                         value="{{ $filePath }}">
@@ -202,11 +176,7 @@
                     <div class="flex flex-col justify-end sm:flex-row gap-3 pt-2">
                         <button type="submit" name="action" value="submitted"
                             class="bg-secondary hover:bg-secondary/90 focus:ring-2 focus:ring-offset-2 focus:ring-secondary text-white font-medium px-3 py-1.5 rounded-lg shadow-sm transition duration-150 ease-in-out flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                            </svg>
+                            <x-icon name="chevron-double-right" class="h-5 w-5 mr-2" />
                             Submit Application
                         </button>
                     </div>

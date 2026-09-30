@@ -10,11 +10,7 @@
             <div class="flex space-x-3">
                 <a href="{{ route('jobs.index') }}"
                     class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg class="h-5 w-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                        viewBox="0 0 20 20">
-                        <path
-                            d="M19.707 9.293l-2-2-7-7a1 1 0 00-1.414 0l-7 7-2 2a1 1 0 001.414 1.414L2 10.414V18a2 2 0 002 2h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-7.586l.293.293a1 1 0 001.414-1.414z" />
-                    </svg>
+                    <x-icon name="home-solid" class="h-5 w-5 mr-2" aria-hidden="true" />
                     Home
                 </a>
             </div>
@@ -38,11 +34,7 @@
                                         class="w-full h-12 pl-4 pr-10 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-secondary focus:border-transparent outline-none"
                                         autocomplete="off">
                                     <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-neutral-400"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
+                                        <x-icon name="magnifying-glass" class="h-5 w-5 text-neutral-400" />
                                     </div>
 
                                     <!-- Search history dropdown -->

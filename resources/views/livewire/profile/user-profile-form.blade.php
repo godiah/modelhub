@@ -138,10 +138,7 @@ new class extends Component {
     <x-section-header :title="__('Bio Information')"
         :subtitle="__('Update your bio information, skills, and preferred tools')">
         <x-slot:icon>
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
+            <x-icon name="user" class="w-5 h-5 text-white" />
         </x-slot:icon>
     </x-section-header>
 
@@ -163,11 +160,7 @@ new class extends Component {
                                     class="w-24 h-24 rounded-full object-cover border-2 border-secondary shadow-lg">
                                 <div
                                     class="absolute -top-2 -right-2 w-6 h-6 bg-secondary rounded-full flex items-center justify-center">
-                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 13l4 4L19 7"></path>
-                                    </svg>
+                                    <x-icon name="check" class="w-3 h-3 text-white" />
                                 </div>
                             </div>
                         @elseif($current_avatar)
@@ -193,12 +186,7 @@ new class extends Component {
                                 class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                             <div
                                 class="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center hover:border-secondary transition-colors duration-200">
-                                <svg class="mx-auto h-8 w-8 text-neutral-400 mb-2" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
-                                    </path>
-                                </svg>
+                                <x-icon name="cloud-arrow-up" class="mx-auto h-8 w-8 text-neutral-400 mb-2" />
                                 <p class="text-sm text-neutral-600 font-main">
                                     <span class="font-medium text-secondary">{{ __('Click to upload') }}</span>
                                     {{ __(' or drag and drop') }}
@@ -212,11 +200,7 @@ new class extends Component {
                         @if ($current_avatar)
                             <button type="button" wire:click="removeAvatar"
                                 class="inline-flex items-center text-sm text-red-600 hover:text-red-800 font-main transition-colors duration-200">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                    </path>
-                                </svg>
+                                <x-icon name="trash" class="w-4 h-4 mr-1" />
                                 {{ __('Remove current avatar') }}
                             </button>
                         @endif
@@ -225,11 +209,7 @@ new class extends Component {
 
                 @error('avatar')
                     <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                         <span>{{ $message }}</span>
                     </div>
                 @enderror
@@ -321,11 +301,7 @@ new class extends Component {
 
                 @error('professional_info')
                     <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                         <span>{{ $message }}</span>
                     </div>
                 @enderror
@@ -338,11 +314,7 @@ new class extends Component {
                 </label>
                 @error('selected_skills')
                     <div class="flex items-center space-x-2 text-red-600 text-sm font-main mb-2">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                         <span>{{ $message }}</span>
                     </div>
                 @enderror
@@ -353,11 +325,7 @@ new class extends Component {
                         <!-- Search Input -->
                         <div class="p-3 bg-white relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 ml-2 text-neutral-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
+                                <x-icon name="magnifying-glass" class="h-5 w-5 ml-2 text-neutral-400" />
                             </div>
                             <input type="text" x-model="searchTerm" @focus="showDropdown = true"
                                 @click.away="showDropdown = false" placeholder="{{ __('Search for skills...') }}"
@@ -373,11 +341,7 @@ new class extends Component {
                                     <span x-text="item.name"></span>
                                     <button type="button" @click="removeItem(item)"
                                         class="ml-2 text-secondary/70 hover:text-secondary">
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                clip-rule="evenodd"></path>
-                                        </svg>
+                                        <x-icon name="x-mark-solid" class="w-3 h-3" />
                                     </button>
                                 </span>
                             </template>
@@ -400,12 +364,7 @@ new class extends Component {
                                             'text-neutral-700'">
                                         <div class="flex items-center justify-between">
                                             <span x-text="item.name"></span>
-                                            <svg x-show="isSelected(item)" class="w-4 h-4 text-secondary"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
+                                            <x-icon name="check-solid" x-show="isSelected(item)" class="w-4 h-4 text-secondary" />
                                         </div>
                                     </button>
                                 </template>
@@ -431,11 +390,7 @@ new class extends Component {
                 </label>
                 @error('selected_software')
                     <div class="flex items-center space-x-2 text-red-600 text-sm font-main mb-2">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                         <span>{{ $message }}</span>
                     </div>
                 @enderror
@@ -446,11 +401,7 @@ new class extends Component {
                         <!-- Search Input -->
                         <div class="p-3 bg-white relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 ml-2 text-neutral-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
+                                <x-icon name="magnifying-glass" class="h-5 w-5 ml-2 text-neutral-400" />
                             </div>
                             <input type="text" x-model="searchTerm" @focus="showDropdown = true"
                                 @click.away="showDropdown = false"
@@ -467,11 +418,7 @@ new class extends Component {
                                     <span x-text="item.name"></span>
                                     <button type="button" @click="removeItem(item)"
                                         class="ml-2 text-accent/70 hover:text-accent">
-                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                clip-rule="evenodd"></path>
-                                        </svg>
+                                        <x-icon name="x-mark-solid" class="w-3 h-3" />
                                     </button>
                                 </span>
                             </template>
@@ -493,12 +440,7 @@ new class extends Component {
                                         :class="isSelected(item) ? 'bg-accent/20 text-accent font-medium' : 'text-neutral-700'">
                                         <div class="flex items-center justify-between">
                                             <span x-text="item.name"></span>
-                                            <svg x-show="isSelected(item)" class="w-4 h-4 text-accent"
-                                                fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clip-rule="evenodd"></path>
-                                            </svg>
+                                            <x-icon name="check-solid" x-show="isSelected(item)" class="w-4 h-4 text-accent" />
                                         </div>
                                     </button>
                                 </template>
@@ -539,11 +481,7 @@ new class extends Component {
                 </div>
                 @error('location')
                     <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                         <span>{{ $message }}</span>
                     </div>
                 @enderror
@@ -556,12 +494,7 @@ new class extends Component {
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
-                            </path>
-                        </svg>
+                        <x-icon name="phone" class="h-5 w-5 text-neutral-400" />
                     </div>
                     <input type="tel" wire:model="telephone_number" id="telephone_number"
                         class="text-sm block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
@@ -569,11 +502,7 @@ new class extends Component {
                 </div>
                 @error('telephone_number')
                     <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                         <span>{{ $message }}</span>
                     </div>
                 @enderror
@@ -590,10 +519,7 @@ new class extends Component {
                     wire:loading.attr="disabled">
 
                     <span wire:loading.remove wire:target="updateProfile" class="flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
+                        <x-icon name="check" class="w-4 h-4 mr-2" />
                         {{ __('Update Bio Details') }}
                     </span>
 

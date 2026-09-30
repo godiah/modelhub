@@ -10,20 +10,12 @@
             <div class="flex space-x-3">
                 <a href="{{ route('jobs.browse') }}"
                     class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
                     Browse More Jobs
                 </a>
                 <a href="{{ route('applications.archived') }}"
                     class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-5 w-5 mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                    </svg>
+                    <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
                     View Archived
                 </a>
             </div>
@@ -37,21 +29,13 @@
                 class="bg-white rounded-xl shadow-sm mb-6 p-4 border border-neutral-200 flex flex-wrap items-center justify-between">
                 <div class="flex items-center space-x-4 text-tertiary font-main">
                     <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
+                        <x-icon name="clipboard-list" class="h-5 w-5 text-secondary" />
                         <span>Total: <strong>{{ $applications->total() }}</strong> Applications</span>
                     </div>
                     @if ($draftCount > 0)
                         <a href="{{ route('applications.drafts') }}"
                             class="flex items-center space-x-2 text-primary hover:text-primary-dark transition-colors duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
+                            <x-icon name="pencil-square" class="h-5 w-5" />
                             <span>View Drafts ({{ $draftCount }})</span>
                         </a>
                     @endif
@@ -93,11 +77,7 @@
                         <div class="text-center py-16 relative z-10">
                             <div
                                 class="bg-neutral-100 h-24 w-24 mx-auto rounded-full flex items-center justify-center mb-6">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-tertiary" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
+                                <x-icon name="document-text" class="h-12 w-12 text-tertiary" />
                             </div>
                             <h3 class="text-2xl font-bold text-neutral-800 mb-3 font-tertiary">No Applications Yet</h3>
                             <p class="text-tertiary mb-8 max-w-lg mx-auto font-secondary text-lg">You haven't submitted
@@ -106,11 +86,7 @@
                             <a href="{{ route('jobs.browse') }}"
                                 class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-accent to-accent/90 text-white rounded-lg hover:shadow-md transition-all duration-300 font-main font-medium">
                                 Find Jobs
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
+                                <x-icon name="arrow-right" class="h-5 w-5 ml-2" />
                             </a>
                         </div>
                     </div>

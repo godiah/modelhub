@@ -6,19 +6,12 @@
         <!-- Modal Header -->
         <div class="bg-primary px-6 py-4 flex justify-between items-center">
             <h3 class="text-xl font-tertiary font-bold text-white flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+                <x-icon name="clipboard-list" class="h-6 w-6 mr-2" />
                 Add New Deliverable
             </h3>
             <button type="button" id="closeDeliverableModal-{{ $engagement->id }}"
                 class="text-white hover:text-neutral-200 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <x-icon name="x-mark" class="h-6 w-6" />
             </button>
         </div>
 
@@ -32,11 +25,7 @@
                 <div class="mb-4">
                     <label for="title" class="block font-tertiary font-medium text-neutral-700 mb-1">
                         <span class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-secondary" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <x-icon name="information-circle" class="h-5 w-5 mr-1 text-secondary" />
                             Title
                         </span>
                     </label>
@@ -66,11 +55,7 @@
                 <div class="mb-6">
                     <label for="due_date" class="block font-tertiary font-medium text-neutral-700 mb-1">
                         <span class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 text-secondary" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                            <x-icon name="calendar" class="h-5 w-5 mr-1 text-secondary" />
                             Due Date
                         </span>
                     </label>
@@ -86,10 +71,7 @@
                     </button>
                     <button type="submit"
                         class="px-4 py-2 bg-secondary text-white font-tertiary font-medium rounded-lg hover:bg-secondary/90 transition-colors flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
+                        <x-icon name="check" class="h-5 w-5 mr-1" />
                         Save Deliverable
                     </button>
                 </div>

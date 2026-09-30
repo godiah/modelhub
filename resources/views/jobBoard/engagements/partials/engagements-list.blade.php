@@ -3,11 +3,7 @@
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
         <div class="p-12 flex flex-col items-center justify-center text-center font-main">
             <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
-                </svg>
+                <x-icon name="chat-bubble-text" class="w-8 h-8 text-primary" />
             </div>
 
             <h3 class="text-lg font-semibold text-neutral-800 mb-2">No Engagements Found</h3>
@@ -19,12 +15,7 @@
 
             <a href="#" id="clearEngagementFilters"
                 class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-150">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                    </path>
-                </svg>
+                <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
                 Clear All Filters
             </a>
         </div>
@@ -50,11 +41,7 @@
                         <div class="flex-1">
                             <div class="flex flex-col sm:flex-row sm:items-center">
                                 <h3 class="font-tertiary font-bold text-lg text-primary flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 flex-shrink-0"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
+                                    <x-icon name="document-text" class="h-5 w-5 mr-2 flex-shrink-0" />
                                     {{ $engagement->application->job->title }}
                                 </h3>
                                 <span
@@ -72,24 +59,14 @@
                             @if ($isApplicant && $engagement->status === EngagementStatus::EmployerAccepted)
                                 <a href="{{ route('engagements.response-form', ['applicationId' => $engagement->application_id]) }}"
                                     class="mr-3 inline-flex items-center px-3 py-1 text-xs font-medium text-primary bg-primary/10 rounded-full border border-primary/20 hover:bg-primary/20 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 13l4 4L19 7" />
-                                    </svg>
+                                    <x-icon name="check" class="h-3.5 w-3.5 mr-1" />
                                     Respond
                                 </a>
                             @endif
 
                             <button class="flex items-center text-neutral-500 hover:text-neutral-700" x-cloak>
                                 <span class="text-sm mr-1" x-text="open ? 'Hide Details' : 'View Details'"></span>
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-5 w-5 transition-transform duration-200"
-                                    :class="{ 'transform rotate-180': open }" fill="none" viewBox="0 0 24 24"
-                                    stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 9l-7 7-7-7" />
-                                </svg>
+                                <x-icon name="chevron-down" class="h-5 w-5 transition-transform duration-200" ::class="{ 'transform rotate-180': open }" />
                             </button>
                         </div>
                     </div>
@@ -116,11 +93,7 @@
                         @if ($isApplicant)
                             <div class="p-6">
                                 <h4 class="font-tertiary font-semibold text-primary mb-4 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                    </svg>
+                                    <x-icon name="clipboard-list" class="h-5 w-5 mr-2" />
                                     Project Deliverables
                                 </h4>
 
@@ -181,38 +154,16 @@
                                                             @else
                                                                 bg-neutral-200 text-neutral-600 @endif">
                                                         @if ($deliverable->approved_at)
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3 w-3 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
+                                                            <x-icon name="check-circle" class="h-3 w-3 mr-1" />
                                                             Approved
                                                         @elseif($deliverable->rejected_at)
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3 w-3 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
+                                                            <x-icon name="x-mark" class="h-3 w-3 mr-1" />
                                                             Rejected
                                                         @elseif($deliverable->submitted_at)
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3 w-3 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
-                                                            </svg>
+                                                            <x-icon name="check" class="h-3 w-3 mr-1" />
                                                             Submitted
                                                         @elseif($deliverable->isOverdue())
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-4 w-4 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                            </svg>
+                                                            <x-icon name="exclamation-triangle" class="h-4 w-4 mr-1" />
                                                             Overdue
                                                         @else
                                                             Pending
@@ -228,13 +179,7 @@
                                                     @if ($deliverable->due_date)
                                                         <div
                                                             class="flex items-center {{ $deliverable->isOverdue() ? 'text-red-500' : 'text-secondary' }}">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                            </svg>
+                                                            <x-icon name="calendar" class="h-3.5 w-3.5 mr-1" />
                                                             Due:
                                                             {{ $deliverable->due_date->format('M j, Y') }}
                                                             @if ($deliverable->isOverdue())
@@ -243,26 +188,14 @@
                                                         </div>
                                                     @else
                                                         <div class="flex items-center text-secondary">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                            </svg>
+                                                            <x-icon name="calendar" class="h-3.5 w-3.5 mr-1" />
                                                             Due Date Not Set
                                                         </div>
                                                     @endif
 
                                                     @if ($deliverable->submitted_at)
                                                         <div class="flex items-center text-secondary">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
+                                                            <x-icon name="check-circle" class="h-3.5 w-3.5 mr-1" />
                                                             Completed:
                                                             {{ $deliverable->submitted_at->format('M j, Y') }}
                                                         </div>
@@ -270,13 +203,7 @@
 
                                                     @if ($deliverable->isApproved())
                                                         <div class="flex items-center text-secondary">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                            </svg>
+                                                            <x-icon name="check-circle" class="h-3.5 w-3.5 mr-1" />
                                                             Approved:
                                                             {{ $deliverable->approved_at->format('M j, Y') }}
                                                         </div>
@@ -284,12 +211,7 @@
 
                                                     @if ($deliverable->rejected_at)
                                                         <div class="flex items-center text-red-800">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
+                                                            <x-icon name="x-mark" class="h-3.5 w-3.5 mr-1" />
                                                             Rejected:
                                                             {{ $deliverable->rejected_at->format('M j, Y') }}
                                                         </div>
@@ -310,24 +232,12 @@
                                                     @if (!$deliverable->submitted_at && !$deliverable->approved_at && !$deliverable->rejected_at)
                                                         <div @click.stop="fileSubmissionOpen = !fileSubmissionOpen"
                                                             class="flex items-center text-primary hover:text-primary/80 cursor-pointer ml-auto">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                            </svg>
+                                                            <x-icon name="cloud-arrow-up" class="h-3.5 w-3.5 mr-1" />
                                                             Submit Deliverable
                                                         </div>
                                                     @elseif ($deliverable->submission_files)
                                                         <div class="flex items-center text-primary">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                            </svg>
+                                                            <x-icon name="document-text" class="h-3.5 w-3.5 mr-1" />
                                                             {{ count($deliverable->submission_files) }}
                                                             {{ Str::plural('File', count($deliverable->submission_files)) }}
                                                             Submitted
@@ -354,12 +264,7 @@
                                                         x-on:click="$dispatch('open-modal', 'resubmit-deliverable-{{ $deliverable->id }}')"
                                                         type="button"
                                                         class="px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-tertiary font-medium text-sm rounded-md shadow-sm transition-colors duration-200 flex items-center">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                        </svg>
+                                                        <x-icon name="cloud-arrow-up" class="h-4 w-4 mr-1.5" />
                                                         Resubmit Deliverable
                                                     </button>
                                                 </div>
@@ -376,13 +281,7 @@
                                                             class="mb-4 p-3 bg-accent/10 border border-accent/20 rounded-md">
                                                             <div class="flex items-start">
                                                                 <div class="flex-shrink-0">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-5 w-5 text-accent" fill="none"
-                                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                                    </svg>
+                                                                    <x-icon name="exclamation-triangle" class="h-5 w-5 text-accent" />
                                                                 </div>
                                                                 <div class="ml-3">
                                                                     <h3
@@ -412,14 +311,7 @@
                                                         <div class="space-y-2">
                                                             <h6
                                                                 class="font-tertiary font-semibold text-sm text-neutral-700 flex items-center">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-4 w-4 mr-1.5 text-secondary"
-                                                                    fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                                </svg>
+                                                                <x-icon name="cloud-arrow-up" class="h-4 w-4 mr-1.5 text-secondary" />
                                                                 {{ $deliverable->rejected_at ? 'Resubmit Files' : 'Upload Files' }}
                                                             </h6>
 
@@ -475,15 +367,7 @@
 
                                                                     <div
                                                                         class="flex flex-col items-center justify-center space-y-2">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                                            class="h-10 w-10 text-secondary"
-                                                                            fill="none" viewBox="0 0 24 24"
-                                                                            stroke="currentColor">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                                                        </svg>
+                                                                        <x-icon name="cloud-arrow-up" class="h-10 w-10 text-secondary" />
 
                                                                         <div class="space-y-1">
                                                                             <p
@@ -546,15 +430,7 @@
                                                                         <div
                                                                             class="flex items-center justify-between bg-white p-2 rounded-md border border-neutral-200 mb-2">
                                                                             <div class="flex items-center space-x-2">
-                                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                    class="h-5 w-5 text-neutral-500"
-                                                                                    fill="none" viewBox="0 0 24 24"
-                                                                                    stroke="currentColor">
-                                                                                    <path stroke-linecap="round"
-                                                                                        stroke-linejoin="round"
-                                                                                        stroke-width="2"
-                                                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                                </svg>
+                                                                                <x-icon name="document-text" class="h-5 w-5 text-neutral-500" />
                                                                                 <span
                                                                                     class="text-sm text-neutral-700 font-main truncate max-w-sm"
                                                                                     x-text="file.name"></span>
@@ -565,15 +441,7 @@
                                                                             <button type="button"
                                                                                 @click="removeFile(index)"
                                                                                 class="text-red-500 hover:text-red-700">
-                                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                    class="h-4 w-4" fill="none"
-                                                                                    viewBox="0 0 24 24"
-                                                                                    stroke="currentColor">
-                                                                                    <path stroke-linecap="round"
-                                                                                        stroke-linejoin="round"
-                                                                                        stroke-width="2"
-                                                                                        d="M6 18L18 6M6 6l12 12" />
-                                                                                </svg>
+                                                                                <x-icon name="x-mark" class="h-4 w-4" />
                                                                             </button>
                                                                         </div>
                                                                     </template>
@@ -584,14 +452,7 @@
                                                         <div class="space-y-2">
                                                             <h6
                                                                 class="font-tertiary font-semibold text-sm text-neutral-700 flex items-center">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-4 w-4 mr-1.5 text-secondary"
-                                                                    fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                </svg>
+                                                                <x-icon name="pencil-square" class="h-4 w-4 mr-1.5 text-secondary" />
                                                                 {{ $deliverable->rejected_at ? 'Updated Notes (Optional)' : 'Submission Notes (Optional)' }}
                                                             </h6>
 
@@ -605,14 +466,7 @@
                                                             <div
                                                                 class="p-4 bg-neutral-100 rounded-md border border-neutral-200">
                                                                 <div class="flex items-center mb-3">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-5 w-5 text-neutral-500 mr-2"
-                                                                        fill="none" viewBox="0 0 24 24"
-                                                                        stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
+                                                                    <x-icon name="clock" class="h-5 w-5 text-neutral-500 mr-2" />
                                                                     <h6
                                                                         class="font-tertiary font-semibold text-sm text-neutral-700">
                                                                         Previous Submission</h6>
@@ -642,17 +496,7 @@
                                                                                     class="flex items-center p-1.5 bg-white border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors">
                                                                                     <div
                                                                                         class="rounded-md bg-neutral-100 p-1 mr-2">
-                                                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                            class="h-3 w-3 text-neutral-500"
-                                                                                            fill="none"
-                                                                                            viewBox="0 0 24 24"
-                                                                                            stroke="currentColor">
-                                                                                            <path
-                                                                                                stroke-linecap="round"
-                                                                                                stroke-linejoin="round"
-                                                                                                stroke-width="2"
-                                                                                                d="M15 15l-6 6m0 0l-6-6m6 6V9a6 6 0 0112 0v3" />
-                                                                                        </svg>
+                                                                                        <x-icon name="arrow-uturn-down" class="h-3 w-3 text-neutral-500" />
                                                                                     </div>
                                                                                     <div class="truncate">
                                                                                         <span
@@ -669,13 +513,7 @@
                                                         <div class="flex justify-end">
                                                             <button type="submit"
                                                                 class="px-4 py-2 bg-secondary hover:bg-secondary/90 text-white font-tertiary font-medium text-sm rounded-md shadow-sm transition-colors duration-200 flex items-center">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-4 w-4 mr-1.5" fill="none"
-                                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M5 13l4 4L19 7" />
-                                                                </svg>
+                                                                <x-icon name="check" class="h-4 w-4 mr-1.5" />
                                                                 {{ $deliverable->rejected_at ? 'Resubmit Deliverable' : 'Submit Deliverable' }}
                                                             </button>
                                                         </div>
@@ -692,12 +530,7 @@
                                                     class="border-t border-neutral-200 p-5 mt-2 bg-neutral-50 rounded-b-md">
                                                     <div class="mb-3 flex items-center">
                                                         <div class="rounded-full bg-secondary/10 p-1 mr-2">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-4 w-4 text-secondary" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
-                                                            </svg>
+                                                            <x-icon name="check" class="h-4 w-4 text-secondary" />
                                                         </div>
                                                         <span
                                                             class="text-sm font-tertiary font-medium text-neutral-700">
@@ -707,13 +540,7 @@
                                                         @if ($deliverable->approved_at)
                                                             <div
                                                                 class="ml-2 rounded-full bg-green-100 px-2 py-0.5 flex items-center">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-3 w-3 text-green-600 mr-1" fill="none"
-                                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
+                                                                <x-icon name="check-circle" class="h-3 w-3 text-green-600 mr-1" />
                                                                 <span
                                                                     class="text-xs font-tertiary font-medium text-green-600">Approved</span>
                                                             </div>
@@ -724,14 +551,7 @@
                                                         <div class="mb-4">
                                                             <h6
                                                                 class="font-tertiary font-semibold text-sm text-neutral-700 mb-2 flex items-center">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-4 w-4 mr-1.5 text-secondary"
-                                                                    fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                </svg>
+                                                                <x-icon name="pencil-square" class="h-4 w-4 mr-1.5 text-secondary" />
                                                                 Submission Notes:
                                                             </h6>
                                                             <p
@@ -745,14 +565,7 @@
                                                         <div>
                                                             <h6
                                                                 class="font-tertiary font-semibold text-sm text-neutral-700 mb-2 flex items-center">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-4 w-4 mr-1.5 text-secondary"
-                                                                    fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                </svg>
+                                                                <x-icon name="document-text" class="h-4 w-4 mr-1.5 text-secondary" />
                                                                 Submitted Files:
                                                             </h6>
                                                             <div class="ml-6 grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -761,15 +574,7 @@
                                                                         class="flex items-center p-2 bg-white border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors group">
                                                                         <div
                                                                             class="rounded-md bg-secondary/10 p-1.5 mr-2 group-hover:bg-secondary/20 transition-colors">
-                                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                                class="h-4 w-4 text-secondary"
-                                                                                fill="none" viewBox="0 0 24 24"
-                                                                                stroke="currentColor">
-                                                                                <path stroke-linecap="round"
-                                                                                    stroke-linejoin="round"
-                                                                                    stroke-width="2"
-                                                                                    d="M15 15l-6 6m0 0l-6-6m6 6V9a6 6 0 0112 0v3" />
-                                                                            </svg>
+                                                                            <x-icon name="arrow-uturn-down" class="h-4 w-4 text-secondary" />
                                                                         </div>
                                                                         <div class="truncate flex-grow">
                                                                             <span
@@ -789,13 +594,7 @@
                                     @empty
                                         <div
                                             class="col-span-2 bg-white p-6 border border-neutral-200 rounded-lg text-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-8 w-8 text-neutral-300 mx-auto mb-2" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    stroke-width="1.5"
-                                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                            </svg>
+                                            <x-icon name="clipboard-list" class="h-8 w-8 text-neutral-300 mx-auto mb-2" stroke-width="1.5" />
                                             <p class="text-neutral-500 italic font-tertiary">No deliverables
                                                 specified for this
                                                 project yet.</p>
@@ -807,11 +606,7 @@
                                 @if ($engagement->deliverables->isNotEmpty())
                                     <div class="mt-8 bg-white border border-neutral-200 rounded-lg shadow-sm p-5">
                                         <h5 class="font-tertiary font-medium text-neutral-800 mb-4 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                            </svg>
+                                            <x-icon name="chart-bar" class="h-5 w-5 mr-2 text-primary" />
                                             Project Progress
                                         </h5>
 
@@ -874,11 +669,7 @@
                             <div class="p-6">
                                 <div class="mb-6 flex justify-between">
                                     <h4 class="font-tertiary font-semibold text-primary flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                        </svg>
+                                        <x-icon name="clipboard-list" class="h-5 w-5 mr-2" />
                                         Project Deliverables
                                     </h4>
 
@@ -886,11 +677,7 @@
                                     @if (!$engagement->isCompleted() && !$engagement->isCancelled())
                                         <button id="openDeliverableModal-{{ $engagement->id }}"
                                             class="font-tertiary inline-flex items-center px-4 py-2 rounded-lg text-white bg-secondary hover:bg-secondary/90 transition-colors shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 4v16m8-8H4" />
-                                            </svg>
+                                            <x-icon name="plus" class="h-5 w-5 mr-2" />
                                             Add Deliverable
                                         </button>
                                     @endif
@@ -947,13 +734,7 @@
                                                             @if ($deliverable->due_date)
                                                                 <div
                                                                     class="flex items-center {{ now()->gt($deliverable->due_date) ? 'text-red-500' : 'text-secondary' }}">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                    </svg>
+                                                                    <x-icon name="calendar" class="h-3.5 w-3.5 mr-1" />
                                                                     Due:
                                                                     {{ $deliverable->due_date->format('M j, Y') }}
                                                                     @if ($deliverable->isOverdue())
@@ -962,26 +743,14 @@
                                                                 </div>
                                                             @else
                                                                 <div class="flex items-center text-secondary">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                                    </svg>
+                                                                    <x-icon name="calendar" class="h-3.5 w-3.5 mr-1" />
                                                                     Due Date Not Set
                                                                 </div>
                                                             @endif
 
                                                             @if ($deliverable->submitted_at)
                                                                 <div class="flex items-center text-secondary">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
+                                                                    <x-icon name="check-circle" class="h-3.5 w-3.5 mr-1" />
                                                                     Completed:
                                                                     {{ $deliverable->submitted_at->format('M j, Y') }}
                                                                 </div>
@@ -989,13 +758,7 @@
 
                                                             @if ($deliverable->approved_at)
                                                                 <div class="flex items-center text-secondary">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
+                                                                    <x-icon name="check-circle" class="h-3.5 w-3.5 mr-1" />
                                                                     Approved:
                                                                     {{ $deliverable->approved_at->format('M j, Y') }}
                                                                 </div>
@@ -1003,13 +766,7 @@
 
                                                             @if ($deliverable->rejected_at)
                                                                 <div class="flex items-center text-red-800">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                                        class="h-3.5 w-3.5 mr-1" fill="none"
-                                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M6 18L18 6M6 6l12 12" />
-                                                                    </svg>
+                                                                    <x-icon name="x-mark" class="h-3.5 w-3.5 mr-1" />
                                                                     Rejected:
                                                                     {{ $deliverable->rejected_at->format('M j, Y') }}
                                                                 </div>
@@ -1031,38 +788,16 @@
                                                                 bg-neutral-200 text-neutral-600 @endif">
 
                                                         @if ($deliverable->status === 'approved')
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3 w-3 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
-                                                            </svg>
+                                                            <x-icon name="check" class="h-3 w-3 mr-1" />
                                                             Approved
                                                         @elseif($deliverable->status === 'rejected')
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3 w-3 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
+                                                            <x-icon name="x-mark" class="h-3 w-3 mr-1" />
                                                             Rejected
                                                         @elseif($deliverable->status === 'submitted')
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-3 w-3 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                            </svg>
+                                                            <x-icon name="document-text" class="h-3 w-3 mr-1" />
                                                             Submitted
                                                         @elseif($deliverable->isOverdue())
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-4 w-4 mr-1" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                            </svg>
+                                                            <x-icon name="exclamation-triangle" class="h-4 w-4 mr-1" />
                                                             Overdue
                                                         @else
                                                             Pending
@@ -1091,14 +826,7 @@
                                                         @else
                                                             <div
                                                                 class="flex items-center p-3 bg-neutral-50 rounded-lg mb-3">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-10 w-10 mr-2 text-neutral-400"
-                                                                    fill="none" viewBox="0 0 24 24"
-                                                                    stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                                </svg>
+                                                                <x-icon name="document-text" class="h-10 w-10 mr-2 text-neutral-400" />
                                                                 <span class="text-sm text-neutral-500 font-main">No
                                                                     provided notes</span>
                                                             </div>
@@ -1114,15 +842,7 @@
                                                                 @foreach ($deliverable->submission_files as $index => $file)
                                                                     <a href="{{ route('engagements.deliverables.download-file', [$deliverable->id, $index]) }}"
                                                                         class="flex items-center p-2 border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors">
-                                                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                                                            class="h-5 w-5 mr-2 text-primary"
-                                                                            fill="none" viewBox="0 0 24 24"
-                                                                            stroke="currentColor">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                                        </svg>
+                                                                        <x-icon name="document" class="h-5 w-5 mr-2 text-primary" />
                                                                         <div
                                                                             class="flex flex-col w-full overflow-hidden">
                                                                             <span
@@ -1137,14 +857,7 @@
                                                         @else
                                                             <div
                                                                 class="flex items-center justify-center mx-auto p-3 bg-neutral-50 rounded-lg">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                                    viewBox="0 0 24 24" stroke-width="1.5"
-                                                                    stroke="currentColor"
-                                                                    class="h-10 w-10 mr-2 text-neutral-400">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round"
-                                                                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                                                                </svg>
+                                                                <x-icon name="document-text-2" class="h-10 w-10 mr-2 text-neutral-400" />
                                                                 <span class="text-sm text-neutral-500 font-main">No
                                                                     files uploaded</span>
                                                             </div>
@@ -1187,24 +900,14 @@
                                                         <button x-data
                                                             x-on:click="$dispatch('open-modal', 'approve-deliverable-{{ $deliverable->id }}')"
                                                             class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-white bg-secondary hover:bg-secondary/90 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-4 w-4 mr-1.5" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M5 13l4 4L19 7" />
-                                                            </svg>
+                                                            <x-icon name="check" class="h-4 w-4 mr-1.5" />
                                                             Approve
                                                         </button>
 
                                                         <button x-data
                                                             x-on:click="$dispatch('open-modal', 'reject-deliverable-{{ $deliverable->id }}')"
                                                             class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-accent border border-accent/30 bg-white hover:bg-accent/5 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-4 w-4 mr-1.5" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                            </svg>
+                                                            <x-icon name="x-mark" class="h-4 w-4 mr-1.5" />
                                                             Request Changes
                                                         </button>
                                                     @endif
@@ -1214,25 +917,13 @@
                                                         <button x-data
                                                             x-on:click="$dispatch('open-modal', 'edit-deliverable-{{ $deliverable->id }}')"
                                                             class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-primary border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary/40">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-4 w-4 mr-1.5" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
+                                                            <x-icon name="pencil-square" class="h-4 w-4 mr-1.5" />
                                                             Edit
                                                         </button>
                                                         <button x-data
                                                             x-on:click="$dispatch('open-modal', 'remove-deliverable-{{ $deliverable->id }}')"
                                                             class="inline-flex items-center px-3.5 py-2 text-sm font-medium rounded-md text-red-600 border border-red-200 bg-red-50 hover:bg-red-100 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500/40">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-4 w-4 mr-1.5" fill="none"
-                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
+                                                            <x-icon name="trash" class="h-4 w-4 mr-1.5" />
                                                             Remove
                                                         </button>
                                                     @endif
@@ -1242,12 +933,7 @@
                                     @empty
                                         <div class="bg-white p-8 border border-neutral-200 rounded-lg text-center">
                                             <div class="bg-primary/5 inline-flex rounded-full p-4 mb-4">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="1.5"
-                                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                                </svg>
+                                                <x-icon name="clipboard-list" class="h-8 w-8 text-primary" stroke-width="1.5" />
                                             </div>
                                             <h5 class="font-medium text-lg text-neutral-800 mb-2 font-tertiary">No
                                                 Deliverables
@@ -1263,11 +949,7 @@
                                 @if ($engagement->deliverables->isNotEmpty())
                                     <div class="mt-8 bg-white border border-neutral-200 rounded-lg shadow-sm p-5">
                                         <h5 class="font-tertiary font-medium text-neutral-800 mb-4 flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                            </svg>
+                                            <x-icon name="chart-bar" class="h-5 w-5 mr-2 text-primary" />
                                             Project Progress
                                         </h5>
 
@@ -1379,11 +1061,7 @@
                     <div class="flex items-center">
                         <div
                             class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-                            </svg>
+                            <x-icon name="chat-bubble-left-right" class="size-6" />
 
                         </div>
                         <div class="ml-3">
@@ -1392,10 +1070,7 @@
                         </div>
                     </div>
                     <button @click="closeModal()" class="text-white hover:text-white/80 focus:outline-none">
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                        <x-icon name="x-mark" class="h-6 w-6" />
                     </button>
                 </div>
 
@@ -1431,11 +1106,7 @@
                                     placeholder="Type your message..."></textarea>
                                 <button type="submit" :disabled="sending || !newMessage.trim()"
                                     class="ml-3 inline-flex items-center justify-center rounded-md px-4 py-2 bg-secondary text-white hover:bg-secondary/90 disabled:opacity-50">
-                                    <svg x-show="!sending" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
+                                    <x-icon name="paper-airplane" x-show="!sending" class="h-5 w-5" />
                                     <svg x-show="sending" class="animate-spin h-5 w-5"
                                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10"

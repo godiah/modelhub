@@ -32,11 +32,7 @@
             <span id="selected-date-text" class="text-neutral-600 text-sm">
                 {{ $displayText }}
             </span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <x-icon name="calendar" class="h-5 w-5 text-secondary" />
         </div>
 
         <input type="date" id="deadline" name="deadline" class="absolute inset-0 opacity-0 cursor-pointer"
@@ -48,11 +44,7 @@
         </div>
     </div>
     <p class="text-xs text-tertiary mt-2 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary" fill="none"
-            viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <x-icon name="information-circle" class="h-4 w-4 mr-1 text-secondary" />
         Specify when you need this project completed
     </p>
 </div>

@@ -9,21 +9,13 @@
             <div class="flex space-x-3">
                 <a href="{{ route('jobs.index') }}"
                     class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg class="h-5 w-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                        viewBox="0 0 20 20">
-                        <path
-                            d="M19.707 9.293l-2-2-7-7a1 1 0 00-1.414 0l-7 7-2 2a1 1 0 001.414 1.414L2 10.414V18a2 2 0 002 2h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a2 2 0 002-2v-7.586l.293.293a1 1 0 001.414-1.414z" />
-                    </svg>
+                    <x-icon name="home-solid" class="h-5 w-5 mr-2" aria-hidden="true" />
                     Home
                 </a>
 
                 <a href="{{ route('project.index') }}"
                     class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-5 w-5 mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z" />
-                    </svg>
+                    <x-icon name="briefcase" class="h-5 w-5 mr-2" stroke-width="1.5" />
                     Project Dashboard
                 </a>
             </div>
@@ -54,19 +46,11 @@
                             class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium space-x-2 {{ $job->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                             @if ($job->is_active)
                                 <!-- Checkmark icon -->
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                                <x-icon name="check-circle-solid" class="w-5 h-5" />
                                 <span>Active</span>
                             @else
                                 <!-- Exclamation icon -->
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd" />
-                                </svg>
+                                <x-icon name="exclamation-triangle-solid" class="w-5 h-5" />
                                 <span>Closed</span>
                             @endif
                         </span>
@@ -86,19 +70,11 @@
                     <!-- Job Meta Info -->
                     <div class="relative z-10 mt-2 flex flex-wrap items-center gap-3 text-sm">
                         <span class="bg-white/15 backdrop-blur-sm text-white px-3 py-1 rounded-full flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                            <x-icon name="calendar" class="h-4 w-4 mr-1.5" />
                             Posted on {{ \Carbon\Carbon::parse($job->created_at)->format('F j, Y') }}
                         </span>
                         <span class="bg-white/15 backdrop-blur-sm text-white px-3 py-1 rounded-full flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                            <x-icon name="clock" class="h-4 w-4 mr-1.5" />
                             @if ($job->deadline)
                                 Deadline: {{ \Carbon\Carbon::parse($job->deadline)->format('F j, Y') }}
                             @else
@@ -120,11 +96,7 @@
                             </div>
                         @else
                             <div class="aspect-w-16 aspect-h-10 bg-neutral-100 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-neutral-300"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                                <x-icon name="photo" class="h-16 w-16 text-neutral-300" stroke-width="1.5" />
                             </div>
                         @endif
                         <!-- Image Gallery -->
@@ -170,11 +142,7 @@
                                 </button>
                                 <a href="{{ route('jobs.edit', ['job' => $job->slug]) }}"
                                     class="flex items-center px-3 py-1.5 bg-white rounded-lg border border-neutral-200 text-sm text-tertiary hover:border-secondary hover:text-secondary transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                    </svg>
+                                    <x-icon name="pencil-square" class="h-4 w-4 mr-1.5" />
                                     Edit
                                 </a>
                             </div>
@@ -187,11 +155,7 @@
                         @if ($job->description)
                             <div class="mb-6">
                                 <h2 class="text-lg font-bold text-primary mb-3 flex items-center font-tertiary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-secondary"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
+                                    <x-icon name="document-text" class="h-5 w-5 mr-2 text-secondary" />
                                     Job Description
                                 </h2>
                                 <div class="border-l-4 border-secondary/20 pl-4">
@@ -212,11 +176,7 @@
                                 <div
                                     class="bg-neutral-50 rounded-xl p-4 border border-neutral-200 hover:border-secondary/30 transition-colors">
                                     <h2 class="text-lg font-bold text-primary mb-3 flex items-center font-tertiary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-secondary"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                        </svg>
+                                        <x-icon name="light-bulb" class="h-5 w-5 mr-2 text-secondary" />
                                         Skills Required
                                     </h2>
                                     <div class="flex flex-wrap gap-2">
@@ -263,23 +223,14 @@
                     class="bg-gradient-to-r from-neutral-50 to-neutral-100 p-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-neutral-200">
                     <a href="{{ route('my-jobs.index') }}"
                         class="group text-tertiary hover:text-primary font-medium flex items-center transition-all py-2 px-4 rounded-lg hover:bg-white hover:shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5 mr-2 text-secondary group-hover:text-primary transition-colors"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
+                        <x-icon name="arrow-left" class="h-5 w-5 mr-2 text-secondary group-hover:text-primary transition-colors" />
                         Back to My Jobs
                     </a>
 
                     <div class="flex items-center gap-3">
                         <a href="{{ route('jobs.create') }}"
                             class="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-5 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center font-tertiary focus:ring-2 focus:ring-accent/50">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
+                            <x-icon name="plus" class="h-5 w-5 mr-2" />
                             Create New Project
                         </a>
                     </div>

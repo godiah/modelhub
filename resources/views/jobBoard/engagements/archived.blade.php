@@ -2,11 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="h-6 w-6 mr-2">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                </svg>
+                <x-icon name="archive-box" class="h-6 w-6 mr-2" />
                 {{ __('Archived Engagements') }}
             </h2>
             <a href="{{ route('engagements.index') }}"

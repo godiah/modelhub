@@ -45,11 +45,7 @@
                             <div class="flex items-center space-x-3">
                                 <div
                                     class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
+                                    <x-icon name="user" class="w-5 h-5 text-white" />
                                 </div>
                                 <h3 class="text-lg font-bold text-white font-main">Client</h3>
                             </div>
@@ -122,11 +118,7 @@
                             <div class="flex items-center space-x-3">
                                 <div
                                     class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
+                                    <x-icon name="cash" class="w-5 h-5 text-white" />
                                 </div>
                                 <h3 class="text-lg font-bold text-white font-main">Financial Summary</h3>
                             </div>
@@ -158,22 +150,14 @@
                                 @if ($engagement->payment_escrowed_at)
                                     <div
                                         class="flex items-center text-xs font-tertiary bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-3 py-1 rounded-full">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <x-icon name="check-circle-solid" class="w-3 h-3 mr-1" />
                                         Payment Escrowed
                                     </div>
                                 @endif
                                 @if ($engagement->payment_released_at)
                                     <div
                                         class="flex items-center text-xs font-tertiary bg-gradient-to-r from-green-100 to-green-200 text-green-800 px-3 py-1 rounded-full">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd"
-                                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <x-icon name="check-circle-solid" class="w-3 h-3 mr-1" />
                                         Payment Released
                                     </div>
                                 @endif
@@ -192,11 +176,7 @@
                                 <div class="flex items-center space-x-3">
                                     <div
                                         class="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
+                                        <x-icon name="pencil-square" class="w-5 h-5 text-white" />
                                     </div>
                                     <h3 class="text-lg font-bold text-white font-main">Notes</h3>
                                 </div>

@@ -7,11 +7,7 @@
             </h2>
             <a href="{{ route('jobs.browse') }}"
                 class="inline-flex items-center px-4 py-2 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
                 Browse More Jobs
             </a>
         </div>
@@ -32,11 +28,7 @@
                                 <div class="flex-1">
                                     <span
                                         class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-secondary/10 text-secondary mb-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                        </svg>
+                                        <x-icon name="briefcase-2" class="h-3.5 w-3.5 mr-1" />
                                         3D Modelling Jobs
                                     </span>
 
@@ -52,13 +44,7 @@
                                             <span
                                                 class="text-neutral-700 font-semibold font-main">{{ $job->user->name }}</span>
                                             <div class="flex items-center text-sm text-neutral-500 mt-1">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-4 w-4 mr-1 text-secondary" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
+                                                <x-icon name="calendar" class="h-4 w-4 mr-1 text-secondary" />
                                                 Posted on {{ $job->created_at->format('M d, Y') }}
                                             </div>
                                         </div>
@@ -76,11 +62,7 @@
                                     <!-- Deadline Card -->
                                     <x-jobs.detail-card label="Deadline">
                                         <x-slot:icon>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <x-icon name="clock" class="h-6 w-6 text-secondary" />
                                         </x-slot:icon>
                                         @if ($job->no_deadline)
                                             <p class="text-neutral-800 font-secondary mt-1">No Fixed Deadline</p>
@@ -93,11 +75,7 @@
                                     <!-- Applicants Card -->
                                     <x-jobs.detail-card label="Applicants">
                                         <x-slot:icon>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                            </svg>
+                                            <x-icon name="user-group" class="h-6 w-6 text-secondary" />
                                         </x-slot:icon>
                                         <div class="flex items-center mt-1">
                                             <p class="text-neutral-800 font-secondary font-bold">
@@ -128,11 +106,7 @@
                                 <div class="h-px bg-neutral-200 flex-grow"></div>
                                 <span
                                     class="px-4 text-sm font-main uppercase tracking-wider text-neutral-800 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary mr-2"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
+                                    <x-icon name="document-text" class="h-5 w-5 text-secondary mr-2" />
                                     Job Description</span>
                                 <div class="h-px bg-neutral-200 flex-grow"></div>
                             </div>
@@ -157,11 +131,7 @@
                                         @foreach ($job->tags as $tag)
                                             <span
                                                 class="px-3 py-1.5 bg-secondary/10 text-secondary rounded-lg text-sm font-main flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M5 13l4 4L19 7" />
-                                                </svg>
+                                                <x-icon name="check" class="h-4 w-4 mr-1.5" />
                                                 {{ $tag }}
                                             </span>
                                         @endforeach
@@ -178,11 +148,7 @@
                                     <button
                                         class="tab-button active flex items-center px-5 py-3 text-sm font-main font-medium text-primary border-b-2 border-primary relative -mb-px transition-all duration-200 focus:outline-none"
                                         data-tab="skills">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                                        </svg>
+                                        <x-icon name="light-bulb" class="h-4 w-4 mr-2" />
                                         Required Skills
                                         <span
                                             class="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -227,13 +193,7 @@
                                         <div
                                             class="flex items-center justify-center p-8 bg-neutral-50 rounded-lg border border-neutral-100">
                                             <div class="text-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-10 w-10 text-neutral-400 mx-auto mb-3" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
+                                                <x-icon name="exclamation-triangle" class="h-10 w-10 text-neutral-400 mx-auto mb-3" />
                                                 <p class="text-neutral-600 font-main">No specific skills mentioned for
                                                     this position</p>
                                             </div>
@@ -257,13 +217,7 @@
                                         <div
                                             class="flex items-center justify-center p-8 bg-neutral-50 rounded-lg border border-neutral-100">
                                             <div class="text-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-10 w-10 text-neutral-400 mx-auto mb-3" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                                </svg>
+                                                <x-icon name="exclamation-triangle" class="h-10 w-10 text-neutral-400 mx-auto mb-3" />
                                                 <p class="text-neutral-600 font-main">No specific software required for
                                                     this position</p>
                                             </div>
@@ -275,12 +229,7 @@
                                 <div class="mt-6 flex items-center justify-center">
                                     <span
                                         class="px-4 py-2 bg-neutral-100 text-neutral-600 rounded-full text-xs font-main inline-flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                            class="h-4 w-4 mr-1.5 text-neutral-500" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <x-icon name="information-circle" class="h-4 w-4 mr-1.5 text-neutral-500" />
                                         These requirements are preferred but not mandatory for all applicants
                                     </span>
                                 </div>
@@ -292,11 +241,7 @@
                             <!-- Section Header -->
                             <h2
                                 class="text-neutral-800 font-tertiary font-bold text-xl flex items-center justify-center mx-auto">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary mr-2"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                                <x-icon name="photo" class="h-5 w-5 text-secondary mr-2" />
                                 Project Preview
                             </h2>
 
@@ -321,12 +266,7 @@
                                     <div
                                         class="bg-neutral-100 rounded-lg border border-neutral-200 flex items-center justify-center p-6 w-48 h-48">
                                         <div class="text-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-10 w-10 text-neutral-400 mx-auto mb-2" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
+                                            <x-icon name="photo" class="h-10 w-10 text-neutral-400 mx-auto mb-2" />
                                             <p class="text-neutral-500 font-main text-sm mb-1">No preview</p>
                                             <p class="text-neutral-400 font-main text-xs">No project visuals</p>
                                         </div>
@@ -342,11 +282,7 @@
                             <button
                                 class="fixed top-4 right-4 z-50 p-2 text-white hover:text-accent transition-colors duration-200 bg-black/50 rounded-full backdrop-blur-sm"
                                 onclick="closeImageModal()">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                <x-icon name="x-mark" class="h-10 w-10" />
                                 <span class="sr-only">Close modal</span>
                             </button>
 
@@ -364,11 +300,7 @@
                 <!-- Application Form -->
                 <div class="bg-white rounded-xl shadow-lg p-8 border border-neutral-100">
                     <h2 class="text-2xl font-bold text-primary mb-6 font-tertiary flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-secondary" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
+                        <x-icon name="pencil" class="h-6 w-6 mr-3 text-secondary" />
                         Submit Your Proposal
                     </h2>
 
@@ -385,11 +317,7 @@
                             <div class="w-full md:w-1/2 relative">
                                 <label for="offer"
                                     class="block text-sm font-medium text-primary mb-2 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-secondary"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="currency-dollar" class="h-4 w-4 mr-2 text-secondary" />
                                     Your Offer Amount
                                 </label>
                                 <div class="mt-1 relative rounded-md shadow-sm">
@@ -406,11 +334,7 @@
                             <div
                                 class="w-full md:w-1/2 mt-6 md:mt-0 bg-gradient-to-r from-secondary/5 to-primary/5 p-6 rounded-xl border border-neutral-200">
                                 <h3 class="text-sm font-semibold text-primary mb-4 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-secondary"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                    </svg>
+                                    <x-icon name="calculator" class="h-5 w-5 mr-2 text-secondary" />
                                     Earnings Breakdown
                                 </h3>
                                 <div class="space-y-3">
@@ -455,11 +379,7 @@
                             <div
                                 class="mt-1 border-2 border-dashed border-neutral-300 rounded-lg bg-neutral-50 transition-all duration-200 ease-in-out hover:bg-neutral-100 hover:border-secondary/50">
                                 <div class="flex flex-col items-center justify-center py-6 px-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-secondary/60"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                    </svg>
+                                    <x-icon name="cloud-arrow-up" class="h-12 w-12 text-secondary/60" />
                                     <p class="mt-3 text-sm text-neutral-700">
                                         <span class="font-medium text-secondary">Drop files here</span> or
                                         <label for="file-upload" class="relative cursor-pointer">
@@ -508,11 +428,7 @@
                             </button>
                             <button type="submit" name="action" value="submitted"
                                 class="bg-secondary hover:bg-secondary/90 focus:ring-2 focus:ring-offset-2 focus:ring-secondary text-white font-medium px-3 py-1.5 rounded-lg shadow-sm transition duration-150 ease-in-out flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                                </svg>
+                                <x-icon name="chevron-double-right" class="h-5 w-5 mr-2" />
                                 Submit Application
                             </button>
                         </div>
@@ -527,11 +443,7 @@
                         <!-- Section Header -->
                         <div class="flex justify-between items-center mb-8">
                             <h2 class="text-2xl font-bold text-primary font-tertiary flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-secondary"
-                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                </svg>
+                                <x-icon name="clipboard-list" class="h-6 w-6 mr-2 text-secondary" />
                                 Similar Projects
                             </h2>
                         </div>
@@ -566,12 +478,7 @@
                                         <div class="flex items-center justify-between mb-2 text-xs">
                                             <!-- Posted Date -->
                                             <div class="flex items-center text-neutral-500 font-tertiary font-medium">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
+                                                <x-icon name="clock" class="h-3.5 w-3.5 mr-1" />
                                                 <span>Posted {{ $similarJob->created_at->diffForHumans() }}</span>
                                             </div>
 
@@ -597,11 +504,7 @@
 
                                         <!-- Deadline -->
                                         <div class="flex items-center text-sm text-neutral-600 mt-auto mb-4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-tertiary"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
+                                            <x-icon name="calendar" class="h-4 w-4 mr-2 text-tertiary" />
                                             @if ($similarJob->no_deadline)
                                                 <span class="text-neutral-500 font-tertiary font-medium">No
                                                     Deadline</span>
@@ -617,11 +520,7 @@
                                         <a href="{{ route('jobs.apply', $similarJob->slug) }}"
                                             class="w-full flex items-center justify-center px-4 py-3 bg-white border-2 border-secondary text-secondary hover:bg-secondary hover:text-white rounded-xl transition-all duration-300 font-medium">
                                             View Details
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-2"
-                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                            </svg>
+                                            <x-icon name="arrow-right" class="h-4 w-4 ml-2" />
                                         </a>
                                     </div>
                                 </div>

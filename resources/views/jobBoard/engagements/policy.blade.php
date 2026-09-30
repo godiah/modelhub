@@ -2,11 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="h-6 w-6 mr-2">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                </svg>
+                <x-icon name="document-text-2" class="h-6 w-6 mr-2" />
                 Cancellation & Payment Policy
             </h2>
         </div>
@@ -18,11 +14,7 @@
             <div class="mb-8 bg-gradient-to-r from-primary/90 to-primary rounded-lg shadow-lg overflow-hidden">
                 <div class="px-6 py-8 text-white">
                     <div class="flex items-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="w-8 h-8 mr-3">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                        </svg>
+                        <x-icon name="information-circle-2" class="w-8 h-8 mr-3" />
                         <h3 class="text-xl font-tertiary font-bold">{{ config('app.name') }} Cancellation & Payment
                             Policy</h3>
                     </div>
@@ -39,11 +31,7 @@
                             <span>Effective Date: May 15, 2025</span>
                         </div>
                         <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                            </svg>
+                            <x-icon name="arrow-path-2" class="w-5 h-5 mr-1" />
                             <span>Last Updated: May 15, 2025</span>
                         </div>
                     </div>
@@ -54,11 +42,7 @@
             <div class="mb-8 bg-white rounded-lg shadow-md overflow-hidden border border-neutral-200">
                 <div class="px-6 py-5 border-b border-neutral-200 bg-neutral-50">
                     <div class="flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                            stroke="currentColor" class="w-5 h-5 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                        </svg>
+                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mr-2" />
                         <h3 class="text-lg font-tertiary font-bold text-primary">Quick Navigation</h3>
                     </div>
                 </div>
@@ -147,31 +131,16 @@
 
                             <ul class="mt-4 space-y-3">
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>A stated reason for cancellation.</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>Selection of a cancellation type (e.g., mutual, early termination,
                                         dispute).</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>A review of submitted deliverables (if any).</span>
                                 </li>
                             </ul>
@@ -191,32 +160,18 @@
 
                             <ul class="mt-4 space-y-3">
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>Submitted but not approved.</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>Approved by the Client.</span>
                                 </li>
                             </ul>
 
                             <div class="mt-5 bg-neutral-50 p-4 rounded-lg border border-neutral-200">
                                 <div class="flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-accent mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                                    </svg>
+                                    <x-icon name="exclamation-triangle-4" class="w-5 h-5 text-accent mr-2" />
                                     <p class="font-medium text-sm">Deliverables that have already been approved are
                                         considered
                                         final and eligible for payment.</p>
@@ -227,42 +182,23 @@
                 <!-- Section 3: Payment Eligibility -->
                 <x-policy.section id="payment-eligibility" number="3" title="Payment Eligibility">
                     <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-                        </svg>
+                        <x-icon name="banknotes-2" class="w-6 h-6 text-secondary mr-2" />
                     </x-slot:icon>
                             <div class="mb-6">
                                 <h4 class="text-md font-tertiary font-semibold mb-3 text-primary">A. Approved
                                     Deliverables</h4>
                                 <ul class="space-y-3">
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>Approved deliverables will be considered for payment regardless of who
                                             initiated the cancellation.</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>The Freelancer is eligible to receive payment for approved work.</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>Funds will be released from escrow or requested from the Client if not
                                             already funded.</span>
                                     </li>
@@ -274,22 +210,12 @@
                                     Deliverables</h4>
                                 <ul class="space-y-3">
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>Clients may choose to approve submitted work at the time of
                                             cancellation.</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>If no approval is granted, no payment will be processed for unapproved
                                             work unless the dispute process is triggered.</span>
                                     </li>
@@ -309,31 +235,17 @@
                             <div class="mb-6">
                                 <div
                                     class="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent font-medium text-sm mb-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
-                                    </svg>
+                                    <x-icon name="arrows-cross" class="w-4 h-4 mr-1" />
                                     If the Client Cancels
                                 </div>
                                 <ul class="space-y-3">
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                        </svg>
+                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>The Freelancer will be shown a breakdown of deliverables that were
                                             approved and the corresponding payable amount.</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                        </svg>
+                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>The Freelancer may accept the payment or request a dispute if they believe
                                             the payment is insufficient.</span>
                                     </li>
@@ -343,52 +255,28 @@
                             <div class="mb-4">
                                 <div
                                     class="inline-flex items-center px-3 py-1 rounded-full bg-secondary/10 text-secondary font-medium text-sm mb-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
-                                    </svg>
+                                    <x-icon name="arrows-cross" class="w-4 h-4 mr-1" />
                                     If the Freelancer Cancels
                                 </div>
                                 <ul class="space-y-3">
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                        </svg>
+                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>The Client will be prompted to review submitted deliverables and approve
                                             those they find satisfactory.</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                        </svg>
+                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>The platform will calculate the payment due based on approved work.</span>
                                     </li>
                                     <li class="flex items-start">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                                        </svg>
+                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                         <span>The Freelancer will then be notified of the payment status.</span>
                                     </li>
                                 </ul>
                             </div>
 
                             <div class="mt-6 flex items-center p-4 bg-primary/5 rounded-lg border border-primary/10">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor"
-                                    class="flex-shrink-0 w-6 h-6 text-primary mr-3">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                </svg>
+                                <x-icon name="information-circle-2" class="flex-shrink-0 w-6 h-6 text-primary mr-3" />
                                 <p class="text-sm">Both parties will receive a detailed cancellation summary that
                                     outlines the approved deliverables, payment amounts, and next steps.</p>
                             </div>
@@ -405,31 +293,16 @@
                     </x-slot:icon>
                             <ul class="space-y-3">
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>Funds held in escrow will only be released for approved deliverables.</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>If no deliverables are approved, the full escrowed amount will be refunded to
                                         the Client.</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>For milestone-based engagements, only the current milestone amount is
                                         affected.</span>
                                 </li>
@@ -452,12 +325,7 @@
                                 </div>
                                 <div class="flex-1 p-4 rounded-lg border border-secondary/20 bg-secondary/5">
                                     <div class="flex items-center mb-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-secondary mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-                                        </svg>
+                                        <x-icon name="banknotes-2" class="w-5 h-5 text-secondary mr-2" />
                                         <h4 class="font-tertiary font-semibold text-sm text-primary">Fund Security</h4>
                                     </div>
                                     <p class="text-sm text-neutral-600">All escrowed funds are held in secure,
@@ -479,32 +347,17 @@
 
                             <ul class="space-y-3">
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>A dispute can be raised by selecting "Dispute this decision" within 5 days of
                                         the cancellation notice.</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>Our admin team will review engagement history, deliverables, and communication
                                         logs.</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>A final resolution will be provided within 7–14 business days.</span>
                                 </li>
                             </ul>
@@ -558,12 +411,7 @@
                                             class="absolute -top-3 left-4 bg-white px-2 text-sm font-medium text-primary">
                                             Step 3</div>
                                         <div class="mt-1 flex flex-col items-center text-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-8 h-8 text-accent">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <x-icon name="check-circle-2" class="w-8 h-8 text-accent" />
                                             <h4 class="text-sm font-semibold mt-2">Resolution</h4>
                                             <p class="text-xs text-neutral-500 mt-1">Final decision with detailed
                                                 explanation and fund distribution instructions.</p>
@@ -587,32 +435,17 @@
                                                 Dispute Resolution</h4>
                                             <ul class="mt-2 text-sm text-neutral-600 space-y-1">
                                                 <li class="flex items-start">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                        class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M5 13l4 4L19 7" />
-                                                    </svg>
+                                                    <x-icon name="check" class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" />
                                                     <span>Provide clear, factual evidence related to your
                                                         claim</span>
                                                 </li>
                                                 <li class="flex items-start">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                        class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M5 13l4 4L19 7" />
-                                                    </svg>
+                                                    <x-icon name="check" class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" />
                                                     <span>Reference specific contract terms or project
                                                         milestones</span>
                                                 </li>
                                                 <li class="flex items-start">
-                                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                                        class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" fill="none"
-                                                        viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                                            stroke-width="2" d="M5 13l4 4L19 7" />
-                                                    </svg>
+                                                    <x-icon name="check" class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" />
                                                     <span>Maintain professional communication throughout the
                                                         process</span>
                                                 </li>
@@ -636,30 +469,15 @@
 
                             <ul class="space-y-3">
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>Withhold or reverse payment in the event of fraud or policy violations.</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>Suspend accounts involved in repeated or malicious cancellations.</span>
                                 </li>
                                 <li class="flex items-start">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor"
-                                        class="w-5 h-5 text-secondary mt-0.5 mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
+                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
                                     <span>Use discretion in resolving disputes where platform policy or deliverable
                                         clarity is in question.</span>
                                 </li>
@@ -697,11 +515,7 @@
                 <!-- Section 8: Communication and Notifications -->
                 <x-policy.section id="communication" number="8" title="Communication and Notifications">
                     <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                        </svg>
+                        <x-icon name="chat-bubble-text-2" class="w-6 h-6 text-secondary mr-2" />
                     </x-slot:icon>
                         <div class="px-6 py-5 font-main text-neutral-700">
                             <p class="mb-4">All actions in the cancellation flow will trigger platform notifications
@@ -712,11 +526,7 @@
                                 <div
                                     class="bg-white shadow-sm rounded-lg p-4 border border-neutral-200 flex flex-col items-center text-center">
                                     <div class="rounded-full bg-primary/10 p-3 mb-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                                        </svg>
+                                        <x-icon name="bell-2" class="w-6 h-6 text-primary" />
                                     </div>
                                     <h4 class="text-sm font-semibold text-primary">In-App Notifications</h4>
                                     <p class="text-xs text-neutral-500 mt-2">Real-time updates directly within your
@@ -726,11 +536,7 @@
                                 <div
                                     class="bg-white shadow-sm rounded-lg p-4 border border-neutral-200 flex flex-col items-center text-center">
                                     <div class="rounded-full bg-secondary/10 p-3 mb-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                                        </svg>
+                                        <x-icon name="envelope-2" class="w-6 h-6 text-secondary" />
                                     </div>
                                     <h4 class="text-sm font-semibold text-primary">Email Alerts</h4>
                                     <p class="text-xs text-neutral-500 mt-2">Detailed notifications sent to your
@@ -771,11 +577,7 @@
                                 <a href="#"
                                     class="inline-flex items-center text-xs font-medium text-secondary hover:text-primary transition-colors duration-200">
                                     <span>Manage notification settings</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 ml-1" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
+                                    <x-icon name="chevron-right" class="h-3.5 w-3.5 ml-1" />
                                 </a>
                             </div>
                 </x-policy.section>
@@ -783,11 +585,7 @@
                 <!-- Section 9: Policy Updates -->
                 <x-policy.section id="policy-updates" number="9" title="Policy Updates">
                     <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                        </svg>
+                        <x-icon name="arrow-path-2" class="w-6 h-6 text-secondary mr-2" />
                     </x-slot:icon>
                             <p>This policy is subject to change. Users will be notified of significant changes via email
                                 and platform notification.</p>
@@ -796,11 +594,7 @@
                             <div class="mt-5 bg-primary/5 rounded-lg p-4 border border-primary/10">
                                 <div class="flex items-start">
                                     <div class="flex-shrink-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-primary">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                        </svg>
+                                        <x-icon name="information-circle-2" class="w-6 h-6 text-primary" />
                                     </div>
                                     <div class="ml-3">
                                         <h4 class="text-sm font-semibold text-primary">Policy Version Control</h4>
@@ -850,12 +644,7 @@
                                     <div class="flex flex-col items-center text-center">
                                         <div
                                             class="rounded-full bg-primary/10 h-12 w-12 flex items-center justify-center mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-6 h-6 text-primary">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
+                                            <x-icon name="check-circle-2" class="w-6 h-6 text-primary" />
                                         </div>
                                         <p class="text-xs font-medium text-neutral-700">Policy Update</p>
                                         <span class="text-xs text-neutral-500 mt-1">Changes implemented based on
@@ -866,12 +655,7 @@
                                     <div class="flex flex-col items-center text-center">
                                         <div
                                             class="rounded-full bg-primary/10 h-12 w-12 flex items-center justify-center mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-6 h-6 text-primary">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                                            </svg>
+                                            <x-icon name="chat-bubble-text-2" class="w-6 h-6 text-primary" />
                                         </div>
                                         <p class="text-xs font-medium text-neutral-700">User Notification</p>
                                         <span class="text-xs text-neutral-500 mt-1">Transparent communication of
@@ -895,12 +679,7 @@
                                 <div class="mt-4 space-y-3">
                                     <div class="flex items-start">
                                         <div class="flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-5 h-5 text-secondary mt-0.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                                            </svg>
+                                            <x-icon name="envelope-2" class="w-5 h-5 text-secondary mt-0.5" />
                                         </div>
                                         <div class="ml-3">
                                             <p class="text-sm font-medium text-neutral-800">Email Notifications</p>
@@ -911,12 +690,7 @@
 
                                     <div class="flex items-start">
                                         <div class="flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-5 h-5 text-secondary mt-0.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-                                            </svg>
+                                            <x-icon name="bell-2" class="w-5 h-5 text-secondary mt-0.5" />
                                         </div>
                                         <div class="ml-3">
                                             <p class="text-sm font-medium text-neutral-800">Platform Notifications</p>
@@ -947,11 +721,7 @@
                             <div class="mt-6 bg-neutral-50 rounded-lg p-4 border border-neutral-200">
                                 <div class="flex">
                                     <div class="flex-shrink-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-primary">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                        </svg>
+                                        <x-icon name="information-circle-2" class="w-5 h-5 text-primary" />
                                     </div>
                                     <div class="ml-3">
                                         <h4 class="text-sm font-semibold text-primary">User Acknowledgment</h4>
@@ -963,11 +733,7 @@
                                             <a href="#"
                                                 class="inline-flex items-center text-xs font-medium text-secondary hover:text-primary transition-colors duration-200">
                                                 <span>Learn more about policy acknowledgment</span>
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 ml-1"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M9 5l7 7-7 7" />
-                                                </svg>
+                                                <x-icon name="chevron-right" class="h-3.5 w-3.5 ml-1" />
                                             </a>
                                         </div> --}}
                                     </div>

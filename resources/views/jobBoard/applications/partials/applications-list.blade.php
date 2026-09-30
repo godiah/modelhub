@@ -4,11 +4,7 @@
     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
         <div class="p-12 flex flex-col items-center justify-center text-center font-main">
             <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="w-8 h-8 text-primary">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-                </svg>
+                <x-icon name="document-text-2" class="w-8 h-8 text-primary" />
             </div>
             <h3 class="text-lg font-semibold text-neutral-800 mb-2">No Current Applications Found</h3>
             <p class="text-neutral-600 mb-6 max-w-md">
@@ -37,11 +33,7 @@
                             @else
                                 <div
                                     class="bg-gradient-to-br from-neutral-50 to-neutral-100 h-full w-full flex items-center justify-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-secondary"
-                                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
+                                    <x-icon name="briefcase-2" class="h-8 w-8 text-secondary" />
                                 </div>
                             @endif
                         </div>
@@ -57,11 +49,7 @@
                             <div class="flex flex-wrap items-center gap-3 mt-2">
                                 <p class="text-sm text-tertiary font-main">
                                     <span class="inline-flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
+                                        <x-icon name="calendar" class="h-4 w-4 mr-1 text-secondary" />
                                         Applied {{ $application->created_at->format('M d, Y') }}
                                     </span>
                                 </p>
@@ -133,11 +121,7 @@
                                     <button type="submit"
                                         class="p-2 text-tertiary hover:text-primary bg-neutral-50 hover:bg-neutral-100 rounded-full transition-colors"
                                         title="Archive Application">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                                        </svg>
+                                        <x-icon name="archive-box" class="h-5 w-5" />
                                     </button>
                                 </form>
                             @endif

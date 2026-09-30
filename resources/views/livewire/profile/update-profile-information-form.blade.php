@@ -65,10 +65,7 @@ new class extends Component {
     <x-section-header :title="__('Profile Information')"
         :subtitle="__('Update your account\'s profile information and email address.')">
         <x-slot:icon>
-            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
+            <x-icon name="user" class="w-5 h-5 text-white" />
         </x-slot:icon>
     </x-section-header>
 
@@ -82,10 +79,7 @@ new class extends Component {
                 </label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
+                        <x-icon name="user" class="h-5 w-5 text-neutral-400" />
                     </div>
                     <input wire:model="name" id="name" name="name" type="text"
                         class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main text-neutral-900"
@@ -93,11 +87,7 @@ new class extends Component {
                 </div>
                 @error('name')
                     <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                         <span>{{ $message }}</span>
                     </div>
                 @enderror
@@ -122,11 +112,7 @@ new class extends Component {
                 </div>
                 @error('email')
                     <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                                clip-rule="evenodd"></path>
-                        </svg>
+                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
                         <span>{{ $message }}</span>
                     </div>
                 @enderror
@@ -136,11 +122,7 @@ new class extends Component {
                     <div class="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-3">
                         <div class="flex items-start space-x-3">
                             <div class="flex-shrink-0">
-                                <svg class="w-5 h-5 text-accent mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                        clip-rule="evenodd"></path>
-                                </svg>
+                                <x-icon name="exclamation-triangle-solid" class="w-5 h-5 text-accent mt-0.5" />
                             </div>
                             <div class="flex-1">
                                 <p class="text-sm text-accent font-medium font-main">
@@ -151,10 +133,7 @@ new class extends Component {
                                 </p>
                                 <button wire:click.prevent="sendVerification"
                                     class="inline-flex items-center mt-2 text-sm font-medium text-secondary hover:text-secondary/80 transition-colors duration-200 font-main focus:outline-none focus:underline">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                                    </svg>
+                                    <x-icon name="paper-airplane" class="w-4 h-4 mr-1" />
                                     {{ __('Resend verification email') }}
                                 </button>
                             </div>
@@ -170,10 +149,7 @@ new class extends Component {
                 <div class="flex items-center space-x-4">
                     <button type="submit"
                         class="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 font-main text-sm">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
-                            </path>
-                        </svg>
+                        <x-icon name="check" class="w-4 h-4 mr-2" />
                         {{ __('Save Changes') }}
                     </button>
 

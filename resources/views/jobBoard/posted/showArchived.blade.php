@@ -8,11 +8,7 @@
             <div class="flex space-x-3">
                 <a href="{{ route('my-jobs.archived.posted-jobs') }}"
                     class="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors duration-200 font-main text-sm font-medium shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-5 w-5 mr-2">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                    </svg>
+                    <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
                     Archived Jobs
                 </a>
             </div>
@@ -30,20 +26,11 @@
                             <h1 class="text-2xl font-bold text-primary font-main mb-2">{{ $job->title }}</h1>
                             <div class="flex flex-wrap items-center gap-4 text-sm font-secondary">
                                 <div class="flex items-center text-tertiary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
-                                        fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                                            clip-rule="evenodd" />
-                                    </svg>
+                                    <x-icon name="calendar-solid" class="h-4 w-4 mr-1" />
                                     Posted: {{ $job->created_at->format('M d, Y') }}
                                 </div>
                                 <div class="flex items-center text-tertiary">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
-                                        fill="currentColor">
-                                        <path
-                                            d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                                    </svg>
+                                    <x-icon name="users-solid" class="h-4 w-4 mr-1" />
                                     Applications: {{ $job->applications_count }}
                                 </div>
                             </div>
@@ -51,11 +38,7 @@
                         <div class="mt-4 md:mt-0">
                             <span
                                 class="px-4 py-2 inline-flex items-center text-sm font-medium font-secondary rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="h-4 w-4 mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
-                                </svg>
+                                <x-icon name="archive-box-2" class="h-4 w-4 mr-2" />
                                 Archived Job
                             </span>
                         </div>
@@ -98,11 +81,7 @@
                 <div class="flex items-center justify-between">
                     <h2 class="text-2xl font-bold text-primary font-main">Job Applications</h2>
                     <div class="flex items-center text-tertiary text-sm font-main">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path
-                                d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                        </svg>
+                        <x-icon name="users-solid" class="h-5 w-5 mr-2" />
                         {{ $job->applications_count }} Total Applicants
                     </div>
                 </div>
@@ -120,11 +99,7 @@
                                     </div>
                                     <div
                                         class="absolute inset-1 bg-white rounded-full flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="h-8 w-8 text-primary">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                        </svg>
+                                        <x-icon name="user-2" class="h-8 w-8 text-primary" />
                                     </div>
                                 </div>
 
@@ -143,12 +118,7 @@
                                             <span class="text-sm">{{ $application->applicant->email }}</span>
                                         </div>
                                         <div class="flex items-center text-tertiary">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1"
-                                                viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
+                                            <x-icon name="calendar-solid" class="h-4 w-4 mr-1" />
                                             <span class="text-sm">Applied
                                                 {{ $application->created_at->format('M d, Y') }}</span>
                                         </div>
@@ -195,13 +165,7 @@
                                     <div class="bg-white border border-neutral-200 rounded-lg p-4">
                                         <h4
                                             class="text-sm font-semibold text-tertiary mb-3 font-main flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                class="h-4 w-4 mr-2 text-secondary" viewBox="0 0 20 20"
-                                                fill="currentColor">
-                                                <path fill-rule="evenodd"
-                                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                                                    clip-rule="evenodd" />
-                                            </svg>
+                                            <x-icon name="document-text-solid" class="h-4 w-4 mr-2 text-secondary" />
                                             Proposal
                                         </h4>
                                         @if ($application->proposal)
@@ -212,12 +176,7 @@
                                         @else
                                             <div
                                                 class="flex items-center justify-center py-6 text-neutral-400 bg-neutral-50 rounded-md border border-neutral-100">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                    class="h-6 w-6 mr-2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                                </svg>
+                                                <x-icon name="exclamation-triangle-3" class="h-6 w-6 mr-2" />
                                                 <span class="text-sm">No proposal provided by the
                                                     applicant</span>
                                             </div>
@@ -230,12 +189,7 @@
                             @if (is_array($application->portfolio) && count($application->portfolio) > 0)
                                 <div class="mt-6">
                                     <h4 class="text-sm font-semibold text-tertiary mb-3 font-main flex items-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-secondary"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
-                                                clip-rule="evenodd" />
-                                        </svg>
+                                        <x-icon name="photo-solid" class="h-4 w-4 mr-2 text-secondary" />
                                         Portfolio & Attachments
                                     </h4>
                                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -261,13 +215,7 @@
                                                         <div class="p-2 w-full flex justify-end">
                                                             <a href="{{ asset('storage/' . $item) }}" target="_blank"
                                                                 class="bg-white/90 p-1.5 rounded-full text-primary hover:text-secondary transition-colors">
-                                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                                    class="h-4 w-4" fill="none"
-                                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                                                </svg>
+                                                                <x-icon name="arrow-top-right-on-square" class="h-4 w-4" />
                                                             </a>
                                                         </div>
                                                     </div>
@@ -278,14 +226,7 @@
                                                     <div
                                                         class="h-full bg-gradient-to-br from-neutral-50 to-neutral-100 flex items-center justify-center">
                                                         <div class="text-center p-2">
-                                                            <svg xmlns="http://www.w3.org/2000/svg"
-                                                                class="h-8 w-8 mx-auto text-tertiary/50 mb-2"
-                                                                fill="none" viewBox="0 0 24 24"
-                                                                stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                                            </svg>
+                                                            <x-icon name="document" class="h-8 w-8 mx-auto text-tertiary/50 mb-2" />
                                                             <p class="text-xs text-tertiary truncate">
                                                                 {{ basename($item) }}</p>
                                                         </div>
@@ -306,11 +247,7 @@
                     <!-- No Applications Found -->
                     <div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-12 font-main">
                         <div class="text-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-neutral-300 mb-4"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
+                            <x-icon name="document-text" class="h-16 w-16 mx-auto text-neutral-300 mb-4" />
                             <h3 class="text-lg font-medium text-neutral-900">No Applications Found</h3>
                             <p class="mt-2 text-sm text-tertiary">This archived job has not received any applications.
                             </p>
