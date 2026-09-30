@@ -195,24 +195,7 @@
                             @endforeach
                         </div>
 
-                        @if ($postedJobs->hasPages())
-                            <nav role="navigation" aria-label="{{ __('Pagination') }}" class="mt-6 flex items-center justify-between gap-3">
-                                <p class="text-sm text-tertiary">{{ __('Showing :from–:to of :total', ['from' => $postedJobs->firstItem(), 'to' => $postedJobs->lastItem(), 'total' => $postedJobs->total()]) }}</p>
-                                <div class="flex items-center gap-2">
-                                    @if ($postedJobs->onFirstPage())
-                                        <x-btn variant="secondary" size="sm" type="button" disabled>{{ __('Previous') }}</x-btn>
-                                    @else
-                                        <x-btn variant="secondary" size="sm" href="{{ $postedJobs->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</x-btn>
-                                    @endif
-                                    <span class="px-1 text-sm tabular-nums text-tertiary">{{ $postedJobs->currentPage() }} / {{ $postedJobs->lastPage() }}</span>
-                                    @if ($postedJobs->hasMorePages())
-                                        <x-btn variant="secondary" size="sm" href="{{ $postedJobs->nextPageUrl() }}" rel="next">{{ __('Next') }}</x-btn>
-                                    @else
-                                        <x-btn variant="secondary" size="sm" type="button" disabled>{{ __('Next') }}</x-btn>
-                                    @endif
-                                </div>
-                            </nav>
-                        @endif
+                        <x-pager :paginator="$postedJobs" />
                     </div>
 
                     <!-- The selected project -->

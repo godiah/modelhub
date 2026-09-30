@@ -76,9 +76,7 @@
                         </div>
                     @endforelse
 
-                    @if ($notifications->hasPages())
-                        {{ $notifications->links('notifications.partials.pagination') }}
-                    @endif
+                    <x-pager :paginator="$notifications" :footer="true" :navigate="true" />
                 </x-card>
             </div>
         </div>

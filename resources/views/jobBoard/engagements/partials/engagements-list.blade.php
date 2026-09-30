@@ -107,4 +107,6 @@
         @include('jobBoard.engagements.partials.components.modals.archive')
         @include('jobBoard.engagements.partials.components.modals.review')
     </div>
+
+    <x-pager :paginator="$engagements" :ajax="true" />
 @endif

@@ -24,7 +24,10 @@ class StoreApplicationRequest extends FormRequest
             'portfolio' => 'nullable|array|max:5',
             'portfolio.*' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240', // 10MB max
             'existing_portfolio' => 'sometimes|array',
+            'existing_portfolio.*' => 'string|max:255',
             'removed_files' => 'sometimes|array',
+            'removed_files.*' => 'string|max:255',
+            'proposal' => 'nullable|string|max:2500',
         ];
 
         // Add stricter validation for submission (not for draft)
@@ -34,10 +37,22 @@ class StoreApplicationRequest extends FormRequest
         } else {
             // For drafts, make offer optional
             $rules['offer'] = 'nullable|numeric|min:1';
-            $rules['proposal'] = 'nullable|string|max:2500';
         }
 
         return $rules;
+    }
+
+    public function after(): array
+    {
+        return [
+            function ($validator) {
+                $kept = count(array_diff((array) $this->input('existing_portfolio', []), (array) $this->input('removed_files', [])));
+
+                if ($kept + count((array) $this->file('portfolio', [])) > 5) {
+                    $validator->errors()->add('portfolio', 'You can attach up to 5 files in total.');
+                }
+            },
+        ];
     }
 
     public function isDraft(): bool

@@ -1,447 +1,72 @@
+@php
+    $open = $job->isOpenForApplications();
+    $cover = $job->images ? asset('storage/'.$job->images) : null;
+@endphp
 <x-app-layout crumb="Resume application">
-    <section>
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-lg p-6 shadow">
-                <form id="job-application-form" class="space-y-8" action="{{ route('applications.store') }}"
-                    method="POST" enctype="multipart/form-data">
-                    @csrf
-
-                    <input type="hidden" name="job_id" value="{{ $job->id }}">
-                    <input type="hidden" name="poster_id" value="{{ $job->user_id }}">
-                    <input type="hidden" name="applicant_id" value="{{ auth()->id() }}">
-                    <input type="hidden" name="status" value="submitted">
-
-                    <!-- Your Offer -->
-                    <div class="flex flex-col md:flex-row md:space-x-6">
-                        <div class="w-full md:w-1/2 relative">
-                            <label for="offer" class="block text-sm font-medium text-primary mb-2 flex items-center">
-                                <x-icon name="currency-dollar" class="h-4 w-4 mr-2 text-secondary" />
-                                Your Offer Amount
-                            </label>
-                            <div class="mt-1 relative rounded-md shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <span class="text-neutral-500 sm:text-sm">Ksh</span>
-                                </div>
-                                <input type="number" id="offer" name="offer"
-                                    value="{{ old('offer', $application->offer_amount > 0 ? $application->offer_amount : '') }}"
-                                    class="pl-10 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-secondary focus:border-secondary transition duration-150 ease-in-out text-neutral-700"
-                                    placeholder="{{ $job->budget }}">
-                            </div>
-                        </div>
-
-                        <!-- Your Earnings -->
-                        <div
-                            class="w-full md:w-1/2 mt-6 md:mt-0 bg-gradient-to-r from-secondary/5 to-primary/5 p-6 rounded-xl border border-neutral-200">
-                            <h3 class="text-sm font-semibold text-primary mb-4 flex items-center">
-                                <x-icon name="calculator" class="h-5 w-5 mr-2 text-secondary" />
-                                Earnings Breakdown
-                            </h3>
-                            <div class="space-y-3">
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-neutral-600">Your offer</span>
-                                    <span id="yourOfferAmount" class="font-semibold text-neutral-800">
-                                        {{ old('offer', $application->offer_amount) ? \App\Support\Money::format(old('offer', $application->offer_amount)) : '' }}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between text-sm">
-                                    <span class="text-neutral-600 flex items-center">
-                                        Service fee
-                                        <span
-                                            class="inline-flex items-center justify-center ml-1 w-4 h-4 rounded-full bg-neutral-200 text-xs"
-                                            title="Service fee applied to all projects">?</span>
-                                    </span>
-                                    <span id="serviceFee" class="font-semibold text-red-500">
-                                        {{ old('offer', $application->offer_amount) ? \App\Support\Money::format(old('offer', $application->offer_amount) * 0.1) : '' }}
-                                    </span>
-                                </div>
-                                <div class="flex justify-between font-bold mt-4 pt-4 border-t border-neutral-200">
-                                    <span class="text-primary">You'll receive</span>
-                                    <span id="youllReceive" class="text-secondary text-lg">
-                                        {{ old('offer', $application->offer_amount) ? \App\Support\Money::format(old('offer', $application->offer_amount) * 0.9) : '' }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Your Proposal -->
-                    <div>
-                        <label for="proposal" class="block text-sm font-medium text-primary mb-2">Your Proposal</label>
-                        <div class="relative">
-                            <textarea id="proposal" name="proposal" rows="6"
-                                class="block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-secondary focus:border-secondary resize-none transition duration-150 ease-in-out"
-                                placeholder="Be specific about your skills, experience and proposal here . . . ">{{ old('proposal', $application->proposal) }}</textarea>
-                            <div class="absolute bottom-3 right-3 text-xs text-neutral-400">
-                                <span id="characters-count">0</span>/2500
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Portfolio Upload -->
-                    <div>
-                        <label class="block text-sm font-medium text-primary mb-2">Portfolio Samples</label>
-                        <div
-                            class="mt-1 border-2 border-dashed border-neutral-300 rounded-lg bg-neutral-50 transition-all duration-200 ease-in-out hover:bg-neutral-100 hover:border-secondary/50">
-                            <div class="flex flex-col items-center justify-center py-6 px-4">
-                                <x-icon name="cloud-arrow-up" class="h-12 w-12 text-secondary/60" />
-                                <p class="mt-3 text-sm text-neutral-700">
-                                    <span class="font-medium text-secondary">Drop files here</span> or
-                                    <label for="file-upload" class="relative cursor-pointer">
-                                        <span class="font-medium text-secondary underline">browse</span>
-                                        <input id="file-upload" name="portfolio[]" type="file" class="sr-only"
-                                            multiple accept="image/*">
-                                    </label>
-                                </p>
-                                <p class="mt-1 text-xs text-neutral-500">
-                                    JPG, JPEG and PNG (max. 5MB per file, max. 5 files)
-                                </p>
-
-                                <!-- Preview area -->
-                                <div id="file-preview"
-                                    class="w-full mt-4 {{ isset($application) && !empty($application->portfolio) ? '' : 'hidden' }}">
-                                    <div id="preview-container"
-                                        class="flex flex-wrap gap-4 p-4 bg-white rounded border border-neutral-200">
-                                        <!-- Existing portfolio files will be added here dynamically -->
-                                        @if (isset($application) && !empty($application->portfolio))
-                                            @foreach ($application->portfolio as $index => $filePath)
-                                                <div
-                                                    class="file-item flex items-center p-2 bg-white rounded border border-neutral-200">
-                                                    <div class="w-12 h-12 rounded overflow-hidden mr-3">
-                                                        @if (Str::endsWith($filePath, ['.jpg', '.jpeg', '.png']))
-                                                            <img src="{{ Storage::url($filePath) }}" alt="Preview"
-                                                                class="w-full h-full object-cover">
-                                                        @else
-                                                            <div
-                                                                class="w-full h-full flex items-center justify-center bg-neutral-100">
-                                                                <x-icon name="document-text" class="h-6 w-6 text-neutral-500" />
-                                                            </div>
-                                                        @endif
-                                                    </div>
-                                                    <div class="flex-1 min-w-0">
-                                                        <p class="text-sm text-neutral-700 truncate">
-                                                            {{ basename($filePath) }}</p>
-                                                    </div>
-                                                    <button type="button"
-                                                        class="text-neutral-400 hover:text-red-500 ml-2 remove-file"
-                                                        data-file-path="{{ $filePath }}">
-                                                        <x-icon name="x-mark" class="h-5 w-5" />
-                                                    </button>
-                                                    <input type="hidden" name="existing_portfolio[]"
-                                                        value="{{ $filePath }}">
-                                                </div>
-                                            @endforeach
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Terms & Conditions -->
-                    <div>
-                        <div class="flex items-start">
-                            <div class="flex items-center h-5">
-                                <input id="terms" name="terms" type="checkbox"
-                                    class="h-5 w-5 text-secondary rounded border-neutral-300 focus:ring-secondary"
-                                    {{ old('terms', $application->terms_accepted) ? 'checked' : '' }}>
-                            </div>
-                            <div class="ml-3 text-sm">
-                                <label for="terms" class="text-neutral-700 font-medium">
-                                    I agree to the <a href="#" class="text-secondary hover:underline">Terms of
-                                        Service</a> and <a href="#"
-                                        class="text-secondary hover:underline">Privacy Policy</a>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex flex-col justify-end sm:flex-row gap-3 pt-2">
-                        <x-btn size="sm" type="submit" name="action" value="submitted">
-                            <x-icon name="chevron-double-right" class="h-5 w-5" />
-                            Submit Application
-                        </x-btn>
-                    </div>
-
-                    <!-- Hidden field for tracking existing portfolio files -->
-                    <div id="removed-files-container"></div>
-                </form>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <!-- Header -->
+        <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div class="min-w-0">
+                <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Draft application') }}</p>
+                <h1 class="mt-1 font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Finish your application') }}</h1>
+                <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Saved :time. Nothing is sent to the client until you submit.', ['time' => $application->updated_at->diffForHumans()]) }}</p>
             </div>
+            <x-btn variant="secondary" size="sm" href="{{ route('applications.drafts') }}" class="shrink-0">
+                <x-icon name="arrow-left" class="h-4 w-4" />
+                {{ __('All drafts') }}
+            </x-btn>
         </div>
 
-        <!-- Disable submission -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Get the elements
-                const offerInput = document.getElementById('offer');
-                const termsCheckbox = document.getElementById('terms');
-                const submitButton = document.querySelector('button[value="submitted"]');
+        @unless ($open)
+            <div class="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900" role="status">
+                <x-icon name="exclamation-triangle" class="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                <p>{{ __('This project is no longer accepting applications, so this draft cannot be sent. You can still read it or delete it from your drafts.') }}</p>
+            </div>
+        @endunless
 
-                // Initially disable the submit button
-                submitButton.disabled = true;
-                submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-
-                // Function to check if form is valid
-                function validateForm() {
-                    // Check if offer has a value and terms is checked
-                    if (offerInput.value.trim() !== '' && termsCheckbox.checked) {
-                        submitButton.disabled = false;
-                        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        submitButton.disabled = true;
-                        submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                }
-
-                // Add event listeners to both fields
-                offerInput.addEventListener('input', validateForm);
-                termsCheckbox.addEventListener('change', validateForm);
-
-                // Initial validation check
-                validateForm();
-            });
-        </script>
-
-        <!-- Tracking Proposal Characters -->
-        <script>
-            // Maximum character limit
-            const maxCharacters = 2500;
-
-            // Get references to the elements
-            const proposalTextarea = document.getElementById('proposal');
-            const charactersCount = document.getElementById('characters-count');
-
-            // Function to update the character count
-            function updateCharacterCount() {
-                const currentLength = proposalTextarea.value.length;
-                const remainingCharacters = maxCharacters - currentLength;
-
-                // Update the character count display
-                charactersCount.textContent = currentLength;
-
-                // Add warning styling when approaching the limit
-                if (remainingCharacters <= 500) {
-                    charactersCount.classList.add('text-red-500');
-                } else {
-                    charactersCount.classList.remove('text-red-500');
-                }
-
-                // Prevent further input when reaching the limit
-                if (currentLength >= maxCharacters) {
-                    proposalTextarea.value = proposalTextarea.value.substring(0, maxCharacters);
-                    updateCharacterCount(); // Update the count after truncation
-                }
-            }
-
-            // Initialize the character count
-            updateCharacterCount();
-
-            // Listen for input changes
-            proposalTextarea.addEventListener('input', updateCharacterCount);
-        </script>
-
-        <!-- Calculating Service Fee & Payout -->
-        <script>
-            // Service fee percentage (configurable)
-            const serviceFeePercentage = 0.10; // 10%
-
-            // Get references to the elements
-            const offerInput = document.getElementById('offer');
-            const yourOfferAmount = document.getElementById('yourOfferAmount');
-            const serviceFee = document.getElementById('serviceFee');
-            const youllReceive = document.getElementById('youllReceive');
-
-            // Function to update the earnings breakdown
-            function updateEarnings() {
-                const offer = parseFloat(offerInput.value) || 0;
-
-                // Calculate service fee
-                const fee = offer * serviceFeePercentage;
-
-                // Calculate net amount
-                const netAmount = offer - fee;
-
-                // Update the DOM with formatted values
-                yourOfferAmount.textContent = formatCurrency(offer);
-                serviceFee.textContent = formatCurrency(fee, true);
-                youllReceive.textContent = formatCurrency(netAmount);
-            }
-
-            // Function to format currency
-            function formatCurrency(amount, isNegative = false) {
-                const symbol = isNegative ? '-' : '';
-                return `${symbol}Ksh${amount.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-                })}`;
-            }
-
-            // Initialize with default values
-            updateEarnings();
-
-            // Listen for input changes
-            offerInput.addEventListener('input', updateEarnings);
-        </script>
-
-        <!-- Portfolio Uploads -->
-        <script>
-            // config
-            const MAX_FILES = 5;
-            const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
-            // DOM refs
-            const fileInput = document.getElementById('file-upload');
-            const previewContainer = document.getElementById('preview-container');
-            const filePreview = document.getElementById('file-preview');
-            const removedFilesCtr = document.getElementById('removed-files-container');
-
-            // internal list of new File objects
-            let newFiles = [];
-
-            // helper alerts (you already have these)
-            function showMaxFilesAlert() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'File Limit Exceeded',
-                    text: `You can upload a maximum of ${MAX_FILES} files.`
-                });
-            }
-
-            function showFileSizeAlert() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'File Size Limit Exceeded',
-                    text: `File size should not exceed ${MAX_FILE_SIZE/(1024*1024)} MB.`
-                });
-            }
-
-            function showFileTypeAlert() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid File Type',
-                    text: 'Only JPG, JPEG, PNG, and PDF files are allowed.'
-                });
-            }
-
-            function formatFileSize(bytes) {
-                if (bytes < 1024) return `${bytes} B`;
-                if (bytes < 1024 * 1024) return `${(bytes/1024).toFixed(1)} KB`;
-                return `${(bytes/(1024*1024)).toFixed(1)} MB`;
-            }
-
-            // each time the user selects files
-            fileInput.addEventListener('change', handleFileSelect);
-
-            function handleFileSelect(e) {
-                const picked = Array.from(e.target.files);
-                const existingCount = document.querySelectorAll('input[name="existing_portfolio[]"]').length;
-
-                for (let file of picked) {
-                    // avoid duplicates by name+size
-                    if (newFiles.some(f => f.name === file.name && f.size === file.size)) {
-                        continue;
-                    }
-                    // check overall count
-                    if (existingCount + newFiles.length + 1 > MAX_FILES) {
-                        showMaxFilesAlert();
-                        break;
-                    }
-                    // type & size checks
-                    if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
-                        showFileTypeAlert();
-                        continue;
-                    }
-                    if (file.size > MAX_FILE_SIZE) {
-                        showFileSizeAlert();
-                        continue;
-                    }
-                    newFiles.push(file);
-                }
-
-                updateFileInput();
-                renderNewPreviews();
-            }
-
-            // sync our `newFiles[]` into the actual <input>
-            function updateFileInput() {
-                const dt = new DataTransfer();
-                newFiles.forEach(f => dt.items.add(f));
-                fileInput.files = dt.files;
-            }
-
-            // render only the “new” files (give them a class so we can clear them)
-            function renderNewPreviews() {
-                // clear previous new-file nodes
-                previewContainer.querySelectorAll('.file-item-new').forEach(el => el.remove());
-
-                // show/hide the entire preview wrapper
-                if (newFiles.length || previewContainer.querySelectorAll('.file-item-existing').length) {
-                    filePreview.classList.remove('hidden');
-                } else {
-                    filePreview.classList.add('hidden');
-                }
-
-                // append each new file
-                newFiles.forEach((file, idx) => {
-                    const item = document.createElement('div');
-                    item.className =
-                        'file-item file-item-new flex items-center p-2 bg-white rounded border border-neutral-200';
-                    item.innerHTML = `
-                        <div class="w-12 h-12 rounded overflow-hidden mr-3">
-                          <img src="" alt="Preview" class="w-full h-full object-cover">
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_28rem]">
+            <!-- The project you are applying to -->
+            <div class="space-y-6">
+                <x-card class="rounded-2xl">
+                    @if ($cover)
+                        <img src="{{ $cover }}" alt="" class="aspect-[16/7] w-full rounded-t-2xl object-cover">
+                    @endif
+                    <div class="p-6">
+                        <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Project') }}</p>
+                        <h2 class="mt-1 font-tertiary text-xl font-semibold leading-snug text-neutral-900">{{ $job->title }}</h2>
+                        @if ($job->user)
+                            <div class="mt-4 flex items-center gap-3">
+                                <x-user-avatar :user="$job->user" size="h-9 w-9" />
+                                <p class="min-w-0 truncate text-sm font-medium text-neutral-900">{{ $job->user->name }}</p>
+                            </div>
+                        @endif
+                    </div>
+                    <dl class="grid grid-cols-1 divide-y divide-neutral-100 border-t border-neutral-100 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
+                        <div class="px-6 py-4">
+                            <dt class="text-xs text-tertiary">{{ __('Budget') }}</dt>
+                            <dd class="mt-1 font-tertiary text-xl font-semibold tabular-nums text-neutral-900"><x-money :amount="$job->budget" :decimals="0" /></dd>
                         </div>
-                        <div class="flex-1 min-w-0">
-                          <p class="text-sm text-neutral-700 truncate">${file.name}</p>
-                          <p class="text-xs text-neutral-500">Size ${formatFileSize(file.size)}</p>
+                        <div class="px-6 py-4">
+                            <dt class="text-xs text-tertiary">{{ __('Deadline') }}</dt>
+                            <dd @class(['mt-1 text-base font-semibold', 'text-amber-700' => $job->deadlineIsSoon(), 'text-neutral-900' => ! $job->deadlineIsSoon()])>
+                                {{ $job->no_deadline || ! $job->deadline ? __('No fixed deadline') : $job->deadline->format('M j, Y') }}
+                            </dd>
                         </div>
-                        <button type="button" class="text-neutral-400 hover:text-red-500 ml-2 remove-new-file">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                               viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      `;
+                    </dl>
+                </x-card>
 
-                    // wire up the removal of this new file
-                    item.querySelector('.remove-new-file').addEventListener('click', () => {
-                        newFiles.splice(idx, 1);
-                        updateFileInput();
-                        renderNewPreviews();
-                    });
+                <x-panel :title="__('About this project')" :description="__('Re-read the brief before you send.')">
+                    <x-jobs.markdown-description :content="$job->description" />
+                    <x-btn variant="secondary" size="sm" class="mt-5" href="{{ route('jobs.apply', $job->slug) }}">
+                        {{ __('Open the project page') }}
+                        <x-icon name="arrow-right" class="h-4 w-4" />
+                    </x-btn>
+                </x-panel>
+            </div>
 
-                    // load thumbnail
-                    const img = item.querySelector('img');
-                    const reader = new FileReader();
-                    reader.onload = e => img.src = e.target.result;
-                    reader.readAsDataURL(file);
-
-                    previewContainer.appendChild(item);
-                });
-            }
-
-            // existing‐file remove (you already had this—but ensure it's after the DOM is ready)
-            document.querySelectorAll('.remove-file').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const fileItem = this.closest('.file-item');
-                    const filePath = this.dataset.filePath;
-
-                    // track for server deletion
-                    const removed = document.createElement('input');
-                    removed.type = 'hidden';
-                    removed.name = 'removed_files[]';
-                    removed.value = filePath;
-                    removedFilesCtr.appendChild(removed);
-
-                    fileItem.remove();
-
-                    // hide preview if nothing left
-                    if (!previewContainer.querySelector('.file-item')) {
-                        filePreview.classList.add('hidden');
-                    }
-                });
-            });
-        </script>
-
-    </section>
+            <aside class="lg:sticky lg:top-24">
+                @include('jobBoard.applications.partials.form', ['job' => $job, 'application' => $application])
+            </aside>
+        </div>
+    </div>
 </x-app-layout>

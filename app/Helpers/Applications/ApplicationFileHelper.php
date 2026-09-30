@@ -9,37 +9,26 @@ use Illuminate\Support\Facades\Storage;
 
 class ApplicationFileHelper
 {
-    // Handle portfolio file operations for applications
+    // Handle portfolio file operations for applications. The form can only keep or remove files the application
+    // already owns: paths it names that are not in $existingFiles are ignored, never trusted.
     public static function handlePortfolioFiles(Request $request, array $existingFiles = []): array
     {
-        // Start with existing portfolio files if any
-        $portfolioFiles = [];
+        $portfolioFiles = $existingFiles;
 
-        // Add any existing files that weren't removed
         if ($request->has('existing_portfolio')) {
-            $portfolioFiles = $request->input('existing_portfolio', []);
-        } elseif (! empty($existingFiles)) {
-            $portfolioFiles = $existingFiles;
+            $portfolioFiles = array_values(array_intersect((array) $request->input('existing_portfolio', []), $existingFiles));
         }
 
-        // Remove any files that were marked for removal
-        if ($request->has('removed_files')) {
-            $removedFiles = $request->input('removed_files', []);
-
-            // Remove the files from storage
+        $removedFiles = array_values(array_intersect((array) $request->input('removed_files', []), $existingFiles));
+        if ($removedFiles !== []) {
             self::deleteFiles($removedFiles);
-
-            // Remove the files from our list
             $portfolioFiles = array_diff($portfolioFiles, $removedFiles);
         }
 
-        // Process new portfolio files if any
         if ($request->hasFile('portfolio')) {
-            $newFiles = self::uploadNewFiles($request->file('portfolio'));
-            $portfolioFiles = array_merge($portfolioFiles, $newFiles);
+            $portfolioFiles = array_merge($portfolioFiles, self::uploadNewFiles($request->file('portfolio')));
         }
 
-        // Reindex the array (in case there were removals)
         return array_values($portfolioFiles);
     }
 

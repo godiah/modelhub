@@ -8,6 +8,7 @@ use App\Enums\ApplicationStatus;
 use App\Helpers\Applications\ApplicationCalculationHelper;
 use App\Helpers\Applications\ApplicationFileHelper;
 use App\Helpers\FlashAlertHelper;
+use App\Models\ApplicantMessage;
 use App\Models\JobApplication;
 use App\Models\ModelJob;
 use Illuminate\Http\Request;
@@ -105,14 +106,6 @@ class ApplicationManagementService
             }
         }
 
-        // Prevent multiple drafts
-        if ($isDraft && $existingApplication && $existingApplication->status === ApplicationStatus::Draft) {
-            return FlashAlertHelper::info(
-                'Existing Draft',
-                'You already have a draft application for this job. Please edit the existing draft or submit it.'
-            );
-        }
-
         // Prevent reapplying after deletion
         if ($existingApplicationWithDeleted && $existingApplicationWithDeleted->deleted_at) {
             return FlashAlertHelper::error(
@@ -121,11 +114,11 @@ class ApplicationManagementService
             );
         }
 
-        // Check for existing submitted application
-        if (! $isDraft && $existingApplication && $existingApplication->status === ApplicationStatus::Submitted) {
+        // One application per project: anything already sent (whatever its status) stands
+        if (! $isDraft && $existingApplication && $existingApplication->status !== ApplicationStatus::Draft) {
             return FlashAlertHelper::info(
                 'Your Application Already Exists',
-                'You have already submitted an application for this job. Your previous application is still pending review.'
+                'You have already applied to this project. You can follow it under My applications.'
             );
         }
 
@@ -135,7 +128,7 @@ class ApplicationManagementService
     // Load draft application for editing
     public function getDraftApplication(string $slug): array
     {
-        $job = ModelJob::where('slug', $slug)->firstOrFail();
+        $job = ModelJob::with('user.profile')->where('slug', $slug)->firstOrFail();
 
         $application = JobApplication::where('job_id', $job->id)
             ->where('applicant_id', Auth::id())
@@ -145,40 +138,51 @@ class ApplicationManagementService
         return compact('application', 'job');
     }
 
-    // Delete an application or draft
-    public function deleteApplication(JobApplication $application): bool
+    // Delete a draft. It was never sent, so it is removed for good (a soft delete would block applying to the
+    // project again) together with the files that were attached to it.
+    public function deleteDraft(JobApplication $application): bool
     {
-        // Authorization check
-        if ($application->applicant_id !== Auth::id()) {
+        if ($application->applicant_id !== Auth::id() || $application->status !== ApplicationStatus::Draft) {
             return false;
         }
 
-        // Remove portfolio files
         ApplicationFileHelper::deleteApplicationPortfolio($application->portfolio ?? []);
-
-        // Delete the application
-        $application->delete();
+        $application->forceDelete();
 
         return true;
     }
 
-    // Get user's applications with filtering
+    // The applicant's sent applications (everything but drafts), newest first unless sorted otherwise
     public function getUserApplications(array $filters): LengthAwarePaginator
     {
-        $query = JobApplication::with('job', 'engagement', 'jobEngagements')
-            ->where('applicant_id', Auth::id())
-            ->where('status', '!=', 'draft')
+        $query = $this->sentApplications()
+            ->with('job', 'engagement', 'jobEngagements')
             ->active();
 
-        // Apply status filter
         if ($filters['status'] !== 'all') {
             $query->where('status', $filters['status']);
         }
 
-        // Apply sorting
+        $this->applySearch($query, $filters['search'] ?? null);
         $this->applySortingToApplications($query, $filters['sort']);
 
-        return $query->paginate(7)->withQueryString();
+        return $query->paginate(8)->withQueryString();
+    }
+
+    /** Applications per status for the filter pills, plus how many are archived and how many drafts exist. */
+    public function getApplicationCounts(): array
+    {
+        $byStatus = $this->sentApplications()->active()
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return [
+            'all' => (int) $byStatus->sum(),
+            'byStatus' => $byStatus->map(fn ($total) => (int) $total)->all(),
+            'archived' => $this->sentApplications()->archived()->count(),
+            'drafts' => $this->getDraftCount(),
+        ];
     }
 
     // Get draft applications count
@@ -195,17 +199,28 @@ class ApplicationManagementService
         return JobApplication::with('job')
             ->where('applicant_id', Auth::id())
             ->where('status', 'draft')
-            ->latest()
-            ->paginate(10);
+            ->latest('updated_at')
+            ->paginate(9);
     }
 
-    // Get application details for viewing
+    // Get application details for viewing (the signed-in user's own application to this job)
     public function getApplicationDetails(ModelJob $job): JobApplication
     {
-        return JobApplication::with(['job', 'applicant', 'poster'])
+        return JobApplication::with(['job', 'poster.profile', 'engagement', 'jobEngagements'])
             ->where('job_id', $job->id)
-            ->where('applicant_id', Auth::user()->id)
+            ->where('applicant_id', Auth::id())
             ->firstOrFail();
+    }
+
+    // Messages the client sent about an application, newest first
+    public function getClientMessages(JobApplication $application)
+    {
+        return ApplicantMessage::with('sender')
+            ->where('job_application_id', $application->id)
+            ->where('recipient_id', Auth::id())
+            ->latest()
+            ->limit(10)
+            ->get();
     }
 
     // Archive an application
@@ -223,15 +238,19 @@ class ApplicationManagementService
     // Restore an archived application
     public function restoreApplication(JobApplication $application): bool
     {
+        if (! $application->is_archived) {
+            return false;
+        }
+
         $application->update(['is_archived' => false]);
 
         return true;
     }
 
-    // Delete an archived application (soft delete)
+    // Delete an archived application (soft delete). One tied to an engagement stays: the engagement needs it.
     public function deleteArchivedApplication(JobApplication $application): bool
     {
-        if (! $application->is_archived) {
+        if (! $application->is_archived || $application->hasEngagement()) {
             return false;
         }
 
@@ -243,11 +262,25 @@ class ApplicationManagementService
     // Get archived applications
     public function getArchivedApplications(): LengthAwarePaginator
     {
-        return JobApplication::with(['job', 'applicant', 'poster'])
-            ->where('applicant_id', Auth::id())
+        return $this->sentApplications()
+            ->with('job', 'engagement', 'jobEngagements')
             ->archived()
-            ->latest()
-            ->paginate(10);
+            ->latest('updated_at')
+            ->paginate(9);
+    }
+
+    protected function sentApplications()
+    {
+        return JobApplication::where('applicant_id', Auth::id())->where('status', '!=', ApplicationStatus::Draft->value);
+    }
+
+    protected function applySearch($query, ?string $term): void
+    {
+        $term = trim((string) $term);
+
+        if ($term !== '') {
+            $query->whereHas('job', fn ($job) => $job->where('title', 'like', '%'.addcslashes($term, '%_\\').'%'));
+        }
     }
 
     // Apply sorting to applications query
@@ -258,7 +291,13 @@ class ApplicationManagementService
                 $query->orderBy('created_at', 'asc');
                 break;
             case 'status':
-                $query->orderBy('status', 'asc');
+                $query->orderBy('status', 'asc')->latest();
+                break;
+            case 'offer_high':
+                $query->orderByDesc('offer_amount');
+                break;
+            case 'offer_low':
+                $query->orderBy('offer_amount');
                 break;
             case 'date_desc':
             default:

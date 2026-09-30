@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ApplicationStatus;
+use App\Enums\EngagementStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -81,25 +82,6 @@ class JobApplication extends Model
         );
     }
 
-    /**
-     * “You got hired”: an engagement exists for *this* application.
-     */
-    public function hasOwnEngagement(): bool
-    {
-        return (bool) $this->engagement;
-    }
-
-    /**
-     * “Filled by someone else”:
-     *  there’s an engagement on the same job, but _not_ for this application.
-     */
-    public function hasOtherEngagement(): bool
-    {
-        return $this->jobEngagements()
-            ->where('application_id', '!=', $this->id)
-            ->exists();
-    }
-
     // Scope for active (non-archived) applications
     public function scopeActive($query)
     {
@@ -112,10 +94,54 @@ class JobApplication extends Model
         return $query->where('is_archived', true);
     }
 
-    // Check if application should show archive option
-    public function canBeArchived()
+    /** An application can be put away once nothing more can happen on it (not while a hired engagement is live). */
+    public function canBeArchived(): bool
     {
-        return in_array($this->status, [ApplicationStatus::Hired, ApplicationStatus::Rejected], true) || $this->hasOtherEngagement();
+        return ! $this->is_archived && $this->standing()['finished'];
+    }
+
+    /**
+     * Where this application stands, from the applicant's point of view: label, badge tone, a one-line hint,
+     * whether it is finished (nothing more will happen) and the engagement when they were hired. Uses the
+     * engagement and the job's engagements, loading them once when a list did not.
+     *
+     * @return array{label: string, tone: string, hint: string, finished: bool, filled: bool, engagement: ?JobEngagement}
+     */
+    public function standing(): array
+    {
+        $this->loadMissing(['engagement', 'jobEngagements']);
+        $engagement = $this->engagement;
+
+        if ($engagement) {
+            [$label, $tone, $hint, $finished] = match ($engagement->status) {
+                EngagementStatus::EmployerAccepted => [__('Offer received'), 'amber', __('The client wants to hire you. Review the offer and accept or decline it.'), false],
+                EngagementStatus::ApplicantAccepted, EngagementStatus::Active => [__('In progress'), 'blue', __('You are working on this project.'), false],
+                EngagementStatus::Disputed => [__('In dispute'), 'red', __('There is a payment dispute on this project.'), false],
+                EngagementStatus::Completed => [__('Completed'), 'green', __('The project is complete.'), true],
+                EngagementStatus::Settled => [__('Settled'), 'neutral', __('The project was settled.'), true],
+                EngagementStatus::Cancelled => [__('Cancelled'), 'neutral', __('The engagement was cancelled.'), true],
+            };
+
+            return ['label' => $label, 'tone' => $tone, 'hint' => $hint, 'finished' => $finished, 'filled' => false, 'engagement' => $engagement];
+        }
+
+        $filled = $this->jobEngagements->contains(fn (JobEngagement $other) => $other->application_id !== $this->id
+            && in_array($other->status, [
+                EngagementStatus::EmployerAccepted, EngagementStatus::ApplicantAccepted, EngagementStatus::Active,
+                EngagementStatus::Disputed, EngagementStatus::Completed,
+            ], true));
+
+        [$label, $tone, $hint, $finished] = match (true) {
+            $this->status === ApplicationStatus::Hired => [__('Hired'), 'green', __('You were hired for this project.'), true],
+            $this->status === ApplicationStatus::Withdrawn => [__('Withdrawn'), 'neutral', __('You withdrew from this project.'), true],
+            $this->status === ApplicationStatus::Rejected => [__('Rejected'), 'red', __('The client chose another freelancer.'), true],
+            $filled => [__('Position filled'), 'neutral', __('The client hired another freelancer for this project.'), true],
+            $this->status === ApplicationStatus::Reviewed => [__('Reviewed'), 'amber', __('The client has looked at your application.'), false],
+            $this->status === ApplicationStatus::Draft => [__('Draft'), 'neutral', __('You have not sent this yet.'), false],
+            default => [__('Submitted'), 'blue', __('Waiting for the client to review your application.'), false],
+        };
+
+        return ['label' => $label, 'tone' => $tone, 'hint' => $hint, 'finished' => $finished, 'filled' => $filled, 'engagement' => null];
     }
 
     // Scope to get draft applications
