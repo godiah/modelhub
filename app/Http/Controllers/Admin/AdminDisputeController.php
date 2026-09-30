@@ -23,7 +23,7 @@ class AdminDisputeController extends Controller
     {
         $status = $request->get('status', 'all');
 
-        $query = JobPaymentDispute::with(['assignedAdmin', 'cancellation'])
+        $query = JobPaymentDispute::with(['assignedAdmin', 'cancellation', 'disputedBy'])
             ->latest();
 
         // Filter by status if specified

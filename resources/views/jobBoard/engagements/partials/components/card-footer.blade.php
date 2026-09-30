@@ -192,7 +192,7 @@
             <!-- Reopen Job Section (for clients only) -->
             @if (in_array($engagement->status, [EngagementStatus::Cancelled, EngagementStatus::Settled]) &&
                     Auth::id() === $engagement->application->poster_id &&
-                    !$engagement->job->is_active)
+                    !$engagement->application->job->is_active)
                 <form action="{{ route('engagements.reopen-job', $engagement) }}" method="POST">
                     @csrf
                     <button type="submit"

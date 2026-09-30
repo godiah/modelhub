@@ -22,7 +22,7 @@
 
     @if ($cancellation->partial_payment_amount)
         <div class="mb-4">
-            <strong>Partial Payment:</strong> ${{ number_format($cancellation->partial_payment_amount, 2) }}
+            <strong>Partial Payment:</strong> Ksh{{ number_format($cancellation->partial_payment_amount, 2) }}
         </div>
     @else
         @if ($notifiable->id === $applicant->id)
