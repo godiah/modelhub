@@ -12,10 +12,13 @@ export default {
 
     theme: {
         extend: {
+            // Two families: Inter for body, UI and numbers; Plus Jakarta Sans for headings, buttons and labels.
+            // `sans` is Tailwind's default (the <body> font), so text without an explicit font class gets Inter too.
             fontFamily: {
-                main: ["Inter", "sans-serif"],
-                secondary: ["Poppins", "sans-serif"],
-                tertiary: ["Montserrat", "sans-serif"],
+                sans: ["Inter", ...defaultTheme.fontFamily.sans],
+                main: ["Inter", ...defaultTheme.fontFamily.sans],
+                secondary: ["Plus Jakarta Sans", ...defaultTheme.fontFamily.sans],
+                tertiary: ["Plus Jakarta Sans", ...defaultTheme.fontFamily.sans],
             },
             colors: {
                 primary: "#1E3A8A", // Deep blue for a strong, modern base

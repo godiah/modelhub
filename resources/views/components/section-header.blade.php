@@ -1,25 +1,28 @@
 @props(['title', 'subtitle' => null, 'variant' => 'primary'])
 
-@php
-    $gradientClasses = match ($variant) {
-        'danger' => 'bg-gradient-to-r from-red-600 to-red-700',
-        default => 'bg-gradient-to-r from-primary to-primary/90',
-    };
-@endphp
+@php($danger = $variant === 'danger')
 
 <!-- Header Section -->
-<div class="{{ $gradientClasses }} px-6 py-5">
-    <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+<div @class(['border-b px-6 py-5', 'border-red-100' => $danger, 'border-neutral-100' => !$danger])>
+    <div class="flex items-center justify-between gap-4">
+        <div class="flex min-w-0 items-center gap-3">
+            <div @class([
+                'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
+                'bg-red-50 text-red-700' => $danger,
+                'bg-teal-50 text-teal-700' => !$danger,
+            ])>
                 {{ $icon }}
             </div>
-            <div>
-                <h2 class="text-xl font-semibold text-white font-secondary">
+            <div class="min-w-0">
+                <h2 @class([
+                    'font-tertiary text-lg font-semibold',
+                    'text-red-800' => $danger,
+                    'text-neutral-900' => !$danger,
+                ])>
                     {{ $title }}
                 </h2>
                 @if ($subtitle)
-                    <p class="text-white/60 text-sm font-main mt-1">
+                    <p class="mt-0.5 font-main text-sm text-tertiary">
                         {{ $subtitle }}
                     </p>
                 @endif
@@ -27,7 +30,7 @@
         </div>
 
         @isset($action)
-            {{ $action }}
+            <div class="shrink-0">{{ $action }}</div>
         @endisset
     </div>
 </div>

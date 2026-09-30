@@ -43,10 +43,10 @@ new #[Layout('layouts.guest')] class extends Component {
 
     <!-- Forgot Password Form -->
     <form wire:submit="sendPasswordResetLink" class="space-y-5">
-        <x-auth-field name="email" type="email" :label="__('Email')" wire:model="email"
+        <x-field size="lg" name="email" type="email" :label="__('Email')" wire:model="email"
             placeholder="you@example.com" required autofocus autocomplete="email" />
 
-        <x-auth-button wire:target="sendPasswordResetLink">{{ __('Email password reset link') }}</x-auth-button>
+        <x-btn block size="lg" wire:target="sendPasswordResetLink">{{ __('Email password reset link') }}</x-btn>
     </form>
 
     <x-slot:footer>

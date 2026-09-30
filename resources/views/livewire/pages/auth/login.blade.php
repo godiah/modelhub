@@ -122,10 +122,10 @@ new #[Layout('layouts.guest')] class extends Component {
 
         <!-- Login Form -->
         <form wire:submit="login" class="space-y-5">
-            <x-auth-field name="email" type="email" :label="__('Email')" wire:model="form.email"
+            <x-field size="lg" name="email" type="email" :label="__('Email')" wire:model="form.email"
                 placeholder="you@example.com" required autofocus autocomplete="username" />
 
-            <x-auth-field name="password" type="password" :label="__('Password')" wire:model="form.password"
+            <x-field size="lg" name="password" type="password" :label="__('Password')" wire:model="form.password"
                 placeholder="{{ __('Enter your password') }}" required autocomplete="current-password">
                 @if (Route::has('password.request'))
                     <x-slot:action>
@@ -135,7 +135,7 @@ new #[Layout('layouts.guest')] class extends Component {
                         </a>
                     </x-slot:action>
                 @endif
-            </x-auth-field>
+            </x-field>
 
             <!-- Remember Me -->
             <label for="remember" class="flex items-center gap-3 text-sm text-tertiary cursor-pointer w-fit">
@@ -144,7 +144,7 @@ new #[Layout('layouts.guest')] class extends Component {
                 {{ __('Remember me') }}
             </label>
 
-            <x-auth-button wire:target="login">{{ __('Sign in') }}</x-auth-button>
+            <x-btn block size="lg" wire:target="login">{{ __('Sign in') }}</x-btn>
         </form>
 
         <x-slot:footer>
@@ -155,18 +155,18 @@ new #[Layout('layouts.guest')] class extends Component {
     @else
         <!-- Two-Factor Authentication Form -->
         <form wire:submit="verifyTwoFactorCode" class="space-y-5">
-            <x-auth-field name="verification_code" :label="__('Verification code')" wire:model="verification_code"
+            <x-field size="lg" name="verification_code" :label="__('Verification code')" wire:model="verification_code"
                 :hint="__('Enter the 6-digit code sent to your email. It expires in 5 minutes.')" placeholder="000000"
                 inputmode="numeric" maxlength="6" pattern="[0-9]*" autocomplete="one-time-code" required autofocus
                 class="text-center text-xl font-semibold tracking-[0.5em]" />
 
-            <x-auth-button wire:target="verifyTwoFactorCode">{{ __('Verify and sign in') }}</x-auth-button>
+            <x-btn block size="lg" wire:target="verifyTwoFactorCode">{{ __('Verify and sign in') }}</x-btn>
 
             <div class="grid grid-cols-2 gap-3">
-                <x-auth-button type="button" variant="secondary" wire:click="resendTwoFactorCode"
-                    wire:target="resendTwoFactorCode">{{ __('Resend code') }}</x-auth-button>
-                <x-auth-button type="button" variant="secondary" wire:click="cancelTwoFactor"
-                    wire:target="cancelTwoFactor">{{ __('Cancel') }}</x-auth-button>
+                <x-btn block size="lg" type="button" variant="secondary" wire:click="resendTwoFactorCode"
+                    wire:target="resendTwoFactorCode">{{ __('Resend code') }}</x-btn>
+                <x-btn block size="lg" type="button" variant="secondary" wire:click="cancelTwoFactor"
+                    wire:target="cancelTwoFactor">{{ __('Cancel') }}</x-btn>
             </div>
         </form>
     @endif

@@ -11,6 +11,7 @@ use App\Models\JobReview;
 use App\Models\Message;
 use App\Models\ModelJob;
 use App\Models\User;
+use App\Support\Profile\ProfileCompleteness;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -270,17 +271,8 @@ class DashboardOverviewService
      */
     private function profileCard(User $user): array
     {
-        $user->loadMissing(['profile', 'skills', 'software']);
-        $profile = $user->profile;
-
-        $checks = [
-            __('Add a profile photo') => (bool) ($profile?->avatar),
-            __('Describe your professional background') => (bool) ($profile?->professional_info),
-            __('Add your location') => (bool) ($profile?->location),
-            __('Add a phone number') => (bool) ($profile?->telephone_number),
-            __('Add your skills') => $user->skills->isNotEmpty(),
-            __('Add the software you use') => $user->software->isNotEmpty(),
-        ];
+        $user->loadMissing(['profile', 'skills']);
+        $completeness = ProfileCompleteness::for($user);
 
         $stats = JobReview::where('reviewee_id', $user->id)
             ->where('is_public', true)
@@ -288,12 +280,12 @@ class DashboardOverviewService
             ->first();
 
         return [
-            'location' => $profile?->location,
+            'location' => $user->profile?->location,
             'skills' => $user->skills->take(5),
             'rating' => $stats->average ? round($stats->average, 1) : null,
             'review_count' => (int) ($stats->total ?? 0),
-            'completeness' => (int) round(count(array_filter($checks)) / count($checks) * 100),
-            'next_step' => array_search(false, $checks, true) ?: null,
+            'completeness' => $completeness['percent'],
+            'next_step' => $completeness['next_step'],
         ];
     }
 

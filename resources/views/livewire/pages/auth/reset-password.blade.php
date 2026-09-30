@@ -73,16 +73,16 @@ new #[Layout('layouts.guest')] class extends Component {
 
     <!-- Password Reset Form -->
     <form wire:submit="resetPassword" class="space-y-5">
-        <x-auth-field name="email" type="email" :label="__('Email')" wire:model="email"
+        <x-field size="lg" name="email" type="email" :label="__('Email')" wire:model="email"
             placeholder="you@example.com" required autofocus autocomplete="username" />
 
-        <x-auth-field name="password" type="password" :label="__('New password')" wire:model="password"
+        <x-field size="lg" name="password" type="password" :label="__('New password')" wire:model="password"
             placeholder="{{ __('Enter a new password') }}" required autocomplete="new-password" />
 
-        <x-auth-field name="password_confirmation" type="password" :label="__('Confirm password')"
+        <x-field size="lg" name="password_confirmation" type="password" :label="__('Confirm password')"
             wire:model="password_confirmation" placeholder="{{ __('Repeat your new password') }}" required
             autocomplete="new-password" />
 
-        <x-auth-button wire:target="resetPassword">{{ __('Reset password') }}</x-auth-button>
+        <x-btn block size="lg" wire:target="resetPassword">{{ __('Reset password') }}</x-btn>
     </form>
 </x-auth-layout>
