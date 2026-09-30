@@ -35,31 +35,26 @@ new #[Layout('layouts.guest')] class extends Component
     }
 }; ?>
 
-<x-auth-card :title="__('Verify Your Email')"
-    :subtitle="__('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.')">
+<x-auth-layout :title="__('Verify your email')"
+    :subtitle="__('Thanks for signing up! Before getting started, please verify your email address by clicking the link we just emailed to you. If you didn’t receive it, we’ll gladly send another.')"
+    :panelTitle="__('Get started with ModelHub')"
+    :panelText="__('One quick step left before you can post or find 3D modeling jobs.')">
 
     <!-- Session Status -->
-    <x-auth-session-status class="mb-6 font-main" :status="session('status')" />
+    <x-auth-session-status class="mb-6" :status="session('status')" />
 
     <!-- Action Buttons -->
-    <div class="space-y-4 font-main">
-        <!-- Resend Verification Button -->
-        <x-primary-button wire:click="sendVerification"
-            class="font-secondary inline-flex items-center justify-center w-full px-6 py-3 bg-secondary border border-transparent rounded-xl font-semibold text-sm text-white tracking-widest hover:bg-teal-600 focus:bg-teal-600 active:bg-teal-700 focus:outline-none focus:ring-4 focus:ring-secondary focus:ring-offset-2 focus:ring-secondary/50 transition-all duration-200 transform hover:shadow-lg hover:shadow-secondary/30">
-            {{ __('Resend Verification Email') }}
-        </x-primary-button>
+    <div class="space-y-3">
+        <x-auth-button type="button" wire:click="sendVerification" wire:target="sendVerification">
+            {{ __('Resend verification email') }}
+        </x-auth-button>
 
-        <!-- Logout Button -->
-        <button wire:click="logout" type="submit"
-            class="w-full px-6 py-3 bg-neutral-50 border border-neutral-200 rounded-xl font-semibold text-sm text-tertiary hover:bg-neutral-100 hover:text-neutral-900 focus:outline-none focus:ring-4 focus:ring-neutral-200 transition-all duration-200">
-            {{ __('Log Out') }}
-        </button>
+        <x-auth-button type="button" variant="secondary" wire:click="logout" wire:target="logout">
+            {{ __('Log out') }}
+        </x-auth-button>
     </div>
 
-    <!-- Footer Info -->
-    <div class="mt-6 text-center font-main">
-        <p class="text-xs text-tertiary">
-            {{ __('Check your spam folder if you don\'t see the email in your inbox.') }}
-        </p>
-    </div>
-</x-auth-card>
+    <x-slot:footer>
+        <span class="text-xs">{{ __('Check your spam folder if you don’t see the email in your inbox.') }}</span>
+    </x-slot:footer>
+</x-auth-layout>
