@@ -49,6 +49,25 @@ class EngagementManagementService
         return $query->latest()->paginate(10)->withQueryString();
     }
 
+    /**
+     * Engagement counts per status for the filter tabs (all of the user's non-archived engagements,
+     * independent of the current filter or page).
+     *
+     * @return array<string, int>
+     */
+    public function getStatusCounts(): array
+    {
+        $counts = JobEngagement::activeForUser(Auth::id())
+            ->reorder()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status')
+            ->map(fn ($total) => (int) $total)
+            ->all();
+
+        return ['all' => array_sum($counts)] + $counts;
+    }
+
     // Apply search filter to engagement query
     protected function applySearchFilter(Builder $query, string $search): void
     {

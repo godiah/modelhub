@@ -79,7 +79,7 @@ it('surfaces an offer awaiting the freelancer first', function () {
 it('does not ask the poster to respond to their own pending offer', function () {
     dashboardEngagement($this->user, EngagementStatus::EmployerAccepted, asApplicant: false);
 
-    $this->get(route('dashboard'))->assertDontSee('Respond to offer')->assertSee("You're all caught up");
+    $this->get(route('dashboard'))->assertOk()->assertDontSee('Respond to offer')->assertSee("You're all caught up");
 });
 
 it('asks the client to review a submitted deliverable and the freelancer to revise a rejected one', function () {
@@ -105,7 +105,7 @@ it('flags overdue and due-soon deliverables for the freelancer only', function (
     $theirs = dashboardEngagement($this->user, EngagementStatus::Active, asApplicant: false);
     dashboardDeliverable($theirs, 'pending', now()->subDays(2)->toDateString(), 'Their late one');
 
-    $this->get(route('dashboard'))
+    $this->get(route('dashboard'))->assertOk()
         ->assertSee('Overdue: Late one')
         ->assertSee('Due soon: Soon one')
         ->assertDontSee('Far one')
@@ -122,7 +122,7 @@ it('counts unread messages from the other party and new applicants on my project
     $job = ModelJob::factory()->create(['user_id' => $this->user->id, 'title' => 'My open project']);
     JobApplication::factory()->count(3)->create(['job_id' => $job->id, 'poster_id' => $this->user->id]);
 
-    $this->get(route('dashboard'))
+    $this->get(route('dashboard'))->assertOk()
         ->assertSee('2 unread messages')
         ->assertSee('3 new applications')
         ->assertSee('My open project');
@@ -136,7 +136,7 @@ it('orders the attention queue by urgency', function () {
     dashboardDeliverable($mine, 'pending', now()->subDay()->toDateString(), 'Late one');
     dashboardEngagement($this->user, EngagementStatus::EmployerAccepted, asApplicant: true);
 
-    $this->get(route('dashboard'))->assertSeeInOrder(['Respond to offer', 'Overdue: Late one', '1 new application']);
+    $this->get(route('dashboard'))->assertOk()->assertSeeInOrder(['Respond to offer', 'Overdue: Late one', '1 new application']);
 });
 
 it('shows a card for work in flight with role, counterpart, progress and deadline', function () {
@@ -159,7 +159,7 @@ it('totals earnings from completed work as a freelancer only', function () {
     dashboardEngagement($this->user, EngagementStatus::Completed, asApplicant: true, overrides: ['net_amount' => 500]);
     dashboardEngagement($this->user, EngagementStatus::Completed, asApplicant: false, overrides: ['net_amount' => 9999]);
 
-    $this->get(route('dashboard'))->assertSee(config('app.currency_symbol').'2,000');
+    $this->get(route('dashboard'))->assertOk()->assertSee(config('app.currency_symbol').'2,000');
 });
 
 it('lists recent applications, posted projects and notifications', function () {
@@ -172,7 +172,7 @@ it('lists recent applications, posted projects and notifications', function () {
         'data' => ['message' => 'Your offer was accepted'],
     ]);
 
-    $this->get(route('dashboard'))
+    $this->get(route('dashboard'))->assertOk()
         ->assertSee('Applied-to project')
         ->assertSee('Submitted')
         ->assertSee('Posted by me')
@@ -191,7 +191,7 @@ it('shows recent public reviews once there are some, with the rating on the prof
         'is_public' => true,
     ]);
 
-    $this->get(route('dashboard'))
+    $this->get(route('dashboard'))->assertOk()
         ->assertSee('Recent reviews')
         ->assertSee('Delivered ahead of schedule')
         ->assertSee('5.0')
