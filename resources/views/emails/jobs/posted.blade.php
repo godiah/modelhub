@@ -1,33 +1,21 @@
 @extends('emails.layouts.master')
 
-@section('title', 'Project Posted Successfully')
-
-@section('header_title', 'Project Posted Successfully!')
+@section('title', 'Your project is live')
+@section('header_title', 'Your project is live')
+@section('preheader', $job->title . ' is now open for applications.')
 
 @section('content')
-<h2>Hello {{ $job->user->name }}!</h2>
+    <p>Hello {{ $job->user->name }},</p>
 
-<p>
-    Great news! Your project titled <strong>{{ $job->title }}</strong> has been posted successfully.
-</p>
+    <p><strong>{{ $job->title }}</strong> has been posted and is open for applications. Freelancers can now view it and send you their offers.</p>
 
-<p>
-    Your project is now visible to potential candidates, and you can start receiving applications from qualified
-    professionals.
-</p>
-
-<div class="text-center">
-    <a href="{{ route('jobs.show', $job->slug) }}" class="btn btn-primary">View Your Project</a>
-</div>
-
-<div class="mt-4">
-    <p>Here's a quick summary of your project:</p>
-    <ul>
-        <li><strong>Title:</strong> {{ $job->title }}</li>
-        <li><strong>Posted on:</strong> <x-date :date="$job->created_at" format="F j, Y" /></li>
-        @if($job->budget)
-        <li><strong>Budget:</strong> {{ $job->budget }}</li>
+    <x-mail.details :title="__('Project summary')">
+        <x-mail.detail label="Title">{{ $job->title }}</x-mail.detail>
+        <x-mail.detail label="Posted"><x-date :date="$job->created_at" format="F j, Y" /></x-mail.detail>
+        @if ($job->budget)
+            <x-mail.detail label="Budget"><x-money :amount="$job->budget" :decimals="0" /></x-mail.detail>
         @endif
-    </ul>
-</div>
+    </x-mail.details>
+
+    <x-mail.button :href="route('jobs.show', $job->slug)">View your project</x-mail.button>
 @endsection

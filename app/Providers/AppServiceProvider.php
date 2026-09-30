@@ -5,6 +5,9 @@ namespace App\Providers;
 use App\Helpers\EmailCssInlinerHelper;
 use App\Models\JobApplication;
 use App\Observers\JobApplicationObserver;
+use App\Support\Mail\BrandedMail;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Mail\Events\MessageSending;
@@ -41,12 +44,32 @@ class AppServiceProvider extends ServiceProvider
         // Fail loudly on N+1s in local/testing instead of shipping them silently.
         Model::preventLazyLoading(! app()->isProduction());
 
-        // Every transactional email in this app extends emails.layouts.master, which embeds
-        // a <style> block. Mail classes using ->markdown() already get that block inlined by
-        // Laravel; Notification classes using MailMessage->view() don't (Laravel only inlines
-        // CSS on the markdown-render path) and depend entirely on the recipient's client
-        // keeping <head><style> content. Inlining here, for every outgoing email, closes that
-        // gap app-wide instead of per-class.
+        // Every email renders through emails.layouts.master (see its header comment). Laravel's own account
+        // emails would otherwise use its default markdown theme, so they are rebuilt on the same template.
+        ResetPassword::toMailUsing(function ($notifiable, string $token) {
+            $url = url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false));
+            $minutes = config('auth.passwords.'.config('auth.defaults.passwords').'.expire');
+
+            return BrandedMail::message('Reset your password')
+                ->subject('Reset your '.config('app.name').' password')
+                ->greeting("Hello {$notifiable->name},")
+                ->line('We received a request to reset the password for your account.')
+                ->action('Reset password', $url)
+                ->line("This link expires in {$minutes} minutes.")
+                ->line('If you did not ask for this, you can ignore this email and your password stays the same.');
+        });
+
+        VerifyEmail::toMailUsing(function ($notifiable, string $url) {
+            return BrandedMail::message('Verify your email address')
+                ->subject('Verify your email address')
+                ->greeting("Hello {$notifiable->name},")
+                ->line('Confirm your email address to finish setting up your '.config('app.name').' account.')
+                ->action('Verify email address', $url)
+                ->line('If you did not create an account, you can ignore this email.');
+        });
+
+        // Inline each email's <style> block into style="" attributes for clients that strip <head><style> (Laravel
+        // only does this on the markdown path, so this closes the gap for every outgoing email).
         Event::listen(function (MessageSending $event) {
             $event->message->html(
                 EmailCssInlinerHelper::inline($event->message->getHtmlBody())

@@ -375,6 +375,8 @@ following, use the component — and if a variant is missing, add a prop rather 
 | Modal | `<x-modal name="…">` opened with `$dispatch('open-modal', 'name')` or `{ name, ...payload }` (payload readable as `payload`), or `bind="alpineVar"`; compose with `<x-modal.header>`/`<x-modal.footer>` |
 | Destructive/confirming action | `<x-confirm-dialog name title message action method>` — **never** `confirm()`/`alert()`; one shared instance per page with a payload beats one per list row |
 | Loading indicator | `<x-spinner class="h-4 w-4" />` |
+| Pagination | `<x-pager :paginator [footer] [navigate] [ajax]>` — the one design (browse-projects). `->links()` renders it by default (`AppServiceProvider`), so never hand-roll a pagination `<nav>`; `PaginationTest` fails if you do |
+| **Emails** | **One template, `emails/layouts/master.blade.php`** — every email `@extends` it and fills `title` / `header_title` / `preheader` / `content`. Build bodies from `<x-mail.button>`, `<x-mail.details>` + `<x-mail.detail>`, `<x-mail.callout>`, `<x-mail.code>`; never hand-roll a button or hard-code a colour. Line-based notifications start from `App\Support\Mail\BrandedMail::message()` (subject/greeting/line/action) and render through `emails/notification.blade.php`; Laravel's own reset/verify emails are re-routed to it in `AppServiceProvider`. Use `->view()`, never `->markdown()`. `EmailTemplateTest` sends every email and fails if one skips the template — add new emails to its list |
 
 Deliberately *not* componentised (would be a visual redesign, not a refactor): input/select/textarea
 styling (80 controls, 28+ class sets), bespoke status->colour switches for applications/disputes/payments,
