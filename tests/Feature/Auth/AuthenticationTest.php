@@ -52,7 +52,8 @@ test('navigation menu can be rendered', function () {
 
     $response
         ->assertOk()
-        ->assertSeeVolt('layout.navigation');
+        ->assertSee('aria-label="Main navigation"', false)
+        ->assertSeeVolt('layout.user-menu');
 });
 
 test('users can logout', function () {

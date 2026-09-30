@@ -16,7 +16,8 @@ use App\Http\Controllers\PostedJobApplicationController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+// Signed-in users go straight to the app shell; the landing page is for guests.
+Route::view('/', 'welcome')->middleware('guest')->name('home');
 
 Route::get('dashboard', [DashBoardController::class, 'index'])
     ->middleware(['auth', 'verified'])

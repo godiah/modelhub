@@ -8,31 +8,8 @@
         </div>
     </x-slot>
 
-    <div class="min-h-screen bg-neutral-50">
+    <div>
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            <!-- Navigation Links -->
-            <div class="mb-8">
-                <x-card class="p-2">
-                    <nav class="flex space-x-1">
-                        <a href="{{ route('applications.my') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 font-secondary {{ request()->routeIs('applications.my') ? 'bg-secondary text-white shadow-sm' : 'text-neutral-700 hover:text-secondary hover:bg-secondary/10' }}">
-                            <x-icon name="document-text" class="w-4 h-4 mr-2" />
-                            {{ __('My Applications') }}
-                        </a>
-                        <a href="{{ route('my-jobs.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 font-secondary {{ request()->routeIs('my-jobs.index') ? 'bg-secondary text-white shadow-sm' : 'text-neutral-700 hover:text-secondary hover:bg-secondary/10' }}">
-                            <x-icon name="briefcase" class="w-4 h-4 mr-2" stroke-width="2" />
-                            {{ __('Jobs Posted') }}
-                        </a>
-                        <a href="{{ route('engagements.index') }}"
-                            class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 font-secondary {{ request()->routeIs('engagements.index') ? 'bg-secondary text-white shadow-sm' : 'text-neutral-700 hover:text-secondary hover:bg-secondary/10' }}">
-                            <x-icon name="chat-bubble-text" class="w-4 h-4 mr-2" stroke-width="2" />
-                            {{ __('My Engagements') }}
-                        </a>
-                    </nav>
-                </x-card>
-            </div>
-
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-8">
