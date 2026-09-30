@@ -1,14 +1,17 @@
 @props(['content', 'secondaryFont' => false])
 
-<div @class([
-    "text-neutral-700 [&>h1]:text-xl [&>h1]:font-tertiary [&>h1]:font-bold [&>h1]:text-primary [&>h1]:mt-6 [&>h1]:mb-4
-        [&>h2]:text-lg [&>h2]:font-tertiary [&>h2]:font-semibold [&>h2]:text-primary/90 [&>h2]:mt-5 [&>h2]:mb-3
-        [&>h3]:text-base [&>h3]:font-tertiary [&>h3]:font-medium [&>h3]:text-neutral-800 [&>h3]:mt-4 [&>h3]:mb-2
-        [&>p]:text-base [&>p]:leading-relaxed [&>p]:text-neutral-700 [&>p]:mb-4
-        [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ul]:text-neutral-700
-        [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4 [&>ol]:text-neutral-700
-        [&>li]:mb-2 [&>a]:text-secondary [&>a]:underline [&>a]:font-medium [&>p]:text-justify",
-    '[&>p]:font-secondary [&>ul]:font-secondary [&>ol]:font-secondary' => $secondaryFont,
-])>
-    {!! Str::markdown($content) !!}
+{{-- Poster-written Markdown, shown to every visitor: raw HTML is stripped and unsafe links dropped. --}}
+<div {{ $attributes->class([
+    'text-sm leading-relaxed text-neutral-700',
+    '[&_p]:mb-4 [&_p:last-child]:mb-0',
+    '[&_h1]:mb-3 [&_h1]:mt-6 [&_h1]:font-tertiary [&_h1]:text-lg [&_h1]:font-semibold [&_h1]:text-neutral-900',
+    '[&_h2]:mb-2 [&_h2]:mt-5 [&_h2]:font-tertiary [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-neutral-900',
+    '[&_h3]:mb-2 [&_h3]:mt-4 [&_h3]:font-tertiary [&_h3]:font-semibold [&_h3]:text-neutral-900',
+    '[&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-5 [&_ul>li]:mb-1.5',
+    '[&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol>li]:mb-1.5',
+    '[&_a]:font-medium [&_a]:text-teal-700 [&_a]:underline',
+    '[&_blockquote]:border-l-4 [&_blockquote]:border-neutral-200 [&_blockquote]:pl-4 [&_blockquote]:text-neutral-600',
+    '[&_p]:font-secondary [&_ul]:font-secondary [&_ol]:font-secondary' => $secondaryFont,
+]) }}>
+    {!! \Illuminate\Support\Str::markdown((string) $content, ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}
 </div>

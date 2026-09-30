@@ -41,33 +41,37 @@ class JobCacheHelper
         // If no tags, just get the most recent jobs
         if (empty($currentJobTags)) {
             return ModelJob::where('id', '!=', $job->id)
-                ->active()
+                ->openForApplications()
                 ->latest()
                 ->take(4)
                 ->get();
         }
 
         // Use database queries for efficiency
-        $similarJobsQuery = ModelJob::where('id', '!=', $job->id)->active();
+        $similarJobsQuery = ModelJob::where('id', '!=', $job->id)->openForApplications();
 
         // Use raw SQL for JSON array comparison
         $similarJobsQuery->where(function ($query) use ($currentJobTags) {
             foreach ($currentJobTags as $tag) {
-                $query->orWhereRaw('JSON_CONTAINS(skills, ?)', ['"'.$tag.'"'])
-                    ->orWhereRaw('JSON_CONTAINS(software, ?)', ['"'.$tag.'"']);
+                $query->orWhereRaw('JSON_CONTAINS(skills, ?)', [json_encode($tag)])
+                    ->orWhereRaw('JSON_CONTAINS(software, ?)', [json_encode($tag)]);
             }
         });
 
-        // Calculate similarity score at database level and order by it
-        $selectRaw = [];
+        // Calculate similarity score at database level and order by it. Tags are bound as JSON
+        // strings (never concatenated into the SQL), and COALESCE keeps a NULL skills/software
+        // column from turning the whole score NULL.
+        $scoreTerms = [];
+        $scoreBindings = [];
         foreach ($currentJobTags as $tag) {
-            $selectRaw[] = "JSON_CONTAINS(skills, '\"".$tag.'")';
-            $selectRaw[] = "JSON_CONTAINS(software, '\"".$tag.'")';
+            $scoreTerms[] = 'COALESCE(JSON_CONTAINS(skills, ?), 0)';
+            $scoreTerms[] = 'COALESCE(JSON_CONTAINS(software, ?), 0)';
+            array_push($scoreBindings, json_encode($tag), json_encode($tag));
         }
 
         $similarJobs = $similarJobsQuery
             ->select('*')
-            ->selectRaw('('.implode(' + ', $selectRaw).') as similarity_score')
+            ->selectRaw('('.implode(' + ', $scoreTerms).') as similarity_score', $scoreBindings)
             ->orderByDesc('similarity_score')
             ->orderByDesc('created_at')
             ->take(4)
@@ -78,7 +82,7 @@ class JobCacheHelper
             $existingIds = $similarJobs->pluck('id')->toArray();
             $additionalJobs = ModelJob::where('id', '!=', $job->id)
                 ->whereNotIn('id', $existingIds)
-                ->active()
+                ->openForApplications()
                 ->latest()
                 ->take(4 - $similarJobs->count())
                 ->get();
@@ -108,11 +112,11 @@ class JobCacheHelper
 
         // Find jobs that share tags with this job
         $relatedJobs = ModelJob::where('id', '!=', $job->id)
-            ->active()
+            ->openForApplications()
             ->where(function ($query) use ($tags) {
                 foreach ($tags as $tag) {
-                    $query->orWhereRaw('JSON_CONTAINS(skills, ?)', ['"'.$tag.'"'])
-                        ->orWhereRaw('JSON_CONTAINS(software, ?)', ['"'.$tag.'"']);
+                    $query->orWhereRaw('JSON_CONTAINS(skills, ?)', [json_encode($tag)])
+                        ->orWhereRaw('JSON_CONTAINS(software, ?)', [json_encode($tag)]);
                 }
             })
             ->limit(50) // Limit to avoid excessive processing

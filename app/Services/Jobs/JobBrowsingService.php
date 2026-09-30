@@ -7,10 +7,12 @@
 namespace App\Services\Jobs;
 
 use App\Helpers\Jobs\JobCacheHelper;
+use App\Models\JobApplication;
 use App\Models\ModelJob;
 use App\Models\Skill;
 use App\Models\Software;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\User;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class JobBrowsingService
@@ -22,57 +24,77 @@ class JobBrowsingService
         $this->cacheHelper = $cacheHelper;
     }
 
+    public const PER_PAGE = 10;
+
     // Browse jobs with filters and pagination
-    public function browseJobs(array $filters): LengthAwarePaginator
+    public function browseJobs(array $filters, ?User $viewer = null): LengthAwarePaginator
     {
-        $query = ModelJob::active()
+        // Browse lists only projects a freelancer can apply to right now — and never the viewer's own.
+        $query = ModelJob::openForApplications()
+            ->when($viewer, fn ($query) => $query->where('user_id', '!=', $viewer->id))
+            ->with('user.profile')
             ->withSearch($filters['search'] ?? null)
+            ->withBudgetBetween($filters['budget_min'] ?? null, $filters['budget_max'] ?? null)
+            ->postedWithin($filters['posted'] ?? null)
             ->withSorting($filters['sort'] ?? 'newest');
 
-        $this->applySkillsFilter($query, $filters['skills'] ?? null);
-        $this->applySoftwareFilter($query, $filters['software'] ?? null);
+        // ModelJob.skills/software store names (see JobManagementService::store()), while the filter
+        // rail sends ids — resolve them here, then let JobFilterTrait build the JSON conditions.
+        if (! empty($filters['skills'])) {
+            $query->withAnySkill(Skill::whereIn('id', $filters['skills'])->pluck('name')->all());
+        }
 
-        return $query->paginate(5);
+        if (! empty($filters['software'])) {
+            $query->withAnySoftware(Software::whereIn('id', $filters['software'])->pluck('name')->all());
+        }
+
+        return $query->paginate(self::PER_PAGE)->withQueryString();
     }
 
-    // The browse UI's filter is a single skill/software id, but ModelJob.skills/software
-    // store names (see JobManagementService::store()) — resolve the id here, then delegate
-    // the actual query condition to JobFilterTrait::scopeWithSkills()/scopeWithSoftware()
-    // rather than duplicating the whereJsonContains() call.
-    protected function applySkillsFilter(Builder $query, ?int $skillId): void
+    // The signed-in user's application status for each listed job (job id => ApplicationStatus),
+    // so cards can say "Applied" or "Continue draft" instead of a bare Apply button.
+    public function applicationStatuses(?User $user, iterable $jobs): array
     {
-        if ($skillId && $skill = Skill::find($skillId)) {
-            $query->withSkills([$skill->name]);
-        }
-    }
+        // collect($paginator) would yield the pagination metadata, not the jobs on the page.
+        $ids = collect($jobs instanceof Paginator ? $jobs->items() : $jobs)->pluck('id')->all();
 
-    protected function applySoftwareFilter(Builder $query, ?int $softwareId): void
-    {
-        if ($softwareId && $software = Software::find($softwareId)) {
-            $query->withSoftware([$software->name]);
+        if (! $user || $ids === []) {
+            return [];
         }
+
+        return JobApplication::where('applicant_id', $user->id)
+            ->whereIn('job_id', $ids)
+            ->pluck('status', 'job_id')
+            ->all();
     }
 
     // Filter dropdown options for the browse view — kept here so the view never queries directly
     public function getFilterOptions(): array
     {
         return [
-            'skills' => Skill::where('is_active', true)->get(),
-            'software' => Software::where('is_active', true)->get(),
+            'skills' => Skill::where('is_active', true)->orderBy('name')->get(),
+            'software' => Software::where('is_active', true)->orderBy('name')->get(),
         ];
     }
 
     // Get similar jobs for a given job
-    public function getSimilarJobs(ModelJob $job)
+    public function getSimilarJobs(ModelJob $job, ?User $viewer = null)
     {
-        // Ensure the job is active
-        if (! $job->is_active || ! $job->isActive()) {
+        // Nothing to suggest for a project that is itself closed
+        if (! $job->isOpenForApplications()) {
             return collect();
         }
 
         $job->loadMissing('user');
 
-        // Get similar jobs using cache helper
-        return $this->cacheHelper->getSimilarJobs($job);
+        // The similar-jobs list is cached for a day, so re-check against the database that each suggestion
+        // is still open (a project can be filled or expire in the meantime) and isn't the viewer's own.
+        $suggestions = $this->cacheHelper->getSimilarJobs($job);
+        $stillOpen = ModelJob::openForApplications()
+            ->whereIn('id', $suggestions->pluck('id'))
+            ->when($viewer, fn ($query) => $query->where('user_id', '!=', $viewer->id))
+            ->pluck('id');
+
+        return $suggestions->whereIn('id', $stillOpen)->values();
     }
 }

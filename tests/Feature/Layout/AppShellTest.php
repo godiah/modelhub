@@ -114,7 +114,7 @@ it('keeps guests on the public shell with the page title in the header band', fu
     $this->get(route('jobs.browse'))
         ->assertOk()
         ->assertDontSee(SIDEBAR_MARKER, false)
-        ->assertSee('Browse Available Jobs')
+        ->assertSee('Browse projects')
         ->assertSee('Connect With Us');
 });
 

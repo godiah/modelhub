@@ -1,882 +1,283 @@
-<x-app-layout title="3D Project Application" :crumb="$job->title">
-    <x-slot name="toolbar">
-        @guest
-            <x-btn variant="secondary" class="text-sm shadow-sm" href="{{ route('jobs.browse') }}">
-                <x-icon name="magnifying-glass" class="h-5 w-5" />
-                Browse More Jobs
-            </x-btn>
-        @endguest
-    </x-slot>
+@use('App\Enums\ApplicationStatus')
+@php
+    $isOwner = auth()->id() === $job->user_id;
+    $canApply = auth()->check() && ! $isOwner && $applicationStatus === null;
+    $feePercent = \App\Helpers\Applications\ApplicationCalculationHelper::getServiceFeePercentage();
+    $skills = array_values(array_filter((array) $job->skills));
+    $software = array_values(array_filter((array) $job->software));
+    $deadlineSoon = ! $job->no_deadline && $job->deadline && $job->deadline->isFuture() && $job->deadline->diffInDays(now()) <= 3;
 
+    $gallery = collect([$job->images])
+        ->merge($job->jobImages->pluck('image_path'))
+        ->filter()
+        ->map(fn ($path) => asset('storage/'.$path))
+        ->values();
 
-    <section>
-        <div class="container mx-auto max-w-7xl px-4 mb-24 pt-8">
-            <!-- Main Content Container -->
-            <div class="space-y-8">
-                <!-- Job Details Card -->
-                <x-card shadow="lg" clip>
-                    <!-- Main Job Card Container -->
-                    <div>
-                        <!-- Job Header  -->
-                        <div class="p-6 sm:p-8">
-                            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                                <!-- Title and Job User-Poster Info -->
-                                <div class="flex-1">
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-secondary/10 text-secondary mb-3">
-                                        <x-icon name="briefcase-2" class="h-3.5 w-3.5 mr-1" />
-                                        3D Modelling Jobs
-                                    </span>
+    $statusCopy = [
+        ApplicationStatus::Submitted->value => __('Your application is waiting for the client to review it.'),
+        ApplicationStatus::Reviewed->value => __('The client has looked at your application.'),
+        ApplicationStatus::Hired->value => __('You were hired for this project. Check your engagements.'),
+        ApplicationStatus::Rejected->value => __('The client chose another freelancer for this project.'),
+        ApplicationStatus::Withdrawn->value => __('You withdrew this application.'),
+    ];
+    $fieldClass = 'block w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-neutral-900 placeholder-neutral-400 transition-colors focus:outline-none focus:ring-2';
+    $okField = 'border-neutral-300 hover:border-neutral-400 focus:border-secondary focus:ring-secondary/25';
+    $badField = 'border-red-400 focus:border-red-500 focus:ring-red-200';
+@endphp
+<x-app-layout title="Project details" :crumb="$job->title">
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
+            <!-- The project -->
+            <div class="space-y-6">
+                <x-card class="rounded-2xl">
+                    <div class="p-6 sm:p-8">
+                        <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Project') }}</p>
+                        <h1 class="mt-1 font-tertiary text-2xl font-semibold leading-snug text-neutral-900 sm:text-3xl">{{ $job->title }}</h1>
 
-                                    <h1 class="text-2xl sm:text-3xl font-bold font-tertiary text-neutral-800 mb-4">
-                                        {{ $job->title }}</h1>
-
-                                    <div class="flex items-center">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg">
-                                            {{ $job->user->getInitials() }}
-                                        </div>
-                                        <div class="ml-3">
-                                            <span
-                                                class="text-neutral-700 font-semibold font-main">{{ $job->user->name }}</span>
-                                            <div class="flex items-center text-sm text-neutral-500 mt-1">
-                                                <x-icon name="calendar" class="h-4 w-4 mr-1 text-secondary" />
-                                                Posted on <x-date :date="$job->created_at" format="M d, Y" />
-                                            </div>
-                                        </div>
-                                    </div>
+                        @if ($job->user)
+                            <div class="mt-4 flex items-center gap-3">
+                                <x-user-avatar :user="$job->user" size="h-10 w-10" />
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-medium text-neutral-900">{{ $job->user->name }}</p>
+                                    <p class="text-xs text-tertiary">{{ __('Posted :time', ['time' => $job->created_at->diffForHumans()]) }}</p>
                                 </div>
                             </div>
+                        @endif
+                    </div>
+
+                    <dl class="grid grid-cols-1 divide-y divide-neutral-100 border-t border-neutral-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                        <div class="px-6 py-4 sm:px-8">
+                            <dt class="text-xs text-tertiary">{{ __('Budget') }}</dt>
+                            <dd class="mt-1 font-tertiary text-xl font-semibold tabular-nums text-neutral-900"><x-money :amount="$job->budget" :decimals="0" /></dd>
                         </div>
-
-                        <!-- Job Details Card -->
-                        <div class="border-t border-neutral-200">
-                            <!-- Details Section -->
-                            <div class="p-6 space-y-6">
-                                <!-- Detail Cards with Interactive Hover -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                    <!-- Deadline Card -->
-                                    <x-jobs.detail-card label="Deadline">
-                                        <x-slot:icon>
-                                            <x-icon name="clock" class="h-6 w-6 text-secondary" />
-                                        </x-slot:icon>
-                                        @if ($job->no_deadline)
-                                            <p class="text-neutral-800 font-secondary mt-1">No Fixed Deadline</p>
-                                        @else
-                                            <p class="text-neutral-800 font-secondary font-bold mt-1">
-                                                <x-date :date="$job->deadline" format="F j, Y" /></p>
-                                        @endif
-                                    </x-jobs.detail-card>
-
-                                    <!-- Applicants Card -->
-                                    <x-jobs.detail-card label="Applicants">
-                                        <x-slot:icon>
-                                            <x-icon name="user-group" class="h-6 w-6 text-secondary" />
-                                        </x-slot:icon>
-                                        <div class="flex items-center mt-1">
-                                            <p class="text-neutral-800 font-secondary font-bold">
-                                                {{ $job->applicants_count }}</p>
-                                            <span class="text-neutral-600 ml-1 font-main">applied</span>
-                                        </div>
-                                    </x-jobs.detail-card>
-
-                                    <!-- Budget Card -->
-                                    <x-jobs.detail-card label="Budget" color="accent">
-                                        <x-slot:icon>
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
-                                                viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-                                                <path fill="#f59e0b"
-                                                    d="M512 80c0 18-14.3 34.6-38.4 48c-29.1 16.1-72.5 27.5-122.3 30.9c-3.7-1.8-7.4-3.5-11.3-5C300.6 137.4 248.2 128 192 128c-8.3 0-16.4 .2-24.5 .6l-1.1-.6C142.3 114.6 128 98 128 80c0-44.2 86-80 192-80S512 35.8 512 80zM160.7 161.1c10.2-.7 20.7-1.1 31.3-1.1c62.2 0 117.4 12.3 152.5 31.4C369.3 204.9 384 221.7 384 240c0 4-.7 7.9-2.1 11.7c-4.6 13.2-17 25.3-35 35.5c0 0 0 0 0 0c-.1 .1-.3 .1-.4 .2c0 0 0 0 0 0s0 0 0 0c-.3 .2-.6 .3-.9 .5c-35 19.4-90.8 32-153.6 32c-59.6 0-112.9-11.3-148.2-29.1c-1.9-.9-3.7-1.9-5.5-2.9C14.3 274.6 0 258 0 240c0-34.8 53.4-64.5 128-75.4c10.5-1.5 21.4-2.7 32.7-3.5zM416 240c0-21.9-10.6-39.9-24.1-53.4c28.3-4.4 54.2-11.4 76.2-20.5c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 19.3-16.5 37.1-43.8 50.9c-14.6 7.4-32.4 13.7-52.4 18.5c.1-1.8 .2-3.5 .2-5.3zm-32 96c0 18-14.3 34.6-38.4 48c-1.8 1-3.6 1.9-5.5 2.9C304.9 404.7 251.6 416 192 416c-62.8 0-118.6-12.6-153.6-32C14.3 370.6 0 354 0 336l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 342.6 135.8 352 192 352s108.6-9.4 148.1-25.9c7.8-3.2 15.3-6.9 22.4-10.9c6.1-3.4 11.8-7.2 17.2-11.2c1.5-1.1 2.9-2.3 4.3-3.4l0 3.4 0 5.7 0 26.3zm32 0l0-32 0-25.9c19-4.2 36.5-9.5 52.1-16c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 10.5-5 21-14.9 30.9c-16.3 16.3-45 29.7-81.3 38.4c.1-1.7 .2-3.5 .2-5.3zM192 448c56.2 0 108.6-9.4 148.1-25.9c16.3-6.8 31.5-15.2 43.9-25.5l0 35.4c0 44.2-86 80-192 80S0 476.2 0 432l0-35.4c12.5 10.3 27.6 18.7 43.9 25.5C83.4 438.6 135.8 448 192 448z" />
-                                            </svg>
-                                        </x-slot:icon>
-                                        <p class="text-primary font-tertiary font-bold text-xl mt-1">
-                                            <x-money :amount="$job->budget" :decimals="0" /></p>
-                                    </x-jobs.detail-card>
-                                </div>
-                            </div>
+                        <div class="px-6 py-4 sm:px-8">
+                            <dt class="text-xs text-tertiary">{{ __('Deadline') }}</dt>
+                            <dd @class(['mt-1 text-base font-semibold', 'text-amber-700' => $deadlineSoon, 'text-neutral-900' => ! $deadlineSoon])>
+                                {{ $job->no_deadline ? __('No fixed deadline') : $job->deadline->format('M j, Y') }}
+                            </dd>
                         </div>
-
-                        <!-- Job Description Content -->
-                        <div class="px-5 py-2">
-                            <div class="flex items-center mb-4">
-                                <div class="h-px bg-neutral-200 flex-grow"></div>
-                                <span
-                                    class="px-4 text-sm font-main uppercase tracking-wider text-neutral-800 flex items-center">
-                                    <x-icon name="document-text" class="h-5 w-5 text-secondary mr-2" />
-                                    Job Description</span>
-                                <div class="h-px bg-neutral-200 flex-grow"></div>
-                            </div>
-
-                            <!-- Markdown Content -->
-                            <div class="prose prose-neutral max-w-none font-main">
-                                <x-jobs.markdown-description :content="$job->description" />
-                            </div>
-
-                            <!-- Tags Section for Required Skills/Qualifications -->
-                            @if (isset($job->tags) && count($job->tags) > 0)
-                                <div class="mt-8">
-                                    <div class="flex items-center mb-4">
-                                        <div class="h-px bg-neutral-200 flex-grow"></div>
-                                        <span
-                                            class="px-4 text-xs font-main uppercase tracking-wider text-neutral-500">Required
-                                            Skills</span>
-                                        <div class="h-px bg-neutral-200 flex-grow"></div>
-                                    </div>
-
-                                    <div class="flex flex-wrap gap-2">
-                                        @foreach ($job->tags as $tag)
-                                            <span
-                                                class="px-3 py-1.5 bg-secondary/10 text-secondary rounded-lg text-sm font-main flex items-center">
-                                                <x-icon name="check" class="h-4 w-4 mr-1.5" />
-                                                {{ $tag }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endif
+                        <div class="px-6 py-4 sm:px-8">
+                            <dt class="text-xs text-tertiary">{{ __('Proposals') }}</dt>
+                            <dd class="mt-1 text-base font-semibold text-neutral-900">{{ trans_choice(':count applicant|:count applicants', (int) $job->applicants_count, ['count' => (int) $job->applicants_count]) }}</dd>
                         </div>
+                    </dl>
+                </x-card>
 
-                        <!-- Skills & Software Section with Tabs -->
-                        <div class="px-6 sm:px-8">
-                            <!-- Modern Tabs Navigation -->
-                            <div class="px-6 sm:px-8 pt-6 pb-0">
-                                <div class="flex space-x-1 border-b border-neutral-200">
-                                    <button
-                                        class="tab-button active flex items-center px-5 py-3 text-sm font-main font-medium text-primary border-b-2 border-primary relative -mb-px transition-all duration-200 focus:outline-none"
-                                        data-tab="skills">
-                                        <x-icon name="light-bulb" class="h-4 w-4 mr-2" />
-                                        Required Skills
-                                        <span
-                                            class="absolute -top-1 -right-1 bg-accent text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                            {{ count($job->skills ?? []) }}
-                                        </span>
-                                    </button>
+                <x-panel :title="__('About this project')">
+                    <x-jobs.markdown-description :content="$job->description" />
+                </x-panel>
 
-                                    <button
-                                        class="tab-button flex items-center px-5 py-3 text-sm font-main font-medium text-neutral-500 hover:text-neutral-700 border-b-2 border-transparent hover:border-neutral-300 relative -mb-px transition-all duration-200 focus:outline-none"
-                                        data-tab="software">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                            fill="currentColor" class="h-4 w-4 mr-2">
-                                            <path d="M16.5 7.5h-9v9h9v-9Z" />
-                                            <path fill-rule="evenodd"
-                                                d="M8.25 2.25A.75.75 0 0 1 9 3v.75h2.25V3a.75.75 0 0 1 1.5 0v.75H15V3a.75.75 0 0 1 1.5 0v.75h.75a3 3 0 0 1 3 3v.75H21A.75.75 0 0 1 21 9h-.75v2.25H21a.75.75 0 0 1 0 1.5h-.75V15H21a.75.75 0 0 1 0 1.5h-.75v.75a3 3 0 0 1-3 3h-.75V21a.75.75 0 0 1-1.5 0v-.75h-2.25V21a.75.75 0 0 1-1.5 0v-.75H9V21a.75.75 0 0 1-1.5 0v-.75h-.75a3 3 0 0 1-3-3v-.75H3A.75.75 0 0 1 3 15h.75v-2.25H3a.75.75 0 0 1 0-1.5h.75V9H3a.75.75 0 0 1 0-1.5h.75v-.75a3 3 0 0 1 3-3h.75V3a.75.75 0 0 1 .75-.75ZM6 6.75A.75.75 0 0 1 6.75 6h10.5a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75H6.75a.75.75 0 0 1-.75-.75V6.75Z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                        Required Software
-                                        <span
-                                            class="absolute -top-1 -right-1 bg-neutral-400 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                                            {{ count($job->software ?? []) }}
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Tab Contents -->
-                            <div class="p-6 sm:px-8 sm:pb-8">
-                                <!-- Skills Content -->
-                                <div class="tab-content skills-content" data-content="skills">
-                                    @if (!empty($job->skills) && count($job->skills) > 0)
-                                        <div class="grid grid-cols-2  md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                            @foreach ($job->skills as $skill)
-                                                <div
-                                                    class="group flex items-center px-4 py-3 bg-primary/5 hover:bg-primary/10 text-primary rounded-lg transition-all duration-200 border border-primary/10 hover:border-primary/20">
-                                                    <span
-                                                        class="text-sm font-medium font-secondary">{{ $skill }}</span>
-                                                </div>
+                @if ($skills || $software)
+                    <x-panel :title="__('What the client is looking for')" :description="__('Preferred, not mandatory for every applicant.')">
+                        <div class="space-y-5">
+                            @foreach ([__('Skills') => [$skills, 'border-neutral-200 bg-neutral-50 text-neutral-700'], __('Software') => [$software, 'border-teal-100 bg-teal-50 text-teal-800']] as $label => [$items, $tone])
+                                @if ($items)
+                                    <div>
+                                        <h3 class="mb-2 text-xs font-medium uppercase tracking-wide text-tertiary">{{ $label }}</h3>
+                                        <ul class="flex flex-wrap gap-2">
+                                            @foreach ($items as $item)
+                                                <li class="rounded-full border px-3 py-1 text-xs font-medium {{ $tone }}">{{ $item }}</li>
                                             @endforeach
-                                        </div>
-                                    @else
-                                        <div
-                                            class="flex items-center justify-center p-8 bg-neutral-50 rounded-lg border border-neutral-100">
-                                            <div class="text-center">
-                                                <x-icon name="exclamation-triangle" class="h-10 w-10 text-neutral-400 mx-auto mb-3" />
-                                                <p class="text-neutral-600 font-main">No specific skills mentioned for
-                                                    this position</p>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <!-- Software Content -->
-                                <div class="tab-content software-content hidden" data-content="software">
-                                    @if (!empty($job->software) && count($job->software) > 0)
-                                        <div class="grid grid-cols-2  md:grid-cols-4 lg:grid-cols-6 gap-3">
-                                            @foreach ($job->software as $software)
-                                                <div
-                                                    class="group flex items-center px-4 py-3 bg-secondary/5 hover:bg-secondary/10 text-secondary rounded-lg transition-all duration-200 border border-secondary/10 hover:border-secondary/20">
-                                                    <span
-                                                        class="text-sm font-medium font-secondary">{{ $software }}</span>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <div
-                                            class="flex items-center justify-center p-8 bg-neutral-50 rounded-lg border border-neutral-100">
-                                            <div class="text-center">
-                                                <x-icon name="exclamation-triangle" class="h-10 w-10 text-neutral-400 mx-auto mb-3" />
-                                                <p class="text-neutral-600 font-main">No specific software required for
-                                                    this position</p>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <!-- Info Badge (Optional) -->
-                                <div class="mt-6 flex items-center justify-center">
-                                    <span
-                                        class="px-4 py-2 bg-neutral-100 text-neutral-600 rounded-full text-xs font-main inline-flex items-center">
-                                        <x-icon name="information-circle" class="h-4 w-4 mr-1.5 text-neutral-500" />
-                                        These requirements are preferred but not mandatory for all applicants
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Preview Image -->
-                        <div>
-                            <!-- Section Header -->
-                            <h2
-                                class="text-neutral-800 font-tertiary font-bold text-xl flex items-center justify-center mx-auto">
-                                <x-icon name="photo" class="h-5 w-5 text-secondary mr-2" />
-                                Project Preview
-                            </h2>
-
-                            <!-- Image Container -->
-                            <div class="pt-2 sm:pt-4 px-4 pb-4 sm:pb-6 sm:px-6">
-                                @if ($job->images || $job->jobImages->isNotEmpty())
-                                    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                                        <!-- Main Preview Image -->
-                                        @if ($job->images)
-                                            <x-jobs.preview-image-card :src="asset('storage/' . $job->images)"
-                                                :alt="$job->title . ' preview'" download-label="Download Sample" />
-                                        @endif
-
-                                        <!-- Additional Images -->
-                                        @foreach ($job->jobImages as $image)
-                                            <x-jobs.preview-image-card :src="asset('storage/' . $image->image_path)"
-                                                alt="Additional project image" />
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <!-- No Images Placeholder -->
-                                    <div
-                                        class="bg-neutral-100 rounded-lg border border-neutral-200 flex items-center justify-center p-6 w-48 h-48">
-                                        <div class="text-center">
-                                            <x-icon name="photo" class="h-10 w-10 text-neutral-400 mx-auto mb-2" />
-                                            <p class="text-neutral-500 font-main text-sm mb-1">No preview</p>
-                                            <p class="text-neutral-400 font-main text-xs">No project visuals</p>
-                                        </div>
+                                        </ul>
                                     </div>
                                 @endif
-                            </div>
-                        </div>
-
-                        <!-- Image Modal for Full-Screen View -->
-                        <div id="imageModal"
-                            class="fixed inset-0 bg-black/90 z-[9999] hidden flex items-center justify-center p-4 backdrop-blur-sm">
-                            <!-- Close Button - Always visible -->
-                            <button
-                                class="fixed top-4 right-4 z-50 p-2 text-white hover:text-accent transition-colors duration-200 bg-black/50 rounded-full backdrop-blur-sm"
-                                onclick="closeImageModal()">
-                                <x-icon name="x-mark" class="h-10 w-10" />
-                                <span class="sr-only">Close modal</span>
-                            </button>
-
-                            <!-- Image Container -->
-                            <div class="relative w-full h-full flex justify-center items-center">
-                                <div class="max-w-full max-h-full overflow-y-auto rounded-lg shadow-2xl">
-                                    <img id="modalImage" src="" alt="Full size preview"
-                                        class="block mx-auto object-contain p-4 bg-white" style="max-height: 95vh;">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </x-card>
-
-                <!-- Application Form -->
-                <x-card shadow="lg" border="neutral-100" class="p-8">
-                    <h2 class="text-2xl font-bold text-primary mb-6 font-tertiary flex items-center">
-                        <x-icon name="pencil" class="h-6 w-6 mr-3 text-secondary" />
-                        Submit Your Proposal
-                    </h2>
-
-                    <form id="job-application-form" class="space-y-8" action="{{ route('applications.store') }}"
-                        method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" name="job_id" value="{{ $job->id }}">
-                        <input type="hidden" name="poster_id" value="{{ $job->user_id }}">
-                        <input type="hidden" name="applicant_id" value="{{ auth()->id() }}">
-                        <input type="hidden" name="status" value="submitted">
-
-                        <div class="flex flex-col md:flex-row md:space-x-6">
-                            <!-- Your Offer -->
-                            <div class="w-full md:w-1/2 relative">
-                                <label for="offer"
-                                    class="block text-sm font-medium text-primary mb-2 flex items-center">
-                                    <x-icon name="currency-dollar" class="h-4 w-4 mr-2 text-secondary" />
-                                    Your Offer Amount
-                                </label>
-                                <div class="mt-1 relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span class="text-neutral-500 sm:text-sm">Ksh</span>
-                                    </div>
-                                    <input type="number" id="offer" name="offer"
-                                        class="pl-10 block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-secondary focus:border-secondary transition duration-150 ease-in-out text-neutral-700"
-                                        placeholder="{{ $job->budget }}">
-                                </div>
-                            </div>
-
-                            <!-- Your Earnings -->
-                            <div
-                                class="w-full md:w-1/2 mt-6 md:mt-0 bg-gradient-to-r from-secondary/5 to-primary/5 p-6 rounded-xl border border-neutral-200">
-                                <h3 class="text-sm font-semibold text-primary mb-4 flex items-center">
-                                    <x-icon name="calculator" class="h-5 w-5 mr-2 text-secondary" />
-                                    Earnings Breakdown
-                                </h3>
-                                <div class="space-y-3">
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-neutral-600">Your offer</span>
-                                        <span id="yourOfferAmount" class="font-semibold text-neutral-800"></span>
-                                    </div>
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-neutral-600 flex items-center">
-                                            Service fee
-                                            <span
-                                                class="inline-flex items-center justify-center ml-1 w-4 h-4 rounded-full bg-neutral-200 text-xs"
-                                                title="Service fee applied to all projects">?</span>
-                                        </span>
-                                        <span id="serviceFee" class="font-semibold text-red-500"></span>
-                                    </div>
-                                    <div class="flex justify-between font-bold mt-4 pt-4 border-t border-neutral-200">
-                                        <span class="text-primary">You'll receive</span>
-                                        <span id="youllReceive" class="text-secondary text-lg"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Your Proposal -->
-                        <div>
-                            <label for="proposal" class="block text-sm font-medium text-primary mb-2">Your
-                                Proposal</label>
-                            <div class="relative">
-                                <textarea id="proposal" name="proposal" rows="6"
-                                    class="block w-full rounded-lg border-neutral-300 shadow-sm focus:ring-secondary focus:border-secondary resize-none transition duration-150 ease-in-out"
-                                    placeholder="Be specific about your skills, experience and proposal here . . . "></textarea>
-                                <div class="absolute bottom-3 right-3 text-xs text-neutral-400 h-">
-                                    <span id="characters-count">0</span>/2500
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Portfolio Upload -->
-                        <div>
-                            <label class="block text-sm font-medium text-primary mb-2">Portfolio Samples</label>
-                            <div
-                                class="mt-1 border-2 border-dashed border-neutral-300 rounded-lg bg-neutral-50 transition-all duration-200 ease-in-out hover:bg-neutral-100 hover:border-secondary/50">
-                                <div class="flex flex-col items-center justify-center py-6 px-4">
-                                    <x-icon name="cloud-arrow-up" class="h-12 w-12 text-secondary/60" />
-                                    <p class="mt-3 text-sm text-neutral-700">
-                                        <span class="font-medium text-secondary">Drop files here</span> or
-                                        <label for="file-upload" class="relative cursor-pointer">
-                                            <span class="font-medium text-secondary underline">browse</span>
-                                            <input id="file-upload" name="portfolio[]" type="file"
-                                                class="sr-only" multiple accept="image/*">
-                                        </label>
-                                    </p>
-                                    <p class="mt-1 text-xs text-neutral-500">
-                                        JPG, JPEG and PNG (max. 5MB per file, max. 5 files)
-                                    </p>
-
-                                    <!-- Preview area -->
-                                    <div id="file-preview" class="w-full mt-4 hidden">
-                                        <div id="preview-container"
-                                            class="flex flex-wrap gap-4 p-4 bg-white rounded border border-neutral-200">
-                                            <!-- File previews will be added here dynamically -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Terms & Conditions -->
-                        <div>
-                            <div class="flex items-start">
-                                <div class="flex items-center h-5">
-                                    <input id="terms" name="terms" type="checkbox"
-                                        class="h-5 w-5 text-secondary rounded border-neutral-300 focus:ring-secondary">
-                                </div>
-                                <div class="ml-3 text-sm">
-                                    <label for="terms" class="text-neutral-700 font-medium">
-                                        I agree to the <a href="#" class="text-secondary hover:underline">Terms
-                                            of Service</a> and <a href="#"
-                                            class="text-secondary hover:underline">Privacy Policy</a>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="flex flex-col justify-end sm:flex-row gap-3 pt-2">
-                            <x-btn variant="secondary" size="sm" class="sm:flex-initial" type="submit" name="action" value="draft">
-                                Save Draft
-                            </x-btn>
-                            <x-btn size="sm" type="submit" name="action" value="submitted">
-                                <x-icon name="chevron-double-right" class="h-5 w-5" />
-                                Submit Application
-                            </x-btn>
-                        </div>
-                    </form>
-                </x-card>
-            </div>
-
-            <!-- Similar Jobs -->
-            @if ($similarJobs->isNotEmpty())
-                <section class="pt-20 pb-12 border-t border-neutral-200">
-                    <div class="container mx-auto">
-                        <!-- Section Header -->
-                        <div class="flex justify-between items-center mb-8">
-                            <h2 class="text-2xl font-bold text-primary font-tertiary flex items-center">
-                                <x-icon name="clipboard-list" class="h-6 w-6 mr-2 text-secondary" />
-                                Similar Projects
-                            </h2>
-                        </div>
-
-                        <!-- Projects Grid -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            @foreach ($similarJobs as $similarJob)
-                                <x-card rounded="2xl" border="neutral-100" clip class="hover:shadow-md hover:border-secondary transition-all duration-300 flex flex-col h-full">
-                                    <!-- Image -->
-                                    <div class="relative aspect-[4/3] overflow-hidden">
-                                        @if ($similarJob->images)
-                                            <img src="{{ asset('storage/' . $similarJob->images) }}"
-                                                alt="{{ $similarJob->title }}" class="w-full h-full object-cover">
-                                        @else
-                                            <div
-                                                class="bg-gradient-to-br from-neutral-50 to-neutral-100 w-full h-full flex items-center justify-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg"
-                                                    class="h-12 w-12 text-neutral-300" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="1.5"
-                                                        d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                                </svg>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <!-- Content -->
-                                    <div class="p-5 flex flex-col flex-grow">
-                                        <!-- Stats Row -->
-                                        <div class="flex items-center justify-between mb-2 text-xs">
-                                            <!-- Posted Date -->
-                                            <div class="flex items-center text-neutral-500 font-tertiary font-medium">
-                                                <x-icon name="clock" class="h-3.5 w-3.5 mr-1" />
-                                                <span>Posted {{ $similarJob->created_at->diffForHumans() }}</span>
-                                            </div>
-
-                                            <!-- Applicants -->
-                                            <span
-                                                class="bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium font-tertiary">
-                                                {{ $similarJob->applicants_count }} applied
-                                            </span>
-                                        </div>
-
-                                        <!-- Title -->
-                                        <h3
-                                            class="font-main font-semibold text-neutral-800 text-lg mb-2 line-clamp-1 hover:text-primary transition-colors">
-                                            {{ $similarJob->title }}
-                                        </h3>
-
-                                        <!-- Budget -->
-                                        <div class="mb-2">
-                                            <span class="text-secondary font-semibold font-tertiary text-sm">
-                                                <x-money :amount="$similarJob->budget" :decimals="0" />
-                                            </span>
-                                        </div>
-
-                                        <!-- Deadline -->
-                                        <div class="flex items-center text-sm text-neutral-600 mt-auto mb-4">
-                                            <x-icon name="calendar" class="h-4 w-4 mr-2 text-tertiary" />
-                                            @if ($similarJob->no_deadline)
-                                                <span class="text-neutral-500 font-tertiary font-medium">No
-                                                    Deadline</span>
-                                            @else
-                                                <span
-                                                    class="{{ $similarJob->deadline->isPast() ? 'text-red-500' : '' }} text-neutral-500 font-tertiary font-medium">
-                                                    Deadline: <x-date :date="$similarJob->deadline" />
-                                                </span>
-                                            @endif
-                                        </div>
-
-                                        <!-- Action Button -->
-                                        <x-btn variant="secondary" size="lg" class="w-full" href="{{ route('jobs.apply', $similarJob->slug) }}">
-                                            View Details
-                                            <x-icon name="arrow-right" class="h-4 w-4 ml-2" />
-                                        </x-btn>
-                                    </div>
-                                </x-card>
                             @endforeach
                         </div>
-                    </div>
-                </section>
-            @endif
-        </div>
+                    </x-panel>
+                @endif
 
-        <!-- Disable submission -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Get the elements
-                const offerInput = document.getElementById('offer');
-                const termsCheckbox = document.getElementById('terms');
-                const submitButton = document.querySelector('button[value="submitted"]');
+                @if ($gallery->isNotEmpty())
+                    <x-panel :title="__('Project preview')" x-data="{ src: null }" @keydown.escape.window="src = null">
+                        <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                            @foreach ($gallery as $image)
+                                <li>
+                                    <button type="button" @click="src = @js($image)" class="group block w-full overflow-hidden rounded-xl border border-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"
+                                        aria-label="{{ __('View image :number full size', ['number' => $loop->iteration]) }}">
+                                        <img src="{{ $image }}" alt="{{ __('Project preview :number', ['number' => $loop->iteration]) }}" loading="lazy"
+                                            class="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+                                    </button>
+                                </li>
+                            @endforeach
+                        </ul>
 
-                // Initially disable the submit button
-                submitButton.disabled = true;
-                submitButton.classList.add('opacity-50', 'cursor-not-allowed');
+                        <div x-show="src" x-cloak x-transition.opacity @click.self="src = null" role="dialog" aria-modal="true" aria-label="{{ __('Project preview') }}"
+                            class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-900/80 p-4 backdrop-blur-sm">
+                            <div class="relative max-h-full max-w-5xl">
+                                <img :src="src" alt="" class="max-h-[85vh] rounded-xl bg-white object-contain shadow-2xl">
+                                <div class="absolute right-3 top-3 flex gap-2">
+                                    <a :href="src" download class="rounded-full bg-white/90 p-2 text-neutral-700 shadow hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40" aria-label="{{ __('Download image') }}"><x-icon name="cloud-arrow-down" class="h-5 w-5" /></a>
+                                    <button type="button" @click="src = null" class="rounded-full bg-white/90 p-2 text-neutral-700 shadow hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40" aria-label="{{ __('Close') }}"><x-icon name="x-mark" class="h-5 w-5" /></button>
+                                </div>
+                            </div>
+                        </div>
+                    </x-panel>
+                @endif
+            </div>
 
-                // Function to check if form is valid
-                function validateForm() {
-                    // Check if offer has a value and terms is checked
-                    if (offerInput.value.trim() !== '' && termsCheckbox.checked) {
-                        submitButton.disabled = false;
-                        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                    } else {
-                        submitButton.disabled = true;
-                        submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-                    }
-                }
-
-                // Add event listeners to both fields
-                offerInput.addEventListener('input', validateForm);
-                termsCheckbox.addEventListener('change', validateForm);
-
-                // Initial validation check
-                validateForm();
-            });
-        </script>
-
-        <!-- Switch Skills and Softwares -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // Tab switching functionality with improved animations
-                const tabButtons = document.querySelectorAll('.tab-button');
-                const tabContents = document.querySelectorAll('.tab-content');
-
-                tabButtons.forEach(button => {
-                    button.addEventListener('click', function() {
-                        const targetTab = this.getAttribute('data-tab');
-
-                        // Remove active class from all buttons
-                        tabButtons.forEach(btn => {
-                            btn.classList.remove('active', 'text-primary', 'border-primary');
-                            btn.classList.add('text-neutral-500', 'border-transparent');
-                        });
-
-                        // Add active class to clicked button
-                        this.classList.add('active', 'text-primary', 'border-primary');
-                        this.classList.remove('text-neutral-500', 'border-transparent');
-
-                        // Update badge colors
-                        tabButtons.forEach(btn => {
-                            const badge = btn.querySelector('span');
-                            if (badge) {
-                                if (btn.classList.contains('active')) {
-                                    badge.classList.remove('bg-neutral-400');
-                                    badge.classList.add('bg-accent');
-                                } else {
-                                    badge.classList.remove('bg-accent');
-                                    badge.classList.add('bg-neutral-400');
+            <!-- Apply -->
+            <aside class="lg:sticky lg:top-24">
+                @if (! auth()->check())
+                    <x-panel :title="__('Interested in this project?')" :description="__('Sign in to send the client your offer and proposal.')">
+                        <div class="space-y-3">
+                            <x-btn block href="{{ route('login') }}">{{ __('Sign in to apply') }}</x-btn>
+                            <x-btn block variant="secondary" href="{{ route('register') }}">{{ __('Create an account') }}</x-btn>
+                        </div>
+                    </x-panel>
+                @elseif ($isOwner)
+                    <x-panel :title="__('This is your project')" :description="__('Freelancers see this page when they open your project.')">
+                        <div class="space-y-3">
+                            <x-btn block href="{{ route('my-jobs.applications.index', $job->slug) }}">{{ __('Review applications') }}</x-btn>
+                            <x-btn block variant="secondary" href="{{ route('jobs.show', $job->slug) }}">{{ __('Open your project page') }}</x-btn>
+                        </div>
+                    </x-panel>
+                @elseif ($applicationStatus === ApplicationStatus::Draft)
+                    <x-panel :title="__('You have a saved draft')" :description="__('Pick up where you left off and send it when you are ready.')">
+                        <x-btn block href="{{ route('applications.continue', $job->slug) }}">{{ __('Continue draft') }}</x-btn>
+                    </x-panel>
+                @elseif ($applicationStatus)
+                    <x-panel :title="__('You applied to this project')">
+                        <x-badge tone="blue" class="px-2.5 py-0.5 text-xs font-medium">{{ $applicationStatus->label() }}</x-badge>
+                        <p class="mt-3 text-sm text-neutral-700">{{ $statusCopy[$applicationStatus->value] ?? '' }}</p>
+                        <x-btn block variant="secondary" class="mt-4" href="{{ route('applications.show', $job->slug) }}">{{ __('View your application') }}</x-btn>
+                    </x-panel>
+                @else
+                    <form action="{{ route('applications.store') }}" method="POST" enctype="multipart/form-data"
+                        x-data="{
+                            offer: @js((string) old('offer', '')),
+                            proposal: @js((string) old('proposal', '')),
+                            terms: {{ old('terms') ? 'true' : 'false' }},
+                            files: [],
+                            error: '',
+                            dragging: false,
+                            fee: {{ $feePercent }},
+                            symbol: @js(config('app.currency_symbol')),
+                            get amount() { return parseFloat(this.offer) || 0; },
+                            get serviceFee() { return this.amount * this.fee; },
+                            money(value) { return this.symbol + value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); },
+                            pick(list) {
+                                this.error = '';
+                                for (const file of Array.from(list)) {
+                                    const extension = file.name.split('.').pop().toLowerCase();
+                                    if (!['jpg', 'jpeg', 'png', 'pdf'].includes(extension)) { this.error = @js(__('Use JPG, PNG or PDF files.')); continue; }
+                                    if (file.size > 10 * 1024 * 1024) { this.error = @js(__('Each file must be 10 MB or smaller.')); continue; }
+                                    if (this.files.length >= 5) { this.error = @js(__('You can attach up to 5 files.')); break; }
+                                    this.files.push({ file, url: file.type.startsWith('image/') ? URL.createObjectURL(file) : null });
                                 }
-                            }
-                        });
+                                this.sync();
+                            },
+                            remove(index) {
+                                if (this.files[index].url) URL.revokeObjectURL(this.files[index].url);
+                                this.files.splice(index, 1);
+                                this.error = '';
+                                this.sync();
+                            },
+                            sync() {
+                                const transfer = new DataTransfer();
+                                this.files.forEach(item => transfer.items.add(item.file));
+                                this.$refs.input.files = transfer.files;
+                            },
+                            size(bytes) { return bytes > 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB'; },
+                        }">
+                        @csrf
+                        <input type="hidden" name="job_id" value="{{ $job->id }}">
 
-                        // Hide all content with fade effect
-                        tabContents.forEach(content => {
-                            content.classList.add('hidden');
-                        });
+                        <x-panel :title="__('Send your proposal')" :description="__('Tell the client what you would charge and why you are the right fit.')">
+                            <div class="space-y-5">
+                                <div>
+                                    <label for="offer" class="mb-1.5 block text-sm font-medium text-neutral-800">{{ __('Your offer') }}</label>
+                                    <div class="relative">
+                                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-sm text-neutral-500">{{ config('app.currency_symbol') }}</span>
+                                        <input type="number" id="offer" name="offer" x-model="offer" min="1" step="0.01" inputmode="decimal" placeholder="{{ (int) $job->budget }}"
+                                            class="{{ $fieldClass }} {{ $errors->has('offer') ? $badField : $okField }} pl-12 tabular-nums" @if ($errors->has('offer')) aria-invalid="true" @endif>
+                                    </div>
+                                    @error('offer')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
+                                    <p class="mt-1.5 text-xs text-tertiary">{{ __('The client’s budget is :amount.', ['amount' => \App\Support\Money::format($job->budget, 0)]) }}</p>
+                                </div>
 
-                        // Show target content
-                        const targetContent = document.querySelector(
-                            `.tab-content[data-content="${targetTab}"]`);
-                        if (targetContent) {
-                            targetContent.classList.remove('hidden');
+                                <dl class="space-y-2 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3.5 text-sm" aria-live="polite">
+                                    <div class="flex items-center justify-between">
+                                        <dt class="text-tertiary">{{ __('Your offer') }}</dt>
+                                        <dd class="font-medium tabular-nums text-neutral-900" x-text="amount ? money(amount) : '—'">—</dd>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <dt class="text-tertiary">{{ __('Service fee (:percent%)', ['percent' => rtrim(rtrim(number_format($feePercent * 100, 1), '0'), '.')]) }}</dt>
+                                        <dd class="tabular-nums text-neutral-700" x-text="amount ? '− ' + money(serviceFee) : '—'">—</dd>
+                                    </div>
+                                    <div class="flex items-center justify-between border-t border-neutral-200 pt-2">
+                                        <dt class="font-medium text-neutral-900">{{ __('You receive') }}</dt>
+                                        <dd class="font-tertiary text-base font-semibold tabular-nums text-teal-700" x-text="amount ? money(amount - serviceFee) : '—'">—</dd>
+                                    </div>
+                                </dl>
 
-                            // Add subtle entrance animation
-                            targetContent.style.opacity = '0';
-                            targetContent.style.transform = 'translateY(10px)';
+                                <div>
+                                    <label for="proposal" class="mb-1.5 flex items-center justify-between text-sm font-medium text-neutral-800">
+                                        <span>{{ __('Your proposal') }}</span>
+                                        <span class="text-xs font-normal tabular-nums text-tertiary" :class="proposal.length > 2000 && 'text-amber-700'" x-text="proposal.length + ' / 2500'">0 / 2500</span>
+                                    </label>
+                                    <textarea id="proposal" name="proposal" rows="6" maxlength="2500" x-model="proposal"
+                                        placeholder="{{ __('Describe your experience, how you would approach the project and how long it would take…') }}"
+                                        class="{{ $fieldClass }} {{ $errors->has('proposal') ? $badField : $okField }} resize-none"></textarea>
+                                    @error('proposal')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
+                                </div>
 
-                            setTimeout(() => {
-                                targetContent.style.transition =
-                                    'opacity 0.3s ease, transform 0.3s ease';
-                                targetContent.style.opacity = '1';
-                                targetContent.style.transform = 'translateY(0)';
-                            }, 50);
-                        }
-                    });
-                });
-            });
-        </script>
+                                <div>
+                                    <span class="mb-1.5 block text-sm font-medium text-neutral-800">{{ __('Portfolio samples') }} <span class="font-normal text-tertiary">({{ __('optional') }})</span></span>
+                                    <label @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="dragging = false; pick($event.dataTransfer.files)"
+                                        :class="dragging ? 'border-secondary bg-teal-50' : 'border-neutral-300 hover:border-neutral-400'"
+                                        class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-5 text-center transition-colors">
+                                        <x-icon name="cloud-arrow-up" class="h-6 w-6 text-neutral-400" />
+                                        <span class="mt-1.5 text-sm text-neutral-700"><span class="font-medium text-teal-700">{{ __('Choose files') }}</span> {{ __('or drag them here') }}</span>
+                                        <span class="mt-0.5 text-xs text-tertiary">{{ __('JPG, PNG or PDF · up to 5 files, 10 MB each') }}</span>
+                                        <input type="file" name="portfolio[]" x-ref="input" multiple accept=".jpg,.jpeg,.png,.pdf" class="sr-only" @change="pick($event.target.files)">
+                                    </label>
+                                    <p x-show="error" x-text="error" x-cloak class="mt-1.5 text-xs text-red-600" role="alert"></p>
+                                    @error('portfolio')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
+                                    @error('portfolio.*')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
 
-        <!-- Simple modal functionality for image preview -->
-        <script>
-            function openImageModal(imageSrc) {
-                const modal = document.getElementById('imageModal');
-                const modalImage = document.getElementById('modalImage');
+                                    <ul class="mt-3 space-y-2" x-show="files.length" x-cloak>
+                                        <template x-for="(item, index) in files" :key="item.file.name + index">
+                                            <li class="flex items-center gap-3 rounded-lg border border-neutral-200 bg-neutral-50 p-2 text-sm">
+                                                <template x-if="item.url"><img :src="item.url" alt="" class="h-10 w-10 shrink-0 rounded-md object-cover"></template>
+                                                <template x-if="!item.url"><span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-white text-xs font-semibold text-tertiary">PDF</span></template>
+                                                <span class="min-w-0 flex-1 truncate text-neutral-800" x-text="item.file.name"></span>
+                                                <span class="shrink-0 text-xs text-tertiary" x-text="size(item.file.size)"></span>
+                                                <button type="button" @click="remove(index)" class="shrink-0 text-neutral-400 hover:text-red-600 focus:outline-none focus-visible:text-red-600" aria-label="{{ __('Remove file') }}"><x-icon name="x-mark" class="h-4 w-4" /></button>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
 
-                modalImage.src = imageSrc;
-                modal.classList.remove('hidden');
-                document.body.classList.add('overflow-hidden');
+                                <div>
+                                    <label class="flex items-start gap-2.5 text-sm text-neutral-700">
+                                        <input type="checkbox" name="terms" value="1" x-model="terms" class="mt-0.5 h-4 w-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-600/30">
+                                        <span>{{ __('I agree to the Terms of Service and Privacy Policy, and that my offer is binding if the client hires me.') }}</span>
+                                    </label>
+                                    @error('terms')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
 
-                // Focus the modal for better keyboard navigation
-                modal.focus();
-            }
-
-            function closeImageModal() {
-                const modal = document.getElementById('imageModal');
-                modal.classList.add('hidden');
-                document.body.classList.remove('overflow-hidden');
-            }
-
-            // Close modal on escape key
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') {
-                    closeImageModal();
-                }
-            });
-
-            // Close modal on outside click
-            document.getElementById('imageModal').addEventListener('click', function(event) {
-                if (event.target === this) {
-                    closeImageModal();
-                }
-            });
-        </script>
-
-        <!-- Download Image -->
-        <script>
-            function downloadImage(imageUrl) {
-                // Create a temporary link
-                const link = document.createElement('a');
-                link.href = imageUrl;
-                link.download = imageUrl.split('/').pop(); // Extract filename from URL
-
-                // Append to body and trigger click
-                document.body.appendChild(link);
-                link.click();
-
-                // Clean up
-                document.body.removeChild(link);
-            }
-        </script>
-
-        <!-- Portfolio Uploads -->
-        <script>
-            // Maximum number of files allowed
-            const MAX_FILES = 5;
-            // Maximum file size in bytes (10MB)
-            const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-            // Master list of File objects
-            let selectedFiles = [];
-
-            // Element refs
-            const fileInput = document.getElementById('file-upload');
-            const previewContainer = document.getElementById('preview-container');
-            const filePreview = document.getElementById('file-preview');
-
-            // Alerts (unchanged)
-            function showMaxFilesAlert() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'File Limit Exceeded',
-                    text: `You can upload a maximum of ${MAX_FILES} files.`,
-                });
-            }
-
-            function showFileSizeAlert() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'File Size Limit Exceeded',
-                    text: `File size should not exceed ${MAX_FILE_SIZE/(1024*1024)}MB.`,
-                });
-            }
-
-            function showFileTypeAlert() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Invalid File Type',
-                    text: 'Only JPG, JPEG, PNG, and PDF files are allowed.',
-                });
-            }
-
-            // Whenever the user selects via “browse”
-            fileInput.addEventListener('change', handleFileSelect);
-
-            function handleFileSelect(event) {
-                const newFiles = Array.from(event.target.files);
-
-                // 1) Check total count
-                if (selectedFiles.length + newFiles.length > MAX_FILES) {
-                    showMaxFilesAlert();
-                    return;
-                }
-
-                newFiles.forEach(file => {
-                    // 2) Type & size checks
-                    if (!['image/jpeg', 'image/png', 'application/pdf'].includes(file.type)) {
-                        showFileTypeAlert();
-                        return;
-                    }
-                    if (file.size > MAX_FILE_SIZE) {
-                        showFileSizeAlert();
-                        return;
-                    }
-
-                    // 3) Add to our master list
-                    selectedFiles.push(file);
-
-                    // 4) Render preview
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'file-item flex items-center p-2 bg-white rounded border border-neutral-200';
-                    fileItem.innerHTML = `
-        <div class="w-12 h-12 rounded overflow-hidden mr-3">
-          <img src="" alt="Preview" class="w-full h-full object-cover">
+                            <x-slot:footer>
+                                <x-btn type="submit" name="action" value="draft" variant="secondary">{{ __('Save draft') }}</x-btn>
+                                <x-btn type="submit" name="action" value="submitted" ::disabled="!(amount > 0 && terms)">
+                                    <x-icon name="paper-airplane" class="h-4 w-4" />
+                                    {{ __('Submit application') }}
+                                </x-btn>
+                            </x-slot:footer>
+                        </x-panel>
+                    </form>
+                @endif
+            </aside>
         </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm text-neutral-700 truncate">${file.name}</p>
-          <p class="text-xs text-neutral-500">Size ${formatFileSize(file.size)}</p>
-        </div>
-        <button type="button" class="text-neutral-400 hover:text-red-500 ml-2">&times;</button>
-      `;
-                    previewContainer.appendChild(fileItem);
 
-                    // Populate image preview
-                    const img = fileItem.querySelector('img');
-                    const reader = new FileReader();
-                    reader.onload = e => img.src = e.target.result;
-                    reader.readAsDataURL(file);
-
-                    // 5) Remove handler
-                    const removeBtn = fileItem.querySelector('button');
-                    removeBtn.addEventListener('click', () => {
-                        // Remove from DOM
-                        fileItem.remove();
-                        // Remove from master list
-                        selectedFiles = selectedFiles.filter(f => !(f.name === file.name && f.size === file
-                            .size));
-                        // Rebuild the FileList
-                        updateFileList();
-                    });
-                });
-
-                // 6) Always rebuild FileList after adding
-                updateFileList();
-            }
-
-            // Rebuild input.files from selectedFiles
-            function updateFileList() {
-                const dt = new DataTransfer();
-                selectedFiles.forEach(f => dt.items.add(f));
-                fileInput.files = dt.files;
-
-                if (selectedFiles.length > 0) {
-                    filePreview.classList.remove('hidden');
-                } else {
-                    filePreview.classList.add('hidden');
-                }
-            }
-
-            // Helper to format bytes
-            function formatFileSize(bytes) {
-                if (bytes < 1024) return `${bytes} B`;
-                if (bytes < 1024 * 1024) return `${(bytes/1024).toFixed(1)} KB`;
-                return `${(bytes/(1024*1024)).toFixed(1)} MB`;
-            }
-        </script>
-
-
-        <!-- Tracking Proposal Characters -->
-        <script>
-            // Maximum character limit
-            const maxCharacters = 2500;
-
-            // Get references to the elements
-            const proposalTextarea = document.getElementById('proposal');
-            const charactersCount = document.getElementById('characters-count');
-
-            // Function to update the character count
-            function updateCharacterCount() {
-                const currentLength = proposalTextarea.value.length;
-                const remainingCharacters = maxCharacters - currentLength;
-
-                // Update the character count display
-                charactersCount.textContent = currentLength;
-
-                // Add warning styling when approaching the limit
-                if (remainingCharacters <= 500) {
-                    charactersCount.classList.add('text-red-500');
-                } else {
-                    charactersCount.classList.remove('text-red-500');
-                }
-
-                // Prevent further input when reaching the limit
-                if (currentLength >= maxCharacters) {
-                    proposalTextarea.value = proposalTextarea.value.substring(0, maxCharacters);
-                    updateCharacterCount(); // Update the count after truncation
-                }
-            }
-
-            // Initialize the character count
-            updateCharacterCount();
-
-            // Listen for input changes
-            proposalTextarea.addEventListener('input', updateCharacterCount);
-        </script>
-
-        <!-- Calculating Service Fee & Payout -->
-        <script>
-            // Service fee percentage (configurable)
-            const serviceFeePercentage = 0.10; // 10%
-
-            // Get references to the elements
-            const offerInput = document.getElementById('offer');
-            const yourOfferAmount = document.getElementById('yourOfferAmount');
-            const serviceFee = document.getElementById('serviceFee');
-            const youllReceive = document.getElementById('youllReceive');
-
-            // Function to update the earnings breakdown
-            function updateEarnings() {
-                const offer = parseFloat(offerInput.value) || 0;
-
-                // Calculate service fee
-                const fee = offer * serviceFeePercentage;
-
-                // Calculate net amount
-                const netAmount = offer - fee;
-
-                // Update the DOM with formatted values
-                yourOfferAmount.textContent = formatCurrency(offer);
-                serviceFee.textContent = formatCurrency(fee, true);
-                youllReceive.textContent = formatCurrency(netAmount);
-            }
-
-            // Function to format currency
-            function formatCurrency(amount, isNegative = false) {
-                const symbol = isNegative ? '-' : '';
-                return `${symbol}Ksh${amount.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-                })}`;
-            }
-
-            // Initialize with default values
-            updateEarnings();
-
-            // Listen for input changes
-            offerInput.addEventListener('input', updateEarnings);
-        </script>
-
-
-    </section>
+        @if ($similarJobs->isNotEmpty())
+            <section class="mt-10 border-t border-neutral-200 pt-8" aria-labelledby="similar-projects">
+                <h2 id="similar-projects" class="mb-4 font-tertiary text-lg font-semibold text-neutral-900">{{ __('Similar projects') }}</h2>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach ($similarJobs->take(3) as $similarJob)
+                        <x-jobs.card :job="$similarJob" :poster="false" :compact="true" />
+                    @endforeach
+                </div>
+            </section>
+        @endif
+    </div>
 </x-app-layout>

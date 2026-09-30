@@ -69,31 +69,30 @@ class ModelJob extends Model
     }
 
     /**
-     * Filters jobs that are considered "active"
-     * Includes jobs with no_deadline = true
-     * or jobs with a deadline in the future
-     * Used for querying active jobs from the database
+     * The one definition of "open for applications": switched on, not archived, and either without a
+     * deadline or with a deadline that has not passed. A deadline is a date, so the project stays open
+     * through the end of that day ("Due Oct 2" still accepts applications on Oct 2).
+     * Browse, the apply page, application submission and similar projects all use this.
      */
-    public function scopeActive($query)
+    public function scopeOpenForApplications($query)
     {
         return $query->where('is_active', true)
             ->where('is_archived', false)
             ->where(function ($q) {
                 $q->where('no_deadline', true)
-                    ->orWhere('deadline', '>', now());
+                    ->orWhereNull('deadline')
+                    ->orWhere('deadline', '>=', today());
             });
     }
 
     /**
-     * Checks if a single job instance is active
-     * Returns true if no_deadline is set
-     * Returns true if deadline hasn't passed
-     * Used for checking individual job status
+     * Instance version of scopeOpenForApplications().
      */
-    public function isActive()
+    public function isOpenForApplications(): bool
     {
-        return $this->is_active &&
-            ($this->no_deadline || now()->lessThanOrEqualTo($this->deadline));
+        return $this->is_active
+            && ! $this->is_archived
+            && ($this->no_deadline || $this->deadline === null || ! $this->deadline->isBefore(today()));
     }
 
     /**
