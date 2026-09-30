@@ -53,7 +53,7 @@
 
                         <!-- Reason for Dispute -->
                         <div class="space-y-2">
-                            <label for="reason" class="block text-sm font-medium text-neutral-700 flex items-center">
+                            <x-form.label class="flex items-center" for="reason">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-secondary"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -62,7 +62,7 @@
                                     <line x1="10" y1="14" x2="21" y2="3"></line>
                                 </svg>
                                 Reason for Dispute
-                            </label>
+                            </x-form.label>
                             <div class="relative">
                                 <select id="reason" name="reason"
                                     class="appearance-none block w-full px-4 py-3 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-secondary focus:border-secondary transition duration-200 text-neutral-700 bg-white"
@@ -82,7 +82,7 @@
 
                         <!-- Detailed Explanation -->
                         <div class="space-y-2">
-                            <label for="details" class="block text-sm font-medium text-neutral-700 flex items-center">
+                            <x-form.label class="flex items-center" for="details">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-secondary"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -93,7 +93,7 @@
                                     <polyline points="10 9 9 9 8 9"></polyline>
                                 </svg>
                                 Detailed Explanation
-                            </label>
+                            </x-form.label>
                             <textarea id="details" name="details" rows="6"
                                 class="shadow-sm block w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary transition duration-200"
                                 placeholder="Please provide a detailed explanation of your dispute, including any relevant timeline, agreements, or information that supports your case."
@@ -105,8 +105,7 @@
 
                         <!-- Supporting Evidence -->
                         <div class="space-y-2">
-                            <label for="evidence"
-                                class="block text-sm font-medium text-neutral-700 flex items-center">
+                            <x-form.label class="flex items-center" for="evidence">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-secondary"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
@@ -114,7 +113,7 @@
                                     <polyline points="13 2 13 9 20 9"></polyline>
                                 </svg>
                                 Supporting Evidence (Optional)
-                            </label>
+                            </x-form.label>
                             <div
                                 class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-neutral-300 border-dashed rounded-lg bg-neutral-50 hover:bg-neutral-100 transition duration-200">
                                 <div class="space-y-1 text-center">

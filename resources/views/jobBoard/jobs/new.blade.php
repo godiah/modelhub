@@ -46,9 +46,7 @@
                                         class="block text-sm font-medium text-primary mb-2 after:content-['*'] after:ml-1 after:text-red-500 font-tertiary">
                                         Project Title
                                     </label>
-                                    @error('title')
-                                        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                    @enderror
+                                    <x-form.error name="title" variant="plain" />
                                     <div class="relative">
                                         <div
                                             class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -67,9 +65,7 @@
                                         class="block text-sm font-medium text-primary mb-2 after:content-['*'] after:ml-1 after:text-red-500 font-tertiary">
                                         Project Description
                                     </label>
-                                    @error('description')
-                                        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                    @enderror
+                                    <x-form.error name="description" variant="plain" />
                                     <div class="border border-neutral-300 rounded-lg overflow-hidden">
                                         <textarea id="description" name="description" rows="6"
                                             class="w-full px-4 py-3 border-0 text-sm focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all duration-200 font-secondary markdown-editor resize-none"
@@ -90,9 +86,7 @@
                                         Upload Preview Image
                                     </label>
 
-                                    @error('image')
-                                        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                    @enderror
+                                    <x-form.error name="image" variant="plain" />
 
                                     <div class="mt-3 rounded-lg border border-neutral-200 p-4 bg-neutral-50">
                                         <div class="mb-3">
@@ -199,9 +193,7 @@
                                         class="block text-sm font-medium text-primary mb-2 after:content-['*'] after:ml-1 after:text-red-500 font-tertiary">
                                         Required 3D Skills
                                     </label>
-                                    @error('skills')
-                                        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                    @enderror
+                                    <x-form.error name="skills" variant="plain" />
                                     <div class="relative">
                                         <div class="border border-neutral-300 rounded-lg overflow-hidden">
                                             <div class="p-3 bg-white relative">
@@ -244,9 +236,7 @@
                                         class="block text-sm font-medium text-primary mb-2 after:content-['*'] after:ml-1 after:text-red-500 font-tertiary">
                                         Required Software
                                     </label>
-                                    @error('software')
-                                        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                                    @enderror
+                                    <x-form.error name="software" variant="plain" />
                                     <div class="relative" id="software-skills-dropdown">
                                         <div class="border border-neutral-300 rounded-lg overflow-hidden">
                                             <div class="p-3 bg-white relative">

@@ -58,8 +58,7 @@
                         <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
                             <!-- Skills Filter -->
                             <div class="w-full md:w-1/3">
-                                <label for="skills-filter"
-                                    class="block text-sm font-medium text-neutral-700 mb-1">Filter by Skills</label>
+                                <x-form.label class="mb-1" for="skills-filter">Filter by Skills</x-form.label>
                                 <select id="skills-filter" name="skills"
                                     class="filter-select w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
                                     <option value="">All Skills</option>
@@ -74,8 +73,7 @@
 
                             <!-- Software Filter -->
                             <div class="w-full md:w-1/3">
-                                <label for="software-filter"
-                                    class="block text-sm font-medium text-neutral-700 mb-1">Filter by Software</label>
+                                <x-form.label class="mb-1" for="software-filter">Filter by Software</x-form.label>
                                 <select id="software-filter" name="software"
                                     class="filter-select w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
                                     <option value="">All Software</option>
@@ -90,8 +88,8 @@
 
                             <!-- Sort By -->
                             <div class="w-full md:w-1/3">
-                                <label for="sort-by" class="block text-sm font-medium text-neutral-700 mb-1">Sort
-                                    By</label>
+                                <x-form.label class="mb-1" for="sort-by">Sort
+                                    By</x-form.label>
                                 <select id="sort-by" name="sort"
                                     class="filter-select w-full h-10 pl-3 pr-10 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-transparent cursor-pointer">
                                     <option value="newest"

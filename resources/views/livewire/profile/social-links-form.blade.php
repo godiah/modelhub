@@ -233,9 +233,9 @@ new class extends Component {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Social Network Selection -->
                         <div class="space-y-2">
-                            <label for="social_network_id" class="block text-sm font-medium text-neutral-700 font-main">
+                            <x-form.label class="font-main" for="social_network_id">
                                 {{ __('Platform') }}
-                            </label>
+                            </x-form.label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
@@ -252,20 +252,15 @@ new class extends Component {
                                     @endforeach
                                 </select>
                             </div>
-                            @error('social_network_id')
-                                <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                                    <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                                    <span>{{ $message }}</span>
-                                </div>
-                            @enderror
+                            <x-form.error name="social_network_id" />
                         </div>
 
                         <!-- Username -->
                         <div class="space-y-2">
-                            <label for="username" class="block text-sm font-medium text-neutral-700 font-main">
+                            <x-form.label class="font-main" for="username">
                                 {{ __('Username') }} <span
                                     class="text-neutral-500 font-normal">({{ __('Optional') }})</span>
-                            </label>
+                            </x-form.label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <x-icon name="user" class="h-5 w-5 text-neutral-400" />
@@ -276,20 +271,15 @@ new class extends Component {
                             </div>
                             <p class="text-xs text-neutral-500 font-main">
                                 {{ __('Will auto-generate URL for known platforms') }}</p>
-                            @error('username')
-                                <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                                    <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                                    <span>{{ $message }}</span>
-                                </div>
-                            @enderror
+                            <x-form.error name="username" />
                         </div>
                     </div>
 
                     <!-- URL -->
                     <div class="space-y-2">
-                        <label for="url" class="block text-sm font-medium text-neutral-700 font-main">
+                        <x-form.label class="font-main" for="url">
                             {{ __('URL') }}
-                        </label>
+                        </x-form.label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <x-icon name="link" class="h-5 w-5 text-neutral-400" />
@@ -298,22 +288,17 @@ new class extends Component {
                                 class="text-sm block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
                                 placeholder="{{ __('https://example.com/profile') }}" required>
                         </div>
-                        @error('url')
-                            <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
+                        <x-form.error name="url" />
                     </div>
 
                     <!-- Display Name and Public Toggle Row -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Display Name -->
                         <div class="space-y-2">
-                            <label for="display_name" class="block text-sm font-medium text-neutral-700 font-main">
+                            <x-form.label class="font-main" for="display_name">
                                 {{ __('Display Name') }} <span
                                     class="text-neutral-500 font-normal">({{ __('Optional') }})</span>
-                            </label>
+                            </x-form.label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <x-icon name="tag" class="h-5 w-5 text-neutral-400" />
@@ -322,19 +307,14 @@ new class extends Component {
                                     class="text-sm block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
                                     placeholder="{{ __('Custom display name') }}">
                             </div>
-                            @error('display_name')
-                                <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                                    <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                                    <span>{{ $message }}</span>
-                                </div>
-                            @enderror
+                            <x-form.error name="display_name" />
                         </div>
 
                         <!-- Public Toggle -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-neutral-700 font-main">
+                            <x-form.label class="font-main">
                                 {{ __('Visibility') }}
-                            </label>
+                            </x-form.label>
                             <div class="flex items-center space-x-3 pt-3">
                                 <div class="relative inline-flex items-center">
                                     <input type="checkbox" wire:model="is_public" id="is_public"

@@ -54,9 +54,7 @@
                             Active
                         </label>
                     </div>
-                    @error('is_active')
-                        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-                    @enderror
+                    <x-form.error name="is_active" variant="plain" />
                     <p class="text-xs text-tertiary mt-2 flex items-center">
                         <x-icon name="information-circle" class="h-4 w-4 mr-1 text-secondary" />
                         Uncheck to mark project as closed and hide it from public view

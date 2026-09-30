@@ -50,10 +50,9 @@ new class extends Component {
         <form wire:submit="updatePassword" class="space-y-6">
             <!-- Current Password Field -->
             <div class="space-y-2">
-                <label for="update_password_current_password"
-                    class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main" for="update_password_current_password">
                     {{ __('Current Password') }}
-                </label>
+                </x-form.label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,19 +78,14 @@ new class extends Component {
                         </button>
                     </div>
                 </div>
-                @error('current_password')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="current_password" />
             </div>
 
             <!-- New Password Field -->
             <div class="space-y-2">
-                <label for="update_password_password" class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main" for="update_password_password">
                     {{ __('New Password') }}
-                </label>
+                </x-form.label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <x-icon name="lock-closed" class="h-5 w-5 text-neutral-400" />
@@ -112,12 +106,7 @@ new class extends Component {
                         </button>
                     </div>
                 </div>
-                @error('password')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="password" />
 
                 <!-- Password Strength Indicator -->
                 <div x-data="{ strength: 0, width: '0%', color: 'bg-neutral-200' }" x-init="$watch('$wire.password', value => {
@@ -173,10 +162,9 @@ new class extends Component {
 
             <!-- Confirm Password Field -->
             <div class="space-y-2">
-                <label for="update_password_password_confirmation"
-                    class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main" for="update_password_password_confirmation">
                     {{ __('Confirm Password') }}
-                </label>
+                </x-form.label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <x-icon name="shield-check" class="h-5 w-5 text-neutral-400" />
@@ -198,12 +186,7 @@ new class extends Component {
                         </button>
                     </div>
                 </div>
-                @error('password_confirmation')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="password_confirmation" />
             </div>
 
             <!-- Action Buttons -->

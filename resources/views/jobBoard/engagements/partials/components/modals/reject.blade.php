@@ -33,10 +33,9 @@
                     <form method="POST" action="{{ route('engagements.deliverables.reject', $deliverable->id) }}">
                         @csrf
                         <div class="mb-6">
-                            <label for="reject-feedback-{{ $deliverable->id }}"
-                                class="block text-sm font-medium text-neutral-700 mb-2">
+                            <x-form.label class="mb-2" for="reject-feedback-{{ $deliverable->id }}">
                                 Feedback <span class="text-accent font-medium">*</span>
-                            </label>
+                            </x-form.label>
                             <div class="relative">
                                 <textarea id="reject-feedback-{{ $deliverable->id }}" x-model="feedback" rows="4" name="feedback"
                                     class="w-full rounded-lg border-neutral-300 shadow-sm focus:border-accent focus:ring focus:ring-accent/20 text-neutral-700 resize-none"

@@ -555,10 +555,9 @@
 
                                             <!-- Status Selection -->
                                             <div>
-                                                <label for="status"
-                                                    class="block text-sm font-medium text-neutral-700 mb-2 font-main">
+                                                <x-form.label class="mb-2 font-main" for="status">
                                                     Update Status
-                                                </label>
+                                                </x-form.label>
                                                 <div class="relative">
                                                     <select name="status" id="status" x-model="selectedStatus"
                                                         @change="if(selectedStatus === 'hired') { showHireModal = true; } else { showHireModal = false; }"
@@ -584,10 +583,9 @@
 
                                             <!-- Notes Field -->
                                             <div>
-                                                <label for="notes"
-                                                    class="block text-sm font-medium text-neutral-700 mb-2 font-main">
+                                                <x-form.label class="mb-2 font-main" for="notes">
                                                     Internal Notes
-                                                </label>
+                                                </x-form.label>
                                                 <textarea id="notes" name="notes" rows="3"
                                                     class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-primary focus:border-primary font-main resize-none"
                                                     placeholder="Add your private notes about this applicant..." @if ($application->job->hasAcceptedEngagement() && !$application->job->is_active) disabled @endif>{{ $application->additional_notes ?? '' }}</textarea>
@@ -786,9 +784,8 @@
                                                                     <div
                                                                         class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                                                         <div class="md:col-span-2">
-                                                                            <label
-                                                                                class="block text-sm font-medium text-neutral-700 mb-1">Title<span
-                                                                                    class="text-red-500">*</span></label>
+                                                                            <x-form.label class="mb-1">Title<span
+                                                                                    class="text-red-500">*</span></x-form.label>
                                                                             <input type="text"
                                                                                 x-model="deliverable.title"
                                                                                 class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
@@ -796,17 +793,15 @@
                                                                                 required>
                                                                         </div>
                                                                         <div>
-                                                                            <label
-                                                                                class="block text-sm font-medium text-neutral-700 mb-1">Due
-                                                                                Date</label>
+                                                                            <x-form.label class="mb-1">Due
+                                                                                Date</x-form.label>
                                                                             <input type="date"
                                                                                 x-model="deliverable.due_date"
                                                                                 class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
                                                                         </div>
                                                                     </div>
                                                                     <div>
-                                                                        <label
-                                                                            class="block text-sm font-medium text-neutral-700 mb-1">Description</label>
+                                                                        <x-form.label class="mb-1">Description</x-form.label>
                                                                         <textarea x-model="deliverable.description"
                                                                             class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
                                                                             rows="2" placeholder="Add details, specifications, or acceptance criteria..."></textarea>
@@ -897,8 +892,7 @@
 
                                     <!-- Subject Field -->
                                     <div>
-                                        <label for="subject"
-                                            class="block text-sm font-medium text-neutral-700 mb-2 font-main">Subject</label>
+                                        <x-form.label class="mb-2 font-main" for="subject">Subject</x-form.label>
                                         <div class="relative">
                                             <div
                                                 class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -912,8 +906,7 @@
 
                                     <!-- Message Field -->
                                     <div>
-                                        <label for="message"
-                                            class="block text-sm font-medium text-neutral-700 mb-2 font-main">Message</label>
+                                        <x-form.label class="mb-2 font-main" for="message">Message</x-form.label>
                                         <textarea id="message" name="message" rows="4" placeholder="Write your message to the applicant..."
                                             class="text-sm w-full py-3 px-4 border border-neutral-300 rounded-lg shadow-sm focus:ring-2 focus:ring-secondary focus:border-secondary font-main"></textarea>
                                     </div>

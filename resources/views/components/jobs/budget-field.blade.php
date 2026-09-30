@@ -5,9 +5,7 @@
         class="block text-sm font-medium text-primary mb-2 {{ $required ? "after:content-['*'] after:ml-1 after:text-red-500" : '' }} font-tertiary">
         Budget
     </label>
-    @error('budget')
-        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-    @enderror
+    <x-form.error name="budget" variant="plain" />
     <div class="relative">
         <div
             class="absolute inset-y-0 left-0 flex items-center pr-3 pl-3 pointer-events-none bg-neutral-100 rounded-l-lg border-r border-neutral-200">

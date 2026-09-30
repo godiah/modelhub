@@ -331,9 +331,7 @@
                                 <p class="text-xs text-neutral-500 mt-1">
                                     Leave blank to use the calculated amount above.
                                 </p>
-                                @error('payment_amount')
-                                    <p class="text-red-500 text-xs italic mt-1">{{ $message }}</p>
-                                @enderror
+                                <x-form.error name="payment_amount" variant="plain" class="mt-1" />
                             </div>
                             <button type="submit"
                                 class="w-full py-2.5 px-4 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg text-sm transition-colors duration-200 flex items-center justify-center">

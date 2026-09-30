@@ -74,9 +74,9 @@ new class extends Component {
         <form wire:submit="updateProfileInformation" class="space-y-6">
             <!-- Name Field -->
             <div class="space-y-2">
-                <label for="name" class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main" for="name">
                     {{ __('Full Name') }}
-                </label>
+                </x-form.label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <x-icon name="user" class="h-5 w-5 text-neutral-400" />
@@ -85,19 +85,14 @@ new class extends Component {
                         class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main text-neutral-900"
                         placeholder="Enter your full name" required autofocus autocomplete="name" />
                 </div>
-                @error('name')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="name" />
             </div>
 
             <!-- Email Field -->
             <div class="space-y-2">
-                <label for="email" class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main" for="email">
                     {{ __('Email Address') }}
-                </label>
+                </x-form.label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,12 +105,7 @@ new class extends Component {
                         class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main text-neutral-900"
                         placeholder="Enter your email address" required autocomplete="username" />
                 </div>
-                @error('email')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="email" />
 
                 <!-- Email Verification Notice -->
                 @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !auth()->user()->hasVerifiedEmail())

@@ -38,9 +38,8 @@
                 <div class="space-y-6">
                     <!-- Cancellation Type -->
                     <div>
-                        <label for="cancellation_type"
-                            class="block text-sm font-medium text-neutral-700 mb-1">Cancellation
-                            Type</label>
+                        <x-form.label class="mb-1" for="cancellation_type">Cancellation
+                            Type</x-form.label>
                         <select id="cancellation_type" name="cancellation_type" required
                             class="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-neutral-300 focus:outline-none focus:ring-secondary focus:border-secondary rounded-md shadow-sm font-main">
                             <option value="mutual">Mutual Agreement</option>
@@ -52,8 +51,8 @@
 
                     <!-- Reason Category -->
                     <div>
-                        <label for="reason_category" class="block text-sm font-medium text-neutral-700 mb-1">Reason
-                            Category</label>
+                        <x-form.label class="mb-1" for="reason_category">Reason
+                            Category</x-form.label>
                         <select id="reason_category" name="reason_category" required
                             class="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-neutral-300 focus:outline-none focus:ring-secondary focus:border-secondary rounded-md shadow-sm font-main">
                             <option value="schedule_conflict">Schedule Conflict</option>
@@ -68,9 +67,9 @@
 
                     <!-- Detailed Reason -->
                     <div>
-                        <label for="cancellation_reason" class="block text-sm font-medium text-neutral-700 mb-1">Please
+                        <x-form.label class="mb-1" for="cancellation_reason">Please
                             provide
-                            details</label>
+                            details</x-form.label>
                         <textarea id="cancellation_reason" name="cancellation_reason" rows="4" required
                             class="shadow-sm block w-full focus:ring-secondary focus:border-secondary border-neutral-300 rounded-md font-main"
                             placeholder="Please explain your reasons for cancellation in detail..."></textarea>

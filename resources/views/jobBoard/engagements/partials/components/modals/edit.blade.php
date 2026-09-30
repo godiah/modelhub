@@ -35,30 +35,27 @@
 
                     <!-- Title Field -->
                     <div class="mb-5">
-                        <label for="title-{{ $deliverable->id }}"
-                            class="block text-sm font-medium text-neutral-700 mb-2">
+                        <x-form.label class="mb-2" for="title-{{ $deliverable->id }}">
                             Title
-                        </label>
+                        </x-form.label>
                         <input type="text" id="title-{{ $deliverable->id }}" name="title" x-model="title"
                             class="w-full rounded-lg border-neutral-300 shadow-sm focus:border-primary" required>
                     </div>
 
                     <!-- Description Field -->
                     <div class="mb-5">
-                        <label for="description-{{ $deliverable->id }}"
-                            class="block text-sm font-medium text-neutral-700 mb-2">
+                        <x-form.label class="mb-2" for="description-{{ $deliverable->id }}">
                             Description
-                        </label>
+                        </x-form.label>
                         <textarea id="description-{{ $deliverable->id }}" name="description" x-model="description" rows="4"
                             class="w-full rounded-lg border-neutral-300 shadow-sm focus:border-primary resize-none"></textarea>
                     </div>
 
                     <!-- Due Date Field -->
                     <div class="mb-6">
-                        <label for="due_date-{{ $deliverable->id }}"
-                            class="block text-sm font-medium text-neutral-700 mb-2">
+                        <x-form.label class="mb-2" for="due_date-{{ $deliverable->id }}">
                             Due Date
-                        </label>
+                        </x-form.label>
                         <div class="relative">
                             <input type="date" id="due_date-{{ $deliverable->id }}" name="due_date"
                                 x-model="dueDate" class="w-full rounded-lg border-neutral-300 shadow-sm ">

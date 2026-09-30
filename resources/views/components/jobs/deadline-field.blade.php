@@ -23,9 +23,7 @@
             <label for="no_deadline" class="text-xs text-neutral-600">No Fixed Deadline</label>
         </div>
     </div>
-    @error('deadline')
-        <p class="text-red-500 text-xs italic">{{ $message }}</p>
-    @enderror
+    <x-form.error name="deadline" variant="plain" />
     <div class="relative">
         <div id="deadline-display"
             class="w-full px-4 py-3 border border-neutral-300 rounded-lg cursor-pointer flex items-center justify-between transition-all duration-300 hover:border-secondary focus:ring-2 focus:ring-secondary/50 bg-white {{ $dimmed ? 'opacity-50' : '' }}">

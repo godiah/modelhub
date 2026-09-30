@@ -285,9 +285,9 @@ new class extends Component {
 
                 <form wire:submit="verifyPasswordAndSendCode" class="space-y-4">
                     <div>
-                        <label for="password" class="block text-sm font-medium text-neutral-700 font-main mb-2">
+                        <x-form.label class="font-main mb-2" for="password">
                             {{ __('Password') }}
-                        </label>
+                        </x-form.label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <x-icon name="lock-closed" class="h-5 w-5 text-neutral-400" />
@@ -296,12 +296,7 @@ new class extends Component {
                                 class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
                                 placeholder="{{ __('Enter your password') }}" required />
                         </div>
-                        @error('password')
-                            <div class="flex items-center space-x-2 text-red-600 text-sm font-main mt-2">
-                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
+                        <x-form.error name="password" class="mt-2" />
                     </div>
 
                     <div class="flex space-x-3 pt-2">
@@ -350,12 +345,7 @@ new class extends Component {
                                 class="block w-full pl-10 pr-3 py-3 border border-red-300 rounded-lg shadow-sm placeholder-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 font-main"
                                 placeholder="{{ __('Enter your password') }}" required />
                         </div>
-                        @error('password')
-                            <div class="flex items-center space-x-2 text-red-600 text-sm font-main mt-2">
-                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
+                        <x-form.error name="password" class="mt-2" />
                     </div>
 
                     <div class="flex space-x-3 pt-2 text-sm">
@@ -390,20 +380,14 @@ new class extends Component {
 
                 <form wire:submit="enableTwoFactor" class="space-y-4">
                     <div>
-                        <label for="verification_code"
-                            class="block text-sm font-medium text-neutral-700 font-main mb-2">
+                        <x-form.label class="font-main mb-2" for="verification_code">
                             {{ __('Verification Code') }}
-                        </label>
+                        </x-form.label>
                         <input type="text" wire:model="verification_code" id="verification_code" maxlength="6"
                             placeholder="000000"
                             class="block w-full px-4 py-4 border border-neutral-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary text-center text-2xl tracking-widest font-mono transition-colors duration-200"
                             required />
-                        @error('verification_code')
-                            <div class="flex items-center space-x-2 text-red-600 text-sm font-main mt-2">
-                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
+                        <x-form.error name="verification_code" class="mt-2" />
                     </div>
 
                     <div class="flex flex-wrap gap-3 pt-2 text-sm">
@@ -451,12 +435,7 @@ new class extends Component {
                             maxlength="6" placeholder="000000"
                             class="block w-full px-4 py-4 border border-red-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-center text-2xl tracking-widest font-mono transition-colors duration-200"
                             required />
-                        @error('verification_code')
-                            <div class="flex items-center space-x-2 text-red-600 text-sm font-main mt-2">
-                                <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                                <span>{{ $message }}</span>
-                            </div>
-                        @enderror
+                        <x-form.error name="verification_code" class="mt-2" />
                     </div>
 
                     <div class="flex flex-wrap gap-3 pt-2 text-sm">

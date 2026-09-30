@@ -49,9 +49,9 @@
 
                 <!-- File Upload Section -->
                 <div class="mb-5">
-                    <label for="submission_files" class="block text-sm font-medium text-neutral-700 mb-2">
+                    <x-form.label class="mb-2" for="submission_files">
                         {{ $deliverable->rejected_at ? 'Resubmit Files' : 'Upload Files' }}
-                    </label>
+                    </x-form.label>
                     <div x-data="{
                         files: [],
                         previewImages: [],
@@ -195,9 +195,9 @@
 
                 <!-- Notes Field -->
                 <div class="mb-6">
-                    <label for="submission_notes" class="block text-sm font-medium text-neutral-700 mb-2">
+                    <x-form.label class="mb-2" for="submission_notes">
                         {{ $deliverable->rejected_at ? 'Updated Notes (Optional)' : 'Submission Notes (Optional)' }}
-                    </label>
+                    </x-form.label>
                     <textarea id="submission_notes" name="submission_notes" rows="4"
                         class="w-full rounded-lg border-neutral-300 shadow-sm focus:border-secondary resize-none"
                         placeholder="{{ $deliverable->rejected_at ? 'Add notes about your updated submission here...' : 'Add any notes about your submission here...' }}"></textarea>

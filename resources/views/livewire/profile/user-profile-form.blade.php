@@ -147,9 +147,9 @@ new class extends Component {
         <form wire:submit="updateProfile" class="space-y-8">
             <!-- Avatar Section -->
             <div class="space-y-4">
-                <label class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main">
                     {{ __('Profile Avatar') }}
-                </label>
+                </x-form.label>
 
                 <div class="flex items-start space-x-6">
                     <!-- Current Avatar Display -->
@@ -207,12 +207,7 @@ new class extends Component {
                     </div>
                 </div>
 
-                @error('avatar')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="avatar" />
             </div>
 
             <!-- Professional Info -->
@@ -231,9 +226,9 @@ new class extends Component {
                     });
                 }
             }">
-                <label for="professional_info" class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main" for="professional_info">
                     {{ __('Professional Information') }}
-                </label>
+                </x-form.label>
                 <div class="relative">
                     <textarea wire:model.debounce.300ms="professional_info" id="professional_info" rows="5" maxlength="1000"
                         class="text-sm text-justify block w-full px-4 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main resize-none"
@@ -299,25 +294,15 @@ new class extends Component {
                     </span>
                 </p>
 
-                @error('professional_info')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="professional_info" />
             </div>
 
             <!-- Skills Section -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main">
                     {{ __('Area of Expertise (Skills)') }}
-                </label>
-                @error('selected_skills')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main mb-2">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                </x-form.label>
+                <x-form.error name="selected_skills" class="mb-2" />
 
                 <div class="relative" x-data="multiSelect('skills', @js($this->skills), @js($selected_skills ?? []))">
                     <div
@@ -385,15 +370,10 @@ new class extends Component {
 
             <!-- Software Section -->
             <div class="space-y-2">
-                <label class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main">
                     {{ __('Preferred Tools (Software)') }}
-                </label>
-                @error('selected_software')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main mb-2">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                </x-form.label>
+                <x-form.error name="selected_software" class="mb-2" />
 
                 <div class="relative" x-data="multiSelect('software', @js($this->software), @js($selected_software ?? []))">
                     <div
@@ -461,9 +441,9 @@ new class extends Component {
 
             <!-- Location -->
             <div class="space-y-2">
-                <label for="location" class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main" for="location">
                     {{ __('Location') }}
-                </label>
+                </x-form.label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor"
@@ -479,19 +459,14 @@ new class extends Component {
                         class="text-sm block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
                         placeholder="{{ __('City, Country') }}">
                 </div>
-                @error('location')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="location" />
             </div>
 
             <!-- Telephone -->
             <div class="space-y-2">
-                <label for="telephone_number" class="block text-sm font-medium text-neutral-700 font-main">
+                <x-form.label class="font-main" for="telephone_number">
                     {{ __('Telephone Number') }}
-                </label>
+                </x-form.label>
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <x-icon name="phone" class="h-5 w-5 text-neutral-400" />
@@ -500,12 +475,7 @@ new class extends Component {
                         class="text-sm block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main"
                         placeholder="{{ __('+254 71234 6789') }}">
                 </div>
-                @error('telephone_number')
-                    <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                        <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                <x-form.error name="telephone_number" />
             </div>
 
             <!-- Submit Button -->

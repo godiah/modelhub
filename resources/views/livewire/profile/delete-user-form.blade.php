@@ -121,9 +121,9 @@ new class extends Component {
 
                 <!-- Password Confirmation -->
                 <div class="space-y-2">
-                    <label for="password" class="block text-sm font-medium text-neutral-700 font-main">
+                    <x-form.label class="font-main" for="password">
                         {{ __('Confirm with your password') }}
-                    </label>
+                    </x-form.label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <x-icon name="lock-closed" class="h-5 w-5 text-neutral-400" />
@@ -132,12 +132,7 @@ new class extends Component {
                             class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors duration-200 font-main text-neutral-900"
                             placeholder="{{ __('Enter your password to confirm') }}" required />
                     </div>
-                    @error('password')
-                        <div class="flex items-center space-x-2 text-red-600 text-sm font-main">
-                            <x-icon name="exclamation-circle-solid" class="w-4 h-4" />
-                            <span>{{ $message }}</span>
-                        </div>
-                    @enderror
+                    <x-form.error name="password" />
                 </div>
             </div>
 
