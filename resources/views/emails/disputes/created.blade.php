@@ -1,50 +1,25 @@
 @extends('emails.layouts.master')
 
-@section('title', 'Dispute Reported')
-
-@section('header_title', 'New Dispute Reported')
+@section('title', 'New dispute reported')
+@section('header_title', 'New dispute reported')
+@section('preheader', 'Engagement #' . $engagement->id . ' (' . $job->title . ') needs review.')
 
 @section('content')
-    <p>
-        A dispute has been reported for the engagement <strong>#{{ $engagement->id }}</strong> related to the job:
-        <strong>{{ $job->title }}</strong>.
-    </p>
+    <p>A dispute was reported on engagement <strong>#{{ $engagement->id }}</strong> for <strong>{{ $job->title }}</strong>. Please review it and take action as soon as you can.</p>
 
-    <div class="mb-4">
-        <h3 style="color: #1E3A8A; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px;">Dispute Information</h3>
-        <p>
-            <strong>Initiated By:</strong> {{ $initiator->name }}
-            ({{ $initiator->id === $client->id ? 'Client' : 'Freelancer' }})<br>
-            <strong>Reason Category:</strong> {{ $cancellation->reason_category }}<br>
-            <strong>Details:</strong> {{ $cancellation->reason_details }}
-        </p>
-    </div>
+    <x-mail.details :title="__('Dispute')">
+        <x-mail.detail label="Reported by">{{ $initiator->name }} ({{ $initiator->id === $client->id ? 'Client' : 'Freelancer' }})</x-mail.detail>
+        <x-mail.detail label="Reason">{{ ucfirst(str_replace('_', ' ', $cancellation->reason_category)) }}</x-mail.detail>
+    </x-mail.details>
 
-    <div class="mb-4">
-        <h3 style="color: #1E3A8A; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px;">Involved Parties</h3>
-        <p>
-            <strong>Client:</strong> {{ $client->name }} ({{ $client->email }})<br>
-            <strong>Freelancer:</strong> {{ $freelancer->name }} ({{ $freelancer->email }})
-        </p>
-    </div>
+    @if ($cancellation->reason_details)
+        <x-mail.callout tone="warning" :title="__('Details')">{{ $cancellation->reason_details }}</x-mail.callout>
+    @endif
 
-    <p style="margin-bottom: 16px;">
-        Please review and take appropriate action as soon as possible.
-    </p>
+    <x-mail.details :title="__('Parties')">
+        <x-mail.detail label="Client">{{ $client->name }}<br>{{ $client->email }}</x-mail.detail>
+        <x-mail.detail label="Freelancer">{{ $freelancer->name }}<br>{{ $freelancer->email }}</x-mail.detail>
+    </x-mail.details>
 
-    <a href="{{ $actionUrl }}"
-        style="
-        display: inline-block;
-        background-color: #2563EB;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 6px;
-        text-decoration: none;
-    ">
-        View Dispute Details
-    </a>
-
-    <p style="margin-top: 24px;">
-        This dispute requires resolution according to platform policies.
-    </p>
+    <x-mail.button :href="$actionUrl">View the dispute</x-mail.button>
 @endsection

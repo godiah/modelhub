@@ -1,54 +1,27 @@
 @extends('emails.layouts.master')
 
-@section('title', 'Congratulations! You\'ve Been Hired')
-
-@section('header_title', 'Congratulations! You\'ve Been Hired')
+@section('title', 'You have been hired')
+@section('header_title', 'You have been hired')
+@section('preheader', 'The client accepted your application for ' . $application->job->title . '.')
 
 @section('content')
-<h2>Dear {{ $application->applicant->name }},</h2>
+    <p>Hello {{ $application->applicant->name }},</p>
 
-<p>
-    We're pleased to inform you that you have been hired for the job:
-    <strong>{{ $application->job->title }}</strong>.
-</p>
+    <p>Good news: <strong>{{ $application->job->user->name }}</strong> wants to hire you for <strong>{{ $application->job->title }}</strong>. Review the offer and accept it to get started.</p>
 
-<div class="mb-4">
-    <h3 style="color: #1E3A8A; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px;">Job Details</h3>
-    <ul style="list-style-type: none; padding-left: 0;">
-        <li style="margin-bottom: 8px;">
-            <strong>Job:</strong> {{ $application->job->title }}
-        </li>
-        <li style="margin-bottom: 8px;">
-            <strong>Employer:</strong> {{ $application->job->user->name }}
-        </li>
-        <li style="margin-bottom: 8px;">
-            <strong>Amount:</strong> <x-money :amount="$engagement->agreed_amount" />
-        </li>
-    </ul>
-</div>
+    <x-mail.details :title="__('The offer')">
+        <x-mail.detail label="Project">{{ $application->job->title }}</x-mail.detail>
+        <x-mail.detail label="Client">{{ $application->job->user->name }}</x-mail.detail>
+        <x-mail.detail label="Amount"><x-money :amount="$engagement->agreed_amount" /></x-mail.detail>
+    </x-mail.details>
 
-@if ($engagement->deliverables->count() > 0)
-<div class="mb-4">
-    <h3 style="color: #1E3A8A; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px;">Deliverables</h3>
-    <ul style="list-style-type: none; padding-left: 0;">
-        @foreach ($engagement->deliverables as $deliverable)
-        <li
-            style="margin-bottom: 12px; padding: 8px; background-color: #F9FAFB; border-left: 3px solid #14B8A6; padding-left: 12px;">
-            <strong>{{ $deliverable->title }}</strong><br>
-            <span style="color: #6B7280; font-size: 14px;">Due:
-                {{ $deliverable->due_date ? date('M d, Y', strtotime($deliverable->due_date)) : 'No deadline' }}
-            </span>
-        </li>
-        @endforeach
-    </ul>
-</div>
-@endif
+    @if ($engagement->deliverables->count() > 0)
+        <x-mail.details :title="__('Deliverables')">
+            @foreach ($engagement->deliverables as $deliverable)
+                <x-mail.detail :label="$deliverable->title">{{ $deliverable->due_date ? 'Due '.date('M j, Y', strtotime($deliverable->due_date)) : 'No deadline' }}</x-mail.detail>
+            @endforeach
+        </x-mail.details>
+    @endif
 
-<p>
-    Please log in to your account to view the complete details of this engagement and start working on the project.
-</p>
-
-<div class="text-center">
-    <a href="{{ route('applications.show', $application->job->slug) }}" class="btn btn-accent">View Job Details</a>
-</div>
+    <x-mail.button :href="route('engagements.response-form', $application->id)">Review the offer</x-mail.button>
 @endsection

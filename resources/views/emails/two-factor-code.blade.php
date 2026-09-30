@@ -1,15 +1,13 @@
 @extends('emails.layouts.master')
 
-@section('title', 'Two-Factor Authentication')
-
-@section('header_title', 'Two-Factor Authentication Code')
+@section('title', 'Your verification code')
+@section('header_title', 'Your verification code')
+@section('preheader', 'Use this code to finish signing in. It expires in 5 minutes.')
 
 @section('content')
-    <h2>Your verification code</h2>
-    <p>Use this code to complete your login:</p>
+    <p>Use this code to finish signing in:</p>
 
-    <div class="code">{{ $code }}</div>
+    <x-mail.code>{{ $code }}</x-mail.code>
 
-    <p>This code will expire in 5 minutes.</p>
-    <p>If you didn't request this code, please ignore this email.</p>
+    <p>It expires in 5 minutes. If you did not try to sign in, you can ignore this email and your account stays safe.</p>
 @endsection

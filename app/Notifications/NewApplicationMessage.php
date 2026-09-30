@@ -38,6 +38,7 @@ class NewApplicationMessage extends Notification implements ShouldQueue
                 'jobTitle' => $job->title,
                 'employerName' => $job->user->name,
                 'applicationId' => $application->id,
+                'actionUrl' => route('applications.show', $job->slug),
             ]);
     }
 

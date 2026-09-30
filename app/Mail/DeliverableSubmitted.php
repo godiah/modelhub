@@ -34,7 +34,7 @@ class DeliverableSubmitted extends Mailable implements ShouldQueue
     public function build()
     {
         return $this->subject('New Deliverable Submitted: '.$this->deliverable->title)
-            ->markdown('emails.deliverables.submitted');
+            ->view('emails.deliverables.submitted');
     }
 
     /**

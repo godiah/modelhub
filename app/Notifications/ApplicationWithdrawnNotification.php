@@ -3,9 +3,9 @@
 namespace App\Notifications;
 
 use App\Models\JobApplication;
+use App\Support\Mail\BrandedMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /** Tells the poster a freelancer withdrew their application. */
@@ -23,11 +23,12 @@ class ApplicationWithdrawnNotification extends Notification implements ShouldQue
     public function toMail($notifiable)
     {
         $job = $this->application->job;
+        $applicant = $this->application->applicant;
 
-        return (new MailMessage)
-            ->subject("{$this->application->applicant->name} withdrew their application")
+        return BrandedMail::message('An application was withdrawn')
+            ->subject("{$applicant->name} withdrew their application")
             ->greeting("Hello {$notifiable->name},")
-            ->line("{$this->application->applicant->name} withdrew their application for \"{$job->title}\".")
+            ->line("{$applicant->name} withdrew their application for \"{$job->title}\".")
             ->line('It stays in your applications list as Withdrawn, and your project is unaffected.')
             ->action('View applications', route('my-jobs.applications.index', $job->slug));
     }

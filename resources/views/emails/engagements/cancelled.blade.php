@@ -1,45 +1,36 @@
 @extends('emails.layouts.master')
 
-@section('title', 'Engagement Cancelled')
-
-@section('header_title', 'Engagement Cancelled')
+@section('title', 'Engagement cancelled')
+@section('header_title', 'Engagement cancelled')
+@section('preheader', 'The engagement for ' . $job->title . ' was cancelled by the ' . $initiatorType . '.')
 
 @section('content')
-    <p>
-        The engagement for the job <strong>{{ $job->title }}</strong> has been cancelled by the {{ $initiatorType }}.
-    </p>
+    <p>Hello {{ $notifiable->name }},</p>
 
-    <div class="mb-4">
-        <h3 style="color: #1E3A8A; border-bottom: 1px solid #E5E7EB; padding-bottom: 8px;">Cancellation Details</h3>
-        <p>
-            <strong>Initiator:</strong> {{ $initiator->name }} ({{ $initiatorType }})<br>
-            <strong>Type:</strong> {{ ucfirst(str_replace('_', ' ', $cancellation->cancellation_type)) }}<br>
-            <strong>Reason:</strong> {{ $cancellation->reason_category }}<br>
-            <strong>Details:</strong> {{ $cancellation->reason_details }}<br>
-            <strong>Date:</strong> <x-date :date="$cancellation->created_at" format="F j, Y, g:i A" />
-        </p>
-    </div>
+    <p>The engagement for <strong>{{ $job->title }}</strong> was cancelled by the {{ $initiatorType }}.</p>
 
-    @if ($cancellation->partial_payment_amount)
-        <div class="mb-4">
-            <strong>Partial Payment:</strong> <x-money :amount="$cancellation->partial_payment_amount" />
-        </div>
-    @else
-        @if ($notifiable->id === $applicant->id)
-            <p>You may contact the client to request compensation for any completed work.</p>
-        @else
-            <p>You can compensate the freelancer for their work via a partial payment.</p>
-            <a href="{{ $paymentUrl }}"
-                style="display: inline-block; background-color: #2563EB; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
-                Process Partial Payment
-            </a>
+    <x-mail.details :title="__('Cancellation')">
+        <x-mail.detail label="Cancelled by">{{ $initiator->name }} ({{ $initiatorType }})</x-mail.detail>
+        <x-mail.detail label="Type">{{ ucfirst(str_replace('_', ' ', $cancellation->cancellation_type)) }}</x-mail.detail>
+        <x-mail.detail label="Reason">{{ ucfirst(str_replace('_', ' ', $cancellation->reason_category)) }}</x-mail.detail>
+        <x-mail.detail label="Date"><x-date :date="$cancellation->created_at" format="F j, Y, g:i A" /></x-mail.detail>
+        @if ($cancellation->partial_payment_amount)
+            <x-mail.detail label="Partial payment"><x-money :amount="$cancellation->partial_payment_amount" /></x-mail.detail>
         @endif
+    </x-mail.details>
+
+    @if ($cancellation->reason_details)
+        <x-mail.callout :title="__('Details')">{{ $cancellation->reason_details }}</x-mail.callout>
     @endif
 
-    <p style="margin-top: 24px;">
-        <a href="{{ $actionUrl }}"
-            style="display: inline-block; background-color: #4B5563; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none;">
-            View Engagement Details
-        </a>
-    </p>
+    @unless ($cancellation->partial_payment_amount)
+        @if ($notifiable->id === $applicant->id)
+            <p>You can contact the client to ask for compensation for any work you completed.</p>
+        @else
+            <p>You can compensate the freelancer for their work with a partial payment.</p>
+            <x-mail.button :href="$paymentUrl">Process partial payment</x-mail.button>
+        @endif
+    @endunless
+
+    <x-mail.button :href="$actionUrl" tone="secondary">View engagement</x-mail.button>
 @endsection
