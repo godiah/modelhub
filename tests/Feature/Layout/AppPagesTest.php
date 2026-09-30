@@ -46,7 +46,7 @@ it('renders menu pages inside the shell with their breadcrumb', function (string
     'job board home' => ['jobs.index', ['Find work', 'Browse projects']],
     'my applications' => ['applications.my', ['Find work', 'My applications']],
     'archived applications' => ['applications.archived', ['My applications', 'Archived']],
-    'drafts' => ['applications.drafts', ['Find work', 'Drafts']],
+    'drafts' => ['applications.drafts', ['Find work', 'My applications', 'Drafts']],
     'post a project' => ['jobs.create', ['Hire', 'Post a project']],
     'posted projects' => ['my-jobs.index', ['Hire', 'Posted projects']],
     'archived posted projects' => ['my-jobs.archived.posted-jobs', ['Posted projects', 'Archived']],
@@ -71,10 +71,10 @@ it('renders the public apply page in the shell when signed in, titled by the pro
 });
 
 it('renders application pages for the applicant', function () {
-    $job = ModelJob::factory()->create();
+    $job = ModelJob::factory()->create(['title' => 'Hospital atrium model']);
     JobApplication::factory()->create(['job_id' => $job->id, 'applicant_id' => $this->user->id, 'poster_id' => $job->user_id]);
 
-    assertInShell($this->get(route('applications.show', $job->slug)), ['My applications', 'Application details']);
+    assertInShell($this->get(route('applications.show', $job->slug)), ['My applications', 'Hospital atrium model']);
 });
 
 it('renders the draft resume page for the applicant', function () {
@@ -141,7 +141,7 @@ it('keeps a back link on the pages whose parent is not a menu item', function ()
 
 it('shows the job board tabs and archive shortcuts in the page toolbar', function () {
     $this->get(route('jobs.index'))->assertOk()->assertSee('Post a Project')->assertSee('Find a Project');
-    $this->get(route('applications.my'))->assertOk()->assertSee('View Archived');
+    $this->get(route('applications.my'))->assertOk()->assertSee(route('applications.archived'), false);
     $this->get(route('my-jobs.index'))->assertOk()->assertSee(route('my-jobs.archived.posted-jobs'), false)->assertSee('Archived');
 });
 

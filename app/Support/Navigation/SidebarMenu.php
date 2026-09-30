@@ -98,8 +98,7 @@ final class SidebarMenu
                 'label' => 'Find work',
                 'items' => [
                     ['label' => 'Browse projects', 'route' => 'jobs.browse', 'icon' => 'magnifying-glass', 'match' => ['jobs.index', 'jobs.browse', 'jobs.apply']],
-                    ['label' => 'My applications', 'route' => 'applications.my', 'icon' => 'document-text', 'match' => ['applications.my', 'applications.show', 'applications.archived', 'applications.continue']],
-                    ['label' => 'Drafts', 'route' => 'applications.drafts', 'icon' => 'pencil-square', 'match' => ['applications.drafts']],
+                    ['label' => 'My applications', 'route' => 'applications.my', 'icon' => 'document-text', 'match' => ['applications.my', 'applications.show', 'applications.archived', 'applications.drafts', 'applications.continue']],
                 ],
             ],
             [

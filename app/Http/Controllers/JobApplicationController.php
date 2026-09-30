@@ -11,6 +11,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStatus;
 use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Application\BrowseApplicationsRequest;
 use App\Http\Requests\Application\StoreApplicationRequest;
@@ -63,16 +64,13 @@ class JobApplicationController extends Controller
     // Get all applications by the current user
     public function getUserApplications(BrowseApplicationsRequest $request)
     {
-        $activeFilters = $request->getActiveFilters();
-        $applications = $this->applicationManagementService->getUserApplications($activeFilters);
-        $draftCount = $this->applicationManagementService->getDraftCount();
+        $filters = $request->getActiveFilters();
 
-        if ($request->isAjaxRequest()) {
-            return view('jobBoard.applications.partials.applications-list',
-                compact('applications', 'activeFilters', 'draftCount'))->render();
-        }
-
-        return view('jobBoard.applications.index', compact('applications', 'activeFilters', 'draftCount'));
+        return view('jobBoard.applications.index', [
+            'applications' => $this->applicationManagementService->getUserApplications($filters),
+            'filters' => $filters,
+            'counts' => $this->applicationManagementService->getApplicationCounts(),
+        ]);
     }
 
     // Get user's draft applications
@@ -83,17 +81,19 @@ class JobApplicationController extends Controller
         return view('jobBoard.applications.drafts', compact('drafts'));
     }
 
-    // Delete an application or draft
+    // Delete a draft
     public function destroyDraft(JobApplication $application)
     {
-        if (! $this->applicationManagementService->deleteApplication($application)) {
-            return redirect()->back()->with(
-                FlashAlertHelper::error('Unauthorized Action', 'You do not have permission to delete this application.')
+        $this->authorize('update', $application);
+
+        if (! $this->applicationManagementService->deleteDraft($application)) {
+            return redirect()->route('applications.my')->with(
+                FlashAlertHelper::error('Not a draft', 'Only drafts can be deleted here. Archive a finished application instead.')
             );
         }
 
-        return redirect()->route('applications.my')->with(
-            FlashAlertHelper::success('Deleted!', 'Your application has been removed.')
+        return redirect()->route('applications.drafts')->with(
+            FlashAlertHelper::success('Draft deleted', 'Your draft has been removed.')
         );
     }
 
@@ -102,7 +102,14 @@ class JobApplicationController extends Controller
     {
         $application = $this->applicationManagementService->getApplicationDetails($job);
 
-        return view('jobBoard.applications.show', compact('application'));
+        if ($application->status === ApplicationStatus::Draft) {
+            return redirect()->route('applications.continue', $job->slug);
+        }
+
+        return view('jobBoard.applications.show', [
+            'application' => $application,
+            'clientMessages' => $this->applicationManagementService->getClientMessages($application),
+        ]);
     }
 
     // View Archived Job Applications
@@ -119,7 +126,7 @@ class JobApplicationController extends Controller
         $this->authorize('update', $application);
 
         if (! $this->applicationManagementService->archiveApplication($application)) {
-            return back()->with('error', 'This application cannot be archived at this time.');
+            return back()->with(FlashAlertHelper::error('Cannot archive yet', 'An application can be archived once it is finished: rejected, withdrawn, filled by someone else, or its engagement has ended.'));
         }
 
         return back()->with(FlashAlertHelper::success('Application Archived!', 'Application archived successfully.'));
@@ -130,7 +137,9 @@ class JobApplicationController extends Controller
     {
         $this->authorize('update', $application);
 
-        $this->applicationManagementService->restoreApplication($application);
+        if (! $this->applicationManagementService->restoreApplication($application)) {
+            return back()->with(FlashAlertHelper::error('Nothing to restore', 'This application is not archived.'));
+        }
 
         return back()->with(FlashAlertHelper::success('Application Restored!', 'Application restored successfully.'));
     }
@@ -141,7 +150,7 @@ class JobApplicationController extends Controller
         $this->authorize('delete', $application);
 
         if (! $this->applicationManagementService->deleteArchivedApplication($application)) {
-            return back()->with('error', 'You can only delete archived applications.');
+            return back()->with(FlashAlertHelper::error('Cannot delete', 'Only archived applications can be deleted, and not one that led to an engagement.'));
         }
 
         return back()->with(FlashAlertHelper::success('Application Deleted!', 'Application deleted successfully.'));

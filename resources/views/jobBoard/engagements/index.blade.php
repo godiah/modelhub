@@ -125,7 +125,7 @@
             });
 
             function bindPagination() {
-                container.querySelectorAll('.pagination a').forEach(link => {
+                container.querySelectorAll('a[data-page-link]').forEach(link => {
                     link.addEventListener('click', e => {
                         e.preventDefault();
                         fetchList(link.href);

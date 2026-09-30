@@ -8,6 +8,7 @@ use App\Observers\JobApplicationObserver;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,6 +33,10 @@ class AppServiceProvider extends ServiceProvider
         // keep JSON responses flat to match what existing frontend JS (e.g.
         // resources/js/templates.js) already expects.
         JsonResource::withoutWrapping();
+
+        // One pagination design everywhere: ->links() renders <x-pager> (resources/views/pagination/app.blade.php)
+        Paginator::defaultView('pagination.app');
+        Paginator::defaultSimpleView('pagination.app');
 
         // Fail loudly on N+1s in local/testing instead of shipping them silently.
         Model::preventLazyLoading(! app()->isProduction());

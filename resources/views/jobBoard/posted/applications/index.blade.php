@@ -230,24 +230,7 @@
                             @endforeach
                         </div>
 
-                        @if ($applications->hasPages())
-                            <nav role="navigation" aria-label="{{ __('Pagination') }}" class="mt-6 flex items-center justify-between gap-3">
-                                <p class="text-sm text-tertiary">{{ __('Showing :from–:to of :total', ['from' => $applications->firstItem(), 'to' => $applications->lastItem(), 'total' => $applications->total()]) }}</p>
-                                <div class="flex items-center gap-2">
-                                    @if ($applications->onFirstPage())
-                                        <x-btn variant="secondary" size="sm" type="button" disabled>{{ __('Previous') }}</x-btn>
-                                    @else
-                                        <x-btn variant="secondary" size="sm" href="{{ $applications->previousPageUrl() }}" rel="prev">{{ __('Previous') }}</x-btn>
-                                    @endif
-                                    <span class="px-1 text-sm tabular-nums text-tertiary">{{ $applications->currentPage() }} / {{ $applications->lastPage() }}</span>
-                                    @if ($applications->hasMorePages())
-                                        <x-btn variant="secondary" size="sm" href="{{ $applications->nextPageUrl() }}" rel="next">{{ __('Next') }}</x-btn>
-                                    @else
-                                        <x-btn variant="secondary" size="sm" type="button" disabled>{{ __('Next') }}</x-btn>
-                                    @endif
-                                </div>
-                            </nav>
-                        @endif
+                        <x-pager :paginator="$applications" />
                     @endif
                 </div>
 
