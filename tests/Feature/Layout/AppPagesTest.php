@@ -5,6 +5,7 @@ use App\Models\JobApplication;
 use App\Models\JobCancellation;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
+use App\Models\Message;
 use App\Models\ModelJob;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -150,4 +151,37 @@ it('shows the engagement counters in the toolbar of the engagements list', funct
 
 it('titles the browser tab after the current page', function () {
     $this->get(route('notifications.index'))->assertSee('<title>Notifications · ', false);
+});
+
+it('renders the engagements list with real engagements, deliverable actions and the chat box', function () {
+    $client = User::factory()->create(['name' => 'Kevin Mwangi']);
+
+    // As the client: a submitted deliverable to approve or send back.
+    $asClient = JobEngagement::create([
+        'application_id' => JobApplication::factory()->hired()->create([
+            'job_id' => ModelJob::factory()->create(['user_id' => $this->user->id, 'title' => 'Client-side job']),
+            'applicant_id' => $client->id, 'poster_id' => $this->user->id,
+        ])->id,
+        'status' => EngagementStatus::Active, 'agreed_amount' => 1100, 'service_fee' => 100, 'net_amount' => 1000,
+    ]);
+    JobDeliverable::create(['engagement_id' => $asClient->id, 'title' => 'Massing model', 'description' => 'd', 'due_date' => now()->addDays(3)->toDateString(), 'status' => 'submitted']);
+    Message::create(['engagement_id' => $asClient->id, 'sender_id' => $client->id, 'content' => 'Ping']);
+
+    // As the freelancer: a rejected deliverable to resubmit.
+    $asFreelancer = JobEngagement::create([
+        'application_id' => JobApplication::factory()->hired()->create([
+            'job_id' => ModelJob::factory()->create(['user_id' => $client->id, 'title' => 'Freelance-side job']),
+            'applicant_id' => $this->user->id, 'poster_id' => $client->id,
+        ])->id,
+        'status' => EngagementStatus::Active, 'agreed_amount' => 900, 'service_fee' => 90, 'net_amount' => 810,
+    ]);
+    JobDeliverable::create(['engagement_id' => $asFreelancer->id, 'title' => 'Lighting pass', 'description' => 'd', 'due_date' => now()->addDays(3)->toDateString(), 'status' => 'rejected']);
+
+    $response = $this->get(route('engagements.index'));
+
+    assertInShell($response, ['Client-side job', 'Freelance-side job']);
+    $response->assertSee('Approve')->assertSee('Resubmit Deliverable');
+
+    // The migrated buttons keep their Alpine bindings instead of turning them into PHP expressions.
+    expect($response->getContent())->toContain(':disabled="sending || !newMessage.trim()"');
 });

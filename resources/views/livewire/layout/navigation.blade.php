@@ -561,16 +561,12 @@ new class extends Component {
         @else
             <!-- Mobile Login/Register for Guests -->
             <div class="border-t border-neutral-200 px-4 py-4 space-y-2">
-                <a href="{{ route('login') }}" wire:navigate
-                    class="block w-full text-center px-4 py-2.5 bg-primary text-white font-medium 
-                          rounded-lg hover:bg-primary/90 transition-all duration-200 font-main">
+                <x-btn class="w-full" href="{{ route('login') }}" wire:navigate>
                     Log In
-                </a>
-                <a href="{{ route('register') }}" wire:navigate
-                    class="block w-full text-center px-4 py-2.5 border border-neutral-300 text-neutral-700 
-                          font-medium rounded-lg hover:bg-neutral-50 transition-all duration-200 font-main">
+                </x-btn>
+                <x-btn variant="secondary" class="w-full" href="{{ route('register') }}" wire:navigate>
                     Sign Up
-                </a>
+                </x-btn>
             </div>
         @endauth
     </div>

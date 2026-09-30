@@ -42,12 +42,11 @@
     @endif
 
     <div class="ml-auto flex items-center gap-2 sm:gap-3">
-        <a href="{{ route('jobs.create') }}" wire:navigate
-            class="inline-flex items-center gap-2 rounded-xl bg-teal-600 px-3 py-2 font-secondary text-sm font-semibold text-white transition-colors duration-200 hover:bg-teal-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-secondary/40 sm:px-4">
+        <x-btn href="{{ route('jobs.create') }}" wire:navigate>
             <x-icon name="plus" class="h-4 w-4" />
             <span class="hidden sm:inline">{{ __('Post a project') }}</span>
             <span class="sr-only sm:hidden">{{ __('Post a project') }}</span>
-        </a>
+        </x-btn>
 
         @php($unread = auth()->user()->unreadNotifications()->count())
         <a href="{{ route('notifications.index') }}" wire:navigate

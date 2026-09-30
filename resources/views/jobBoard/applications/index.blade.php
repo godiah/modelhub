@@ -66,11 +66,10 @@
                             <p class="text-tertiary mb-8 max-w-lg mx-auto font-secondary text-lg">You haven't submitted
                                 any
                                 applications yet. Start your career journey by exploring available opportunities.</p>
-                            <a href="{{ route('jobs.browse') }}"
-                                class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-accent to-accent/90 text-white rounded-lg hover:shadow-md transition-all duration-300 font-main font-medium">
+                            <x-btn size="lg" href="{{ route('jobs.browse') }}">
                                 Find Jobs
                                 <x-icon name="arrow-right" class="h-5 w-5 ml-2" />
-                            </a>
+                            </x-btn>
                         </div>
                     </x-card>
                 @else

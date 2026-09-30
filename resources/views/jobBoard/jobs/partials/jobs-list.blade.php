@@ -94,11 +94,10 @@
                             <x-money :amount="$job->budget" :decimals="0" />
                         </p>
                     </div>
-                    <a href="{{ route('jobs.apply', $job->slug) }}"
-                        class="inline-flex items-center px-3 py-1.5 bg-secondary hover:bg-secondary/90 text-white rounded transition-colors text-xs font-semibold whitespace-nowrap">
+                    <x-btn size="sm" class="whitespace-nowrap" href="{{ route('jobs.apply', $job->slug) }}">
                         Apply
                         <x-icon name="arrow-right" class="h-3 w-3 ml-1" />
-                    </a>
+                    </x-btn>
                 </div>
             </div>
         </div>

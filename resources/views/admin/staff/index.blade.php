@@ -8,10 +8,9 @@
                         user so they can review and resolve payment disputes.</p>
                 </div>
                 @can('view disputes')
-                    <a href="{{ route('admin.disputes.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-white border border-neutral-200 text-neutral-700 text-sm font-medium font-main rounded-lg shadow-sm hover:bg-neutral-50 transition-colors duration-200">
+                    <x-btn variant="secondary" href="{{ route('admin.disputes.index') }}">
                         Disputed Engagements
-                    </a>
+                    </x-btn>
                 @endcan
             </div>
 
@@ -56,10 +55,9 @@
                                             <option value="dispute_manager" @selected($currentRole === 'dispute_manager')>
                                                 Dispute Manager</option>
                                         </select>
-                                        <button type="submit"
-                                            class="px-3 py-1.5 bg-primary text-white text-xs font-medium font-main rounded-lg hover:bg-primary/90 transition-colors duration-200">
+                                        <x-btn size="sm" type="submit">
                                             Update
-                                        </button>
+                                        </x-btn>
                                     </form>
                                 </td>
                             </tr>

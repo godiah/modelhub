@@ -254,15 +254,14 @@
                                 </div>
 
                                 <!-- Action Button -->
-                                {{-- <button
-                                    class="inline-flex items-center px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary/90 transition-colors duration-200 shadow-sm">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
+                                {{-- <x-btn size="sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                     </svg>
                                     Export
-                                </button> --}}
+                                </x-btn> --}}
                             </div>
                         </div>
                     </div>
@@ -458,12 +457,11 @@
                                 <div class="flex items-center space-x-3">
                                     {{-- Only show button if assigned and current admin is the assignee --}}
                                     @if ($dispute->admin_assigned && auth()->id() === $dispute->admin_assigned)
-                                        <a href="{{ route('engagements.show-disputed', $dispute->cancellation->engagement_id) }}"
-                                            class="group inline-flex items-center px-5 py-2.5 bg-secondary text-white text-sm font-medium font-main rounded-lg shadow-sm hover:bg-secondary/90 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 focus:ring-2 focus:ring-secondary/20 focus:outline-none">
-                                            <x-icon name="document-text" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                        <x-btn href="{{ route('engagements.show-disputed', $dispute->cancellation->engagement_id) }}">
+                                            <x-icon name="document-text" class="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                                             View Dispute Details
                                             <x-icon name="chevron-right" class="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform duration-200" />
-                                        </a>
+                                        </x-btn>
                                     @endif
 
                                     @can('resolve disputes')
@@ -471,11 +469,10 @@
                                         <form action="{{ route('admin.disputes.assign', $dispute->id) }}"
                                             method="POST">
                                             @csrf
-                                            <button type="submit"
-                                                class="group inline-flex items-center px-5 py-2.5 bg-primary text-white text-sm font-medium font-main rounded-lg shadow-sm hover:bg-primary/90 transition-all duration-200 hover:shadow-md transform hover:-translate-y-0.5 focus:ring-2 focus:ring-primary/20 focus:outline-none">
-                                                <x-icon name="plus-2" class="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                                            <x-btn type="submit">
+                                                <x-icon name="plus-2" class="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
                                                 Assign to Me
-                                            </button>
+                                            </x-btn>
                                         </form>
                                         @endif
                                     @endcan

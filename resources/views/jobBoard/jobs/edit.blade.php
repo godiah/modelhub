@@ -47,11 +47,10 @@
 
                 <!-- Submit button -->
                 <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8 border-t border-neutral-200 pt-6">
-                    <button type="submit" id="submit-btn"
-                        class="px-6 py-3 bg-secondary text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary font-secondary transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-md hover:shadow-lg">
-                        <x-icon name="arrow-path" class="h-5 w-5 mr-2" />
+                    <x-btn size="lg" type="submit" id="submit-btn">
+                        <x-icon name="arrow-path" class="h-5 w-5" />
                         Update Project Details
-                    </button>
+                    </x-btn>
                 </div>
             </form>
         </x-card>

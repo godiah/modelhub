@@ -418,15 +418,13 @@
 
                         <!-- Action Buttons -->
                         <div class="flex flex-col justify-end sm:flex-row gap-3 pt-2">
-                            <button type="submit" name="action" value="draft"
-                                class="sm:flex-initial bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50 font-medium px-3 py-1.5 rounded-lg shadow-sm transition duration-150 ease-in-out">
+                            <x-btn variant="secondary" size="sm" class="sm:flex-initial" type="submit" name="action" value="draft">
                                 Save Draft
-                            </button>
-                            <button type="submit" name="action" value="submitted"
-                                class="bg-secondary hover:bg-secondary/90 focus:ring-2 focus:ring-offset-2 focus:ring-secondary text-white font-medium px-3 py-1.5 rounded-lg shadow-sm transition duration-150 ease-in-out flex items-center justify-center">
-                                <x-icon name="chevron-double-right" class="h-5 w-5 mr-2" />
+                            </x-btn>
+                            <x-btn size="sm" type="submit" name="action" value="submitted">
+                                <x-icon name="chevron-double-right" class="h-5 w-5" />
                                 Submit Application
-                            </button>
+                            </x-btn>
                         </div>
                     </form>
                 </x-card>
@@ -512,11 +510,10 @@
                                         </div>
 
                                         <!-- Action Button -->
-                                        <a href="{{ route('jobs.apply', $similarJob->slug) }}"
-                                            class="w-full flex items-center justify-center px-4 py-3 bg-white border-2 border-secondary text-secondary hover:bg-secondary hover:text-white rounded-xl transition-all duration-300 font-medium">
+                                        <x-btn variant="secondary" size="lg" class="w-full" href="{{ route('jobs.apply', $similarJob->slug) }}">
                                             View Details
                                             <x-icon name="arrow-right" class="h-4 w-4 ml-2" />
-                                        </a>
+                                        </x-btn>
                                     </div>
                                 </x-card>
                             @endforeach

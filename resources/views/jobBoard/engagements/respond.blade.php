@@ -207,19 +207,16 @@
                     </div>
 
                     <div class="flex justify-end pt-4">
-                        <a href="{{ route('engagements.index') }}"
-                            class="mr-4 inline-flex justify-center items-center py-2.5 px-6 border border-neutral-300 rounded-lg text-sm font-medium text-neutral-700 bg-white hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500 shadow-sm transition duration-150">
-                            <x-icon name="x-mark" class="h-4 w-4 mr-2" />
+                        <x-btn variant="secondary" class="mr-4" href="{{ route('engagements.index') }}">
+                            <x-icon name="x-mark" class="h-4 w-4" />
                             {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'Back' : 'Cancel' }}
-                        </a>
+                        </x-btn>
 
                         @if ($engagement->status === EngagementStatus::EmployerAccepted)
-                            <button type="submit" id="submitResponseBtn"
-                                class="inline-flex justify-center items-center py-2.5 px-6 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-md transition duration-150 opacity-50 cursor-not-allowed"
-                                disabled>
-                                <x-icon name="check" class="h-4 w-4 mr-2" />
+                            <x-btn type="submit" id="submitResponseBtn" disabled>
+                                <x-icon name="check" class="h-4 w-4" />
                                 Submit Response
-                            </button>
+                            </x-btn>
 
                             <script>
                                 // Check if any response option is selected on page load

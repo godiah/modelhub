@@ -277,16 +277,14 @@
 
                         <!-- Form Actions -->
                         <div class="flex flex-col sm:flex-row justify-end gap-4 mt-8 border-t border-neutral-200 pt-6">
-                            <button type="reset"
-                                class="px-6 py-3 border border-neutral-300 rounded-lg text-neutral-700 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary font-secondary transition-all duration-300 flex items-center justify-center">
-                                <x-icon name="x-mark" class="h-5 w-5 mr-2 text-neutral-500" />
+                            <x-btn variant="secondary" size="lg" type="reset">
+                                <x-icon name="x-mark" class="h-5 w-5 text-neutral-500" />
                                 Cancel
-                            </button>
-                            <button type="submit" id="submit-btn"
-                                class="px-6 py-3 bg-secondary text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary font-secondary transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center shadow-md hover:shadow-lg">
-                                <x-icon name="bolt" class="h-5 w-5 mr-2" />
+                            </x-btn>
+                            <x-btn size="lg" type="submit" id="submit-btn">
+                                <x-icon name="bolt" class="h-5 w-5" />
                                 Start Project
-                            </button>
+                            </x-btn>
                         </div>
 
                         <!-- Additional Images -->

@@ -20,15 +20,13 @@
 
     <!-- Download Button -->
     <div class="mt-3">
-        <button
-            class="w-full flex items-center justify-center px-3 py-1.5 bg-primary text-white rounded-lg shadow-sm hover:bg-primary-dark transition-colors duration-200 text-sm"
-            onclick="downloadImage('{{ $src }}')">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
+        <x-btn size="sm" class="w-full" onclick="downloadImage('{{ $src }}')">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             {{ $downloadLabel }}
-        </button>
+        </x-btn>
     </div>
 </div>

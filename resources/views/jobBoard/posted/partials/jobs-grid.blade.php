@@ -125,16 +125,14 @@
                             @endif
                         </div>
                         <div class="flex items-center space-x-2 font-main">
-                            <a href="{{ route('jobs.edit', ['job' => $job->slug]) }}"
-                                class="inline-flex items-center px-3 py-1.5 text-sm font-medium border border-neutral-300 rounded-lg hover:bg-neutral-50 text-neutral-700 transition-colors">
-                                <x-icon name="pencil-square" class="h-4 w-4 mr-1.5" />
+                            <x-btn variant="secondary" size="sm" href="{{ route('jobs.edit', ['job' => $job->slug]) }}">
+                                <x-icon name="pencil-square" class="h-4 w-4" />
                                 Edit
-                            </a>
-                            <a href="{{ route('my-jobs.applications.index', ['slug' => $job->slug]) }}"
-                                class="inline-flex items-center px-3 py-1.5 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors shadow-sm">
-                                <x-icon name="user-group" class="h-4 w-4 mr-1.5" />
+                            </x-btn>
+                            <x-btn size="sm" href="{{ route('my-jobs.applications.index', ['slug' => $job->slug]) }}">
+                                <x-icon name="user-group" class="h-4 w-4" />
                                 View Applications
-                            </a>
+                            </x-btn>
                         </div>
                     </div>
                 </div>

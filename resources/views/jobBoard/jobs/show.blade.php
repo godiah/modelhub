@@ -106,21 +106,18 @@
                             <h3 class="text-sm font-tertiary uppercase text-tertiary mb-3 tracking-wider">Quick Actions
                             </h3>
                             <div class="flex flex-wrap gap-2">
-                                <button
-                                    class="flex items-center px-3 py-1.5 bg-white rounded-lg border border-neutral-200 text-sm text-tertiary hover:border-secondary hover:text-secondary transition-colors"
-                                    onclick="copyToClipboard('{{ $jobUrl }}')" id="shareButton">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
+                                <x-btn variant="secondary" size="sm" onclick="copyToClipboard('{{ $jobUrl }}')" id="shareButton">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                                     </svg>
                                     Share
-                                </button>
-                                <a href="{{ route('jobs.edit', ['job' => $job->slug]) }}"
-                                    class="flex items-center px-3 py-1.5 bg-white rounded-lg border border-neutral-200 text-sm text-tertiary hover:border-secondary hover:text-secondary transition-colors">
-                                    <x-icon name="pencil-square" class="h-4 w-4 mr-1.5" />
+                                </x-btn>
+                                <x-btn variant="secondary" size="sm" href="{{ route('jobs.edit', ['job' => $job->slug]) }}">
+                                    <x-icon name="pencil-square" class="h-4 w-4" />
                                     Edit
-                                </a>
+                                </x-btn>
                             </div>
                         </div>
                     </div>
@@ -197,18 +194,16 @@
                 <!-- Footer Actions -->
                 <div
                     class="bg-gradient-to-r from-neutral-50 to-neutral-100 p-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-t border-neutral-200">
-                    <a href="{{ route('my-jobs.index') }}"
-                        class="group text-tertiary hover:text-primary font-medium flex items-center transition-all py-2 px-4 rounded-lg hover:bg-white hover:shadow-sm">
-                        <x-icon name="arrow-left" class="h-5 w-5 mr-2 text-secondary group-hover:text-primary transition-colors" />
+                    <x-btn variant="ghost" href="{{ route('my-jobs.index') }}">
+                        <x-icon name="arrow-left" class="h-5 w-5" />
                         Back to My Jobs
-                    </a>
+                    </x-btn>
 
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('jobs.create') }}"
-                            class="bg-accent hover:bg-accent/90 text-white font-semibold py-2 px-5 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center font-tertiary focus:ring-2 focus:ring-accent/50">
-                            <x-icon name="plus" class="h-5 w-5 mr-2" />
+                        <x-btn href="{{ route('jobs.create') }}">
+                            <x-icon name="plus" class="h-5 w-5" />
                             Create New Project
-                        </a>
+                        </x-btn>
                     </div>
                 </div>
             </x-card>
