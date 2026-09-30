@@ -229,8 +229,8 @@ test('the disputes index only shows "Assign to Me" to users who can actually res
     $manager->assignRole('dispute_manager');
     makeDisputedEngagement();
 
-    $this->actingAs($support)->get(route('admin.disputes.index'))->assertDontSee('Assign to Me');
-    $this->actingAs($manager)->get(route('admin.disputes.index'))->assertSee('Assign to Me');
+    $this->actingAs($support)->get(route('admin.disputes.index'))->assertOk()->assertDontSee('Assign to Me');
+    $this->actingAs($manager)->get(route('admin.disputes.index'))->assertOk()->assertSee('Assign to Me');
 });
 
 test('staff nav links only show for users who hold the matching permission', function () {
@@ -240,13 +240,13 @@ test('staff nav links only show for users who hold the matching permission', fun
     $support->assignRole('support');
     $regular = User::factory()->create();
 
-    $this->actingAs($admin)->get(route('dashboard'))
+    $this->actingAs($admin)->get(route('dashboard'))->assertOk()
         ->assertSee('Disputed engagements')->assertSee('Staff roles');
 
-    $this->actingAs($support)->get(route('dashboard'))
+    $this->actingAs($support)->get(route('dashboard'))->assertOk()
         ->assertSee('Disputed engagements')->assertDontSee('Staff roles');
 
-    $this->actingAs($regular)->get(route('dashboard'))
+    $this->actingAs($regular)->get(route('dashboard'))->assertOk()
         ->assertDontSee('Disputed engagements')->assertDontSee('Staff roles');
 });
 

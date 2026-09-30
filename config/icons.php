@@ -268,6 +268,11 @@ return [
         'attrs' => ['fill' => 'currentColor', 'fill-rule' => 'evenodd', 'clip-rule' => 'evenodd'],
         'd' => 'M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z',
     ],
+    'ellipsis-vertical' => [
+        'viewBox' => '0 0 24 24',
+        'attrs' => ['fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '2', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round'],
+        'd' => 'M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z',
+    ],
     'envelope' => [
         'viewBox' => '0 0 24 24',
         'attrs' => ['fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '2', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round'],

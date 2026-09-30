@@ -23,6 +23,7 @@ use App\Services\Engagements\EngagementManagementService;
 use App\Services\Engagements\EngagementPaymentService;
 use App\Services\Engagements\EngagementResponseService;
 use App\Services\Engagements\EngagementReviewService;
+use App\Services\Engagements\EngagementSummaryService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -40,18 +41,22 @@ class JobEngagementController extends Controller
 
     protected EngagementPaymentService $engagementPaymentService;
 
+    protected EngagementSummaryService $engagementSummaryService;
+
     public function __construct(
         EngagementManagementService $engagementManagementService,
         EngagementResponseService $engagementResponseService,
         EngagementReviewService $engagementReviewService,
         EngagementCancellationService $engagementCancellationService,
-        EngagementPaymentService $engagementPaymentService
+        EngagementPaymentService $engagementPaymentService,
+        EngagementSummaryService $engagementSummaryService
     ) {
         $this->engagementManagementService = $engagementManagementService;
         $this->engagementResponseService = $engagementResponseService;
         $this->engagementReviewService = $engagementReviewService;
         $this->engagementCancellationService = $engagementCancellationService;
         $this->engagementPaymentService = $engagementPaymentService;
+        $this->engagementSummaryService = $engagementSummaryService;
     }
 
     // Display a listing of the user's job engagements
@@ -63,18 +68,20 @@ class JobEngagementController extends Controller
         ];
 
         $engagements = $this->engagementManagementService->getUserEngagements($filters);
-        $hasFilters = $request->hasActiveFilters();
-        $hasArchivedEngagements = $this->engagementManagementService->hasArchivedEngagements();
+        $data = [
+            'engagements' => $engagements,
+            'summaries' => $this->engagementSummaryService->summaries($engagements->getCollection(), $request->user()),
+            'hasFilters' => $request->hasActiveFilters(),
+            'hasArchivedEngagements' => $this->engagementManagementService->hasArchivedEngagements(),
+            'statusCounts' => $this->engagementManagementService->getStatusCounts(),
+            'activeStatus' => $filters['status'],
+        ];
 
         if ($request->isAjaxRequest()) {
-            return view('jobBoard.engagements.partials.engagements-list', [
-                'engagements' => $engagements,
-                'hasFilters' => $hasFilters,
-                'hasArchivedEngagements' => $hasArchivedEngagements,
-            ])->render();
+            return view('jobBoard.engagements.partials.engagements-list', $data)->render();
         }
 
-        return view('jobBoard.engagements.index', compact('engagements', 'hasFilters', 'hasArchivedEngagements'));
+        return view('jobBoard.engagements.index', $data);
     }
 
     // Show response form for the job engagement

@@ -1,91 +1,88 @@
 <x-app-layout>
-    <x-slot name="toolbar">
-        <div class="flex items-center text-sm font-tertiary font-medium text-neutral-500">
-                <span class="hidden md:inline-flex items-center mr-4">
-                    <x-icon name="clock" class="h-4 w-4 mr-1 text-secondary" />
-                    Active: {{ $engagements->where('status', 'active')->count() }}
-                </span>
-                <span class="hidden md:inline-flex items-center mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-accent" fill="none"
-                        viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                    </svg>
-                    Pending: {{ $engagements->where('status', 'employer_accepted')->count() }}
-                </span>
-                <span class="hidden md:inline-flex items-center mr-4">
-                    <x-icon name="check-circle" class="h-4 w-4 mr-1 text-green-800" />
-                    Completed: {{ $engagements->where('status', 'completed')->count() }}
-                </span>
-                <span class="hidden md:inline-flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="h-4 w-4 mr-1 text-red-800">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                    </svg>
-                    Withdrawn: {{ $engagements->where('status', 'cancelled')->count() }}
-                </span>
-            </div>
-    </x-slot>
+    @php
+        // Tab key = the value the request validates (Pending is `employer_accepted`).
+        $tabs = [
+            'all' => __('All'),
+            'active' => __('Active'),
+            'employer_accepted' => __('Pending'),
+            'completed' => __('Completed'),
+            'cancelled' => __('Withdrawn'),
+        ];
+        // Less common states only get a tab when there is something in them (or it is the current filter).
+        foreach (['disputed' => __('Disputed'), 'settled' => __('Settled')] as $key => $label) {
+            if (($statusCounts[$key] ?? 0) > 0 || $activeStatus === $key) {
+                $tabs[$key] = $label;
+            }
+        }
+        $tabUrl = fn (string $key) => route('engagements.index', array_filter([
+            'status' => $key === 'all' ? null : $key,
+            'search' => request('search'),
+        ]));
+    @endphp
 
     <div class="container mx-auto max-w-7xl px-4 py-8 pb-24">
-        <!-- Search & Filter -->
-        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="relative flex-grow max-w-md">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <x-icon name="magnifying-glass" class="h-5 w-5 text-neutral-400" />
-                </div>
-                <input type="text" id="searchEngagements" name="search"
-                    class="font-tertiary text-sm block w-full pl-10 pr-3 py-2.5 border border-neutral-300 rounded-lg focus:ring-primary focus:border-primary"
-                    value="{{ request('search') }}" placeholder="Search engagements...">
+        <!-- Search + archived -->
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div class="w-full sm:max-w-md">
+                <label for="searchEngagements" class="sr-only">{{ __('Search engagements') }}</label>
+                <x-field id="searchEngagements" name="search" icon="magnifying-glass" value="{{ request('search') }}"
+                    placeholder="{{ __('Search by project or person…') }}" />
             </div>
 
-            <div class="flex gap-3">
-                <div>
-                    <select id="statusEngagementFilter" name="status"
-                        class="font-tertiary block w-full border-neutral-300 rounded-lg focus:ring-primary focus:border-primary py-2.5 pl-3 pr-10 text-sm">
-                        <option value="all">All Status</option>
-                        <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="completed"{{ request('status') == 'completed' ? 'selected' : '' }}>Completed
-                        </option>
-                        <option value="cancelled"{{ request('status') == 'cancelled' ? 'selected' : '' }}>Withdrawn
-                        </option>
-                    </select>
-                </div>
-                <div>
-                    @if ($hasArchivedEngagements)
-                        <x-btn variant="secondary" href="{{ route('engagements.archived') }}">
-                            <x-icon name="archive-box-2" class="h-5 w-5" />
-                            View Archived
-                        </x-btn>
-                    @endif
-                </div>
-            </div>
+            @if ($hasArchivedEngagements)
+                <x-btn variant="secondary" href="{{ route('engagements.archived') }}">
+                    <x-icon name="archive-box-2" class="h-4 w-4" />
+                    {{ __('View archived') }}
+                </x-btn>
+            @endif
         </div>
+
+        <!-- Status tabs -->
+        <div class="-mx-4 mb-6 overflow-x-auto px-4 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+            <nav aria-label="{{ __('Filter engagements by status') }}"
+                class="inline-flex min-w-full gap-1 border-b border-neutral-200 sm:flex">
+                @foreach ($tabs as $key => $label)
+                    @php($active = $activeStatus === $key)
+                    <a href="{{ $tabUrl($key) }}" wire:navigate @if ($active) aria-current="page" @endif
+                        @class([
+                            '-mb-px inline-flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:rounded-t-lg focus-visible:ring-2 focus-visible:ring-secondary/40',
+                            'border-teal-600 text-neutral-900' => $active,
+                            'border-transparent text-neutral-500 hover:text-neutral-800' => !$active,
+                        ])>
+                        {{ $label }}
+                        <span @class([
+                            'rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums',
+                            'bg-teal-50 text-teal-800' => $active,
+                            'bg-neutral-100 text-neutral-600' => !$active,
+                        ])>{{ $statusCounts[$key] ?? 0 }}</span>
+                    </a>
+                @endforeach
+            </nav>
+        </div>
+
         <div id="engagementsContainer">
             @if ($engagements->isEmpty() && !$hasFilters)
-                <x-card class="p-12 text-center">
-                    <div class="bg-neutral-100 h-24 w-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <x-icon name="chat-bubble-text" class="h-12 w-12 text-neutral-400" stroke-width="1.5" />
+                <x-card class="rounded-2xl p-12 text-center">
+                    <span class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
+                        <x-icon name="chat-bubble-left-right" class="h-8 w-8" />
+                    </span>
+                    <h3 class="mt-5 font-tertiary text-lg font-semibold text-neutral-900">{{ __('No engagements yet') }}</h3>
+                    <p class="mx-auto mt-2 max-w-md text-sm text-tertiary">
+                        {{ __('When an offer is made or accepted, the work shows up here with its deliverables, deadlines and messages.') }}
+                    </p>
+                    <div class="mt-6 flex flex-wrap justify-center gap-3">
+                        <x-btn href="{{ route('jobs.browse') }}">
+                            <x-icon name="magnifying-glass" class="h-4 w-4" />
+                            {{ __('Browse projects') }}
+                        </x-btn>
+                        <x-btn variant="secondary" href="{{ route('jobs.create') }}">
+                            <x-icon name="plus" class="h-4 w-4" />
+                            {{ __('Post a project') }}
+                        </x-btn>
                     </div>
-                    <h3 class="font-tertiary font-semibold text-xl text-neutral-700 mb-3">No Job Engagements Found</h3>
-                    <p class="text-neutral-500 font-main max-w-md mx-auto mb-6">You don't have any active job
-                        engagements at
-                        the moment. Apply to job posts to receive offers.</p>
-                    <x-btn size="lg" href="{{ route('jobs.browse') }}">
-                        <x-icon name="magnifying-glass" class="h-5 w-5" />
-                        Browse Available Jobs
-                    </x-btn>
                 </x-card>
             @else
-                @include('jobBoard.engagements.partials.engagements-list', [
-                    'engagements' => $engagements,
-                    'hasFilters' => $hasFilters,
-                    'hasArchivedEngagements' => $hasArchivedEngagements,
-                ])
+                @include('jobBoard.engagements.partials.engagements-list')
             @endif
         </div>
     </div>
@@ -93,26 +90,17 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const searchInput = document.getElementById('searchEngagements');
-            const statusSelect = document.getElementById('statusEngagementFilter');
             const container = document.getElementById('engagementsContainer');
-            const clearBtn = document.getElementById('clearEngagementFilters');
             let debounce;
 
-            function fetchList() {
-                const url = new URL(window.location.href);
-                url.searchParams.set('search', searchInput.value);
-                url.searchParams.set('status', statusSelect.value);
-
+            // Search re-renders just the list (status comes from the URL, so it survives searching).
+            function fetchList(url) {
                 container.classList.add('opacity-50');
-                fetch(url, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                     .then(r => r.text())
                     .then(html => {
                         container.innerHTML = html;
-                        window.history.pushState({}, '', url);
+                        window.history.replaceState({}, '', url);
                         container.classList.remove('opacity-50');
                         bindPagination();
                     });
@@ -120,16 +108,19 @@
 
             searchInput.addEventListener('input', () => {
                 clearTimeout(debounce);
-                debounce = setTimeout(fetchList, 300);
+                debounce = setTimeout(() => {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('search', searchInput.value);
+                    url.searchParams.delete('page');
+                    if (!searchInput.value) url.searchParams.delete('search');
+                    fetchList(url);
+                }, 300);
             });
-            statusSelect.addEventListener('change', fetchList);
 
             document.addEventListener('click', e => {
-                if (e.target.id === 'clearEngagementFilters') {
+                if (e.target.closest('#clearEngagementFilters')) {
                     e.preventDefault();
-                    searchInput.value = '';
-                    statusSelect.value = 'all';
-                    fetchList();
+                    window.location.href = @js(route('engagements.index'));
                 }
             });
 
@@ -137,17 +128,7 @@
                 container.querySelectorAll('.pagination a').forEach(link => {
                     link.addEventListener('click', e => {
                         e.preventDefault();
-                        fetch(link.href, {
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            })
-                            .then(r => r.text())
-                            .then(html => {
-                                container.innerHTML = html;
-                                window.history.pushState({}, '', link.href);
-                                bindPagination();
-                            });
+                        fetchList(link.href);
                     });
                 });
             }

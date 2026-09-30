@@ -54,9 +54,9 @@ it('shows the administration group to staff according to their permissions', fun
     $admin = User::factory()->create();
     $admin->assignRole('admin');
 
-    $this->actingAs($support)->get(route('dashboard'))->assertSee('Administration')->assertSee('Disputed engagements');
+    $this->actingAs($support)->get(route('dashboard'))->assertOk()->assertSee('Administration')->assertSee('Disputed engagements');
 
-    $this->actingAs($admin)->get(route('dashboard'))->assertSee('Administration')->assertSee('Staff roles');
+    $this->actingAs($admin)->get(route('dashboard'))->assertOk()->assertSee('Administration')->assertSee('Staff roles');
 });
 
 it('marks exactly the matching sidebar item active; unlisted pages light up nothing', function () {
@@ -102,7 +102,7 @@ it('resolves breadcrumbs for pages that are not sidebar entries', function () {
 });
 
 it('gives signed-in users the slim app footer and guests the marketing footer', function () {
-    $this->get(route('jobs.browse'))->assertSee('Connect With Us')->assertDontSee('Cancellation &amp; payment policy', false);
+    $this->get(route('jobs.browse'))->assertOk()->assertSee('Connect With Us')->assertDontSee('Cancellation &amp; payment policy', false);
 
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard'))

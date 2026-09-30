@@ -20,7 +20,7 @@
         <div class="px-6 py-3 bg-neutral-50 border-b border-neutral-200">
             <div class="w-full bg-neutral-200 rounded-full h-2.5">
                 <div class="bg-secondary h-2.5 rounded-full"
-                    style="width: {{ ($engagement->getCompletedDeliverablesCount() / $engagement->getTotalDeliverablesCount()) * 100 }}%">
+                    style="width: {{ $engagement->getTotalDeliverablesCount() > 0 ? ($engagement->getCompletedDeliverablesCount() / $engagement->getTotalDeliverablesCount()) * 100 : 0 }}%">
                 </div>
             </div>
         </div>

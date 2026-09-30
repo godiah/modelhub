@@ -134,23 +134,19 @@ it('keeps a back link on the pages whose parent is not a menu item', function ()
     $job = ModelJob::factory()->create(['user_id' => $this->user->id]);
     $application = JobApplication::factory()->create(['job_id' => $job->id, 'poster_id' => $this->user->id]);
 
-    $this->get(route('my-jobs.applications.show', $application))
+    $this->get(route('my-jobs.applications.show', $application))->assertOk()
         ->assertSee(route('my-jobs.applications.index', ['slug' => $job->slug]), false)
         ->assertSee('Back to Applications');
 });
 
 it('shows the job board tabs and archive shortcuts in the page toolbar', function () {
-    $this->get(route('jobs.index'))->assertSee('Post a Project')->assertSee('Find a Project');
-    $this->get(route('applications.my'))->assertSee('View Archived');
-    $this->get(route('my-jobs.index'))->assertSee('Archived Jobs');
-});
-
-it('shows the engagement counters in the toolbar of the engagements list', function () {
-    $this->get(route('engagements.index'))->assertSee('Active:')->assertSee('Withdrawn:');
+    $this->get(route('jobs.index'))->assertOk()->assertSee('Post a Project')->assertSee('Find a Project');
+    $this->get(route('applications.my'))->assertOk()->assertSee('View Archived');
+    $this->get(route('my-jobs.index'))->assertOk()->assertSee('Archived Jobs');
 });
 
 it('titles the browser tab after the current page', function () {
-    $this->get(route('notifications.index'))->assertSee('<title>Notifications · ', false);
+    $this->get(route('notifications.index'))->assertOk()->assertSee('<title>Notifications · ', false);
 });
 
 it('renders the engagements list with real engagements, deliverable actions and the chat box', function () {

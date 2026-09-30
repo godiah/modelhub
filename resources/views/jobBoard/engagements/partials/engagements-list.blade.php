@@ -13,56 +13,212 @@
                 $currentUser = Auth::user();
                 $isApplicant = $engagement->application->applicant_id === $currentUser->id;
                 $isPoster = $engagement->application->poster_id === $currentUser->id;
+                $summary = $summaries[$engagement->id];
 
-                $totalDeliverables = $engagement->deliverables->count();
-                $completedDeliverables = $engagement->deliverables->where('submitted_at', '!=', null)->count();
-                $progressPercentage = $totalDeliverables > 0 ? ($completedDeliverables / $totalDeliverables) * 100 : 0;
+                // Variables the expandable panel below still relies on (progress now counts approved work only).
+                $totalDeliverables = $summary['total'];
+                $completedDeliverables = $summary['approved'];
+                $progressPercentage = $summary['percent'];
+
+                $status = $engagement->status;
+                $isFinished = in_array($status, [EngagementStatus::Completed, EngagementStatus::Cancelled, EngagementStatus::Settled], true);
+                $reviewed = $isFinished && $engagement->hasBeenReviewedByUser();
+                $canCancel = !$isFinished && $status !== EngagementStatus::Disputed;
+                $canMessage = in_array($status, [EngagementStatus::Active, EngagementStatus::Cancelled], true);
+                $canSettle = $engagement->isCancelled() && $engagement->hasSubmittedOrApprovedDeliverables();
+                $canReopen = in_array($status, [EngagementStatus::Cancelled, EngagementStatus::Settled], true)
+                    && $isPoster && !$engagement->application->job->is_active;
+                $fullPageUrl = match ($status) {
+                    EngagementStatus::Cancelled => route('engagements.show-cancelled', $engagement->id),
+                    EngagementStatus::Disputed => route('engagements.show-disputed', $engagement->id),
+                    default => route('engagements.archived-details', $engagement->id),
+                };
+
+                // The one thing this row asks of the user, if anything.
+                $primary = match (true) {
+                    $isApplicant && $status === EngagementStatus::EmployerAccepted => 'respond',
+                    $summary['to_review'] > 0 => 'review',
+                    $summary['to_revise'] > 0 => 'revise',
+                    $canSettle => 'settle',
+                    $status === EngagementStatus::Disputed => 'dispute',
+                    $isFinished && !$reviewed => 'leave-review',
+                    default => null,
+                };
             @endphp
 
-            <x-card clip class="transition-all duration-200 hover:shadow-md" x-data="{ open: false }">
-                <!-- Engagement Header - Always visible -->
-                <div @click="open = !open" class="cursor-pointer">
-                    <div class="p-6 flex flex-col sm:flex-row sm:items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex flex-col sm:flex-row sm:items-center">
-                                <h3 class="font-tertiary font-bold text-lg text-primary flex items-center">
-                                    <x-icon name="document-text" class="h-5 w-5 mr-2 flex-shrink-0" />
-                                    {{ $engagement->application->job->title }}
-                                </h3>
-                                <x-engagement.status-badge :status="$engagement->status" class="sm:ml-3 mt-1 sm:mt-0 px-3 py-1 text-xs font-medium font-main" icon-class="h-3.5 w-3.5 mr-1" />
-                            </div>
-                        </div>
+            <x-card class="rounded-2xl transition-shadow duration-200 hover:shadow-md" x-data="{ open: false }">
+                <!-- Row: identity, progress, amount, actions -->
+                <div class="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:gap-6">
+                    <!-- Identity (toggles the panel) -->
+                    <button type="button" @click="open = !open" :aria-expanded="open.toString()"
+                        class="flex min-w-0 flex-1 items-start gap-4 rounded-xl text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
+                        <span @class([
+                            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl',
+                            'bg-teal-50 text-teal-700' => $summary['role'] === 'freelancer',
+                            'bg-blue-50 text-blue-700' => $summary['role'] === 'client',
+                        ])>
+                            <x-icon :name="$summary['role'] === 'freelancer' ? 'briefcase' : 'users'" class="h-5 w-5" />
+                        </span>
 
-                        <div class="sm:ml-4 flex font-main">
-                            @if ($isApplicant && $engagement->status === EngagementStatus::EmployerAccepted)
-                                <x-btn size="sm" class="mr-3" href="{{ route('engagements.response-form', ['applicationId' => $engagement->application_id]) }}">
-                                    <x-icon name="check" class="h-3.5 w-3.5" />
-                                    Respond
-                                </x-btn>
+                        <span class="min-w-0 flex-1">
+                            <span class="flex flex-wrap items-center gap-2">
+                                <span class="truncate font-tertiary text-base font-semibold text-neutral-900">{{ $engagement->application->job->title }}</span>
+                                <x-engagement.status-badge :status="$status" class="px-2.5 py-0.5 text-xs font-medium" icon-class="w-3 h-3 mr-1" />
+                            </span>
+                            <span class="mt-1 block truncate text-sm text-tertiary">
+                                <span class="font-medium text-neutral-700">{{ $summary['role'] === 'freelancer' ? __('Freelancer') : __('Client') }}</span>
+                                @if ($summary['counterpart'])
+                                    · {{ __('with :name', ['name' => $summary['counterpart']]) }}
+                                @endif
+                                @if ($engagement->started_at)
+                                    · {{ __('Started :date', ['date' => $engagement->started_at->format('M j')]) }}
+                                @endif
+                            </span>
+
+                            @if ($summary['to_review'] > 0 || $summary['to_revise'] > 0 || $summary['overdue'] || $summary['unread_messages'] > 0 || ($isPoster && $status === EngagementStatus::EmployerAccepted))
+                                <span class="mt-2 flex flex-wrap gap-2">
+                                    @if ($summary['to_review'] > 0)
+                                        <x-badge tone="amber" class="px-2.5 py-0.5 text-xs font-medium">{{ trans_choice(':count to review|:count to review', $summary['to_review'], ['count' => $summary['to_review']]) }}</x-badge>
+                                    @endif
+                                    @if ($summary['to_revise'] > 0)
+                                        <x-badge tone="red" class="px-2.5 py-0.5 text-xs font-medium">{{ trans_choice(':count to revise|:count to revise', $summary['to_revise'], ['count' => $summary['to_revise']]) }}</x-badge>
+                                    @endif
+                                    @if ($summary['overdue'])
+                                        <x-badge tone="red" class="px-2.5 py-0.5 text-xs font-medium">{{ __('Overdue') }}</x-badge>
+                                    @endif
+                                    @if ($summary['unread_messages'] > 0)
+                                        <x-badge tone="blue" class="px-2.5 py-0.5 text-xs font-medium" data-unread-for="{{ $engagement->id }}">{{ trans_choice(':count new message|:count new messages', $summary['unread_messages'], ['count' => $summary['unread_messages']]) }}</x-badge>
+                                    @endif
+                                    @if ($isPoster && $status === EngagementStatus::EmployerAccepted)
+                                        <x-badge tone="neutral" class="px-2.5 py-0.5 text-xs font-medium">{{ __('Waiting for the freelancer') }}</x-badge>
+                                    @endif
+                                </span>
                             @endif
+                        </span>
+                    </button>
 
-                            <button class="flex items-center text-neutral-500 hover:text-neutral-700" x-cloak>
-                                <span class="text-sm mr-1" x-text="open ? 'Hide Details' : 'View Details'"></span>
-                                <x-icon name="chevron-down" class="h-5 w-5 transition-transform duration-200" ::class="{ 'transform rotate-180': open }" />
-                            </button>
+                    <!-- Progress and next deadline -->
+                    <div class="lg:w-56 lg:shrink-0">
+                        <div class="h-2 overflow-hidden rounded-full bg-neutral-100" role="progressbar"
+                            aria-label="{{ __('Deliverables approved') }}" aria-valuemin="0" aria-valuemax="100"
+                            aria-valuenow="{{ $summary['percent'] }}">
+                            <div class="h-full rounded-full bg-teal-600" style="width: {{ $summary['percent'] }}%"></div>
                         </div>
+                        <p class="mt-1.5 flex items-center justify-between gap-2 text-xs text-tertiary">
+                            <span>
+                                @if ($summary['total'] > 0)
+                                    {{ __(':approved of :total approved', ['approved' => $summary['approved'], 'total' => $summary['total']]) }}
+                                @else
+                                    {{ __('No deliverables yet') }}
+                                @endif
+                            </span>
+                            @if ($summary['next_due'])
+                                <span @class(['font-medium', 'text-red-600' => $summary['overdue']])>
+                                    {{ $summary['overdue'] ? __('Was due') : __('Due') }} {{ $summary['next_due']->format('M j') }}
+                                </span>
+                            @endif
+                        </p>
                     </div>
 
-                    <!-- Progress bar -->
-                    <div class="px-6 pb-4 font-main" x-cloak>
-                        <div class="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
-                            <div class="h-full bg-secondary rounded-full" style="width: {{ $progressPercentage }}%">
+                    <!-- Amount -->
+                    <div class="lg:w-32 lg:shrink-0 lg:text-right">
+                        <p class="text-xs text-tertiary">{{ __($summary['amount_label']) }}</p>
+                        <p class="font-tertiary text-base font-semibold tabular-nums text-neutral-900"><x-money :amount="$summary['amount']" :decimals="0" /></p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex shrink-0 items-center gap-2 lg:w-64 lg:justify-end">
+                        @switch($primary)
+                            @case('respond')
+                                <x-btn size="sm" href="{{ route('engagements.response-form', ['applicationId' => $engagement->application_id]) }}">{{ __('Respond to offer') }}</x-btn>
+                            @break
+                            @case('review')
+                                <x-btn size="sm" type="button" @click="open = true">{{ __('Review work') }}</x-btn>
+                            @break
+                            @case('revise')
+                                <x-btn size="sm" type="button" @click="open = true">{{ __('Revise') }}</x-btn>
+                            @break
+                            @case('settle')
+                                <x-btn size="sm" href="{{ route('engagements.show-cancelled', $engagement->id) }}">{{ __('Settle') }}</x-btn>
+                            @break
+                            @case('dispute')
+                                <x-btn size="sm" variant="secondary" href="{{ $fullPageUrl }}">{{ __('View dispute') }}</x-btn>
+                            @break
+                            @case('leave-review')
+                                <x-btn size="sm" type="button"
+                                    @click="$dispatch('open-modal', { name: 'review-engagement', id: {{ $engagement->id }}, status: '{{ $status->value }}' })">{{ __('Leave a review') }}</x-btn>
+                            @break
+                        @endswitch
+
+                        <!-- More actions -->
+                        <div class="relative" x-data="{ menu: false }" @click.outside="menu = false" @keydown.escape="menu = false">
+                            <button type="button" @click="menu = !menu" :aria-expanded="menu.toString()" aria-haspopup="menu"
+                                aria-label="{{ __('More actions') }}"
+                                class="rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
+                                <x-icon name="ellipsis-vertical" class="h-5 w-5" />
+                            </button>
+
+                            <div x-show="menu" x-cloak x-transition.opacity role="menu"
+                                class="absolute right-0 z-20 mt-2 w-60 rounded-xl border border-neutral-200 bg-white p-1.5 shadow-lg">
+                                @php($itemClass = 'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-neutral-700 transition-colors hover:bg-neutral-50 focus:bg-neutral-50 focus:outline-none')
+                                <a href="{{ $fullPageUrl }}" role="menuitem" class="{{ $itemClass }}">
+                                    <x-icon name="arrow-top-right-on-square" class="h-4 w-4 text-neutral-400" />{{ __('Open full page') }}
+                                </a>
+
+                                @if ($canMessage)
+                                    <button type="button" role="menuitem" class="{{ $itemClass }}"
+                                        @click="menu = false; $dispatch('open-message-modal', { engagementId: {{ $engagement->id }} })">
+                                        <x-icon name="chat-bubble-left-right" class="h-4 w-4 text-neutral-400" />
+                                        <span class="flex-1">{{ __('Messages') }}</span>
+                                        @if ($summary['unread_messages'] > 0)
+                                            <span data-unread-for="{{ $engagement->id }}" class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">{{ $summary['unread_messages'] }}</span>
+                                        @endif
+                                    </button>
+                                @endif
+
+                                @if ($isFinished && !$reviewed && $primary !== 'leave-review')
+                                    <button type="button" role="menuitem" class="{{ $itemClass }}"
+                                        @click="menu = false; $dispatch('open-modal', { name: 'review-engagement', id: {{ $engagement->id }}, status: '{{ $status->value }}' })">
+                                        <x-icon name="star" class="h-4 w-4 text-neutral-400" />{{ __('Leave a review') }}
+                                    </button>
+                                @endif
+
+                                @if ($isFinished && $reviewed)
+                                    <button type="button" role="menuitem" class="{{ $itemClass }}"
+                                        @click="menu = false; $dispatch('open-modal', { name: 'archive-engagement', id: {{ $engagement->id }} })">
+                                        <x-icon name="archive-box-3" class="h-4 w-4 text-neutral-400" />{{ __('Archive') }}
+                                    </button>
+                                @endif
+
+                                @if ($canReopen)
+                                    <form action="{{ route('engagements.reopen-job', $engagement) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" role="menuitem" class="{{ $itemClass }}">
+                                            <x-icon name="arrow-path" class="h-4 w-4 text-neutral-400" />{{ __('Reopen job') }}
+                                        </button>
+                                    </form>
+                                @endif
+
+                                @if ($canCancel)
+                                    <div class="my-1.5 border-t border-neutral-100"></div>
+                                    <button type="button" role="menuitem"
+                                        class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm text-red-600 transition-colors hover:bg-red-50 focus:bg-red-50 focus:outline-none"
+                                        @click="menu = false; $dispatch('open-modal', 'cancel-engagement-{{ $engagement->id }}')">
+                                        <x-icon name="x-mark" class="h-4 w-4" />{{ __('Cancel engagement') }}
+                                    </button>
+                                @endif
                             </div>
                         </div>
-                        <div class="flex justify-between mt-1 text-xs text-neutral-500">
-                            <span>Progress</span>
-                            <span>{{ $completedDeliverables }}/{{ $totalDeliverables }} Deliverables</span>
-                        </div>
+
+                        <button type="button" @click="open = !open" :aria-label="open ? '{{ __('Hide details') }}' : '{{ __('Show details') }}'"
+                            class="rounded-lg p-2 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
+                            <x-icon name="chevron-down" class="h-5 w-5 transition-transform duration-200" ::class="{ 'rotate-180': open }" />
+                        </button>
                     </div>
                 </div>
 
                 <!-- Expandable Content -->
-                <div x-show="open" x-collapse x-cloak class="border-t border-neutral-200 bg-neutral-50">
+                <div x-show="open" x-collapse x-cloak class="rounded-b-2xl border-t border-neutral-200 bg-neutral-50">
                     <!-- Engagement Details Row -->
                     @include('jobBoard.engagements.partials.components.engagement-details')
 
@@ -875,8 +1031,6 @@
                     @endif
                 </div>
 
-                <!-- Card Footer -->
-                @include('jobBoard.engagements.partials.components.card-footer')
 
 
                 <!-- Cancellation Modal -->
@@ -1038,6 +1192,8 @@
                             if (unreadBadge) {
                                 unreadBadge.style.display = 'none';
                             }
+                            document.querySelectorAll(`[data-unread-for="${this.currentEngagementId}"]`)
+                                .forEach(el => el.style.display = 'none');
                         }
                     } catch (error) {
                         console.error('Error marking messages as read:', error);
