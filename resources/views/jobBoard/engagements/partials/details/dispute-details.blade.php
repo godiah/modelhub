@@ -114,7 +114,7 @@
                             <div class="flex-1 min-w-0">
                                 <h3 class="text-xs font-semibold text-green-800 font-main mb-1">Resolution Amount</h3>
                                 <p class="text-lg font-bold text-green-700 font-main">
-                                    Ksh{{ number_format($dispute->resolution_amount, 2) }}
+                                    <x-money :amount="$dispute->resolution_amount" />
                                 </p>
                             </div>
                         </div>

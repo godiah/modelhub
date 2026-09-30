@@ -80,7 +80,7 @@
                     </div>
                 </div>
                 <p class="text-lg font-bold text-accent font-main">
-                    Ksh{{ number_format($engagement->application->offer_amount, 2) }}
+                    <x-money :amount="$engagement->application->offer_amount" />
                 </p>
             </div>
 
@@ -95,7 +95,7 @@
                     </div>
                 </div>
                 <p class="text-lg font-bold text-primary font-main">
-                    {{ $engagement->application->created_at->format('M j, Y g:i A') }}
+                    <x-date :date="$engagement->application->created_at" format="M j, Y g:i A" />
                 </p>
             </div>
         </div>

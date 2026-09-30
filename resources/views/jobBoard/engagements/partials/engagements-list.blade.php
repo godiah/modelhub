@@ -181,7 +181,7 @@
                                                             class="flex items-center {{ $deliverable->isOverdue() ? 'text-red-500' : 'text-secondary' }}">
                                                             <x-icon name="calendar" class="h-3.5 w-3.5 mr-1" />
                                                             Due:
-                                                            {{ $deliverable->due_date->format('M j, Y') }}
+                                                            <x-date :date="$deliverable->due_date" />
                                                             @if ($deliverable->isOverdue())
                                                                 <span class="ml-1 text-xs">(Overdue)</span>
                                                             @endif
@@ -197,7 +197,7 @@
                                                         <div class="flex items-center text-secondary">
                                                             <x-icon name="check-circle" class="h-3.5 w-3.5 mr-1" />
                                                             Completed:
-                                                            {{ $deliverable->submitted_at->format('M j, Y') }}
+                                                            <x-date :date="$deliverable->submitted_at" />
                                                         </div>
                                                     @endif
 
@@ -205,7 +205,7 @@
                                                         <div class="flex items-center text-secondary">
                                                             <x-icon name="check-circle" class="h-3.5 w-3.5 mr-1" />
                                                             Approved:
-                                                            {{ $deliverable->approved_at->format('M j, Y') }}
+                                                            <x-date :date="$deliverable->approved_at" />
                                                         </div>
                                                     @endif
 
@@ -213,7 +213,7 @@
                                                         <div class="flex items-center text-red-800">
                                                             <x-icon name="x-mark" class="h-3.5 w-3.5 mr-1" />
                                                             Rejected:
-                                                            {{ $deliverable->rejected_at->format('M j, Y') }}
+                                                            <x-date :date="$deliverable->rejected_at" />
                                                         </div>
                                                     @endif
 
@@ -736,7 +736,7 @@
                                                                     class="flex items-center {{ now()->gt($deliverable->due_date) ? 'text-red-500' : 'text-secondary' }}">
                                                                     <x-icon name="calendar" class="h-3.5 w-3.5 mr-1" />
                                                                     Due:
-                                                                    {{ $deliverable->due_date->format('M j, Y') }}
+                                                                    <x-date :date="$deliverable->due_date" />
                                                                     @if ($deliverable->isOverdue())
                                                                         <span class="ml-1 text-xs">(Overdue)</span>
                                                                     @endif
@@ -752,7 +752,7 @@
                                                                 <div class="flex items-center text-secondary">
                                                                     <x-icon name="check-circle" class="h-3.5 w-3.5 mr-1" />
                                                                     Completed:
-                                                                    {{ $deliverable->submitted_at->format('M j, Y') }}
+                                                                    <x-date :date="$deliverable->submitted_at" />
                                                                 </div>
                                                             @endif
 
@@ -760,7 +760,7 @@
                                                                 <div class="flex items-center text-secondary">
                                                                     <x-icon name="check-circle" class="h-3.5 w-3.5 mr-1" />
                                                                     Approved:
-                                                                    {{ $deliverable->approved_at->format('M j, Y') }}
+                                                                    <x-date :date="$deliverable->approved_at" />
                                                                 </div>
                                                             @endif
 
@@ -768,7 +768,7 @@
                                                                 <div class="flex items-center text-red-800">
                                                                     <x-icon name="x-mark" class="h-3.5 w-3.5 mr-1" />
                                                                     Rejected:
-                                                                    {{ $deliverable->rejected_at->format('M j, Y') }}
+                                                                    <x-date :date="$deliverable->rejected_at" />
                                                                 </div>
                                                             @endif
                                                         </div>

@@ -62,7 +62,7 @@
                         <div class="flex flex-col items-end">
                             <span class="text-xs font-tertiary uppercase tracking-wider text-neutral-100">Budget</span>
                             <span class="text-lg sm:text-xl font-semibold font-secondary">
-                                Ksh.{{ number_format($job->budget, 2) }}
+                                <x-money :amount="$job->budget" />
                             </span>
                         </div>
                     </div>

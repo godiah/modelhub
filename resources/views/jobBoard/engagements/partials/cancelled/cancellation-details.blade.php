@@ -38,7 +38,7 @@
                 <span class="text-neutral-700 font-medium text-sm">Engagement Cancelled</span>
             </div>
             <div class="text-sm text-neutral-500">
-                {{ $engagement->cancelled_at->format('M d, Y h:i A') }}
+                <x-date :date="$engagement->cancelled_at" format="M d, Y h:i A" />
             </div>
         </div>
     </div>

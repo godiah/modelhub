@@ -22,7 +22,7 @@
             <strong>Employer:</strong> {{ $application->job->user->name }}
         </li>
         <li style="margin-bottom: 8px;">
-            <strong>Amount:</strong> {{ config('app.currency_symbol') . number_format($engagement->agreed_amount, 2) }}
+            <strong>Amount:</strong> <x-money :amount="$engagement->agreed_amount" />
         </li>
     </ul>
 </div>

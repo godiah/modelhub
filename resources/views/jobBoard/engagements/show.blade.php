@@ -129,20 +129,20 @@
                             <div class="flex justify-between items-center">
                                 <span class="text-sm text-neutral-600 font-secondary">Agreed Amount</span>
                                 <span
-                                    class="text-sm font-medium text-neutral-900 font-main">Ksh{{ number_format($engagement->agreed_amount, 2) }}</span>
+                                    class="text-sm font-medium text-neutral-900 font-main"><x-money :amount="$engagement->agreed_amount" /></span>
                             </div>
                             @if ($engagement->service_fee)
                                 <div class="flex justify-between items-center">
                                     <span class="text-sm text-neutral-600 font-secondary">Service Fee</span>
                                     <span
-                                        class="text-sm font-medium text-neutral-900 font-main">Ksh{{ number_format($engagement->service_fee, 2) }}</span>
+                                        class="text-sm font-medium text-neutral-900 font-main"><x-money :amount="$engagement->service_fee" /></span>
                                 </div>
                             @endif
                             @if ($engagement->net_amount)
                                 <div class="flex justify-between items-center pt-3 border-t border-neutral-200">
                                     <span class="text-sm font-medium text-neutral-900 font-main">Net Amount</span>
                                     <span
-                                        class="text-sm font-medium text-neutral-900 font-main">Ksh{{ number_format($engagement->net_amount, 2) }}</span>
+                                        class="text-sm font-medium text-neutral-900 font-main"><x-money :amount="$engagement->net_amount" /></span>
                                 </div>
                             @endif
                             <!-- Payment Status -->

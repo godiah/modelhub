@@ -58,7 +58,7 @@
                                         </h2>
                                         <p class="text-sm text-neutral-500 font-main mt-1">
                                             Started on <span
-                                                class="font-medium">{{ $draft->created_at->format('M d, Y') }}</span>
+                                                class="font-medium"><x-date :date="$draft->created_at" format="M d, Y" /></span>
                                         </p>
                                     </div>
                                 </div>

@@ -12,7 +12,7 @@
                 </div>
                 <div>
                     <h4 class="font-medium text-neutral-800">{{ $review->reviewer->name }}</h4>
-                    <p class="text-xs text-neutral-500">{{ $review->created_at->format('M d, Y') }}</p>
+                    <p class="text-xs text-neutral-500"><x-date :date="$review->created_at" format="M d, Y" /></p>
                 </div>
             </div>
             <x-jobs.star-rating :rating="$review->rating" size="sm" :showNumber="true" />

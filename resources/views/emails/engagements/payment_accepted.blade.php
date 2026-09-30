@@ -16,7 +16,7 @@
         <p style="margin-bottom: 16px; color: #4B5563; font-size: 16px;">
             <strong style="color: #1E3A8A;">Amount:</strong>
             <span style="color: #1F2937; font-weight: 500;">
-                Ksh{{ number_format($payment->amount, 2) }}
+                <x-money :amount="$payment->amount" />
             </span>
         </p>
 

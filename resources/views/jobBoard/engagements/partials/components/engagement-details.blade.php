@@ -23,7 +23,7 @@
         <div>
             <p class="text-xs text-neutral-500 font-main">Agreed amount</p>
             <p class="font-medium text-neutral-800">
-                Ksh{{ number_format($engagement->net_amount, 2) }}</p>
+                <x-money :amount="$engagement->net_amount" /></p>
         </div>
     </div>
 

@@ -16,13 +16,13 @@
             <strong>Type:</strong> {{ ucfirst(str_replace('_', ' ', $cancellation->cancellation_type)) }}<br>
             <strong>Reason:</strong> {{ $cancellation->reason_category }}<br>
             <strong>Details:</strong> {{ $cancellation->reason_details }}<br>
-            <strong>Date:</strong> {{ $cancellation->created_at->format('F j, Y, g:i A') }}
+            <strong>Date:</strong> <x-date :date="$cancellation->created_at" format="F j, Y, g:i A" />
         </p>
     </div>
 
     @if ($cancellation->partial_payment_amount)
         <div class="mb-4">
-            <strong>Partial Payment:</strong> Ksh{{ number_format($cancellation->partial_payment_amount, 2) }}
+            <strong>Partial Payment:</strong> <x-money :amount="$cancellation->partial_payment_amount" />
         </div>
     @else
         @if ($notifiable->id === $applicant->id)

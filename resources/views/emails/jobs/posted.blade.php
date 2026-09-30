@@ -24,7 +24,7 @@
     <p>Here's a quick summary of your project:</p>
     <ul>
         <li><strong>Title:</strong> {{ $job->title }}</li>
-        <li><strong>Posted on:</strong> {{ $job->created_at->format('F j, Y') }}</li>
+        <li><strong>Posted on:</strong> <x-date :date="$job->created_at" format="F j, Y" /></li>
         @if($job->budget)
         <li><strong>Budget:</strong> {{ $job->budget }}</li>
         @endif

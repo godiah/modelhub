@@ -311,7 +311,7 @@
                                 <span class="text-sm font-medium text-neutral-600 font-tertiary">Amount</span>
                             </div>
                             <p class="text-xl font-bold text-green-600 font-main">
-                                Ksh{{ number_format($partialPayment->amount, 2) }}
+                                <x-money :amount="$partialPayment->amount" />
                             </p>
                         </div>
 

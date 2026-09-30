@@ -36,19 +36,19 @@
                         <div class="flex-1">
                             <div class="flex items-center space-x-2">
                                 <span
-                                    class="text-lg font-medium text-neutral-900 font-main">Ksh{{ number_format($payment->amount, 2) }}</span>
+                                    class="text-lg font-medium text-neutral-900 font-main"><x-money :amount="$payment->amount" /></span>
                                 @if ($payment->final_amount && $payment->final_amount != $payment->amount)
                                     <span class="text-sm text-neutral-500 font-secondary">(Final:
-                                        Ksh{{ number_format($payment->final_amount, 2) }})</span>
+                                        <x-money :amount="$payment->final_amount" />)</span>
                                 @endif
                             </div>
                             @if ($payment->notes)
                                 <p class="text-sm text-neutral-600 mt-1 font-secondary">{{ $payment->notes }}</p>
                             @endif
                             <div class="flex items-center mt-2 text-xs text-neutral-500 font-secondary space-x-4">
-                                <span>Processed: {{ $payment->processed_at->format('M j, Y g:i A') }}</span>
+                                <span>Processed: <x-date :date="$payment->processed_at" format="M j, Y g:i A" /></span>
                                 @if ($payment->accepted_at)
-                                    <span>Accepted: {{ $payment->accepted_at->format('M j, Y g:i A') }}</span>
+                                    <span>Accepted: <x-date :date="$payment->accepted_at" format="M j, Y g:i A" /></span>
                                 @endif
                             </div>
                         </div>

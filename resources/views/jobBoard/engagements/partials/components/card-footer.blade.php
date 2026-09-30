@@ -10,7 +10,7 @@
                 <div>
                     <p class="text-xs text-neutral-500 mb-1">Job Posted</p>
                     <p class="text-sm font-medium text-neutral-700">
-                        {{ $engagement->application->job->created_at->format('M j, Y') }}
+                        <x-date :date="$engagement->application->job->created_at" />
                     </p>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                         {{ $isApplicant ? 'Application Date' : 'Applied On' }}
                     </p>
                     <p class="text-sm font-medium text-neutral-700">
-                        {{ $engagement->application->created_at->format('M j, Y') }}</p>
+                        <x-date :date="$engagement->application->created_at" /></p>
                 </div>
             </div>
 
@@ -85,7 +85,7 @@
                     <div>
                         <p class="text-xs text-neutral-500 mb-1">Budget</p>
                         <p class="text-sm font-medium text-neutral-700">
-                            Ksh{{ number_format($engagement->agreed_amount, 2) }}
+                            <x-money :amount="$engagement->agreed_amount" />
                         </p>
                     </div>
                 </div>

@@ -19,7 +19,7 @@
 
         <p style="margin-bottom: 16px; color: #4B5563; background-color: #F3F4F6; padding: 12px; border-radius: 6px;">
             <strong style="color: #1E3A8A;">Agreed Amount:</strong> <span
-                style="color: #1F2937; font-weight: 500;">Ksh{{ number_format($engagement->agreed_amount, 2) }}</span>
+                style="color: #1F2937; font-weight: 500;"><x-money :amount="$engagement->agreed_amount" /></span>
         </p>
 
         @if ($notes)

@@ -21,7 +21,7 @@
                         <div>
                             <h1 class="text-2xl font-bold font-tertiary tracking-tight">Payment Dispute</h1>
                             <p class="text-white/80 mt-1 font-secondary">
-                                For payment amount: Ksh{{ number_format($payment->amount, 2) }} for job
+                                For payment amount: <x-money :amount="$payment->amount" /> for job
                                 "{{ $engagement->application->job->title }}"
                             </p>
                         </div>

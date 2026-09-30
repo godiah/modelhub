@@ -50,7 +50,7 @@
                                 <p class="text-sm text-tertiary font-main">
                                     <span class="inline-flex items-center">
                                         <x-icon name="calendar" class="h-4 w-4 mr-1 text-secondary" />
-                                        Applied {{ $application->created_at->format('M d, Y') }}
+                                        Applied <x-date :date="$application->created_at" format="M d, Y" />
                                     </span>
                                 </p>
                             </div>

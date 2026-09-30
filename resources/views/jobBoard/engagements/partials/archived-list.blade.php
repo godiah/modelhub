@@ -101,7 +101,7 @@
                                 </div>
                                 <div>
                                     <p class="text-lg font-bold font-main text-neutral-900">
-                                        Ksh{{ number_format($engagement->agreed_amount, 2) }}</p>
+                                        <x-money :amount="$engagement->agreed_amount" /></p>
                                     <p class="text-xs text-neutral-500 font-secondary">Total Amount</p>
                                 </div>
                             </div>
@@ -114,7 +114,7 @@
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium font-secondary text-neutral-900">
-                                        {{ $engagement->updated_at->format('M d, Y') }}</p>
+                                        <x-date :date="$engagement->updated_at" format="M d, Y" /></p>
                                     <p class="text-xs text-neutral-500 font-secondary">Archived Date
                                     </p>
                                 </div>

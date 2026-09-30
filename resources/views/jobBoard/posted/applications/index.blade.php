@@ -23,19 +23,19 @@
                             <div class="mt-2 flex flex-wrap items-center gap-4 font-secondary">
                                 <p class="text-sm text-neutral-500 flex items-center">
                                     <x-icon name="calendar" class="h-4 w-4 mr-1 text-secondary" />
-                                    Posted on {{ $job->created_at->format('M d, Y') }}
+                                    Posted on <x-date :date="$job->created_at" format="M d, Y" />
                                 </p>
                                 <p class="text-sm text-neutral-500 flex items-center">
                                     <x-icon name="clock" class="h-4 w-4 mr-1 text-accent" />
                                     @if ($job->no_deadline)
                                         No deadline
                                     @else
-                                        Deadline: {{ $job->deadline->format('M d, Y') }}
+                                        Deadline: <x-date :date="$job->deadline" format="M d, Y" />
                                     @endif
                                 </p>
                                 <p class="text-sm text-neutral-500 flex items-center">
                                     <x-icon name="coins" class="h-4 w-4 mr-1 text-primary" fill="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    Budget: <span class="font-medium">Ksh.{{ number_format($job->budget) }}</span>
+                                    Budget: <span class="font-medium"><x-money :amount="$job->budget" :decimals="0" /></span>
                                 </p>
                             </div>
                         </div>

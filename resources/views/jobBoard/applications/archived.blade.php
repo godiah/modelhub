@@ -85,8 +85,8 @@
                                         {{ $application->job->title }}
                                     </h2>
                                     <p class="text-sm text-tertiary font-main mt-1">
-                                        Applied: {{ $application->created_at->format('M d, Y') }} &bull;
-                                        Archived: {{ $application->updated_at->format('M d, Y') }}
+                                        Applied: <x-date :date="$application->created_at" format="M d, Y" /> &bull;
+                                        Archived: <x-date :date="$application->updated_at" format="M d, Y" />
                                     </p>
                                 </div>
                             </div>

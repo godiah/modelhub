@@ -66,12 +66,12 @@
                                                 @if ($job->no_deadline)
                                                     <span>No deadline</span>
                                                 @else
-                                                    <span>Deadline: {{ $job->deadline->format('M d, Y') }}</span>
+                                                    <span>Deadline: <x-date :date="$job->deadline" format="M d, Y" /></span>
                                                 @endif
                                             </div>
                                             <div class="flex items-center">
                                                 <x-icon name="coins" class="h-4 w-4 mr-2 text-neutral-400" fill="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                <span>Budget: Ksh{{ number_format($job->budget, 2) }}</span>
+                                                <span>Budget: <x-money :amount="$job->budget" /></span>
                                             </div>
                                             <div class="flex items-center">
                                                 <x-icon name="users" class="h-4 w-4 mr-2 text-neutral-400" />

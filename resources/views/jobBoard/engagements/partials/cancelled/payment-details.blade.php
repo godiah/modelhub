@@ -152,7 +152,7 @@
                                 <x-icon name="coins" class="h-4 w-4 text-primary mr-2" fill="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                                 Amount
                             </dt>
-                            <dd class="text-neutral-900">Ksh{{ number_format($payment->amount, 2) }}</dd>
+                            <dd class="text-neutral-900"><x-money :amount="$payment->amount" /></dd>
                         </div>
                         <div class="p-3 bg-white rounded-lg shadow-sm">
                             <dt class="font-medium text-neutral-500 flex items-center mb-1 text-xs">

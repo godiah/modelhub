@@ -98,7 +98,7 @@
                                         <div class="flex items-center text-tertiary">
                                             <x-icon name="calendar-solid" class="h-4 w-4 mr-1" />
                                             <span class="text-sm">Applied
-                                                {{ $application->created_at->format('M d, Y') }}</span>
+                                                <x-date :date="$application->created_at" format="M d, Y" /></span>
                                         </div>
                                     </div>
                                 </div>
@@ -120,7 +120,7 @@
                                     <div class="text-sm text-tertiary mb-1 font-main">Offer Amount</div>
                                     <div class="text-xl font-bold text-primary font-secondary">
                                         @if ($application->offer_amount)
-                                            Ksh{{ number_format($application->offer_amount, 2) }}
+                                            <x-money :amount="$application->offer_amount" />
                                         @else
                                             <span class="text-tertiary text-base font-normal">Not specified</span>
                                         @endif
@@ -132,7 +132,7 @@
                                     <div class="text-sm text-tertiary mb-1 font-main">Service Fee (10%)</div>
                                     <div class="text-xl font-bold text-red-500 font-secondary">
                                         @if ($application->service_fee)
-                                            Ksh{{ number_format($application->service_fee, 2) }}
+                                            <x-money :amount="$application->service_fee" />
                                         @else
                                             <span class="text-tertiary text-base font-normal">Not applicable</span>
                                         @endif
@@ -144,7 +144,7 @@
                                     <div class="text-sm text-blue-700 mb-1 font-main">Net Amount</div>
                                     <div class="text-xl font-bold text-blue-700 font-secondary">
                                         @if ($application->net_amount)
-                                            Ksh{{ number_format($application->net_amount, 2) }}
+                                            <x-money :amount="$application->net_amount" />
                                         @else
                                             <span class="text-blue-400 text-base font-normal">Not applicable</span>
                                         @endif
@@ -406,7 +406,7 @@
                                             <span
                                                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
                                                 <x-icon name="coins" class="h-3.5 w-3.5 mr-1" fill="#1e3a8a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                                Ksh {{ number_format($application->job->budget, 2) }}
+                                                <x-money :amount="$application->job->budget" />
                                             </span>
                                         </div>
                                     </div>
@@ -420,7 +420,7 @@
                                             Posted Date
                                         </div>
                                         <div class="font-medium text-neutral-700">
-                                            {{ $application->job->created_at->format('M d, Y') }}</div>
+                                            <x-date :date="$application->job->created_at" format="M d, Y" /></div>
                                     </div>
                                     <div class="bg-neutral-50 rounded-lg p-3 border border-neutral-200/60">
                                         <div class="flex items-center text-tertiary text-sm mb-1 font-main">
@@ -958,7 +958,7 @@
                                         <p class="text-sm font-medium text-neutral-800 font-secondary">Application
                                             Submitted</p>
                                         <p class="text-xs text-neutral-500 mt-0.5 font-main">
-                                            {{ $application->created_at->format('M d, Y - h:i A') }}</p>
+                                            <x-date :date="$application->created_at" format="M d, Y - h:i A" /></p>
                                     </div>
                                 </div>
 
@@ -972,7 +972,7 @@
                                             <p class="text-sm font-medium text-neutral-800 font-secondary">Application
                                                 Reviewed</p>
                                             <p class="text-xs text-neutral-500 mt-0.5 font-main">
-                                                {{ $application->updated_at->format('M d, Y - h:i A') }}</p>
+                                                <x-date :date="$application->updated_at" format="M d, Y - h:i A" /></p>
                                         </div>
                                     </div>
                                 @endif
@@ -986,7 +986,7 @@
                                             <p class="text-sm font-medium text-neutral-800 font-secondary">Applicant
                                                 Hired</p>
                                             <p class="text-xs text-neutral-500 mt-0.5 font-main">
-                                                {{ $application->updated_at->format('M d, Y - h:i A') }}</p>
+                                                <x-date :date="$application->updated_at" format="M d, Y - h:i A" /></p>
                                         </div>
                                     </div>
                                 @endif
@@ -1000,7 +1000,7 @@
                                             <p class="text-sm font-medium text-neutral-800 font-secondary">Application
                                                 Rejected</p>
                                             <p class="text-xs text-neutral-500 mt-0.5 font-main">
-                                                {{ $application->updated_at->format('M d, Y - h:i A') }}</p>
+                                                <x-date :date="$application->updated_at" format="M d, Y - h:i A" /></p>
                                         </div>
                                     </div>
                                 @endif

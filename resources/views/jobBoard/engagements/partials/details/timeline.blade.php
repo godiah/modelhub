@@ -59,8 +59,8 @@
                                 </span>
                             </div>
                             <p class="text-sm text-neutral-600 font-secondary">
-                                {{ $engagement->employer_accepted_at->format('F j, Y') }} at
-                                {{ $engagement->employer_accepted_at->format('g:i A') }}
+                                <x-date :date="$engagement->employer_accepted_at" format="F j, Y" /> at
+                                <x-date :date="$engagement->employer_accepted_at" format="g:i A" />
                             </p>
                         </div>
                     </div>
@@ -96,8 +96,8 @@
                                 </span>
                             </div>
                             <p class="text-sm text-neutral-600 font-secondary">
-                                {{ $engagement->started_at->format('F j, Y') }} at
-                                {{ $engagement->started_at->format('g:i A') }}
+                                <x-date :date="$engagement->started_at" format="F j, Y" /> at
+                                <x-date :date="$engagement->started_at" format="g:i A" />
                             </p>
                         </div>
                     </div>
@@ -126,8 +126,8 @@
                                 </span>
                             </div>
                             <p class="text-sm text-neutral-600 font-secondary">
-                                {{ $engagement->completed_at->format('F j, Y') }} at
-                                {{ $engagement->completed_at->format('g:i A') }}
+                                <x-date :date="$engagement->completed_at" format="F j, Y" /> at
+                                <x-date :date="$engagement->completed_at" format="g:i A" />
                             </p>
                         </div>
                     </div>
@@ -156,8 +156,8 @@
                                 </span>
                             </div>
                             <p class="text-sm text-neutral-600 font-secondary">
-                                {{ $engagement->cancelled_at->format('F j, Y') }} at
-                                {{ $engagement->cancelled_at->format('g:i A') }}
+                                <x-date :date="$engagement->cancelled_at" format="F j, Y" /> at
+                                <x-date :date="$engagement->cancelled_at" format="g:i A" />
                             </p>
                         </div>
                     </div>
@@ -189,8 +189,8 @@
                                 </span>
                             </div>
                             <p class="text-sm text-neutral-600 font-secondary">
-                                {{ $engagement->cancellation->freelancer_accepted_at->format('F j, Y') }} at
-                                {{ $engagement->cancellation->freelancer_accepted_at->format('g:i A') }}
+                                <x-date :date="$engagement->cancellation->freelancer_accepted_at" format="F j, Y" /> at
+                                <x-date :date="$engagement->cancellation->freelancer_accepted_at" format="g:i A" />
                             </p>
                         </div>
                     </div>
@@ -219,8 +219,8 @@
                                 </span>
                             </div>
                             <p class="text-sm text-neutral-600 font-secondary">
-                                {{ $engagement->cancellation->dispute->resolved_at->format('F j, Y') }} at
-                                {{ $engagement->cancellation->dispute->resolved_at->format('g:i A') }}
+                                <x-date :date="$engagement->cancellation->dispute->resolved_at" format="F j, Y" /> at
+                                <x-date :date="$engagement->cancellation->dispute->resolved_at" format="g:i A" />
                             </p>
                         </div>
                     </div>

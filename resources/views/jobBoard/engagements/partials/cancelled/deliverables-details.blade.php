@@ -183,7 +183,7 @@
                                 class="pt-2 border-t border-neutral-200 flex justify-between text-xs text-neutral-500">
                                 <div>
                                     <p>Created:
-                                        {{ $deliverable->created_at->format('M d, Y h:i A') }}</p>
+                                        <x-date :date="$deliverable->created_at" format="M d, Y h:i A" /></p>
                                     @if ($deliverable->submitted_at)
                                         <p>Submitted:
                                             {{ \Carbon\Carbon::parse($deliverable->submitted_at)->format('M d, Y h:i A') }}

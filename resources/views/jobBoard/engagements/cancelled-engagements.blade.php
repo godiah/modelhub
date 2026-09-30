@@ -93,7 +93,7 @@
                             <p class="text-sm text-neutral-600 mt-1 flex items-center">
                                 <x-icon name="calendar-2" class="w-4 h-4 mr-1.5 text-neutral-500" />
                                 Cancelled on <span
-                                    class="font-medium text-neutral-700 ml-1">{{ $engagement->cancelled_at->format('M d, Y') }}</span>
+                                    class="font-medium text-neutral-700 ml-1"><x-date :date="$engagement->cancelled_at" format="M d, Y" /></span>
                             </p>
                         </div>
                     </div>

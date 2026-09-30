@@ -57,7 +57,7 @@
                                 <div class="flex justify-between text-sm">
                                     <span class="text-neutral-600">Your offer</span>
                                     <span id="yourOfferAmount" class="font-semibold text-neutral-800">
-                                        {{ old('offer', $application->offer_amount) ? 'Ksh' . number_format(old('offer', $application->offer_amount), 2) : '' }}
+                                        {{ old('offer', $application->offer_amount) ? \App\Support\Money::format(old('offer', $application->offer_amount)) : '' }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between text-sm">
@@ -68,13 +68,13 @@
                                             title="Service fee applied to all projects">?</span>
                                     </span>
                                     <span id="serviceFee" class="font-semibold text-red-500">
-                                        {{ old('offer', $application->offer_amount) ? 'Ksh' . number_format(old('offer', $application->offer_amount) * 0.1, 2) : '' }}
+                                        {{ old('offer', $application->offer_amount) ? \App\Support\Money::format(old('offer', $application->offer_amount) * 0.1) : '' }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between font-bold mt-4 pt-4 border-t border-neutral-200">
                                     <span class="text-primary">You'll receive</span>
                                     <span id="youllReceive" class="text-secondary text-lg">
-                                        {{ old('offer', $application->offer_amount) ? 'Ksh' . number_format(old('offer', $application->offer_amount) * 0.9, 2) : '' }}
+                                        {{ old('offer', $application->offer_amount) ? \App\Support\Money::format(old('offer', $application->offer_amount) * 0.9) : '' }}
                                     </span>
                                 </div>
                             </div>

@@ -56,7 +56,7 @@
                                 {{ $application->status->label() }}</span>
                         </p>
                         <p class="text-sm text-neutral-600">
-                            Applied on {{ $application->created_at->format('F d, Y') }}
+                            Applied on <x-date :date="$application->created_at" format="F d, Y" />
                         </p>
                     </div>
                 </div>
@@ -89,7 +89,7 @@
                         <div class="flex items-center mt-3 text-tertiary text-sm">
                             <span class="flex items-center">
                                 <x-icon name="calendar" class="h-4 w-4 mr-1" />
-                                Posted on {{ $application->job->created_at->format('M d, Y') }}
+                                Posted on <x-date :date="$application->job->created_at" format="M d, Y" />
                             </span>
                             <span class="mx-3">•</span>
                             <span class="flex items-center">
@@ -102,7 +102,7 @@
                             <div class="bg-neutral-100 rounded-lg px-5 py-3 text-center">
                                 <p class="text-sm text-neutral-500">Job Budget</p>
                                 <p class="text-base font-bold text-primary mt-1">
-                                    Ksh{{ number_format($application->job->budget) }}</p>
+                                    <x-money :amount="$application->job->budget" :decimals="0" /></p>
                             </div>
                         </div>
                     </div>
@@ -118,19 +118,19 @@
                         <div class="bg-white rounded-lg p-4 border border-neutral-200">
                             <p class="text-sm text-neutral-500 mb-1">Your Offer</p>
                             <p class="text-xl font-bold text-primary">
-                                Ksh{{ number_format($application->offer_amount, 2) }}</p>
+                                <x-money :amount="$application->offer_amount" /></p>
                         </div>
 
                         <div class="bg-white rounded-lg p-4 border border-neutral-200">
                             <p class="text-sm text-neutral-500 mb-1">Service Fee</p>
                             <p class="text-xl font-bold text-tertiary">
-                                Ksh{{ number_format($application->service_fee, 2) }}</p>
+                                <x-money :amount="$application->service_fee" /></p>
                         </div>
 
                         <div class="bg-white rounded-lg p-4 border border-neutral-200">
                             <p class="text-sm text-neutral-500 mb-1">You'll Receive</p>
                             <p class="text-xl font-bold text-secondary">
-                                Ksh{{ number_format($application->net_amount, 2) }}
+                                <x-money :amount="$application->net_amount" />
                             </p>
                         </div>
                     </div>

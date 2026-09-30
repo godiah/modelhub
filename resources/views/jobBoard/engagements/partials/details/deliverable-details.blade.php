@@ -83,7 +83,7 @@
                                     <div class="flex items-center space-x-1.5">
                                         <x-icon name="cloud-arrow-up" class="w-3.5 h-3.5 text-neutral-400" />
                                         <span class="font-medium">Submitted:</span>
-                                        <span>{{ $deliverable->created_at->format('M j, Y g:i A') }}</span>
+                                        <span><x-date :date="$deliverable->created_at" format="M j, Y g:i A" /></span>
                                     </div>
 
                                     <!-- Status Date -->

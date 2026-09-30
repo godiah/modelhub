@@ -55,7 +55,7 @@
                     <div>
                         <p class="text-sm font-medium font-main text-neutral-600">Total Earnings</p>
                         <p class="text-2xl font-bold font-tertiary text-accent mt-1">
-                            Ksh{{ number_format($stats['total_earnings'], 2) }}
+                            <x-money :amount="$stats['total_earnings']" />
                         </p>
                     </div>
                     <div

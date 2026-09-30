@@ -27,7 +27,7 @@
                             <div class="flex flex-wrap items-center gap-4 text-sm font-secondary">
                                 <div class="flex items-center text-tertiary">
                                     <x-icon name="calendar-solid" class="h-4 w-4 mr-1" />
-                                    Posted: {{ $job->created_at->format('M d, Y') }}
+                                    Posted: <x-date :date="$job->created_at" format="M d, Y" />
                                 </div>
                                 <div class="flex items-center text-tertiary">
                                     <x-icon name="users-solid" class="h-4 w-4 mr-1" />
@@ -120,7 +120,7 @@
                                         <div class="flex items-center text-tertiary">
                                             <x-icon name="calendar-solid" class="h-4 w-4 mr-1" />
                                             <span class="text-sm">Applied
-                                                {{ $application->created_at->format('M d, Y') }}</span>
+                                                <x-date :date="$application->created_at" format="M d, Y" /></span>
                                         </div>
                                     </div>
                                 </div>
@@ -141,7 +141,7 @@
                                                 <div class="text-xs text-tertiary mb-1 font-main">Offer Amount</div>
                                                 <div class="text-lg font-bold text-primary font-secondary">
                                                     @if ($application->offer_amount)
-                                                        Ksh{{ number_format($application->offer_amount, 2) }}
+                                                        <x-money :amount="$application->offer_amount" />
                                                     @else
                                                         <span class="text-tertiary text-base font-normal">Not
                                                             specified</span>
@@ -152,7 +152,7 @@
                                                 <div>
                                                     <div class="text-xs text-tertiary mb-1 font-main">Net Amount</div>
                                                     <div class="text-lg font-bold text-blue-700 font-secondary">
-                                                        Ksh{{ number_format($application->net_amount, 2) }}
+                                                        <x-money :amount="$application->net_amount" />
                                                     </div>
                                                 </div>
                                             @endif

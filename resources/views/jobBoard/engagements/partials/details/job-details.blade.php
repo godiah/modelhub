@@ -148,7 +148,7 @@
                     <span class="text-sm font-medium text-neutral-600 font-secondary">Budget</span>
                 </div>
                 <p class="text-lg font-bold text-accent font-main">
-                    Ksh {{ number_format($engagement->application->job->budget, 2) }}
+                    <x-money :amount="$engagement->application->job->budget" />
                 </p>
             </div>
 
@@ -161,7 +161,7 @@
                     <span class="text-sm font-medium text-neutral-600 font-secondary">Posted</span>
                 </div>
                 <p class="text-lg font-bold text-primary font-main">
-                    {{ $engagement->application->job->created_at->format('M j, Y') }}
+                    <x-date :date="$engagement->application->job->created_at" />
                 </p>
             </div>
 

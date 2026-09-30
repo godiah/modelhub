@@ -83,7 +83,7 @@
                             <div class="flex-1 min-w-0">
                                 <h3 class="text-xs font-semibold text-red-800 font-main mb-1">Partial Payment</h3>
                                 <p class="text-sm font-bold text-red-700 font-main">
-                                    Ksh{{ number_format($engagement->cancellation->partial_payment_amount, 2) }}
+                                    <x-money :amount="$engagement->cancellation->partial_payment_amount" />
                                 </p>
                             </div>
                         </div>

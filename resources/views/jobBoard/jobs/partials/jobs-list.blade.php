@@ -27,7 +27,7 @@
                         {{ $job->title }}
                     </h2>
                     <p class="text-xs text-gray-500 mt-0.5">
-                        Posted on {{ $job->created_at->format('M d, Y') }}
+                        Posted on <x-date :date="$job->created_at" format="M d, Y" />
                     </p>
                 </div>
 
@@ -41,7 +41,7 @@
                         <span
                             class="bg-secondary text-white font-semibold px-2 py-0.5 rounded-full md:flex md:items-center text-xs">
                             <x-icon name="calendar" class="hidden md:block h-3 w-3 mr-0.5" />
-                            {{ $job->deadline->format('M d') }}
+                            <x-date :date="$job->deadline" format="M d" />
                         </span>
                     @endif
                 </div>
@@ -93,7 +93,7 @@
                     <div>
                         <p class="text-xs text-neutral-500 font-tertiary">Budget</p>
                         <p class="text-primary font-secondary font-bold text-sm whitespace-nowrap">
-                            Ksh. {{ number_format($job->budget) }}
+                            <x-money :amount="$job->budget" :decimals="0" />
                         </p>
                     </div>
                     <a href="{{ route('jobs.apply', $job->slug) }}"

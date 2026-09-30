@@ -57,7 +57,7 @@
                                 <p class="text-sm font-medium text-neutral-800">Created</p>
                                 <p class="text-xs text-neutral-500 flex items-center">
                                     <x-icon name="clock-solid" class="h-3 w-3 mr-1" />
-                                    {{ $deliverable->created_at->format('M d, Y h:i A') }}
+                                    <x-date :date="$deliverable->created_at" format="M d, Y h:i A" />
                                 </p>
                             </div>
                         </div>
@@ -76,7 +76,7 @@
                                     <p class="text-sm font-medium text-neutral-800">Submitted</p>
                                     <p class="text-xs text-neutral-500 flex items-center">
                                         <x-icon name="clock-solid" class="h-3 w-3 mr-1" />
-                                        {{ $deliverable->submitted_at->format('M d, Y h:i A') }}
+                                        <x-date :date="$deliverable->submitted_at" format="M d, Y h:i A" />
                                     </p>
                                 </div>
                             </div>
@@ -98,7 +98,7 @@
                                     <p class="text-sm font-medium text-green-700">Approved</p>
                                     <p class="text-xs text-neutral-500 flex items-center">
                                         <x-icon name="clock-solid" class="h-3 w-3 mr-1" />
-                                        {{ $deliverable->approved_at->format('M d, Y h:i A') }}
+                                        <x-date :date="$deliverable->approved_at" format="M d, Y h:i A" />
                                     </p>
                                 </div>
                             </div>
@@ -115,7 +115,7 @@
                                     <p class="text-sm font-medium text-red-700">Rejected</p>
                                     <p class="text-xs text-neutral-500 flex items-center">
                                         <x-icon name="clock-solid" class="h-3 w-3 mr-1" />
-                                        {{ $deliverable->rejected_at->format('M d, Y h:i A') }}
+                                        <x-date :date="$deliverable->rejected_at" format="M d, Y h:i A" />
                                     </p>
                                 </div>
                             </div>

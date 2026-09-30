@@ -196,7 +196,7 @@
                                         Bid Amount
                                     </h4>
                                     <p class="mt-1 text-xl font-semibold font-main text-primary">
-                                        Ksh{{ number_format($application->offer_amount, 2) }}
+                                        <x-money :amount="$application->offer_amount" />
                                     </p>
                                     <p class="text-xs text-neutral-500 font-secondary">
                                         @php

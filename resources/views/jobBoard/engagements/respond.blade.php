@@ -26,7 +26,7 @@
                             <span>{{ $application->poster->name }}</span>
                             <span class="mx-2">•</span>
                             <x-icon name="calendar" class="h-4 w-4 mr-1" />
-                            <span>{{ $application->job->created_at->format('M j, Y') }}</span>
+                            <span><x-date :date="$application->job->created_at" /></span>
                         </div>
                     </div>
                     <div
@@ -50,7 +50,7 @@
                         <div class="text-neutral-500 text-sm mb-1">Application Submitted</div>
                         <div class="flex items-center">
                             <x-icon name="calendar" class="h-5 w-5 text-primary mr-2" />
-                            <p class="font-medium text-neutral-800">{{ $application->created_at->format('F j, Y') }}</p>
+                            <p class="font-medium text-neutral-800"><x-date :date="$application->created_at" format="F j, Y" /></p>
                         </div>
                     </div>
 
@@ -60,7 +60,7 @@
                         <div class="flex items-center">
                             <x-icon name="coins" class="h-5 w-5 text-accent mr-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             <p class="font-medium text-lg text-neutral-800">
-                                Ksh{{ number_format($engagement->agreed_amount, 2) }}</p>
+                                <x-money :amount="$engagement->agreed_amount" /></p>
                         </div>
                     </div>
 
@@ -73,7 +73,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
                             </svg>
-                            <p class="font-medium text-neutral-800">Ksh{{ number_format($engagement->service_fee, 2) }}
+                            <p class="font-medium text-neutral-800"><x-money :amount="$engagement->service_fee" />
                             </p>
                         </div>
                     </div>
@@ -88,7 +88,7 @@
                                     d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                             </svg>
                             <p class="font-medium text-lg text-secondary">
-                                Ksh{{ number_format($engagement->net_amount, 2) }}</p>
+                                <x-money :amount="$engagement->net_amount" /></p>
                         </div>
                     </div>
                 </div>
@@ -117,7 +117,7 @@
                                     <div
                                         class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent border border-accent/20">
                                         <x-icon name="calendar" class="h-4 w-4 mr-1" />
-                                        Due: {{ $deliverable->due_date->format('M j, Y') }}
+                                        Due: <x-date :date="$deliverable->due_date" />
                                     </div>
                                 @else
                                     <div

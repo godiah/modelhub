@@ -45,7 +45,7 @@
                                                 class="text-neutral-700 font-semibold font-main">{{ $job->user->name }}</span>
                                             <div class="flex items-center text-sm text-neutral-500 mt-1">
                                                 <x-icon name="calendar" class="h-4 w-4 mr-1 text-secondary" />
-                                                Posted on {{ $job->created_at->format('M d, Y') }}
+                                                Posted on <x-date :date="$job->created_at" format="M d, Y" />
                                             </div>
                                         </div>
                                     </div>
@@ -68,7 +68,7 @@
                                             <p class="text-neutral-800 font-secondary mt-1">No Fixed Deadline</p>
                                         @else
                                             <p class="text-neutral-800 font-secondary font-bold mt-1">
-                                                {{ $job->deadline->format('F j, Y') }}</p>
+                                                <x-date :date="$job->deadline" format="F j, Y" /></p>
                                         @endif
                                     </x-jobs.detail-card>
 
@@ -94,7 +94,7 @@
                                             </svg>
                                         </x-slot:icon>
                                         <p class="text-primary font-tertiary font-bold text-xl mt-1">
-                                            Ksh.{{ number_format($job->budget) }}</p>
+                                            <x-money :amount="$job->budget" :decimals="0" /></p>
                                     </x-jobs.detail-card>
                                 </div>
                             </div>
@@ -498,7 +498,7 @@
                                         <!-- Budget -->
                                         <div class="mb-2">
                                             <span class="text-secondary font-semibold font-tertiary text-sm">
-                                                Ksh.{{ number_format($similarJob->budget, 0) }}
+                                                <x-money :amount="$similarJob->budget" :decimals="0" />
                                             </span>
                                         </div>
 
@@ -511,7 +511,7 @@
                                             @else
                                                 <span
                                                     class="{{ $similarJob->deadline->isPast() ? 'text-red-500' : '' }} text-neutral-500 font-tertiary font-medium">
-                                                    Deadline: {{ $similarJob->deadline->format('M j, Y') }}
+                                                    Deadline: <x-date :date="$similarJob->deadline" />
                                                 </span>
                                             @endif
                                         </div>
