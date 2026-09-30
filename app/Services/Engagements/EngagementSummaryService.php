@@ -35,6 +35,56 @@ class EngagementSummaryService
     }
 
     /**
+     * What this user can do with the engagement right now, and the single primary action to offer.
+     * Shared by the list row and the workspace header so they can never disagree.
+     *
+     * @param  array<string, mixed>  $summary  from summaries()
+     * @return array<string, mixed>
+     */
+    public function actions(JobEngagement $engagement, User $user, array $summary): array
+    {
+        $status = $engagement->status;
+        $application = $engagement->application;
+        $isApplicant = $application->applicant_id === $user->id;
+        $isPoster = $application->poster_id === $user->id;
+        $isFinished = in_array($status, [EngagementStatus::Completed, EngagementStatus::Cancelled, EngagementStatus::Settled], true);
+        $reviewed = $isFinished && $engagement->hasBeenReviewedByUser($user->id);
+        $canSettle = $engagement->isCancelled() && $engagement->hasSubmittedOrApprovedDeliverables();
+
+        $primary = match (true) {
+            $isApplicant && $status === EngagementStatus::EmployerAccepted => 'respond',
+            $summary['to_review'] > 0 => 'review',
+            $summary['to_revise'] > 0 => 'revise',
+            $canSettle => 'settle',
+            $status === EngagementStatus::Disputed => 'dispute',
+            $isFinished && ! $reviewed => 'leave-review',
+            default => null,
+        };
+
+        return [
+            'primary' => $primary,
+            'is_poster' => $isPoster,
+            'is_applicant' => $isApplicant,
+            'is_finished' => $isFinished,
+            'reviewed' => $reviewed,
+            'can_cancel' => ! $isFinished && $status !== EngagementStatus::Disputed,
+            'can_message' => in_array($status, [EngagementStatus::Active, EngagementStatus::Cancelled], true),
+            'can_settle' => $canSettle,
+            'can_reopen' => in_array($status, [EngagementStatus::Cancelled, EngagementStatus::Settled], true)
+                && $isPoster && ! $application->job->is_active,
+            // Deliverable rights: only the client manages them, only the freelancer submits, only while active.
+            'can_manage_deliverables' => $isPoster && $status === EngagementStatus::Active,
+            'can_submit_deliverables' => $isApplicant && $status === EngagementStatus::Active,
+            'workspace_url' => route('engagements.show', $engagement),
+            'deliverables_url' => route('engagements.show', $engagement).'#deliverables',
+            'messages_url' => route('engagements.show', $engagement).'#messages',
+            // Money and dispute flows still live on their own pages until those are folded in.
+            'settlement_url' => route('engagements.show-cancelled', $engagement->id),
+            'dispute_url' => route('engagements.show-disputed', $engagement->id),
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function summarise(JobEngagement $engagement, User $user, int $unreadMessages): array

@@ -110,7 +110,14 @@ class EngagementCancellationService
     // Get cancelled engagement details
     public function getCancelledEngagementDetails(int $engagementId): array
     {
-        $engagement = JobEngagement::with(['deliverables'])->findOrFail($engagementId);
+        $engagement = JobEngagement::with([
+            'deliverables',
+            'application.job',
+            'application.poster.profile',
+            'application.applicant.profile',
+            'cancellation.initiator.profile',
+            'cancellation.dispute',
+        ])->findOrFail($engagementId);
         $user = Auth::user();
 
         // Authorization check
@@ -133,8 +140,12 @@ class EngagementCancellationService
     public function getDisputedEngagementDetails(int $engagementId): array
     {
         $engagement = JobEngagement::with([
-            'application',
-            'cancellation.dispute.partialPayment',
+            'application.job',
+            'application.poster.profile',
+            'application.applicant.profile',
+            'cancellation.dispute.disputedBy.profile',
+            'cancellation.dispute.resolvedBy',
+            'cancellation.dispute.partialPayment.processor',
         ])->findOrFail($engagementId);
 
         $user = Auth::user();

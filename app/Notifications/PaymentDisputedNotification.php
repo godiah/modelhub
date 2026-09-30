@@ -47,7 +47,7 @@ class PaymentDisputedNotification extends Notification implements ShouldQueue
                 'freelancer' => $freelancer,
                 'payment' => $this->payment,
                 'dispute' => $this->dispute,
-                'actionUrl' => route('engagements.archived-details', $this->engagement),
+                'actionUrl' => route('engagements.show', $this->engagement),
             ]);
     }
 
@@ -77,7 +77,7 @@ class PaymentDisputedNotification extends Notification implements ShouldQueue
             'amount' => $this->payment->amount,
             'reason' => $this->dispute->formatted_reason,
             'type' => 'payment_disputed',
-            'url' => route('engagements.archived-details', $this->engagement),
+            'url' => route('engagements.show', $this->engagement),
         ];
     }
 

@@ -1,253 +1,149 @@
-<!-- resources/views/jobBoard/engagements/respond.blade.php -->
 @use('App\Enums\EngagementStatus')
+@php
+    $job = $application->job;
+    $pending = $engagement->status === EngagementStatus::EmployerAccepted;
+    $accepted = $engagement->status === EngagementStatus::Active;
+    $answeredAt = $accepted ? $engagement->started_at : $engagement->cancelled_at;
+@endphp
 <x-app-layout crumb="Respond to offer">
-    <div class="container mx-auto max-w-6xl px-4 pt-10 pb-24 font-main">
-        <x-card shadow="lg" clip>
-            <!-- Header with gradient background -->
-            <div class="bg-gradient-to-r from-primary to-primary/80 p-6 text-white">
-                <div class="flex flex-col md:flex-row md:justify-between md:items-center">
-                    <div>
-                        <h3 class="font-tertiary font-bold text-2xl">{{ $application->job->title }}</h3>
-                        <div class="flex items-center mt-2 text-white/80">
-                            <x-icon name="user" class="h-4 w-4 mr-1" />
-                            <span>{{ $application->poster->name }}</span>
-                            <span class="mx-2">•</span>
-                            <x-icon name="calendar" class="h-4 w-4 mr-1" />
-                            <span><x-date :date="$application->job->created_at" /></span>
-                        </div>
-                    </div>
-                    <div
-                        class="mt-4 md:mt-0 flex items-center bg-white/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm">
-                        <x-icon name="check-circle" class="h-5 w-5 mr-2" />
-                        Offer Received
-                    </div>
-                </div>
-            </div>
-
-            <!-- Job Summary Card -->
-            <div class="p-6 bg-neutral-50 border-b border-neutral-200">
-                <h4 class="font-tertiary font-semibold text-lg text-primary mb-4 flex items-center">
-                    <x-icon name="clipboard-list" class="h-5 w-5 mr-2" />
-                    Offer Details
-                </h4>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <x-card rounded="lg" class="p-4 transition-transform hover:scale-[1.01]">
-                        <div class="text-neutral-500 text-sm mb-1">Application Submitted</div>
-                        <div class="flex items-center">
-                            <x-icon name="calendar" class="h-5 w-5 text-primary mr-2" />
-                            <p class="font-medium text-neutral-800"><x-date :date="$application->created_at" format="F j, Y" /></p>
-                        </div>
-                    </x-card>
-
-                    <x-card rounded="lg" class="p-4 transition-transform hover:scale-[1.01]">
-                        <div class="text-neutral-500 text-sm mb-1">Offer Amount</div>
-                        <div class="flex items-center">
-                            <x-icon name="coins" class="h-5 w-5 text-accent mr-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            <p class="font-medium text-lg text-neutral-800">
-                                <x-money :amount="$engagement->agreed_amount" /></p>
-                        </div>
-                    </x-card>
-
-                    <x-card rounded="lg" class="p-4 transition-transform hover:scale-[1.01]">
-                        <div class="text-neutral-500 text-sm mb-1">Service Fee</div>
-                        <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500 mr-2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                            </svg>
-                            <p class="font-medium text-neutral-800"><x-money :amount="$engagement->service_fee" />
-                            </p>
-                        </div>
-                    </x-card>
-
-                    <x-card rounded="lg" class="p-4 transition-transform hover:scale-[1.01]">
-                        <div class="text-neutral-500 text-sm mb-1">Your Net Earnings</div>
-                        <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary mr-2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                            </svg>
-                            <p class="font-medium text-lg text-secondary">
-                                <x-money :amount="$engagement->net_amount" /></p>
-                        </div>
-                    </x-card>
-                </div>
-            </div>
-
-            <!-- Deliverables Section -->
-            <div class="p-6 border-b border-neutral-200">
-                <h4 class="font-tertiary font-semibold text-lg text-primary mb-4 flex items-center">
-                    <x-icon name="clipboard-list" class="h-5 w-5 mr-2" />
-                    Project Deliverables
-                </h4>
-
-                <div class="space-y-4">
-                    @forelse($engagement->deliverables as $deliverable)
-                        <x-card rounded="lg" class="p-5 hover:shadow transition-all duration-200">
-                            <div class="flex flex-wrap gap-2 justify-between items-start mb-3">
-                                <div class="flex items-center">
-                                    <div class="bg-secondary/10 rounded-full p-2 mr-3">
-                                        <x-icon name="check" class="h-5 w-5 text-secondary" />
-                                    </div>
-                                    <h5 class="font-secondary font-semibold text-neutral-800">{{ $deliverable->title }}
-                                    </h5>
-                                </div>
-                                @if ($deliverable->due_date)
-                                    <div
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent border border-accent/20">
-                                        <x-icon name="calendar" class="h-4 w-4 mr-1" />
-                                        Due: <x-date :date="$deliverable->due_date" />
-                                    </div>
-                                @else
-                                    <div
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-accent/10 text-accent border border-accent/20">
-                                        <x-icon name="calendar" class="h-4 w-4 mr-1" />
-                                        No Due Date Set
-                                    </div>
-                                @endif
-                            </div>
-                            <p class="text-neutral-600 ml-10 text-sm text-justify">{{ $deliverable->description }}</p>
-                        </x-card>
-                    @empty
-                        <div class="bg-neutral-50 rounded-lg p-8 text-center">
-                            <x-icon name="clipboard-list" class="h-12 w-12 text-neutral-300 mx-auto mb-3" />
-                            <p class="text-neutral-500 italic">No deliverables have been specified for this project
-                                yet.
-                            </p>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-
-            <!-- Response Form -->
-            <form method="POST" action="{{ route('engagements.respond', ['engagement' => $engagement]) }}"
-                class="p-6">
-                @csrf
-
-                <div class="space-y-6">
-                    @if ($engagement->status !== EngagementStatus::EmployerAccepted)
-                        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4">
-                            <div class="flex items-center">
-                                <x-icon name="information-circle" class="h-5 w-5 text-amber-500 mr-2" />
-                                <p class="text-amber-800 font-medium">
-                                    You have already {{ $engagement->status === EngagementStatus::Active ? 'accepted' : 'declined' }}
-                                    this offer on
-                                    {{ $engagement->status === EngagementStatus::Active ? $engagement->started_at->format('M d, Y') : $engagement->cancelled_at->format('M d, Y') }}.
-                                </p>
-                            </div>
-                        </div>
-                    @endif
-
-                    <div>
-                        <label class="flex items-center font-tertiary font-semibold text-lg text-primary mb-4">
-                            <x-icon name="check" class="h-5 w-5 mr-2" />
-                            Your Response
-                        </label>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <label
-                                class="relative flex {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' }} rounded-xl border border-neutral-200 bg-white p-5 shadow-sm hover:bg-neutral-50 transition duration-200">
-                                <input type="radio" name="response" value="accepted" class="sr-only peer"
-                                    {{ $engagement->status === EngagementStatus::Active ? 'checked' : '' }}
-                                    {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'disabled' : '' }}>
-                                <div class="flex w-full items-center">
-                                    <div class="flex-shrink-0 mr-4">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center peer-checked:bg-secondary text-secondary peer-checked:text-white transition-all duration-200">
-                                            <x-icon name="check" class="h-6 w-6" />
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow">
-                                        <p class="font-secondary font-medium text-neutral-900">Accept Offer</p>
-                                        <p class="text-neutral-500 text-sm">I agree to all terms and conditions</p>
-                                    </div>
-                                </div>
-                                <div class="absolute -inset-px rounded-xl border-2 pointer-events-none peer-checked:border-secondary opacity-0 peer-checked:opacity-100 transition-opacity"
-                                    aria-hidden="true"></div>
-                            </label>
-
-                            <label
-                                class="relative flex {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer' }} rounded-xl border border-neutral-200 bg-white p-5 shadow-sm hover:bg-neutral-50 transition duration-200">
-                                <input type="radio" name="response" value="declined" class="sr-only peer"
-                                    {{ $engagement->status === EngagementStatus::Cancelled ? 'checked' : '' }}
-                                    {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'disabled' : '' }}>
-                                <div class="flex w-full items-center">
-                                    <div class="flex-shrink-0 mr-4">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center peer-checked:bg-neutral-700 text-neutral-400 peer-checked:text-white transition-all duration-200">
-                                            <x-icon name="x-mark" class="h-6 w-6 text-rose-500" />
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow">
-                                        <p class="font-secondary font-medium text-neutral-900">Decline Offer</p>
-                                        <p class="text-neutral-500 text-sm">This job isn't right for me</p>
-                                    </div>
-                                </div>
-                                <div class="absolute -inset-px rounded-xl border-2 pointer-events-none peer-checked:border-rose-500 opacity-0 peer-checked:opacity-100 transition-opacity"
-                                    aria-hidden="true"></div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="bg-neutral-50 rounded-xl p-5 border border-neutral-200">
-                        <label for="notes"
-                            class="block font-secondary font-medium text-neutral-700 mb-2 flex items-center">
-                            <x-icon name="pencil-square" class="h-5 w-5 mr-2 text-tertiary" />
-                            {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'Your Notes' : 'Additional Notes' }}
-                            <span
-                                class="text-xs font-normal text-neutral-500 ml-2">{{ $engagement->status === EngagementStatus::EmployerAccepted ? '(Optional)' : '' }}</span>
-                        </label>
-                        <textarea id="notes" name="notes" rows="4"
-                            class="block w-full rounded-lg border-neutral-300 shadow-sm focus:border-secondary focus:ring-secondary focus:ring-opacity-50 transition duration-200 resize-none {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'bg-neutral-100' : '' }}"
-                            placeholder="{{ $engagement->status === EngagementStatus::EmployerAccepted ? 'Type your message to the job poster here...' : '' }}"
-                            {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'readonly' : '' }}>{{ $engagement->notes ?? '' }}</textarea>
-                    </div>
-
-                    <div class="flex justify-end pt-4">
-                        <x-btn variant="secondary" class="mr-4" href="{{ route('engagements.index') }}">
-                            <x-icon name="x-mark" class="h-4 w-4" />
-                            {{ $engagement->status !== EngagementStatus::EmployerAccepted ? 'Back' : 'Cancel' }}
-                        </x-btn>
-
-                        @if ($engagement->status === EngagementStatus::EmployerAccepted)
-                            <x-btn type="submit" id="submitResponseBtn" disabled>
-                                <x-icon name="check" class="h-4 w-4" />
-                                Submit Response
-                            </x-btn>
-
-                            <script>
-                                // Check if any response option is selected on page load
-                                document.addEventListener('DOMContentLoaded', function() {
-                                    checkResponseSelection();
-
-                                    // Add event listeners to radio buttons
-                                    const radioButtons = document.querySelectorAll('input[name="response"]');
-                                    radioButtons.forEach(function(radio) {
-                                        radio.addEventListener('change', checkResponseSelection);
-                                    });
-                                });
-
-                                // Function to check if a response is selected and enable/disable button accordingly
-                                function checkResponseSelection() {
-                                    const responseSelected = document.querySelector('input[name="response"]:checked') !== null;
-                                    const submitButton = document.getElementById('submitResponseBtn');
-
-                                    if (responseSelected) {
-                                        submitButton.disabled = false;
-                                        submitButton.classList.remove('opacity-50', 'cursor-not-allowed');
-                                    } else {
-                                        submitButton.disabled = true;
-                                        submitButton.classList.add('opacity-50', 'cursor-not-allowed');
-                                    }
-                                }
-                            </script>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <!-- Header -->
+        <x-card class="mb-6 rounded-2xl">
+            <div class="flex flex-col gap-4 p-6 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0">
+                    <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Job offer') }}</p>
+                    <div class="mt-1 flex flex-wrap items-center gap-3">
+                        <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ $job->title }}</h1>
+                        @if ($pending)
+                            <x-badge tone="amber" class="px-2.5 py-0.5 text-xs font-medium">{{ __('Awaiting your response') }}</x-badge>
+                        @elseif ($accepted)
+                            <x-badge tone="green" class="px-2.5 py-0.5 text-xs font-medium">{{ __('Accepted') }}</x-badge>
+                        @else
+                            <x-badge tone="neutral" class="px-2.5 py-0.5 text-xs font-medium">{{ __('Declined') }}</x-badge>
                         @endif
                     </div>
+                    <p class="mt-1.5 text-sm text-tertiary">
+                        {{ __('From :name', ['name' => $application->poster->name]) }}
+                        · {{ __('You applied :date', ['date' => $application->created_at->format('M j, Y')]) }}
+                    </p>
                 </div>
-            </form>
+                <x-btn variant="secondary" size="sm" href="{{ $accepted ? route('engagements.show', $engagement) : route('engagements.index') }}" class="shrink-0 self-start">
+                    <x-icon name="arrow-left" class="h-4 w-4" />
+                    {{ $accepted ? __('Open engagement') : __('Back to engagements') }}
+                </x-btn>
+            </div>
         </x-card>
+
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <div class="space-y-6">
+                <x-panel :title="__('Offer terms')">
+                    <dl class="divide-y divide-neutral-100 text-sm">
+                        <div class="flex items-center justify-between gap-4 py-2.5 first:pt-0">
+                            <dt class="text-tertiary">{{ __('Offer amount') }}</dt>
+                            <dd class="font-medium tabular-nums text-neutral-900"><x-money :amount="$engagement->agreed_amount" /></dd>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 py-2.5">
+                            <dt class="text-tertiary">{{ __('Service fee') }}</dt>
+                            <dd class="font-medium tabular-nums text-neutral-900">− <x-money :amount="$engagement->service_fee" /></dd>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 py-2.5 last:pb-0">
+                            <dt class="font-medium text-neutral-900">{{ __('You receive') }}</dt>
+                            <dd class="font-tertiary text-lg font-semibold tabular-nums text-teal-700"><x-money :amount="$engagement->net_amount" /></dd>
+                        </div>
+                    </dl>
+                    <p class="mt-4 border-t border-neutral-100 pt-4 text-xs text-tertiary">{{ __('Payment is held in escrow and released as your work is approved.') }}</p>
+                </x-panel>
+
+                <x-panel :title="__('Deliverables')" :description="$engagement->deliverables->isNotEmpty() ? __('What the client expects you to deliver, and when.') : null">
+                    @forelse ($engagement->deliverables as $deliverable)
+                        @if ($loop->first)
+                            <ul class="divide-y divide-neutral-100">
+                        @endif
+                        <li class="py-4 first:pt-0 last:pb-0">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h3 class="text-sm font-semibold text-neutral-900">{{ $deliverable->title }}</h3>
+                                <span class="text-xs text-tertiary">
+                                    {{ $deliverable->due_date ? __('Due :date', ['date' => $deliverable->due_date->format('M j, Y')]) : __('No due date') }}
+                                </span>
+                            </div>
+                            @if ($deliverable->description)
+                                <p class="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-neutral-700">{{ $deliverable->description }}</p>
+                            @endif
+                        </li>
+                        @if ($loop->last)
+                            </ul>
+                        @endif
+                    @empty
+                        <p class="text-sm text-tertiary">{{ __('The client has not listed any deliverables yet. You can agree them with the client once you accept.') }}</p>
+                    @endforelse
+                </x-panel>
+            </div>
+
+            <!-- Response -->
+            <div class="lg:sticky lg:top-24">
+                <x-panel :title="__('Your response')">
+                    @unless ($pending)
+                        <div class="mb-5 flex items-start gap-3 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700" role="status">
+                            <x-icon name="information-circle" class="mt-0.5 h-5 w-5 shrink-0 text-neutral-400" />
+                            <p>
+                                {{ $accepted ? __('You accepted this offer') : __('You declined this offer') }}@if ($answeredAt) {{ __('on :date', ['date' => $answeredAt->format('M j, Y')]) }}@endif.
+                            </p>
+                        </div>
+                    @endunless
+
+                    <form method="POST" action="{{ route('engagements.respond', ['engagement' => $engagement]) }}" x-data="{ choice: '' }" class="space-y-5">
+                        @csrf
+
+                        <div role="radiogroup" aria-label="{{ __('Accept or decline the offer') }}" class="space-y-3">
+                            <label @class([
+                                'relative flex items-start gap-3 rounded-xl border p-4 transition-colors has-[:checked]:border-teal-600 has-[:checked]:ring-1 has-[:checked]:ring-teal-600',
+                                'cursor-pointer border-neutral-200 bg-white hover:border-neutral-300' => $pending,
+                                'border-neutral-200 bg-neutral-50 opacity-70' => ! $pending,
+                            ])>
+                                <input type="radio" name="response" value="accepted" x-model="choice" class="mt-1 border-neutral-300 text-teal-600 focus:ring-0 focus:ring-offset-0"
+                                    @checked($accepted) @disabled(! $pending)>
+                                <span>
+                                    <span class="block text-sm font-medium text-neutral-900">{{ __('Accept offer') }}</span>
+                                    <span class="block text-xs text-tertiary">{{ __('Start work on the agreed terms.') }}</span>
+                                </span>
+                            </label>
+
+                            <label @class([
+                                'relative flex items-start gap-3 rounded-xl border p-4 transition-colors has-[:checked]:border-red-500 has-[:checked]:ring-1 has-[:checked]:ring-red-500',
+                                'cursor-pointer border-neutral-200 bg-white hover:border-neutral-300' => $pending,
+                                'border-neutral-200 bg-neutral-50 opacity-70' => ! $pending,
+                            ])>
+                                <input type="radio" name="response" value="declined" x-model="choice" class="mt-1 border-neutral-300 text-red-600 focus:ring-0 focus:ring-offset-0"
+                                    @checked($engagement->status === EngagementStatus::Cancelled) @disabled(! $pending)>
+                                <span>
+                                    <span class="block text-sm font-medium text-neutral-900">{{ __('Decline offer') }}</span>
+                                    <span class="block text-xs text-tertiary">{{ __('This project is not right for me.') }}</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <x-field type="textarea" name="notes" error="notes" rows="4" maxlength="1000"
+                            :label="$pending ? __('Message to the client (optional)') : __('Your message')"
+                            :placeholder="$pending ? __('Anything the client should know…') : ''"
+                            :readonly="! $pending">{{ old('notes', $engagement->notes ?? '') }}</x-field>
+
+                        @if ($pending)
+                            <p class="text-xs text-tertiary">{{ __('Your response is final and the client is notified straight away.') }}</p>
+
+                            <div class="flex flex-wrap gap-2">
+                                <x-btn type="submit" block x-show="choice !== 'declined'" ::disabled="!choice">
+                                    <x-icon name="check" class="h-4 w-4" />
+                                    <span x-text="choice === 'accepted' ? @js(__('Accept offer')) : @js(__('Submit response'))"></span>
+                                </x-btn>
+                                <x-btn type="submit" variant="danger" block x-show="choice === 'declined'" x-cloak>
+                                    <x-icon name="x-mark" class="h-4 w-4" />
+                                    {{ __('Decline offer') }}
+                                </x-btn>
+                            </div>
+                        @endif
+                    </form>
+                </x-panel>
+            </div>
+        </div>
     </div>
 </x-app-layout>

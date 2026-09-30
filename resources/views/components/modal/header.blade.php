@@ -1,32 +1,16 @@
-@props(['title', 'icon' => null, 'variant' => 'plain'])
+@props(['title', 'icon' => null])
 
-@php
-    $isBrand = $variant === 'brand';
-    $iconClass = \Illuminate\Support\Arr::toCssClasses(['mr-2', 'h-6 w-6' => $isBrand, 'h-5 w-5 text-primary' => ! $isBrand]);
-@endphp
-
-<div {{ $attributes->class([
-    'flex items-center justify-between px-6 py-4',
-    'bg-primary text-white' => $isBrand,
-    'border-b border-neutral-200' => ! $isBrand,
-]) }}>
-    <h3 @class([
-        'flex items-center font-tertiary font-bold',
-        'text-xl text-white' => $isBrand,
-        'text-lg text-neutral-800' => ! $isBrand,
-    ])>
+{{-- Modal title bar: quiet white with a divider, like every other surface. Colour lives in the buttons and alerts, not the header. --}}
+<div {{ $attributes->class('flex items-center justify-between border-b border-neutral-200 px-6 py-4') }}>
+    <h3 class="flex items-center font-tertiary text-lg font-semibold text-neutral-900">
         @if ($icon)
-            <x-icon :name="$icon" class="{{ $iconClass }}" />
+            <x-icon :name="$icon" class="mr-2 h-5 w-5 text-teal-600" />
         @endif
         {{ $title }}
     </h3>
 
     <button type="button" x-on:click="dismiss()" aria-label="Close"
-        @class([
-            'transition-colors',
-            'text-white hover:text-neutral-200' => $isBrand,
-            'text-neutral-400 hover:text-neutral-600' => ! $isBrand,
-        ])>
+        class="rounded-lg p-1 text-neutral-400 transition-colors hover:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
         <x-icon name="x-mark" class="h-5 w-5" />
     </button>
 </div>

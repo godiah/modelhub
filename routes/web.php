@@ -107,7 +107,10 @@ Route::middleware(['auth'])->prefix('notifications')->name('notifications.')->gr
 // Job Engagements
 Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(function () {
     Route::get('/', [JobEngagementController::class, 'index'])->name('index');
-    Route::get('/{id}', [JobEngagementController::class, 'showCancelledEngagement'])->name('show-cancelled');
+    // The engagement workspace (deliverables, messages, activity). Numeric only, so it never shadows the
+    // static segments below (archive, deliverables, policies, disputed, ...).
+    Route::get('/{engagement}', [JobEngagementController::class, 'show'])->whereNumber('engagement')->name('show');
+    Route::get('/{id}/cancelled', [JobEngagementController::class, 'showCancelledEngagement'])->whereNumber('id')->name('show-cancelled');
     Route::get('/disputed/{id}', [JobEngagementController::class, 'showDisputedEngagement'])->name('show-disputed');
     Route::middleware(['throttle:10,1'])->group(function () {
         Route::post('/{id}/process-payment', [PartialPaymentController::class, 'processPartialPayment'])->name('process-partial-payment');
@@ -122,7 +125,8 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
         Route::post('/', [JobEngagementController::class, 'archive'])->name('archive');
         Route::get('/archived', [JobEngagementController::class, 'archivedEngagements'])->name('archived');
         Route::post('/restore', [JobEngagementController::class, 'restore'])->name('restore');
-        Route::get('/{engagement}/details', [JobEngagementController::class, 'show'])->name('archived-details');
+        // Legacy URL (stored in notifications and emails): forward to the workspace.
+        Route::get('/{engagement}/details', [JobEngagementController::class, 'legacyDetails'])->name('archived-details');
     });
 
     // Accept & Reject Engagement

@@ -1,6 +1,6 @@
 <!-- Review Modal (single instance; opened with $dispatch('open-modal', { name: 'review-engagement', id, status })) -->
 <x-modal name="review-engagement" focusable>
-    <x-modal.header variant="brand" title="Leave a Review" icon="chat-bubble-text" />
+    <x-modal.header title="Leave a Review" icon="chat-bubble-text" />
 
     <div class="p-6 font-main" x-data="{ rating: 0, reviewText: '', tags: [], isPublic: true }">
         <form x-bind:action="'/engagements/' + payload.id + '/review'" method="POST">

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\DisputeStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class JobCancellation extends Model
 {
@@ -141,5 +142,35 @@ class JobCancellation extends Model
         }
 
         return $this;
+    }
+
+    /**
+     * Human-readable cancellation reason (the stored value is a slug such as "project_scope_change").
+     */
+    public function getReasonLabelAttribute(): string
+    {
+        return [
+            'schedule_conflict' => 'Schedule conflict',
+            'project_scope_change' => 'Project scope changed',
+            'communication_issues' => 'Communication issues',
+            'quality_concerns' => 'Quality concerns',
+            'financial_reasons' => 'Financial reasons',
+            'personal_reasons' => 'Personal reasons',
+            'other' => 'Other',
+        ][$this->reason_category] ?? Str::headline((string) $this->reason_category);
+    }
+
+    /**
+     * Who or what ended the engagement.
+     */
+    public function getTypeLabelAttribute(): string
+    {
+        return [
+            'mutual' => 'Mutual agreement',
+            'client_initiated' => 'Client initiated',
+            'freelancer_initiated' => 'Freelancer initiated',
+            'dispute' => 'In dispute',
+            'admin_terminated' => 'Ended by an administrator',
+        ][$this->cancellation_type] ?? Str::headline((string) $this->cancellation_type);
     }
 }

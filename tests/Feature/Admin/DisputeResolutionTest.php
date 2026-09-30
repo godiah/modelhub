@@ -102,7 +102,7 @@ test('support (dispute_manager, not just admin) can view a disputed engagement t
     $this->actingAs($manager)
         ->get(route('engagements.show-disputed', $engagement->id))
         ->assertOk()
-        ->assertSee('Admin Resolution Panel');
+        ->assertSee('Resolve this dispute');
 });
 
 test('support can view a disputed engagement but not the resolution form', function () {
@@ -113,7 +113,7 @@ test('support can view a disputed engagement but not the resolution form', funct
     $this->actingAs($support)
         ->get(route('engagements.show-disputed', $engagement->id))
         ->assertOk()
-        ->assertDontSee('Admin Resolution Panel');
+        ->assertDontSee('Resolve this dispute');
 });
 
 test('a bystander with no role cannot view a disputed engagement they are not party to', function () {

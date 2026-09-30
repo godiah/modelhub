@@ -100,6 +100,8 @@ class PartialPaymentController extends Controller
             return back()->with('error', 'This payment cannot be disputed in its current state.');
         }
 
+        $engagement->loadMissing(['application.job', 'application.poster']);
+
         // Show dispute form
         return view('jobBoard.engagements.dispute', [
             'payment' => $payment,

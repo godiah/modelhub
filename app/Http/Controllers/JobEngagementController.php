@@ -10,6 +10,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Engagements\EngagementAuthorizationHelper;
 use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Engagement\ArchiveEngagementRequest;
 use App\Http\Requests\Engagement\BrowseEngagementsRequest;
@@ -18,12 +19,14 @@ use App\Http\Requests\Engagement\LeaveReviewRequest;
 use App\Http\Requests\Engagement\RespondToOfferRequest;
 use App\Http\Requests\Job\ReopenJobRequest;
 use App\Models\JobEngagement;
+use App\Services\Engagements\EngagementActivityService;
 use App\Services\Engagements\EngagementCancellationService;
 use App\Services\Engagements\EngagementManagementService;
 use App\Services\Engagements\EngagementPaymentService;
 use App\Services\Engagements\EngagementResponseService;
 use App\Services\Engagements\EngagementReviewService;
 use App\Services\Engagements\EngagementSummaryService;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 
@@ -68,9 +71,13 @@ class JobEngagementController extends Controller
         ];
 
         $engagements = $this->engagementManagementService->getUserEngagements($filters);
+        $summaries = $this->engagementSummaryService->summaries($engagements->getCollection(), $request->user());
         $data = [
             'engagements' => $engagements,
-            'summaries' => $this->engagementSummaryService->summaries($engagements->getCollection(), $request->user()),
+            'summaries' => $summaries,
+            'actionSets' => collect($engagements->items())->mapWithKeys(
+                fn ($engagement) => [$engagement->id => $this->engagementSummaryService->actions($engagement, $request->user(), $summaries[$engagement->id])]
+            )->all(),
             'hasFilters' => $request->hasActiveFilters(),
             'hasArchivedEngagements' => $this->engagementManagementService->hasArchivedEngagements(),
             'statusCounts' => $this->engagementManagementService->getStatusCounts(),
@@ -167,6 +174,7 @@ class JobEngagementController extends Controller
                 'paymentInfo' => $paymentInfo,
                 'canProcess' => $paymentInfo['can_process'],
                 'payment' => $latestPayment,
+                'canReopen' => EngagementAuthorizationHelper::canReopenJob($engagement, request()->user()) && ! $engagement->application->job->is_active,
             ]);
         } catch (\Exception $e) {
             return back()->with('error', $e->getMessage());
@@ -260,13 +268,28 @@ class JobEngagementController extends Controller
     }
 
     // Engagement Details
-    public function show(JobEngagement $engagement)
+    // Old detail URL (still stored in notifications and emails) forwards to the workspace.
+    public function legacyDetails(JobEngagement $engagement)
     {
-        // Check authorization (ensure user can view this engagement)
+        return redirect()->route('engagements.show', $engagement);
+    }
+
+    public function show(JobEngagement $engagement, EngagementActivityService $activity)
+    {
         $this->authorize('view', $engagement);
 
         $engagement = $this->engagementManagementService->getEngagementDetails($engagement);
+        $engagement->loadMissing(['application.poster.profile', 'application.applicant.profile']);
+        $user = request()->user();
 
-        return view('jobBoard.engagements.show', compact('engagement'));
+        $summary = $this->engagementSummaryService->summaries(new EloquentCollection([$engagement]), $user)[$engagement->id];
+
+        return view('jobBoard.engagements.workspace', [
+            'engagement' => $engagement,
+            'job' => $engagement->application->job,
+            'summary' => $summary,
+            'actions' => $this->engagementSummaryService->actions($engagement, $user, $summary),
+            'timeline' => $activity->timeline($engagement),
+        ]);
     }
 }
