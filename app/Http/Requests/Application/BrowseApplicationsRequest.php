@@ -18,8 +18,8 @@ class BrowseApplicationsRequest extends FormRequest
     {
         return [
             'status' => 'sometimes|string|in:all,submitted,reviewed,hired,rejected,withdrawn',
-            'sort' => 'sometimes|string|in:date_desc,date_asc,status',
-            'search' => 'sometimes|string|max:255',
+            'sort' => 'sometimes|string|in:date_desc,date_asc,status,offer_high,offer_low',
+            'search' => 'nullable|string|max:255',
         ];
     }
 

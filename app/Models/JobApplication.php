@@ -147,4 +147,26 @@ class JobApplication extends Model
     {
         return $query->where('status', 'reviewed');
     }
+
+    /**
+     * Why this application cannot be hired right now, or null when it can. Enforced on the server: the
+     * buttons hide these cases, but a direct request must not create a second or a duplicate engagement.
+     */
+    public function hireBlocker(): ?string
+    {
+        return match (true) {
+            $this->status === ApplicationStatus::Hired => 'You have already hired this applicant.',
+            $this->status === ApplicationStatus::Withdrawn => 'This applicant withdrew their application.',
+            $this->status === ApplicationStatus::Draft => 'This application has not been submitted yet.',
+            (bool) $this->job->is_archived => 'Restore this project from your archive before hiring.',
+            $this->job->hasActiveHire() => 'You have already hired someone for this project.',
+            default => null,
+        };
+    }
+
+    /** A hired or withdrawn application's status is final. */
+    public function isStatusLocked(): bool
+    {
+        return in_array($this->status, [ApplicationStatus::Hired, ApplicationStatus::Withdrawn], true);
+    }
 }

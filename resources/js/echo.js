@@ -3,12 +3,20 @@ import Echo from "laravel-echo";
 import Pusher from "pusher-js";
 window.Pusher = Pusher;
 
-window.Echo = new Echo({
-    broadcaster: "pusher",
-    key: import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
-    forceTLS: true,
-});
+// Realtime is optional: without a Pusher key (local development, BROADCAST_CONNECTION=log) Echo would throw
+// "You must pass your app key" while this module loads, and that aborts every script that loads after it.
+if (import.meta.env.VITE_PUSHER_APP_KEY) {
+    try {
+        window.Echo = new Echo({
+            broadcaster: "pusher",
+            key: import.meta.env.VITE_PUSHER_APP_KEY,
+            cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+            forceTLS: true,
+        });
+    } catch (error) {
+        console.warn("Realtime notifications are off:", error.message);
+    }
+}
 
 // Notification handler system
 const NotificationHandler = {
@@ -132,7 +140,7 @@ const NotificationHandler = {
 };
 
 // Listen for notifications
-if (window.userId) {
+if (window.userId && window.Echo) {
     window.Echo.private(`App.Models.User.${window.userId}`).notification(
         (notification) => {
             console.log("Received notification:", notification);

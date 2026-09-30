@@ -4,6 +4,8 @@
 
 namespace App\Services\Applications;
 
+use App\Enums\ApplicationStatus;
+use App\Models\ApplicantMessage;
 use App\Models\JobApplication;
 use App\Models\JobReview;
 use App\Models\ModelJob;
@@ -13,46 +15,70 @@ use Illuminate\Support\Facades\Auth;
 
 class ApplicationBrowsingService
 {
-    // Get applications for a specific job
+    // Get applications for a specific job, with what the poster needs to compare bids
     public function getJobApplications(string $slug, array $filters): array
     {
         // Check if the job belongs to the authenticated user
         $job = ModelJob::where('slug', $slug)
             ->where('user_id', Auth::id())
+            ->with('engagements')
             ->firstOrFail();
 
-        // Build the base query
-        $query = $job->applications()->with(['applicant', 'job']);
+        $submitted = fn () => $job->applications()->where('status', '!=', ApplicationStatus::Draft);
 
-        // Apply search filter
+        // Build the filtered, sorted list
+        $query = $submitted()->with(['applicant.profile', 'engagement']);
+
         if (! empty($filters['search'])) {
             $this->applySearchFilter($query, $filters['search']);
         }
 
-        // Apply status filter
         if ($filters['status'] !== 'all') {
             $query->where('status', $filters['status']);
         }
 
-        // Get paginated results
-        $applications = $query->where('status', '!=', 'draft')
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+        match ($filters['sort'] ?? 'date_desc') {
+            'date_asc' => $query->oldest(),
+            'offer_high' => $query->orderByDesc('offer_amount')->latest(),
+            'offer_low' => $query->orderBy('offer_amount')->latest(),
+            default => $query->latest(),
+        };
 
-        // Check if filters are active
-        $hasFilters = ! empty($filters['search']) || $filters['status'] !== 'all';
+        $applications = $query->paginate(10)->withQueryString();
+
+        // Status pill counts and bid statistics cover every application, not just the filtered page
+        $counts = $submitted()->toBase()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
+        $bids = $submitted()->toBase()
+            ->where('status', '!=', ApplicationStatus::Withdrawn)
+            ->whereNotNull('offer_amount')
+            ->selectRaw('min(offer_amount) as low, avg(offer_amount) as mean, max(offer_amount) as high')
+            ->first();
+
+        // Average public rating and review count for the applicants on this page, in one query
+        $ratings = JobReview::whereIn('reviewee_id', $applications->pluck('applicant_id'))
+            ->public()
+            ->selectRaw('reviewee_id, avg(rating) as average, count(*) as total')
+            ->groupBy('reviewee_id')
+            ->get()
+            ->keyBy('reviewee_id');
 
         return [
             'job' => $job,
             'applications' => $applications,
-            'hasFilters' => $hasFilters,
+            'hasFilters' => ! empty($filters['search']) || $filters['status'] !== 'all',
+            'filters' => $filters,
+            'counts' => ['all' => (int) $counts->sum()] + $counts->map(fn ($n) => (int) $n)->all(),
+            'bids' => $bids && $bids->low !== null ? ['low' => (float) $bids->low, 'mean' => (float) $bids->mean, 'high' => (float) $bids->high] : null,
+            'ratings' => $ratings,
+            'filled' => $job->hasActiveHire(),
         ];
     }
 
     // Get application details with reviews and stats
     public function getApplicationDetails(JobApplication $application): array
     {
+        $application->loadMissing(['applicant.profile', 'job.engagements', 'engagement']);
+
         // Get reviews for this applicant
         $reviews = JobReview::where('reviewee_id', $application->applicant_id)
             ->with(['reviewer', 'engagement.application.job'])
@@ -80,6 +106,7 @@ class ApplicationBrowsingService
             'averageRating' => $averageRating,
             'topSkill' => $topSkill,
             'ratingFilter' => 'all',
+            'sentMessages' => ApplicantMessage::where('job_application_id', $application->id)->latest()->take(5)->get(),
         ];
     }
 
