@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Helpers\FlashAlertHelper;
 use App\Helpers\NotificationPresenterHelper;
+use App\Http\Requests\Notification\IndexNotificationsRequest;
 use App\Models\ApplicantMessage;
+use App\Services\Notifications\NotificationFeedService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
-    public function index()
-    {
-        $notifications = Auth::user()->notifications()->paginate(10);
+    public function __construct(protected NotificationFeedService $notificationFeedService) {}
 
-        return view('notifications.index', compact('notifications'));
+    public function index(IndexNotificationsRequest $request)
+    {
+        return view('notifications.index', $this->notificationFeedService->feed(Auth::user(), $request->filter()));
     }
 
     public function markAsRead($id)
