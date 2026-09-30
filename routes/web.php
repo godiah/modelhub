@@ -13,7 +13,6 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
 use App\Http\Controllers\PolicyManagementController;
 use App\Http\Controllers\PostedJobApplicationController;
-use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 
 // Signed-in users go straight to the app shell; the landing page is for guests.
@@ -157,11 +156,6 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
 
     // Policy routes
     Route::get('/policies/cancellation', [PolicyManagementController::class, 'index'])->name('policy');
-});
-
-// Projects Dashboard
-Route::middleware(['auth'])->prefix('projects')->name('project.')->group(function () {
-    Route::get('/', [ProjectController::class, 'index'])->name('index');
 });
 
 // Client - Freelancer Messaging

@@ -111,7 +111,6 @@ final class SidebarMenu
             [
                 'label' => 'Delivery',
                 'items' => [
-                    ['label' => 'Projects', 'route' => 'project.index', 'icon' => 'clipboard-list', 'match' => ['project.*']],
                     ['label' => 'Engagements', 'route' => 'engagements.index', 'icon' => 'chat-bubble-left-right', 'match' => ['engagements.*'], 'except' => ['engagements.policy']],
                 ],
             ],
