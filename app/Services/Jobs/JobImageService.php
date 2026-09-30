@@ -6,7 +6,9 @@
 
 namespace App\Services\Jobs;
 
+use App\Models\ModelJob;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class JobImageService
 {
@@ -37,5 +39,33 @@ class JobImageService
                 'image_path' => $imagePath,
             ]);
         }
+    }
+
+    // Replace the cover image, deleting the old file
+    public function replaceMainImage(Request $request, ModelJob $job): void
+    {
+        if (! $request->hasFile('image')) {
+            return;
+        }
+
+        $old = $job->images;
+        $job->update(['images' => $request->file('image')->store('job_images', 'public')]);
+
+        if ($old) {
+            Storage::disk('public')->delete($old);
+        }
+    }
+
+    // Remove some of the project's extra images (only ones that belong to it) and their files
+    public function removeAdditionalImages(ModelJob $job, array $imageIds): void
+    {
+        if ($imageIds === []) {
+            return;
+        }
+
+        $job->jobImages()->whereIn('id', $imageIds)->get()->each(function ($image) {
+            Storage::disk('public')->delete($image->image_path);
+            $image->delete();
+        });
     }
 }

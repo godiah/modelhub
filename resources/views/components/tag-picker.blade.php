@@ -1,5 +1,6 @@
 @props([
-    'field',           // Livewire property that receives the selected ids
+    'field',           // Livewire property that receives the selected ids (or the id prefix / error key in a plain form)
+    'name' => null,    // plain (non-Livewire) form: input name, e.g. "skills[]"; one hidden input per chip, valued with the item's id
     'label',
     'items',           // [['id' => 1, 'name' => 'Blender'], ...]
     'selected' => [],
@@ -13,7 +14,7 @@
     $messages = $errors->get($field);
 @endphp
 
-<div x-data="multiSelect('{{ $field }}', @js($items), @js($selected))" @click.outside="showDropdown = false" class="relative">
+<div x-data="multiSelect('{{ $field }}', @js($items), @js($selected), {{ $name ? 'true' : 'false' }})" @click.outside="showDropdown = false" class="relative">
     <label for="{{ $field }}-search" class="mb-1.5 block text-sm font-medium text-neutral-800">{{ $label }}</label>
 
     <div @click="$refs.search.focus()"
@@ -35,6 +36,12 @@
     </div>
 
     <!-- Options -->
+    @if ($name)
+        <template x-for="item in selectedItems" :key="'value-' + item.id">
+            <input type="hidden" name="{{ $name }}" :value="item.id">
+        </template>
+    @endif
+
     <div x-show="showDropdown && filteredItems.length > 0" x-cloak x-transition.opacity.duration.100ms
         class="absolute z-20 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-neutral-200 bg-white p-1.5 shadow-lg">
         <template x-for="item in filteredItems" :key="item.id">
@@ -60,9 +67,10 @@
 /**
  * Alpine data for the tag picker component: pick several items from a searchable list, shown as removable chips.
  * The selection is written to the Livewire property named `field` without a network round trip; it is
- * sent with the next form submit.
+ * sent with the next form submit. In a plain form (`plain`) nothing is synced: the component renders
+ * hidden inputs for the chips instead.
  */
-window.multiSelect = function (field, allItems, selectedIds = []) {
+window.multiSelect = function (field, allItems, selectedIds = [], plain = false) {
     return {
         searchTerm: "",
         showDropdown: false,
@@ -102,6 +110,8 @@ window.multiSelect = function (field, allItems, selectedIds = []) {
         },
 
         sync() {
+            if (plain) return;
+
             this.$wire.$set(field, this.selectedItems.map((item) => item.id), false);
         },
     };

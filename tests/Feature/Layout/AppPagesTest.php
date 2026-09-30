@@ -142,7 +142,7 @@ it('keeps a back link on the pages whose parent is not a menu item', function ()
 it('shows the job board tabs and archive shortcuts in the page toolbar', function () {
     $this->get(route('jobs.index'))->assertOk()->assertSee('Post a Project')->assertSee('Find a Project');
     $this->get(route('applications.my'))->assertOk()->assertSee('View Archived');
-    $this->get(route('my-jobs.index'))->assertOk()->assertSee('Archived Jobs');
+    $this->get(route('my-jobs.index'))->assertOk()->assertSee(route('my-jobs.archived.posted-jobs'), false)->assertSee('Archived');
 });
 
 it('titles the browser tab after the current page', function () {

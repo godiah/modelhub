@@ -16,14 +16,22 @@ class BrowsePostedJobsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'sometimes|string|in:all,active,inactive',
+            'status' => 'sometimes|string|in:all,active,closed,inactive',
             'sort' => 'sometimes|string|in:newest,deadline,budget_high,budget_low',
+            'search' => 'nullable|string|max:100',
         ];
     }
 
     public function getStatusFilter(): string
     {
         return $this->input('status', 'all');
+    }
+
+    public function getSearch(): ?string
+    {
+        $search = trim((string) $this->input('search'));
+
+        return $search === '' ? null : $search;
     }
 
     public function getSortOption(): string
@@ -34,7 +42,8 @@ class BrowsePostedJobsRequest extends FormRequest
     public function hasActiveFilters(): bool
     {
         return ($this->has('status') && $this->status !== 'all') ||
-               $this->has('sort');
+               ($this->has('sort') && $this->sort !== 'newest') ||
+               $this->getSearch() !== null;
     }
 
     public function isAjaxRequest(): bool

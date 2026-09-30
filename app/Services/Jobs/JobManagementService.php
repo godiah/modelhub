@@ -7,6 +7,11 @@
 
 namespace App\Services\Jobs;
 
+use App\Enums\ApplicationStatus;
+use App\Enums\EngagementStatus;
+use App\Helpers\Jobs\JobCacheHelper;
+use App\Models\JobApplication;
+use App\Models\JobEngagement;
 use App\Models\ModelJob;
 use App\Models\Skill;
 use App\Models\Software;
@@ -23,10 +28,13 @@ class JobManagementService
 
     protected JobSlugService $slugService;
 
-    public function __construct(JobImageService $imageService, JobSlugService $slugService)
+    protected JobCacheHelper $cacheHelper;
+
+    public function __construct(JobImageService $imageService, JobSlugService $slugService, JobCacheHelper $cacheHelper)
     {
         $this->imageService = $imageService;
         $this->slugService = $slugService;
+        $this->cacheHelper = $cacheHelper;
     }
 
     // Get data for creating a new job (skills & software)
@@ -86,18 +94,24 @@ class JobManagementService
         ];
     }
 
-    // Update a job
-    public function update(ModelJob $job, array $updateData): ModelJob
+    // Update a job: brief, budget, deadline, open/closed switch and images, together or not at all
+    public function update(ModelJob $job, array $updateData, ?Request $request = null, array $removedImageIds = []): ModelJob
     {
-        $job->update($updateData);
+        DB::transaction(function () use ($job, $updateData, $request, $removedImageIds) {
+            $job->update($updateData);
+
+            if ($request) {
+                $this->imageService->replaceMainImage($request, $job);
+                $this->imageService->removeAdditionalImages($job, $removedImageIds);
+                $this->imageService->handleAdditionalImages($request, $job);
+            }
+        });
+
+        // The slug stays as it was, so links already shared keep working; suggestions built from the old
+        // brief are stale now.
+        $this->cacheHelper->clearJobCache($job);
 
         return $job;
-    }
-
-    // Check if user can view the job (authorization check) --- Move to a policy
-    public function authorizeJobView(ModelJob $job): bool
-    {
-        return $job->user_id === Auth::id();
     }
 
     // Check if a job title exists
@@ -109,17 +123,96 @@ class JobManagementService
     // Get user's posted jobs with filtering and sorting
     public function getUserPostedJobs(array $filters): LengthAwarePaginator
     {
-        $query = ModelJob::where('user_id', Auth::id())->unarchived();
+        $query = ModelJob::where('user_id', Auth::id())
+            ->unarchived()
+            ->with('engagements')
+            ->withCount(['applications as new_applications_count' => fn ($q) => $q->where('status', ApplicationStatus::Submitted)]);
 
-        // Apply status filter if selected
-        if ($filters['status'] !== 'all') {
-            $query->where('is_active', $filters['status'] === 'active');
+        if (! empty($filters['search'])) {
+            $query->where('title', 'like', '%'.$filters['search'].'%');
         }
+
+        // "active" = open for applications right now, "closed" = everything else that is not archived
+        match ($filters['status']) {
+            'active' => $query->openForApplications(),
+            'closed', 'inactive' => $query->notOpenForApplications(),
+            default => null,
+        };
 
         // Apply sorting
         $this->applySortingToPostedJobs($query, $filters['sort']);
 
-        return $query->paginate(5)->withQueryString();
+        return $query->paginate(10)->withQueryString();
+    }
+
+    // Who applied to each listed project (latest first, drafts excluded), for the list's detail panel
+    public function getPostedJobInsights(array $jobs): array
+    {
+        $ids = collect($jobs)->pluck('id')->all();
+
+        if ($ids === []) {
+            return [];
+        }
+
+        return JobApplication::whereIn('job_id', $ids)
+            ->where('poster_id', Auth::id())
+            ->where('status', '!=', ApplicationStatus::Draft)
+            ->with('applicant.profile')
+            ->latest()
+            ->get()
+            ->groupBy('job_id')
+            ->all();
+    }
+
+    // Headline numbers across all the poster's projects
+    public function getPostedJobStats(): array
+    {
+        $engagements = fn (array $statuses) => JobEngagement::whereHas('application', fn ($q) => $q->where('poster_id', Auth::id()))
+            ->whereIn('status', $statuses)
+            ->count();
+
+        return [
+            'open' => ModelJob::where('user_id', Auth::id())->unarchived()->openForApplications()->count(),
+            'new_applications' => JobApplication::where('poster_id', Auth::id())
+                ->where('status', ApplicationStatus::Submitted)
+                ->whereHas('job', fn ($q) => $q->unarchived())
+                ->count(),
+            'in_progress' => $engagements([EngagementStatus::Active, EngagementStatus::Disputed]),
+            'completed' => $engagements([EngagementStatus::Completed]),
+        ];
+    }
+
+    // Tab counts for the poster's project list (archived projects live on their own page)
+    public function getPostedJobCounts(): array
+    {
+        $mine = fn () => ModelJob::where('user_id', Auth::id())->unarchived();
+
+        return [
+            'all' => $mine()->count(),
+            'active' => $mine()->openForApplications()->count(),
+            'closed' => $mine()->notOpenForApplications()->count(),
+        ];
+    }
+
+    // Everything the poster's project page shows besides the project itself: who applied, and the hire if any
+    public function getPosterOverview(ModelJob $job): array
+    {
+        $applications = $job->applications()
+            ->where('status', '!=', ApplicationStatus::Draft)
+            ->with(['applicant.profile', 'engagement'])
+            ->latest()
+            ->get();
+
+        return [
+            'applications' => $applications,
+            'recent' => $applications->take(4),
+            'counts' => [
+                'total' => $applications->count(),
+                'new' => $applications->where('status', ApplicationStatus::Submitted)->count(),
+                'hired' => $applications->where('status', ApplicationStatus::Hired)->count(),
+            ],
+            'engagement' => $job->engagements()->latest('job_engagements.id')->first(),
+        ];
     }
 
     // Apply sorting to posted jobs query
@@ -143,44 +236,65 @@ class JobManagementService
         }
     }
 
-    // Archive a job
-    public function archiveJob(ModelJob $job): bool
+    // Archive a job. Returns null once it is archived, otherwise why it was refused.
+    public function archiveJob(ModelJob $job): ?string
     {
         if ($job->user_id !== Auth::id()) {
-            return false;
+            return 'Unauthorized Action';
+        }
+
+        $job->loadMissing('engagements');
+
+        if (! $job->canBeArchived()) {
+            return $job->isOpenForApplications()
+                ? 'Close this project before archiving it. You can do that from Edit.'
+                : 'A freelancer is working on this project, so it cannot be archived yet.';
         }
 
         $job->archive();
 
-        return true;
+        return null;
     }
 
-    // Restore an archived job
-    public function restoreJob(ModelJob $job): bool
+    // Restore an archived job. Returns null once restored, otherwise why it was refused.
+    public function restoreJob(ModelJob $job): ?string
     {
         if ($job->user_id !== Auth::id()) {
-            return false;
+            return 'Unauthorized Action';
+        }
+
+        if (! $job->is_archived) {
+            return 'This project is not archived.';
         }
 
         $job->unarchive();
 
-        return true;
+        return null;
     }
 
-    // Get archived jobs
-    public function getArchivedJobs(): LengthAwarePaginator
+    // The poster's archived projects, newest first, with a real (non-draft) application count
+    public function getArchivedJobs(?string $search = null): LengthAwarePaginator
     {
         return ModelJob::where('user_id', Auth::id())
             ->archived()
-            ->with(['applications', 'jobImages'])
-            ->withCount('applications')
+            ->when($search, fn ($query) => $query->where('title', 'like', '%'.$search.'%'))
+            ->withCount(['applications as applications_count' => fn ($q) => $q->where('status', '!=', ApplicationStatus::Draft)])
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
     }
 
-    // Authorize job access for archived job view
-    public function authorizeArchivedJobAccess(ModelJob $job): bool
+    // Everything the archived project's page shows: its applications, latest first, drafts excluded
+    public function getArchivedJobOverview(ModelJob $job): array
     {
-        return $job->user_id === Auth::id();
+        $job->load('jobImages');
+
+        return [
+            'applications' => $job->applications()
+                ->where('status', '!=', ApplicationStatus::Draft)
+                ->with('applicant.profile')
+                ->latest()
+                ->get(),
+        ];
     }
 }

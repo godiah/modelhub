@@ -15,6 +15,8 @@ use App\Models\ModelJob;
 use App\Services\Jobs\JobBrowsingService;
 use App\Services\Jobs\JobManagementService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 
 class JobController extends Controller
 {
@@ -58,35 +60,47 @@ class JobController extends Controller
     // Return view to edit a job
     public function edit(ModelJob $job)
     {
-        // Check if user has permission to edit this job
-        // $this->authorize('update', $job);
+        Gate::authorize('update', $job);
 
-        $data = $this->jobManagementService->getEditJobData($job);
+        $job->load('jobImages');
 
-        return view('jobBoard.jobs.edit', $data);
+        return view('jobBoard.jobs.edit', $this->jobManagementService->getEditJobData($job) + [
+            'locked' => $job->hasEngagementInProgress(),
+        ]);
     }
 
-    // Update job details
+    // Update a job: authorisation and validation live in UpdateJobRequest
     public function update(UpdateJobRequest $request, ModelJob $job)
     {
-        $updateData = $request->getUpdateData();
-
-        $this->jobManagementService->update($job, $updateData);
+        $this->jobManagementService->update($job, $request->getUpdateData(), $request, $request->getRemovedImageIds());
 
         return redirect()->route('jobs.show', $job->slug)
             ->with('success', 'Project details updated successfully');
     }
 
-    // Show a specific job
+    // The poster's own project page. Everyone else is sent to the public page for the project.
     public function show(ModelJob $job)
     {
-        if (! $this->jobManagementService->authorizeJobView($job)) {
-            return $this->unauthorizedError();
+        if (! auth()->user()?->can('view', $job)) {
+            return redirect()->route('jobs.apply', $job->slug);
         }
 
-        $jobUrl = url("/jobs/{$job->slug}");
+        $job->load(['jobImages', 'engagements']);
 
-        return view('jobBoard.jobs.show', compact('job', 'jobUrl'));
+        return view('jobBoard.jobs.show', [
+            'job' => $job,
+            'publicUrl' => route('jobs.apply', $job->slug),
+        ] + $this->jobManagementService->getPosterOverview($job));
+    }
+
+    // Render Markdown for the editor's preview tab, with the same sanitising the project pages use
+    public function previewDescription(Request $request)
+    {
+        $validated = $request->validate(['description' => 'nullable|string|max:20000']);
+
+        return response()->json([
+            'html' => (string) Str::markdown((string) ($validated['description'] ?? ''), ['html_input' => 'strip', 'allow_unsafe_links' => false]),
+        ]);
     }
 
     // List all active projects/jobs
