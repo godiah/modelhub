@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use App\Notifications\ApplicationWithdrawnNotification;
 use App\Notifications\DisputeCreatedNotification;
 use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
@@ -62,7 +63,7 @@ enum NotificationCategory: string
     {
         return match ($this) {
             self::Messages => [NewApplicationMessage::class],
-            self::Engagements => [HiredNotification::class, EngagementResponseNotification::class, EngagementCancelledNotification::class],
+            self::Engagements => [HiredNotification::class, EngagementResponseNotification::class, EngagementCancelledNotification::class, ApplicationWithdrawnNotification::class],
             self::Payments => [PartialPaymentProcessedNotification::class, PaymentAcceptedNotification::class, PaymentDisputedNotification::class],
             self::Disputes => [DisputeCreatedNotification::class],
             self::Reviews => [ReviewSubmittedNotification::class],

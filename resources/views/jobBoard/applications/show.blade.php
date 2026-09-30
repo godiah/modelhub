@@ -14,10 +14,15 @@
     // Progress: applied → reviewed → the client's decision
     $failed = in_array($application->status, [ApplicationStatus::Rejected, ApplicationStatus::Withdrawn], true) || $standing['filled'];
     $reviewed = $application->status !== ApplicationStatus::Submitted;
+    $withdrewEarly = $application->status === ApplicationStatus::Withdrawn && ! $engagement;
     $decided = $application->status === ApplicationStatus::Hired || $engagement;
     $steps = [
         ['label' => __('Applied :date', ['date' => $application->created_at->format('M j')]), 'state' => 'done'],
-        ['label' => __('Reviewed'), 'state' => $reviewed ? 'done' : 'current'],
+        ['label' => __('Reviewed'), 'state' => match (true) {
+            $withdrewEarly => 'todo',
+            $reviewed => 'done',
+            default => 'current',
+        }],
         ['label' => match (true) {
             $decided => __('Hired'),
             $application->status === ApplicationStatus::Withdrawn => __('Withdrawn'),
@@ -39,7 +44,7 @@
     ]);
 @endphp
 <x-app-layout :crumb="$job->title">
-    <div class="container mx-auto max-w-7xl px-4 py-8" x-data="{ archiving: false, restoring: false, deleting: false }">
+    <div class="container mx-auto max-w-7xl px-4 py-8" x-data="{ archiving: false, restoring: false, deleting: false, withdrawing: false }">
         <!-- Header -->
         <x-card class="mb-6 rounded-2xl">
             <div class="flex flex-col gap-4 p-6 lg:flex-row lg:items-start lg:justify-between">
@@ -182,6 +187,15 @@
                     </x-panel>
                 @endif
 
+                @if ($application->canBeWithdrawn())
+                    <x-panel :title="__('Changed your mind?')" :description="__('Withdrawing tells the client you are no longer interested. You will not be able to apply to this project again.')">
+                        <x-btn size="sm" variant="danger-outline" type="button" @click="withdrawing = true">
+                            <x-icon name="arrow-left" class="h-4 w-4" />
+                            {{ __('Withdraw application') }}
+                        </x-btn>
+                    </x-panel>
+                @endif
+
                 @if ($application->is_archived)
                     <x-panel :title="__('Archived')" :description="__('This application is out of your My applications list.')">
                         <div class="flex flex-wrap items-center gap-3">
@@ -204,6 +218,12 @@
                 @endif
             </aside>
         </div>
+
+        @if ($application->canBeWithdrawn())
+            <x-confirm-dialog bind="withdrawing" title="Withdraw application" icon="arrow-left" confirm-label="Withdraw"
+                :action="route('applications.withdraw', $application)"
+                message="The client will be told you withdrew. You will not be able to apply to this project again." />
+        @endif
 
         @if ($application->is_archived)
             <x-confirm-dialog bind="restoring" title="Restore application" icon="arrow-path" tone="success" confirm-label="Restore"

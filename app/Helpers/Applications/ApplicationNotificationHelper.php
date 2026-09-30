@@ -12,6 +12,7 @@ namespace App\Helpers\Applications;
 use App\Models\ApplicantMessage;
 use App\Models\JobApplication;
 use App\Models\JobEngagement;
+use App\Notifications\ApplicationWithdrawnNotification;
 use App\Notifications\HiredNotification;
 use App\Notifications\NewApplicationMessage;
 
@@ -27,5 +28,12 @@ class ApplicationNotificationHelper
     public static function sendHiredNotification(JobApplication $application, JobEngagement $engagement): void
     {
         $application->applicant->notify(new HiredNotification($application, $engagement));
+    }
+
+    // Tell the poster an applicant withdrew
+    public static function sendWithdrawnNotification(JobApplication $application): void
+    {
+        $application->loadMissing(['job', 'applicant', 'poster']);
+        $application->poster?->notify(new ApplicationWithdrawnNotification($application));
     }
 }

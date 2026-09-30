@@ -53,6 +53,7 @@ Route::middleware(['auth'])->prefix('applications')->name('applications.')->grou
     });
     Route::get('/continue/{slug}', [JobApplicationController::class, 'continueDraft'])->name('continue');
     Route::get('/applications/archived', [JobApplicationController::class, 'archived'])->name('archived');
+    Route::post('/applications/{application}/withdraw', [JobApplicationController::class, 'withdraw'])->name('withdraw');
     Route::post('/applications/{application}/archive', [JobApplicationController::class, 'archive'])->name('archive');
     Route::post('/applications/{application}/restore', [JobApplicationController::class, 'restore'])->name('restore');
     Route::delete('/applications/{application}', [JobApplicationController::class, 'destroy'])->name('destroy');

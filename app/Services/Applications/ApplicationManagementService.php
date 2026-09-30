@@ -7,6 +7,7 @@ namespace App\Services\Applications;
 use App\Enums\ApplicationStatus;
 use App\Helpers\Applications\ApplicationCalculationHelper;
 use App\Helpers\Applications\ApplicationFileHelper;
+use App\Helpers\Applications\ApplicationNotificationHelper;
 use App\Helpers\FlashAlertHelper;
 use App\Models\ApplicantMessage;
 use App\Models\JobApplication;
@@ -14,6 +15,7 @@ use App\Models\ModelJob;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ApplicationManagementService
 {
@@ -221,6 +223,40 @@ class ApplicationManagementService
             ->latest()
             ->limit(10)
             ->get();
+    }
+
+    /**
+     * Withdraw a sent application. Re-read under a lock so a hire that lands at the same moment wins (the client's
+     * hire checks the status too). Returns why it cannot be withdrawn, or null once it has been.
+     */
+    public function withdrawApplication(JobApplication $application): ?string
+    {
+        $withdrawn = DB::transaction(function () use ($application, &$error) {
+            $current = JobApplication::whereKey($application->id)->lockForUpdate()->firstOrFail();
+
+            if (! $current->canBeWithdrawn()) {
+                $error = match (true) {
+                    $current->status === ApplicationStatus::Draft => 'This is still a draft. Delete it from your drafts instead.',
+                    $current->status === ApplicationStatus::Withdrawn => 'You have already withdrawn this application.',
+                    $current->status === ApplicationStatus::Rejected => 'The client has already turned this application down.',
+                    default => 'You were hired for this project. To step back, decline the offer from your engagements.',
+                };
+
+                return null;
+            }
+
+            $current->update(['status' => ApplicationStatus::Withdrawn]);
+
+            return $current;
+        });
+
+        if (! $withdrawn) {
+            return $error;
+        }
+
+        ApplicationNotificationHelper::sendWithdrawnNotification($withdrawn);
+
+        return null;
     }
 
     // Archive an application
