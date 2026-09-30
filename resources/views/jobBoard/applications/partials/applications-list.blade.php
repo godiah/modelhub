@@ -1,18 +1,7 @@
 @use('App\Enums\ApplicationStatus')
 
 @if ($applications->isEmpty() && $activeFilters)
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
-        <div class="p-12 flex flex-col items-center justify-center text-center font-main">
-            <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <x-icon name="document-text-2" class="w-8 h-8 text-primary" />
-            </div>
-            <h3 class="text-lg font-semibold text-neutral-800 mb-2">No Current Applications Found</h3>
-            <p class="text-neutral-600 mb-6 max-w-md">
-                We couldn't find any present applications matching your current search criteria. Try adjusting your
-                filters.
-            </p>
-        </div>
-    </div>
+    <x-empty-state icon="document-text-2" title="No Current Applications Found" description="We couldn't find any present applications matching your current search criteria. Try adjusting your filters." />
 @else
     <div class="grid gap-6 md:grid-cols-1">
         @foreach ($applications as $application)

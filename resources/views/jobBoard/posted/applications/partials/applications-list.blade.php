@@ -1,24 +1,12 @@
 @use('App\Enums\ApplicationStatus')
 
 @if ($applications->isEmpty() && $hasFilters)
-    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
-        <div class="p-12 flex flex-col items-center justify-center text-center font-main">
-            <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                <x-icon name="magnifying-glass" class="w-8 h-8 text-primary" />
-            </div>
-
-            <h3 class="text-lg font-semibold text-neutral-800 mb-2">No Applications Found</h3>
-            <p class="text-neutral-600 mb-6 max-w-md">
-                We couldn't find any applications matching your current search criteria. Try adjusting your filters or
-                search terms.
-            </p>
-
-            <x-button href="#" id="clearFilters">
-                <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
-                Clear All Filters
-            </x-button>
-        </div>
-    </div>
+    <x-empty-state icon="magnifying-glass" title="No Applications Found" description="We couldn't find any applications matching your current search criteria. Try adjusting your filters or search terms.">
+        <x-button href="#" id="clearFilters">
+            <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
+            Clear All Filters
+        </x-button>
+    </x-empty-state>
 @else
     <div class="space-y-6">
         @foreach ($applications as $application)
