@@ -136,7 +136,7 @@ it('keeps a back link on the pages whose parent is not a menu item', function ()
 
     $this->get(route('my-jobs.applications.show', $application))->assertOk()
         ->assertSee(route('my-jobs.applications.index', ['slug' => $job->slug]), false)
-        ->assertSee('Back to Applications');
+        ->assertSee('All applications');
 });
 
 it('shows the job board tabs and archive shortcuts in the page toolbar', function () {

@@ -1,12 +1,12 @@
 @props(['review'])
 
-<x-card clip class="hover:shadow-md transition-shadow duration-300">
+<x-card clip class="rounded-xl shadow-none">
     <div class="p-5">
         <!-- Header -->
         <div class="flex justify-between items-start">
             <div class="flex items-center">
                 <div
-                    class="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center border border-primary/20 font-medium mr-3">
+                    class="h-10 w-10 rounded-full bg-teal-50 text-teal-800 flex items-center justify-center border border-teal-700/15 text-sm font-semibold mr-3">
                     {{ $review->reviewer->getInitials() }}
                 </div>
                 <div>
@@ -27,7 +27,7 @@
             <div class="mt-4 flex flex-wrap gap-1">
                 @foreach ($review->tags as $tag)
                     <span
-                        class="font-tertiary font-medium px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">{{ $tag }}</span>
+                        class="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-0.5 text-xs text-neutral-700">{{ $tag }}</span>
                 @endforeach
             </div>
         @endif

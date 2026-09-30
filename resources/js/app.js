@@ -1,7 +1,5 @@
 import "flowbite";
 import "./bootstrap";
-import "./templates";
-import "./search-history";
 
 /**
  * Switch Post and Find Jobs Tabs

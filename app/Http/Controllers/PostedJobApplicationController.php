@@ -11,6 +11,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ApplicationStatus;
 use App\Helpers\FlashAlertHelper;
 use App\Http\Requests\Application\BrowseApplicationsRequest;
 use App\Http\Requests\Application\BrowsePostedJobsRequest;
@@ -77,15 +78,10 @@ class PostedJobApplicationController extends Controller
         $filters = [
             'search' => $request->getSearchTerm(),
             'status' => $request->getStatusFilter(),
+            'sort' => $request->getSortOption(),
         ];
 
-        $data = $this->applicationBrowsingService->getJobApplications($slug, $filters);
-
-        if ($request->isAjaxRequest()) {
-            return view('jobBoard.posted.applications.partials.applications-list', $data)->render();
-        }
-
-        return view('jobBoard.posted.applications.index', $data);
+        return view('jobBoard.posted.applications.index', $this->applicationBrowsingService->getJobApplications($slug, $filters));
     }
 
     // View job application details
@@ -103,11 +99,20 @@ class PostedJobApplicationController extends Controller
     {
         $this->authorize('manage', $application);
 
-        // Check if hiring confirmation is required
+        // A hired or withdrawn application's status is final (saving a note without changing it is fine)
+        if ($application->isStatusLocked() && $request->status !== $application->status->value) {
+            return redirect()->back()->with(FlashAlertHelper::error($application->status === ApplicationStatus::Hired
+                ? 'This applicant has been hired, so the status can no longer be changed.'
+                : 'This applicant withdrew their application, so the status can no longer be changed.'));
+        }
+
+        // Hiring creates an engagement, so it goes through the confirmation step on the details page
         if ($this->applicationHiringService->requiresHireConfirmation($application, $request->status)) {
-            return redirect()->back()
-                ->with('show_hire_confirmation', true)
-                ->withInput();
+            if ($blocker = $application->hireBlocker()) {
+                return redirect()->back()->with(FlashAlertHelper::error($blocker));
+            }
+
+            return redirect()->route('my-jobs.applications.show', ['application' => $application, 'hire' => 1]);
         }
 
         // Update the application status
@@ -122,9 +127,13 @@ class PostedJobApplicationController extends Controller
     {
         $this->authorize('manage', $application);
 
+        if ($blocker = $application->hireBlocker()) {
+            return redirect()->back()->with(FlashAlertHelper::error($blocker));
+        }
+
         $deliverables = $request->hasDeliverables() ? $request->getDeliverables() : [];
 
-        $engagement = $this->applicationHiringService->confirmHire($application, $deliverables);
+        $this->applicationHiringService->confirmHire($application, $deliverables);
 
         return redirect()->back()->with(FlashAlertHelper::success('Hire confirmed and applicant notified'));
     }

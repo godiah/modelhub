@@ -78,6 +78,20 @@ class ModelJob extends Model
     }
 
     /**
+     * True once a freelancer has been hired and the engagement is live or finished (pending offer, accepted,
+     * active, disputed or completed). Cancelled and settled engagements free the project up again.
+     */
+    public function hasActiveHire(): bool
+    {
+        return $this->engagements()
+            ->whereIn('job_engagements.status', [
+                EngagementStatus::EmployerAccepted, EngagementStatus::ApplicantAccepted, EngagementStatus::Active,
+                EngagementStatus::Disputed, EngagementStatus::Completed,
+            ])
+            ->exists();
+    }
+
+    /**
      * Archiving tidies away a finished or abandoned project, so it must already be closed to applications and
      * have nobody working on it (a completed engagement is fine; an active or disputed one is not).
      */
