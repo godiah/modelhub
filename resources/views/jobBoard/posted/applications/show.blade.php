@@ -622,22 +622,20 @@
                                             </p>
 
                                             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                                <x-button size="lg" class="justify-center"
-                                                    x-on:click="showHireModal = false; showDeliverablesForm = true">
-                                                    <x-icon name="clipboard-list" class="mr-2 h-5 w-5" />
+                                                <x-btn size="lg" class="justify-center" x-on:click="showHireModal = false; showDeliverablesForm = true">
+                                                    <x-icon name="clipboard-list" class="h-5 w-5" />
                                                     Setup Deliverables
-                                                </x-button>
-                                                <x-button variant="secondary" size="lg" class="justify-center"
-                                                    x-on:click="showHireModal = false; document.getElementById('hireForm').submit();">
-                                                    <x-icon name="check" class="mr-2 h-5 w-5" />
+                                                </x-btn>
+                                                <x-btn variant="secondary" size="lg" class="justify-center" x-on:click="showHireModal = false; document.getElementById('hireForm').submit();">
+                                                    <x-icon name="check" class="h-5 w-5" />
                                                     Hire Without Deliverables
-                                                </x-button>
+                                                </x-btn>
                                             </div>
 
                                             <div class="mt-4">
-                                                <x-button type="button" variant="neutral" class="w-full justify-center" x-on:click="dismiss()">
+                                                <x-btn type="button" variant="secondary" class="w-full justify-center" x-on:click="dismiss()">
                                                     Cancel
-                                                </x-button>
+                                                </x-btn>
                                             </div>
                                         </div>
                                     </x-modal>
@@ -739,13 +737,11 @@
                                         </div>
 
                                         <x-modal.footer>
-                                            <x-button type="button" variant="neutral" x-on:click="dismiss()">Cancel</x-button>
-                                            <x-button type="button" x-on:click="submitDeliverables()"
-                                                ::disabled="deliverables.length === 0 || deliverables.some(d => !d.title)"
-                                                ::class="{ 'opacity-50 cursor-not-allowed': deliverables.length === 0 || deliverables.some(d => !d.title) }">
-                                                <x-icon name="check" class="mr-2 h-5 w-5" />
+                                            <x-btn type="button" variant="secondary" x-on:click="dismiss()">Cancel</x-btn>
+                                            <x-btn type="button" x-on:click="submitDeliverables()" ::disabled="deliverables.length === 0 || deliverables.some(d => !d.title)" ::class="{ 'opacity-50 cursor-not-allowed': deliverables.length === 0 || deliverables.some(d => !d.title) }">
+                                                <x-icon name="check" class="h-5 w-5" />
                                                 Submit and Hire
-                                            </x-button>
+                                            </x-btn>
                                         </x-modal.footer>
                                     </x-modal>
                                 @endif

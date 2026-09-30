@@ -11,14 +11,14 @@
                     <p class="text-neutral-600 font-main mb-8 text-center max-w-sm">
                         You haven't archived any jobs yet. Archived jobs will appear here when you close them.
                     </p>
-                    <x-button size="lg" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
+                    <x-btn size="lg" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M11 17l-5-5m0 0l5-5m-5 5h12" />
                         </svg>
                         View Active Jobs
-                    </x-button>
+                    </x-btn>
                 </x-card>
             @else
                 <div class="grid gap-6">
@@ -134,10 +134,10 @@
                                         </svg>
                                         View Details
                                     </a>
-                                    <x-button variant="secondary" class="text-sm" @click="showingRestore = true">
-                                        <x-icon name="arrow-path" class="h-4 w-4 mr-2" />
+                                    <x-btn variant="secondary" class="text-sm" @click="showingRestore = true">
+                                        <x-icon name="arrow-path" class="h-4 w-4" />
                                         Restore Job
-                                    </x-button>
+                                    </x-btn>
                                 </div>
                             </div>
 

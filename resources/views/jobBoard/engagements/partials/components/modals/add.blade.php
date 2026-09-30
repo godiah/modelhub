@@ -43,11 +43,11 @@
         </div>
 
         <x-modal.footer>
-            <x-button type="button" variant="neutral" x-on:click="dismiss()">Cancel</x-button>
-            <x-button type="submit" variant="secondary">
-                <x-icon name="check" class="mr-1 h-5 w-5" />
+            <x-btn type="button" variant="secondary" x-on:click="dismiss()">Cancel</x-btn>
+            <x-btn type="submit">
+                <x-icon name="check" class="h-5 w-5" />
                 Save Deliverable
-            </x-button>
+            </x-btn>
         </x-modal.footer>
     </form>
 </x-modal>

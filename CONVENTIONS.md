@@ -367,8 +367,11 @@ following, use the component — and if a variant is missing, add a prop rather 
 | Amount / date | `<x-money :amount="$x" />` (or `App\Support\Money::format()` in expressions), `<x-date :date="$x" />` (null-safe). Currency symbol lives in `config('app.currency_symbol')`. |
 | Panel | `<x-card rounded shadow border clip>`; empty list results: `<x-empty-state icon title description>` |
 | Pill / status | `<x-badge tone>`, `<x-engagement.status-badge :status>` |
-| Button / link-button | `<x-button variant size href>` (primary/secondary/danger/neutral, md/lg) |
-| Form label / field error | `<x-form.label>`, `<x-form.error name="field">` |
+| Button / link-button | `<x-btn variant size block href>` — variants `primary` (teal, the page's main action), `secondary` (outline: alternatives, toolbar/nav and utility actions), `danger`, `danger-outline`, `ghost`; sizes md/lg. Renders a `<a>` with `href`, else a `<button>` (defaults `type="submit"`) with a `wire:loading` spinner (`wire:target` passes through). Icons inside are spaced by the button's `gap` — don't add `mr-*` to them. Replaces the old navy `<x-button>` |
+| Text field / textarea / select | `<x-field name label type hint icon size>` — label above, hint, error (read from the `wire:model` key), inside icon, password show/hide, `type="textarea"`/`"select"` (options in the slot). `size="lg"` is the roomy filled variant used on the auth pages |
+| Settings card | `<x-panel title description danger flush>` with `<x-slot:actions>` (header) and `<x-slot:footer>` (save row) — the quiet replacement for coloured section headers |
+| Multi-select chips | `<x-tag-picker field label :items :selected tone>` — writes ids to the Livewire property `field` locally (no request per toggle); its Alpine `multiSelect()` is inline (`@once`) on purpose, see the comment in the component |
+| Form label / field error (legacy) | `<x-form.label>`, `<x-form.error name="field">` — prefer `<x-field>` |
 | Modal | `<x-modal name="…">` opened with `$dispatch('open-modal', 'name')` or `{ name, ...payload }` (payload readable as `payload`), or `bind="alpineVar"`; compose with `<x-modal.header>`/`<x-modal.footer>` |
 | Destructive/confirming action | `<x-confirm-dialog name title message action method>` — **never** `confirm()`/`alert()`; one shared instance per page with a payload beats one per list row |
 | Loading indicator | `<x-spinner class="h-4 w-4" />` |

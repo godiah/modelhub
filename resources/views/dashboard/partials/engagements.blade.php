@@ -17,14 +17,14 @@
                     {{ __('Once an offer is accepted, the work in progress shows up here with its deliverables and deadlines.') }}
                 </p>
                 <div class="mt-5 flex flex-wrap justify-center gap-3">
-                    <x-button href="{{ route('jobs.browse') }}" class="text-sm shadow-sm">
-                        <x-icon name="magnifying-glass" class="mr-2 h-4 w-4" />
+                    <x-btn href="{{ route('jobs.browse') }}" class="text-sm shadow-sm">
+                        <x-icon name="magnifying-glass" class="h-4 w-4" />
                         {{ __('Browse projects') }}
-                    </x-button>
-                    <x-button variant="secondary" href="{{ route('jobs.create') }}" class="text-sm shadow-sm">
-                        <x-icon name="plus" class="mr-2 h-4 w-4" />
+                    </x-btn>
+                    <x-btn variant="secondary" href="{{ route('jobs.create') }}" class="text-sm shadow-sm">
+                        <x-icon name="plus" class="h-4 w-4" />
                         {{ __('Post a project') }}
-                    </x-button>
+                    </x-btn>
                 </div>
             </div>
         @else

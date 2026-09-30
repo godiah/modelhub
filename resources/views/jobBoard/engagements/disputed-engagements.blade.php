@@ -3,10 +3,10 @@
 <x-app-layout :crumb="$engagement->job->title">
     <x-slot name="toolbar">
         @can('view disputes')
-            <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('admin.disputes.index') }}">
-                <x-icon name="scale" class="h-5 w-5 mr-2" />
+            <x-btn variant="secondary" class="text-sm shadow-sm" href="{{ route('admin.disputes.index') }}">
+                <x-icon name="scale" class="h-5 w-5" />
                 Disputed engagements
-            </x-button>
+            </x-btn>
         @endcan
     </x-slot>
 

@@ -1,9 +1,9 @@
 <x-app-layout :crumb="$job->title">
     <x-slot name="toolbar">
-        <x-button class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
-            <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
+        <x-btn variant="secondary" class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
+            <x-icon name="archive-box-2" class="h-5 w-5" />
             Archived Jobs
-        </x-button>
+        </x-btn>
     </x-slot>
 
     <div class="py-8">

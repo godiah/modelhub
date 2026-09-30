@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="toolbar">
-        <x-button class="text-sm shadow-sm" href="{{ route('applications.archived') }}">
-            <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
+        <x-btn variant="secondary" class="text-sm shadow-sm" href="{{ route('applications.archived') }}">
+            <x-icon name="archive-box-2" class="h-5 w-5" />
             View Archived
-        </x-button>
+        </x-btn>
     </x-slot>
 
     <section>

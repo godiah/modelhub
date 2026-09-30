@@ -96,8 +96,8 @@
 
                     <!-- Action Buttons -->
                     <div class="mt-4 flex justify-end gap-3">
-                        <x-button type="button" variant="neutral" x-on:click="dismiss()">Cancel</x-button>
-                        <x-button type="submit">Submit Review</x-button>
+                        <x-btn type="button" variant="secondary" x-on:click="dismiss()">Cancel</x-btn>
+                        <x-btn type="submit">Submit Review</x-btn>
                     </div>
                 </form>
     </div>
