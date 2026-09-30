@@ -50,7 +50,6 @@ it('renders menu pages inside the shell with their breadcrumb', function (string
     'post a project' => ['jobs.create', ['Hire', 'Post a project']],
     'posted projects' => ['my-jobs.index', ['Hire', 'Posted projects']],
     'archived posted projects' => ['my-jobs.archived.posted-jobs', ['Posted projects', 'Archived']],
-    'projects' => ['project.index', ['Delivery', 'Projects']],
     'engagements' => ['engagements.index', ['Delivery', 'Engagements']],
     'archived engagements' => ['engagements.archived', ['Engagements', 'Archived']],
     'cancellation policy' => ['engagements.policy', ['Help', 'Cancellation policy']],

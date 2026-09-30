@@ -20,7 +20,7 @@
             'value' => \App\Support\Money::format($summary['earned'], 0),
             'hint' => __('From completed work'),
             'icon' => 'banknotes',
-            'url' => route('project.index'),
+            'url' => route('engagements.index', ['status' => 'completed']),
         ],
         [
             'label' => __('Open applications'),
