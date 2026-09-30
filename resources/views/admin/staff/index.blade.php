@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="min-h-screen bg-neutral-50">
+    <div>
         <div class="max-w-5xl mx-auto p-8">
             <div class="mb-8 flex items-center justify-between">
                 <div>

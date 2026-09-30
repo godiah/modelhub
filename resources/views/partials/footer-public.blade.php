@@ -7,7 +7,7 @@
                     <h2 class="text-xl font-tertiary font-bold">ModelHub</h2>
                     <p class="text-neutral-200 text-sm mt-1 font-secondary">Discover Your Potential</p>
                 </div>
-                <p class="text-neutral-200 text-sm font-secondary">&copy; 2025 ModelHub. All rights reserved.</p>
+                <p class="text-neutral-200 text-sm font-secondary">&copy; {{ date('Y') }} ModelHub. All rights reserved.</p>
             </div>
 
             <!-- Quick Links -->

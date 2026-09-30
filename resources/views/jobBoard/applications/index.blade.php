@@ -1,27 +1,13 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
-                    {{ __('My Job Applications') }}
-                </h2>
-                {{-- <p class="text-tertiary mt-2 font-main text-xs">Track and manage your job applications</p> --}}
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('jobs.browse') }}">
-                    <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
-                    Browse More Jobs
-                </x-button>
-                <x-button class="text-sm shadow-sm" href="{{ route('applications.archived') }}">
-                    <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
-                    View Archived
-                </x-button>
-            </div>
-        </div>
+    <x-slot name="toolbar">
+        <x-button class="text-sm shadow-sm" href="{{ route('applications.archived') }}">
+            <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
+            View Archived
+        </x-button>
     </x-slot>
 
-    <section class="bg-gradient-to-br from-neutral-50 to-neutral-100">
-        <div class="container mx-auto max-w-7xl px-4 py-12 min-h-screen">
+    <section>
+        <div class="container mx-auto max-w-7xl px-4 py-8">
             <!-- Filters/Stats Bar -->
             <x-card class="mb-6 p-4 flex flex-wrap items-center justify-between">
                 <div class="flex items-center space-x-4 text-tertiary font-main">
@@ -93,8 +79,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        @include('partials.footer-secondary')
     </section>
 
     <style>

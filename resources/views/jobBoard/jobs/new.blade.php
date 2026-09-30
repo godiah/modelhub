@@ -1,21 +1,5 @@
 <x-app-layout>
 
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
-                    {{ __('New Project') }}
-                </h2>
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
-                    <x-icon name="briefcase" class="h-5 w-5 mr-2" stroke-width="1.5" />
-                    My Jobs
-                </x-button>
-            </div>
-        </div>
-    </x-slot>
-
     <section class="font-main">
         <!-- Main Container -->
         <div class="container mx-auto max-w-7xl">
@@ -321,8 +305,6 @@
             });
         </script>
 
-        <!-- Footer -->
-        @include('partials.footer-secondary')
     </section>
 
 </x-app-layout>

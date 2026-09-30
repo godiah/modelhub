@@ -1,19 +1,6 @@
 @use('App\Enums\ApplicationStatus')
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-xl text-primary leading-tight">
-                Application details
-            </h2>
-            <a href="{{ route('applications.my') }}"
-                class="flex items-center px-4 py-2 bg-neutral-100 rounded-md text-sm font-main text-primary hover:bg-neutral-200 transition shadow-sm">
-                <x-icon name="arrow-left" class="h-5 w-5 mr-2" />
-                Back to Applications
-            </a>
-        </div>
-    </x-slot>
-
-    <section class="bg-neutral-50">
+<x-app-layout crumb="Application details">
+    <section>
         <div class="container mx-auto max-w-7xl px-4 py-8">
             <!-- Application Status Banner -->
             <div
@@ -265,7 +252,5 @@
             </x-card>
         </div>
 
-        <!-- Footer -->
-        @include('partials.footer-secondary')
     </section>
 </x-app-layout>

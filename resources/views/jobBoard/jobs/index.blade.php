@@ -1,9 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <!-- Tab Navigation -->
-        <div class="">
-            <div class="flex justify-end space-x-5 md:justify-end">
-                <!-- Post a Job -->
+    <x-slot name="toolbar">
+        <!-- Post a Job -->
                 <button id="post-job-btn" class="flex items-center gap-2 font-medium  border-secondary text-secondary"
                     onclick="showTab('post-job')">
                     <!-- SVG Icon -->
@@ -24,9 +21,8 @@
                     </svg>
                     Find a Project
                 </button>
-            </div>
-        </div>
     </x-slot>
+
     <div class="font-main text-neutral-800 bg-white">
 
         <!-- Post a Job/Hire Freelancer Section  -->
@@ -436,7 +432,5 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        @include('partials.footer-secondary')
     </div>
 </x-app-layout>

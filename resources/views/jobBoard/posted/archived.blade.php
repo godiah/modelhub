@@ -1,23 +1,6 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
-                    {{ __('Archived Jobs') }}
-                </h2>
-
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('my-jobs.index') }}">
-                    <x-icon name="clipboard-check" class="h-5 w-5 mr-2" />
-                    Back to Active Jobs
-                </x-button>
-            </div>
-        </div>
-    </x-slot>
-
-    <section class="bg-gradient-to-br from-neutral-50 to-neutral-100">
-        <div class="container mx-auto max-w-7xl px-4 py-12 min-h-screen">
+<x-app-layout crumb="Archived">
+    <section>
+        <div class="container mx-auto max-w-7xl px-4 py-8">
             @if ($archivedJobs->isEmpty())
                 <x-card class="flex flex-col items-center justify-center min-h-[300px] p-12">
                     <div class="relative">

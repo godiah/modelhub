@@ -1,22 +1,5 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
-                <x-icon name="archive-box" class="h-6 w-6 mr-2" />
-                {{ __('Archived Engagements') }}
-            </h2>
-            <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('engagements.index') }}">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                    stroke="currentColor" class="h-5 w-5 mr-2">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-                </svg>
-                Back to Active Engagements
-            </x-button>
-        </div>
-    </x-slot>
-
-    <div class="py-8 bg-gradient-to-br from-neutral-50 to-neutral-100 min-h-screen">
+<x-app-layout crumb="Archived">
+    <div class="py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Main Content Card -->
             <x-card rounded="2xl" shadow="xl" clip>

@@ -1,24 +1,7 @@
 @use('App\Enums\ApplicationStatus')
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
-                    {{ __('Archived Applications') }}
-                </h2>
-
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('applications.my') }}">
-                    <x-icon name="clipboard-check" class="h-5 w-5 mr-2" />
-                    Back to Active Applications
-                </x-button>
-            </div>
-        </div>
-    </x-slot>
-
-    <section class="bg-gradient-to-br from-neutral-50 to-neutral-100">
-        <div class="container mx-auto max-w-7xl px-4 py-12 min-h-screen">
+<x-app-layout crumb="Archived">
+    <section>
+        <div class="container mx-auto max-w-7xl px-4 py-8">
             {{-- Quick Stats --}}
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                 @php

@@ -241,13 +241,13 @@ test('staff nav links only show for users who hold the matching permission', fun
     $regular = User::factory()->create();
 
     $this->actingAs($admin)->get(route('dashboard'))
-        ->assertSee('Disputed Engagements')->assertSee('Staff Roles');
+        ->assertSee('Disputed engagements')->assertSee('Staff roles');
 
     $this->actingAs($support)->get(route('dashboard'))
-        ->assertSee('Disputed Engagements')->assertDontSee('Staff Roles');
+        ->assertSee('Disputed engagements')->assertDontSee('Staff roles');
 
     $this->actingAs($regular)->get(route('dashboard'))
-        ->assertDontSee('Disputed Engagements')->assertDontSee('Staff Roles');
+        ->assertDontSee('Disputed engagements')->assertDontSee('Staff roles');
 });
 
 test('an invalid role value on the staff screen is rejected', function () {

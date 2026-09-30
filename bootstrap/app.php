@@ -16,6 +16,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Set from JS by the sidebar collapse toggle; read server-side so the shell renders in the right state.
+        $middleware->encryptCookies(except: ['modelhub_sidebar']);
+
         $middleware->alias([
             'verify-engagement-ownership' => VerifyJobEngagementOwnership::class,
             'role' => RoleMiddleware::class,

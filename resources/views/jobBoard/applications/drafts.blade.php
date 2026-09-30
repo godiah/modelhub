@@ -1,22 +1,6 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight">
-                    {{ __('My Drafts') }}
-                </h2>
-            </div>
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="text-sm" href="{{ route('jobs.browse') }}">
-                    <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
-                    Browse Jobs
-                </x-button>
-            </div>
-        </div>
-    </x-slot>
-
-    <section class=" bg-neutral-50">
-        <div class="container mx-auto max-w-7xl px-4 py-8 min-h-screen">
+    <section>
+        <div class="container mx-auto max-w-7xl px-4 py-8">
             <!-- Drafts Container -->
             @if ($drafts->isEmpty())
                 <x-card shadow="lg" class="p-8">
@@ -96,9 +80,6 @@
                 @endif
             @endif
         </div>
-
-        <!-- Footer -->
-        @include('partials.footer-secondary')
 
         <script>
             function confirmDelete(event, id) {

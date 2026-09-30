@@ -1,12 +1,4 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-bold text-2xl text-primary leading-tight flex items-center">
-                {{ $engagement->job->title }}
-            </h2>
-        </div>
-    </x-slot>
-
+<x-app-layout :crumb="$engagement->job->title">
     <div class="container mx-auto px-4 py-8">
         <div class="max-w-7xl mx-auto">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">

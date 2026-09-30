@@ -321,6 +321,8 @@
     </section>
 
 
+    @include('partials.footer-public')
+
     <!-- Floating Chat Button -->
     <div class="fixed bottom-6 right-6">
         <button

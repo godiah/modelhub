@@ -1,25 +1,12 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-tertiary font-semibold text-2xl text-primary leading-tight">
-                {{ __('Jobs Posted') }}
-            </h2>
-
-            <div class="flex space-x-3">
-                <x-button variant="secondary" class="shadow-sm" href="{{ route('jobs.create') }}">
-                    <x-icon name="plus-solid" class="h-5 w-5 mr-2" />
-                    Post New Job
-                </x-button>
-
-                <x-button class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
-                    <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
-                    Archived Jobs
-                </x-button>
-            </div>
-        </div>
+    <x-slot name="toolbar">
+        <x-button class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
+            <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
+            Archived Jobs
+        </x-button>
     </x-slot>
 
-    <div class="py-10 bg-gradient-to-b from-neutral-50 to-white min-h-screen">
+    <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             @if ($postedJobs->isEmpty() && !$hasFilters)
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-neutral-200">
@@ -33,11 +20,11 @@
                     </div>
                 </div>
             @else
-                <div class="mb-6 flex justify-between items-center">
+                <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
                     <h3 class="font-secondary text-neutral-700 text-lg">
                         Showing <span class="font-medium">{{ $postedJobs->count() }}</span> jobs
                     </h3>
-                    <div class="flex items-center space-x-2 font-main">
+                    <div class="flex flex-wrap items-center gap-2 font-main">
                         <select id="statusFilter"
                             class="rounded-lg border-neutral-300 text-neutral-700 text-sm focus:ring-primary focus:border-primary">
                             <option value="all">All Jobs</option>
@@ -72,8 +59,6 @@
             @endif
         </div>
     </div>
-
-    @include('partials.footer-secondary')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
