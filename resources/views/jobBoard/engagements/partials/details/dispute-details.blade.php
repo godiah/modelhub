@@ -39,7 +39,7 @@
             <!-- Primary Information Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Disputed By -->
-                <div class="bg-white rounded-lg p-4 border border-orange-100 shadow-sm">
+                <x-card rounded="lg" border="orange-100" class="p-4">
                     <div class="flex items-start space-x-3">
                         <div class="p-2 bg-orange-100 rounded-lg">
                             <x-icon name="user" class="w-4 h-4 text-orange-600" />
@@ -51,10 +51,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </x-card>
 
                 <!-- Current Status -->
-                <div class="bg-white rounded-lg p-4 border border-orange-100 shadow-sm">
+                <x-card rounded="lg" border="orange-100" class="p-4">
                     <div class="flex items-start space-x-3">
                         <div
                             class="p-2 rounded-lg
@@ -82,10 +82,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </x-card>
 
                 <!-- Dispute Reason -->
-                <div class="bg-white rounded-lg p-4 border border-orange-100 shadow-sm">
+                <x-card rounded="lg" border="orange-100" class="p-4">
                     <div class="flex items-start space-x-3">
                         <div class="p-2 bg-orange-100 rounded-lg">
                             <x-icon name="question-mark-circle" class="w-4 h-4 text-orange-600" />
@@ -97,11 +97,11 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </x-card>
 
                 <!-- Resolution Amount (if exists) -->
                 @if ($dispute->resolution_amount)
-                    <div class="bg-white rounded-lg p-4 border border-green-100 shadow-sm">
+                    <x-card rounded="lg" border="green-100" class="p-4">
                         <div class="flex items-start space-x-3">
                             <div class="p-2 bg-green-100 rounded-lg">
                                 <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor"
@@ -118,14 +118,14 @@
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 @endif
             </div>
 
             <!-- Timeline Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Dispute Created -->
-                <div class="bg-white rounded-lg p-4 border border-orange-100 shadow-sm">
+                <x-card rounded="lg" border="orange-100" class="p-4">
                     <div class="flex items-center space-x-3">
                         <div class="p-2 bg-orange-100 rounded-lg">
                             <x-icon name="clock" class="w-4 h-4 text-orange-600" />
@@ -140,11 +140,11 @@
                             {{ $dispute->created_at->diffForHumans() }}
                         </p>
                     </div>
-                </div>
+                </x-card>
 
                 <!-- Resolution Date (if resolved) -->
                 @if ($dispute->status === DisputeStatus::Resolved && $dispute->resolved_at)
-                    <div class="bg-white rounded-lg p-4 border border-green-100 shadow-sm">
+                    <x-card rounded="lg" border="green-100" class="p-4">
                         <div class="flex items-center space-x-3">
                             <div class="p-2 bg-green-100 rounded-lg">
                                 <x-icon name="check-circle" class="w-4 h-4 text-green-600" />
@@ -159,13 +159,13 @@
                                 {{ $dispute->resolved_at->diffForHumans() }}
                             </p>
                         </div>
-                    </div>
+                    </x-card>
                 @endif
             </div>
 
             <!-- Dispute Details (if provided) -->
             @if ($dispute->dispute_details)
-                <div class="bg-white rounded-lg p-4 border border-orange-100 shadow-sm mb-6">
+                <x-card rounded="lg" border="orange-100" class="p-4 mb-6">
                     <div class="flex items-start space-x-3">
                         <div class="p-2 bg-orange-100 rounded-lg flex-shrink-0 mt-0.5">
                             <x-icon name="document-text" class="w-4 h-4 text-orange-600" />
@@ -179,12 +179,12 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </x-card>
             @endif
 
             <!-- Resolution Notes (if provided) -->
             @if ($dispute->resolution_notes)
-                <div class="bg-white rounded-lg p-4 border border-green-100 shadow-sm mb-6">
+                <x-card rounded="lg" border="green-100" class="p-4 mb-6">
                     <div class="flex items-start space-x-3">
                         <div class="p-2 bg-green-100 rounded-lg flex-shrink-0 mt-0.5">
                             <x-icon name="clipboard-check-2" class="w-4 h-4 text-green-600" />
@@ -198,7 +198,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </x-card>
             @endif
 
             <!-- Status Alert -->

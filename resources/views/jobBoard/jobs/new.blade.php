@@ -22,8 +22,7 @@
         <div class="container mx-auto max-w-7xl">
             <!-- Create Job Form -->
             <div class="py-14 px-4 sm:px-6 lg:px-8">
-                <div
-                    class="rounded-2xl shadow-xl overflow-hidden bg-white transition-all duration-300 hover:shadow-2xl border border-neutral-200">
+                <x-card rounded="2xl" shadow="xl" clip class="transition-all duration-300 hover:shadow-2xl">
                     <x-jobs.form-header title="Hire 3D Designer"
                         subtitle="Create a comprehensive project brief to find the perfect 3D design professional for your needs.">
                         <x-slot:icon>
@@ -321,7 +320,7 @@
                         <input type="file" id="additionalImages" name="additional_images[]"
                             accept="image/jpeg,image/png,image/jpg" multiple class="hidden">
                     </form>
-                </div>
+                </x-card>
             </div>
         </div>
 

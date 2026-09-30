@@ -1,4 +1,4 @@
-<div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden relative">
+<x-card rounded="2xl" shadow="lg" clip class="relative">
     <!-- Subtle background pattern -->
     <div class="absolute inset-0 opacity-5">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -47,20 +47,20 @@
     <!-- Financial information section -->
     <div class="bg-neutral-50 p-4 border-b border-neutral-200">
         <div class="grid grid-cols-2 gap-4">
-            <div class="bg-white rounded-lg p-3 border border-neutral-200 shadow-sm">
+            <x-card rounded="lg" class="p-3">
                 <div class="text-xs text-neutral-500 uppercase tracking-wider font-medium">Budget</div>
                 <div class="text-lg font-secondary font-bold text-neutral-800">
                     <span class="text-primary"><x-money :amount="$engagement->job->budget" /></span>
                 </div>
-            </div>
-            <div class="bg-white rounded-lg p-3 border border-neutral-200 shadow-sm">
+            </x-card>
+            <x-card rounded="lg" class="p-3">
                 <div class="text-xs text-neutral-500 uppercase tracking-wider font-medium">Your Offer
                 </div>
                 <div class="text-lg font-secondary font-bold text-neutral-800">
                     <span
                         class="text-secondary"><x-money :amount="$engagement->application->offer_amount" /></span>
                 </div>
-            </div>
+            </x-card>
         </div>
     </div>
 
@@ -80,7 +80,7 @@
                     </svg>
                     Freelancer
                 </h3>
-                <div class="flex items-center bg-white p-3 rounded-lg border border-neutral-200 shadow-sm">
+                <x-card rounded="lg" class="flex items-center p-3">
                     <div
                         class="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-secondary to-primary text-white font-medium mr-3">
                         {{ $engagement->applicant->getInitials() }}
@@ -90,7 +90,7 @@
                         </h4>
                         <div class="text-sm text-neutral-500">Freelancer</div>
                     </div>
-                </div>
+                </x-card>
             </div>
 
             <!-- Client Details -->
@@ -106,7 +106,7 @@
                     </svg>
                     Client
                 </h3>
-                <div class="flex items-center bg-white p-3 rounded-lg border border-neutral-200 shadow-sm">
+                <x-card rounded="lg" class="flex items-center p-3">
                     <div
                         class="flex items-center justify-center h-12 w-12 rounded-full bg-gradient-to-br from-accent to-accent/70 text-white font-medium mr-3">
                         {{ $engagement->poster->getInitials() }}
@@ -115,8 +115,8 @@
                         <h4 class="font-medium text-neutral-800">{{ $engagement->poster->name }}</h4>
                         <div class="text-sm text-neutral-500">Client</div>
                     </div>
-                </div>
+                </x-card>
             </div>
         </div>
     </div>
-</div>
+</x-card>

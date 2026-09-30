@@ -1,4 +1,4 @@
-<div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden relative">
+<x-card rounded="2xl" shadow="lg" clip class="relative">
     <!-- Subtle background pattern -->
     <div class="absolute inset-0 opacity-5">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -59,7 +59,7 @@
                     </svg>
                     Initiated by
                 </h3>
-                <div class="flex items-center bg-white p-3 rounded-lg border border-neutral-200 shadow-sm">
+                <x-card rounded="lg" class="flex items-center p-3">
 
                     @if ($engagement->cancellation->initiator_id === $engagement->application->poster->id)
                         <div
@@ -89,7 +89,7 @@
                             @endif
                         </h4>
                     </div>
-                </div>
+                </x-card>
             </div>
 
             <!-- Cancellation Type -->
@@ -102,7 +102,7 @@
                     </svg>
                     Cancellation Type
                 </h3>
-                <div class="bg-white p-3 rounded-lg border border-neutral-200 shadow-sm">
+                <x-card rounded="lg" class="p-3">
                     @php
                         $cancellationTypes = [
                             'mutual' => 'Mutual Agreement',
@@ -127,7 +127,7 @@
                         class="inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium {{ $typeColorClass }}">
                         {{ $cancellationType }}
                     </span>
-                </div>
+                </x-card>
             </div>
 
             <!-- Reason Category -->
@@ -136,7 +136,7 @@
                     <x-icon name="chat-bubble-left-right" class="h-5 w-5 mr-2 text-tertiary" />
                     Reason
                 </h3>
-                <div class="bg-white p-4 rounded-lg border border-neutral-200 shadow-sm">
+                <x-card rounded="lg" class="p-4">
                     @php
                         $reasonCategories = [
                             'schedule_conflict' => 'Schedule Conflict',
@@ -161,8 +161,8 @@
                     <div class="text-neutral-700 text-sm mt-3 bg-neutral-50 p-3 rounded-lg border border-neutral-100">
                         {{ $engagement->cancellation->reason_details }}
                     </div>
-                </div>
+                </x-card>
             </div>
         </div>
     </div>
-</div>
+</x-card>

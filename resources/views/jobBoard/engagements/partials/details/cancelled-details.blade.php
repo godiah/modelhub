@@ -29,7 +29,7 @@
             <!-- Main Details Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <!-- Initiated By -->
-                <div class="bg-white rounded-lg p-4 border border-red-100 shadow-sm">
+                <x-card rounded="lg" border="red-100" class="p-4">
                     <div class="flex items-start space-x-3">
                         <div class="p-2 bg-red-100 rounded-lg">
                             <x-icon name="user" class="w-4 h-4 text-red-600" />
@@ -41,10 +41,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </x-card>
 
                 <!-- Cancellation Type -->
-                <div class="bg-white rounded-lg p-4 border border-red-100 shadow-sm">
+                <x-card rounded="lg" border="red-100" class="p-4">
                     <div class="flex items-start space-x-3">
                         <div class="p-2 bg-red-100 rounded-lg">
                             <x-icon name="tag" class="w-4 h-4 text-red-600" />
@@ -56,10 +56,10 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </x-card>
 
                 <!-- Category -->
-                <div class="bg-white rounded-lg p-4 border border-red-100 shadow-sm">
+                <x-card rounded="lg" border="red-100" class="p-4">
                     <div class="flex items-start space-x-3">
                         <div class="p-2 bg-red-100 rounded-lg">
                             <x-icon name="inbox" class="w-4 h-4 text-red-600" />
@@ -71,11 +71,11 @@
                             </p>
                         </div>
                     </div>
-                </div>
+                </x-card>
 
                 <!-- Partial Payment -->
                 @if ($engagement->cancellation->partial_payment_amount)
-                    <div class="bg-white rounded-lg p-4 border border-red-100 shadow-sm">
+                    <x-card rounded="lg" border="red-100" class="p-4">
                         <div class="flex items-start space-x-3">
                             <div class="p-2 bg-red-100 rounded-lg">
                                 <x-icon name="cash" class="w-4 h-4 text-red-600" />
@@ -87,12 +87,12 @@
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 @endif
             </div>
 
             <!-- Cancellation Timeline -->
-            <div class="bg-white rounded-lg p-4 border border-red-100 shadow-sm mb-6">
+            <x-card rounded="lg" border="red-100" class="p-4 mb-6">
                 <div class="flex items-center space-x-3 mb-1">
                     <div class="p-2 bg-red-100 rounded-lg">
                         <x-icon name="clock" class="w-4 h-4 text-red-600" />
@@ -107,11 +107,11 @@
                         {{ $engagement->cancelled_at->diffForHumans() }}
                     </p>
                 </div>
-            </div>
+            </x-card>
 
             <!-- Reason Details (if provided) -->
             @if ($engagement->cancellation->reason_details)
-                <div class="bg-white rounded-lg p-4 border border-red-100 shadow-sm">
+                <x-card rounded="lg" border="red-100" class="p-4">
                     <div class="flex items-start space-x-3">
                         <div class="p-2 bg-red-100 rounded-lg flex-shrink-0 mt-0.5">
                             <x-icon name="chat-bubble-left-right" class="w-4 h-4 text-red-600" stroke-width="2" />
@@ -126,7 +126,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </x-card>
             @endif
 
             <!-- Status Alert -->

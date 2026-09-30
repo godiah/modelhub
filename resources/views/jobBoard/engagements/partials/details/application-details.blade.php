@@ -1,5 +1,5 @@
 <!-- Application Details -->
-<div class="bg-white rounded-2xl shadow-lg border border-neutral-100 overflow-hidden">
+<x-card rounded="2xl" shadow="lg" border="neutral-100" clip>
     <!-- Header Section -->
     <div class="relative bg-gradient-to-r from-secondary to-secondary/90 px-8 py-6">
         <!-- Background Pattern -->
@@ -45,11 +45,11 @@
                 </div>
 
                 @if ($engagement->application->proposal)
-                    <div class="bg-white rounded-lg p-6 border border-neutral-200 shadow-sm">
+                    <x-card rounded="lg" class="p-6">
                         <div class="prose max-w-none font-main text-neutral-700 text-sm leading-relaxed">
                             {!! nl2br(e($engagement->application->proposal)) !!}
                         </div>
-                    </div>
+                    </x-card>
                 @else
                     <div
                         class="flex flex-col items-center justify-center py-6 bg-white rounded-lg border-2 border-dashed border-neutral-300">
@@ -100,4 +100,4 @@
             </div>
         </div>
     </div>
-</div>
+</x-card>

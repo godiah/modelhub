@@ -11,7 +11,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-lg border border-neutral-200 p-6 hover:shadow-md transition-shadow">
+            <x-card shadow="lg" class="p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium font-main text-neutral-600">Total Projects</p>
@@ -22,9 +22,9 @@
                         <x-icon name="briefcase" class="w-6 h-6 text-primary" stroke-width="2" />
                     </div>
                 </div>
-            </div>
+            </x-card>
 
-            <div class="bg-white rounded-xl shadow-lg border border-neutral-200 p-6 hover:shadow-md transition-shadow">
+            <x-card shadow="lg" class="p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium font-main text-neutral-600">Active</p>
@@ -35,9 +35,9 @@
                         <x-icon name="clock" class="w-6 h-6 text-secondary" />
                     </div>
                 </div>
-            </div>
+            </x-card>
 
-            <div class="bg-white rounded-xl shadow-lg border border-neutral-200 p-6 hover:shadow-md transition-shadow">
+            <x-card shadow="lg" class="p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium font-main text-neutral-600">Completed</p>
@@ -48,9 +48,9 @@
                         <x-icon name="check-circle" class="w-6 h-6 text-green-600" />
                     </div>
                 </div>
-            </div>
+            </x-card>
 
-            <div class="bg-white rounded-xl shadow-lg border border-neutral-200 p-6 hover:shadow-md transition-shadow">
+            <x-card shadow="lg" class="p-6 hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium font-main text-neutral-600">Total Earnings</p>
@@ -63,11 +63,11 @@
                         <x-icon name="banknotes" class="w-6 h-6 text-accent" stroke-width="1.5" />
                     </div>
                 </div>
-            </div>
+            </x-card>
         </div>
 
         <!-- Tabs Navigation -->
-        <div class="bg-white rounded-xl shadow-lg border border-neutral-200 mb-6">
+        <x-card shadow="lg" class="mb-6">
             <div class="border-b border-neutral-200 font-main">
                 <nav class="-mb-px flex space-x-2 px-6 overflow-x-auto" aria-label="Tabs">
                     <button data-tab="all"
@@ -143,7 +143,7 @@
                     'tab' => $tab,
                 ])
             </div>
-        </div>
+        </x-card>
     </div>
 
     <script>

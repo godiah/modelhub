@@ -3,7 +3,7 @@
 <div
     class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 mx-auto bg-gradient-to-r from-neutral-50 to-neutral-100 border border-neutral-200">
     <!-- Started Date -->
-    <div class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
+    <x-card rounded="lg" border="neutral-100" class="flex items-center space-x-3 p-3">
         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
             <x-icon name="calendar" class="h-5 w-5 text-primary" />
         </div>
@@ -13,10 +13,10 @@
                 {{ $engagement->started_at ? $engagement->started_at->format('M d, Y') : 'Not started yet' }}
             </p>
         </div>
-    </div>
+    </x-card>
 
     <!-- Agreed Amount -->
-    <div class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
+    <x-card rounded="lg" border="neutral-100" class="flex items-center space-x-3 p-3">
         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
             <x-icon name="banknotes" class="h-5 w-5 text-secondary" stroke-width="1.5" />
         </div>
@@ -25,10 +25,10 @@
             <p class="font-medium text-neutral-800">
                 <x-money :amount="$engagement->net_amount" /></p>
         </div>
-    </div>
+    </x-card>
 
     <!-- Payment Status -->
-    <div class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
+    <x-card rounded="lg" border="neutral-100" class="flex items-center space-x-3 p-3">
         <div
             class="flex-shrink-0 h-10 w-10 rounded-full 
                                     @if ($engagement->isPaymentEscrowed()) bg-secondary/10 
@@ -67,10 +67,10 @@
                 @endif
             </p>
         </div>
-    </div>
+    </x-card>
 
     <!-- Message Action -->
-    <div class="flex items-center space-x-3 bg-white p-3 rounded-lg shadow-sm border border-neutral-100">
+    <x-card rounded="lg" border="neutral-100" class="flex items-center space-x-3 p-3">
         <div class="flex-shrink-0 h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
@@ -102,5 +102,5 @@
                 <p class="font-medium text-neutral-600">Not available</p>
             @endif
         </div>
-    </div>
+    </x-card>
 </div>

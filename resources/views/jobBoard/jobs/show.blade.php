@@ -24,8 +24,7 @@
 
     <div class="container mx-auto max-w-7xl">
         <div class="max-w-7xl mx-auto px-4 py-14 sm:px-6 lg:px-8">
-            <div
-                class="bg-white rounded-2xl shadow-xl overflow-hidden border border-neutral-200 transition-all duration-300 hover:shadow-2xl">
+            <x-card rounded="2xl" shadow="xl" clip class="transition-all duration-300 hover:shadow-2xl">
                 <!-- Header Section -->
                 <div class="bg-gradient-to-r from-primary to-primary/90 text-white p-6 relative overflow-hidden">
                     <!-- Background Pattern -->
@@ -235,7 +234,7 @@
                         </a>
                     </div>
                 </div>
-            </div>
+            </x-card>
         </div>
     </div>
 

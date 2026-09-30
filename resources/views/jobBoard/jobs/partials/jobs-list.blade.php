@@ -1,8 +1,6 @@
 <!-- resources/views/jobBoard/jobs/partials/jobs-list.blade.php -->
 @forelse ($jobs as $job)
-    <div
-        class="bg-white rounded-xl shadow-lg overflow-hidden border border-neutral-200 hover:shadow-xl transition-all duration-300 
-                md:flex md:h-40">
+    <x-card shadow="lg" clip class="hover:shadow-xl transition-all duration-300 md:flex md:h-40">
 
         <!-- Job Image Section (Top on mobile, Left on desktop) -->
         <div class="relative h-auto w-full md:w-40 md:min-w-40 md:h-full">
@@ -104,7 +102,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </x-card>
 @empty
     <div class="bg-white rounded-xl shadow p-6 text-center max-w-2xl mx-auto">
         <div class="mx-auto w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mb-3">

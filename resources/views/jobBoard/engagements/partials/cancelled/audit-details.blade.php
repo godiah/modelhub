@@ -1,5 +1,5 @@
 <!-- Redesigned Deliverables Timeline -->
-<div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
+<x-card rounded="2xl" shadow="lg" clip>
     <!-- Header  -->
     <div class="bg-gradient-to-r from-accent to-accent/80 p-6 relative">
         <!-- Abstract clipboard visual element -->
@@ -27,8 +27,7 @@
 
     <div class="p-5">
         @foreach ($engagement->deliverables as $deliverable)
-            <div
-                class="mb-5 bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow duration-300">
+            <x-card clip class="mb-5 hover:shadow-md transition-shadow duration-300">
                 <div class="px-4 py-3 bg-gradient-to-r from-primary/5 to-transparent border-b border-neutral-100">
                     <h4 class="font-secondary font-semibold text-neutral-800 flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" viewBox="0 0 20 20"
@@ -122,7 +121,7 @@
                         @endif
                     </div>
                 </div>
-            </div>
+            </x-card>
         @endforeach
 
         <!-- Empty state if no deliverables -->
@@ -141,7 +140,7 @@
             </div>
         @endif
     </div>
-</div>
+</x-card>
 
 <style>
     /* Custom CSS for additional styling */

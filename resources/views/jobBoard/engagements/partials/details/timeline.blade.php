@@ -1,5 +1,5 @@
 <!-- Engagement Timeline -->
-<div class="bg-white rounded-2xl shadow-lg border border-neutral-100 overflow-hidden">
+<x-card rounded="2xl" shadow="lg" border="neutral-100" clip>
     <!-- Header Section -->
     <div class="relative bg-gradient-to-r from-tertiary to-tertiary/90 px-8 py-6">
         <!-- Background Pattern -->
@@ -228,4 +228,4 @@
             </div>
         </div>
     </div>
-</div>
+</x-card>

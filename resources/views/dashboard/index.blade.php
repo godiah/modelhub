@@ -12,7 +12,7 @@
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <!-- Navigation Links -->
             <div class="mb-8">
-                <div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-2">
+                <x-card class="p-2">
                     <nav class="flex space-x-1">
                         <a href="{{ route('applications.my') }}"
                             class="flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 font-secondary {{ request()->routeIs('applications.my') ? 'bg-secondary text-white shadow-sm' : 'text-neutral-700 hover:text-secondary hover:bg-secondary/10' }}">
@@ -30,14 +30,14 @@
                             {{ __('My Engagements') }}
                         </a>
                     </nav>
-                </div>
+                </x-card>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Main Content -->
                 <div class="lg:col-span-2 space-y-8">
                     <!-- Profile Section -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                    <x-card clip>
                         <x-section-header :title="__('Profile Information')"
                             :subtitle="__('Your professional profile overview')">
                             <x-slot:icon>
@@ -137,11 +137,11 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Social Links Section -->
                     @if ($dashboardData['socialLinks']->count() > 0)
-                        <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                        <x-card clip>
                             <div class="bg-gradient-to-r from-secondary to-secondary/90 px-6 py-4">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
@@ -175,14 +175,14 @@
                                     @endforeach
                                 </div>
                             </div>
-                        </div>
+                        </x-card>
                     @endif
 
                     <!-- Skills and Software Row -->
                     <div class="grid grid-cols-1 gap-6">
                         <!-- Skills Section -->
                         @if ($dashboardData['skills']->count() > 0)
-                            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                            <x-card clip>
                                 <div
                                     class="bg-gradient-to-r from-secondary/20 to-secondary/10 px-6 py-4 border-b border-neutral-200">
                                     <div class="flex items-center space-x-3">
@@ -204,12 +204,12 @@
                                         @endforeach
                                     </div>
                                 </div>
-                            </div>
+                            </x-card>
                         @endif
 
                         <!-- Software Section -->
                         @if ($dashboardData['software']->count() > 0)
-                            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                            <x-card clip>
                                 <div
                                     class="bg-gradient-to-r from-accent/20 to-accent/10 px-6 py-4 border-b border-neutral-200">
                                     <div class="flex items-center space-x-3">
@@ -235,13 +235,13 @@
                                         @endforeach
                                     </div>
                                 </div>
-                            </div>
+                            </x-card>
                         @endif
                     </div>
 
                     <!-- Reviews Section -->
                     @if ($dashboardData['reviews']->count() > 0)
-                        <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                        <x-card clip>
                             <div
                                 class="bg-gradient-to-r from-accent/20 to-accent/10 px-6 py-4 border-b border-neutral-200">
                                 <div class="flex items-center justify-between">
@@ -330,10 +330,9 @@
                                     @endforeach
                                 </div>
                             </div>
-                        </div>
+                        </x-card>
                     @else
-                        <div
-                            class="text-center bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden py-12">
+                        <x-card clip class="text-center py-12">
                             <div
                                 class="w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-full flex items-center justify-center">
                                 <x-icon name="star" class="w-8 h-8 text-accent/60" />
@@ -343,7 +342,7 @@
                             <p class="text-neutral-500 font-main max-w-sm mx-auto">
                                 {{ __('Your reviews will appear here once clients start sharing their experiences working with you.') }}
                             </p>
-                        </div>
+                        </x-card>
                     @endif
                 </div>
 
@@ -351,7 +350,7 @@
                 <div class="space-y-6">
                     <!-- Review Statistics -->
                     @if ($dashboardData['reviewStats']['total_reviews'] > 0)
-                        <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                        <x-card clip>
                             <div
                                 class="bg-gradient-to-r from-accent/20 to-accent/10 px-6 py-4 border-b border-neutral-200">
                                 <div class="flex items-center space-x-3">
@@ -404,11 +403,11 @@
                                     @endforeach
                                 </div>
                             </div>
-                        </div>
+                        </x-card>
                     @endif
 
                     <!-- Activity Summary -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                    <x-card clip>
                         <div
                             class="bg-gradient-to-r from-primary/20 to-primary/10 px-6 py-4 border-b border-neutral-200">
                             <div class="flex items-center space-x-3">
@@ -468,10 +467,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Quick Actions -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                    <x-card clip>
                         <div
                             class="bg-gradient-to-r from-secondary/20 to-secondary/10 px-6 py-4 border-b border-neutral-200">
                             <div class="flex items-center space-x-3">
@@ -503,7 +502,7 @@
                                 </a>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 </div>
             </div>
         </div>

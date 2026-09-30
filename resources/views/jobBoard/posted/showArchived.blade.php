@@ -18,7 +18,7 @@
     <div class="py-10 bg-gradient-to-b from-neutral-50 to-white min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Job Information Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden mb-8">
+            <x-card clip class="mb-8">
                 <div class="px-6 py-6 space-y-4">
                     <!-- Job Header -->
                     <div class="flex flex-col md:flex-row md:items-center justify-between">
@@ -74,7 +74,7 @@
                         </div>
                     @endif
                 </div>
-            </div>
+            </x-card>
 
             <!-- Applications Section -->
             <div class="space-y-6">
@@ -88,8 +88,7 @@
 
                 @forelse($job->applications as $application)
                     <!-- Individual Application Card -->
-                    <div
-                        class="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden transform transition-all duration-300 hover:shadow-xl">
+                    <x-card shadow="lg" clip class="transform transition-all duration-300 hover:shadow-xl">
                         <!-- Applicant Header -->
                         <div class="relative px-6 pt-6 pb-4 bg-gradient-to-r from-neutral-50 to-white">
                             <div class="flex items-center gap-4">
@@ -162,7 +161,7 @@
 
                                 <!-- Proposal -->
                                 <div class="md:col-span-2">
-                                    <div class="bg-white border border-neutral-200 rounded-lg p-4">
+                                    <x-card rounded="lg" shadow="none" class="p-4">
                                         <h4
                                             class="text-sm font-semibold text-tertiary mb-3 font-main flex items-center">
                                             <x-icon name="document-text-solid" class="h-4 w-4 mr-2 text-secondary" />
@@ -181,7 +180,7 @@
                                                     applicant</span>
                                             </div>
                                         @endif
-                                    </div>
+                                    </x-card>
                                 </div>
                             </div>
 
@@ -206,8 +205,7 @@
                                             @endphp
 
                                             @if ($isImage)
-                                                <div
-                                                    class="group relative bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden transition-all hover:shadow-md aspect-square">
+                                                <x-card rounded="lg" clip class="group relative transition-all hover:shadow-md aspect-square">
                                                     <img src="{{ asset('storage/' . $item) }}" alt="Portfolio image"
                                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
                                                     <div
@@ -219,10 +217,9 @@
                                                             </a>
                                                         </div>
                                                     </div>
-                                                </div>
+                                                </x-card>
                                             @else
-                                                <div
-                                                    class="group bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden transition-all hover:shadow-md aspect-square">
+                                                <x-card rounded="lg" clip class="group transition-all hover:shadow-md aspect-square">
                                                     <div
                                                         class="h-full bg-gradient-to-br from-neutral-50 to-neutral-100 flex items-center justify-center">
                                                         <div class="text-center p-2">
@@ -235,24 +232,24 @@
                                                         class="absolute inset-0 flex items-center justify-center bg-neutral-800/80 text-white opacity-0 group-hover:opacity-100 transition-opacity">
                                                         <span class="text-sm font-medium">Download</span>
                                                     </a>
-                                                </div>
+                                                </x-card>
                                             @endif
                                         @endforeach
                                     </div>
                                 </div>
                             @endif
                         </div>
-                    </div>
+                    </x-card>
                 @empty
                     <!-- No Applications Found -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 p-12 font-main">
+                    <x-card class="p-12 font-main">
                         <div class="text-center">
                             <x-icon name="document-text" class="h-16 w-16 mx-auto text-neutral-300 mb-4" />
                             <h3 class="text-lg font-medium text-neutral-900">No Applications Found</h3>
                             <p class="mt-2 text-sm text-tertiary">This archived job has not received any applications.
                             </p>
                         </div>
-                    </div>
+                    </x-card>
                 @endforelse
             </div>
         </div>

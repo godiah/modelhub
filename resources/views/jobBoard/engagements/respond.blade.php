@@ -15,7 +15,7 @@
     </x-slot>
 
     <div class="container mx-auto max-w-6xl px-4 pt-10 pb-24 font-main">
-        <div class="bg-white border border-neutral-200 rounded-xl shadow-lg overflow-hidden">
+        <x-card shadow="lg" clip>
             <!-- Header with gradient background -->
             <div class="bg-gradient-to-r from-primary to-primary/80 p-6 text-white">
                 <div class="flex flex-col md:flex-row md:justify-between md:items-center">
@@ -45,27 +45,24 @@
                 </h4>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div
-                        class="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm transition-transform hover:scale-[1.01]">
+                    <x-card rounded="lg" class="p-4 transition-transform hover:scale-[1.01]">
                         <div class="text-neutral-500 text-sm mb-1">Application Submitted</div>
                         <div class="flex items-center">
                             <x-icon name="calendar" class="h-5 w-5 text-primary mr-2" />
                             <p class="font-medium text-neutral-800"><x-date :date="$application->created_at" format="F j, Y" /></p>
                         </div>
-                    </div>
+                    </x-card>
 
-                    <div
-                        class="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm transition-transform hover:scale-[1.01]">
+                    <x-card rounded="lg" class="p-4 transition-transform hover:scale-[1.01]">
                         <div class="text-neutral-500 text-sm mb-1">Offer Amount</div>
                         <div class="flex items-center">
                             <x-icon name="coins" class="h-5 w-5 text-accent mr-2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                             <p class="font-medium text-lg text-neutral-800">
                                 <x-money :amount="$engagement->agreed_amount" /></p>
                         </div>
-                    </div>
+                    </x-card>
 
-                    <div
-                        class="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm transition-transform hover:scale-[1.01]">
+                    <x-card rounded="lg" class="p-4 transition-transform hover:scale-[1.01]">
                         <div class="text-neutral-500 text-sm mb-1">Service Fee</div>
                         <div class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-500 mr-2" fill="none"
@@ -76,10 +73,9 @@
                             <p class="font-medium text-neutral-800"><x-money :amount="$engagement->service_fee" />
                             </p>
                         </div>
-                    </div>
+                    </x-card>
 
-                    <div
-                        class="bg-white rounded-lg p-4 border border-neutral-200 shadow-sm transition-transform hover:scale-[1.01]">
+                    <x-card rounded="lg" class="p-4 transition-transform hover:scale-[1.01]">
                         <div class="text-neutral-500 text-sm mb-1">Your Net Earnings</div>
                         <div class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary mr-2" fill="none"
@@ -90,7 +86,7 @@
                             <p class="font-medium text-lg text-secondary">
                                 <x-money :amount="$engagement->net_amount" /></p>
                         </div>
-                    </div>
+                    </x-card>
                 </div>
             </div>
 
@@ -103,8 +99,7 @@
 
                 <div class="space-y-4">
                     @forelse($engagement->deliverables as $deliverable)
-                        <div
-                            class="bg-white border border-neutral-200 rounded-lg p-5 shadow-sm hover:shadow transition-all duration-200">
+                        <x-card rounded="lg" class="p-5 hover:shadow transition-all duration-200">
                             <div class="flex flex-wrap gap-2 justify-between items-start mb-3">
                                 <div class="flex items-center">
                                     <div class="bg-secondary/10 rounded-full p-2 mr-3">
@@ -128,7 +123,7 @@
                                 @endif
                             </div>
                             <p class="text-neutral-600 ml-10 text-sm text-justify">{{ $deliverable->description }}</p>
-                        </div>
+                        </x-card>
                     @empty
                         <div class="bg-neutral-50 rounded-lg p-8 text-center">
                             <x-icon name="clipboard-list" class="h-12 w-12 text-neutral-300 mx-auto mb-3" />
@@ -269,6 +264,6 @@
                     </div>
                 </div>
             </form>
-        </div>
+        </x-card>
     </div>
 </x-app-layout>

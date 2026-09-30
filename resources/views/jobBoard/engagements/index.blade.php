@@ -74,7 +74,7 @@
         </div>
         <div id="engagementsContainer">
             @if ($engagements->isEmpty() && !$hasFilters)
-                <div class="bg-white border border-neutral-200 rounded-xl p-12 text-center shadow-sm">
+                <x-card class="p-12 text-center">
                     <div class="bg-neutral-100 h-24 w-24 rounded-full flex items-center justify-center mx-auto mb-6">
                         <x-icon name="chat-bubble-text" class="h-12 w-12 text-neutral-400" stroke-width="1.5" />
                     </div>
@@ -87,7 +87,7 @@
                         <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
                         Browse Available Jobs
                     </a>
-                </div>
+                </x-card>
             @else
                 @include('jobBoard.engagements.partials.engagements-list', [
                     'engagements' => $engagements,

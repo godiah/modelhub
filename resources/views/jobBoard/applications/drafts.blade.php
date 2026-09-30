@@ -20,7 +20,7 @@
         <div class="container mx-auto max-w-7xl px-4 py-8 min-h-screen">
             <!-- Drafts Container -->
             @if ($drafts->isEmpty())
-                <div class="bg-white p-8 rounded-xl shadow-lg border border-neutral-200">
+                <x-card shadow="lg" class="p-8">
                     <div class="text-center py-12">
                         <x-icon name="pencil-square" class="h-16 w-16 mx-auto text-neutral-300 mb-4" />
                         <h3 class="text-xl font-semibold text-neutral-800 mb-2 font-secondary">No Drafts Found</h3>
@@ -33,12 +33,11 @@
                             <x-icon name="arrow-right" class="h-5 w-5 ml-2" />
                         </a>
                     </div>
-                </div>
+                </x-card>
             @else
                 <div class="grid gap-6 md:grid-cols-1">
                     @foreach ($drafts as $draft)
-                        <div
-                            class="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border border-neutral-200 overflow-hidden group">
+                        <x-card shadow="md" clip class="hover:shadow-lg transition-shadow group">
                             <div class="p-6 flex flex-col md:flex-row md:items-center justify-between">
                                 <!-- Job Title and Date -->
                                 <div class="flex items-center mb-4 md:mb-0">
@@ -87,7 +86,7 @@
                             <div class="h-1 bg-accent/20">
                                 <div class="h-full bg-accent" style="width: 35%"></div>
                             </div>
-                        </div>
+                        </x-card>
                     @endforeach
                 </div>
 

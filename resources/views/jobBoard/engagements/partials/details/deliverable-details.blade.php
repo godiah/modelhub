@@ -1,5 +1,5 @@
 <!-- Deliverables -->
-<div class="bg-white rounded-2xl shadow-lg border border-neutral-100 overflow-hidden">
+<x-card rounded="2xl" shadow="lg" border="neutral-100" clip>
     <!-- Header Section -->
     <div class="bg-gradient-to-r from-primary to-primary/90 px-8 py-6">
         <div class="flex items-center justify-between">
@@ -28,8 +28,7 @@
         @if ($engagement->deliverables->count() > 0)
             <div class="space-y-4">
                 @foreach ($engagement->deliverables as $deliverable)
-                    <div
-                        class="group relative bg-white border border-neutral-200 rounded-xl p-5 hover:shadow-md hover:border-secondary/30 transition-all duration-300">
+                    <x-card shadow="none" class="group relative p-5 hover:shadow-md hover:border-secondary/30 transition-all duration-300">
                         <!-- Status Indicator Line -->
                         <div
                             class="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl
@@ -133,7 +132,7 @@
                         <div
                             class="absolute inset-0 bg-gradient-to-r from-secondary/5 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl pointer-events-none">
                         </div>
-                    </div>
+                    </x-card>
                 @endforeach
             </div>
         @else
@@ -148,4 +147,4 @@
             </div>
         @endif
     </div>
-</div>
+</x-card>

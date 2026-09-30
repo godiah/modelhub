@@ -20,7 +20,7 @@
     <div class="py-8 bg-gradient-to-br from-neutral-50 to-neutral-100 min-h-screen">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Main Content Card -->
-            <div class="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
+            <x-card rounded="2xl" shadow="xl" clip>
                 <div class="bg-gradient-to-r from-primary/5 to-secondary/5 px-6 py-4 border-b border-neutral-200">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4">
@@ -66,7 +66,7 @@
                         'archivedEngagements' => $archivedEngagements,
                     ])
                 </div>
-            </div>
+            </x-card>
         </div>
     </div>
 

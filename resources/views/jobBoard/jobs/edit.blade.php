@@ -18,8 +18,7 @@
     </x-slot>
 
     <div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        <div
-            class="rounded-2xl shadow-xl overflow-hidden bg-white transition-all duration-300 hover:shadow-2xl border border-neutral-200">
+        <x-card rounded="2xl" shadow="xl" clip class="transition-all duration-300 hover:shadow-2xl">
 
             <x-jobs.form-header title="Edit 3D Design Project"
                 subtitle="Update your project brief to refine your search for the ideal 3D design professional.">
@@ -74,7 +73,7 @@
                     </button>
                 </div>
             </form>
-        </div>
+        </x-card>
 
         <script src="{{ asset('js/submit-btn-edit.js') }}"></script>
     </div>

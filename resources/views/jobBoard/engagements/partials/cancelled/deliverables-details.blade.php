@@ -1,6 +1,6 @@
 <div class="font-main rounded-2xl shadow-lg border border-neutral-200">
     <!-- Card Container -->
-    <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+    <x-card shadow="md" clip>
         <!-- Header -->
         <div class="bg-gradient-to-r from-primary to-primary/90 p-6 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -208,7 +208,7 @@
                 </div>
             @endforeach
         </div>
-    </div>
+    </x-card>
 </div>
 
 <script>

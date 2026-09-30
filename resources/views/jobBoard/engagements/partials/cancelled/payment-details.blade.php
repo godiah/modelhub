@@ -1,7 +1,7 @@
 @use('App\Enums\PartialPaymentStatus')
 <div class="space-y-6">
     {{-- Payment Summary Card --}}
-    <div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
+    <x-card rounded="2xl" shadow="lg" clip>
         <!-- Header with gradient background -->
         <div class="bg-gradient-to-r from-accent to-accent/80 p-6 border-b border-neutral-200 relative">
             <!-- Abstract visual element -->
@@ -67,10 +67,10 @@
                 </div>
             </dl>
         </div>
-    </div>
+    </x-card>
 
     {{-- Payment Status Card --}}
-    <div class="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
+    <x-card rounded="2xl" shadow="lg" clip>
         <div class="bg-gradient-to-r from-accent to-accent/80 p-6 border-b border-neutral-200 relative">
             <!-- Abstract visual element for summary -->
             <div class="absolute right-0 bottom-0 transform translate-y-1/3 translate-x-1/6 opacity-20">
@@ -381,5 +381,5 @@
                 @endif
             @endif
         </div>
-    </div>
+    </x-card>
 </div>

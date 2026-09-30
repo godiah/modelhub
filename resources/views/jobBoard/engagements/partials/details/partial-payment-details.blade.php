@@ -26,8 +26,7 @@
         <!-- Payment List -->
         <div class="px-6 py-4 space-y-4">
             @foreach ($engagement->partialPayments as $payment)
-                <div
-                    class="relative bg-white rounded-lg border border-neutral-200 group hover:shadow-md transition-all duration-200">
+                <x-card rounded="lg" shadow="none" class="relative group hover:shadow-md transition-all duration-200">
                     <!-- Subtle Gradient Border Effect -->
                     <div
                         class="absolute inset-0 rounded-lg bg-gradient-to-r from-secondary/20 to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -106,7 +105,7 @@
                             {{ $payment->status->label() }}
                         </span>
                     </div>
-                </div>
+                </x-card>
             @endforeach
         </div>
     </div>

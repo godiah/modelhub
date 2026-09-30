@@ -33,8 +33,7 @@
                 $progressPercentage = $totalDeliverables > 0 ? ($completedDeliverables / $totalDeliverables) * 100 : 0;
             @endphp
 
-            <div x-data="{ open: false }"
-                class="bg-white border border-neutral-200 rounded-xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+            <x-card clip class="transition-all duration-200 hover:shadow-md" x-data="{ open: false }">
                 <!-- Engagement Header - Always visible -->
                 <div @click="open = !open" class="cursor-pointer">
                     <div class="p-6 flex flex-col sm:flex-row sm:items-start justify-between">
@@ -99,8 +98,7 @@
 
                                 <div class="grid grid-cols-1 gap-4">
                                     @forelse($engagement->deliverables as $deliverable)
-                                        <div x-data="{ expanded: false, fileSubmissionOpen: false }"
-                                            class="bg-white p-5 border border-neutral-200 rounded-lg shadow-sm hover:shadow transition-all duration-200 mb-4">
+                                        <x-card rounded="lg" class="p-5 hover:shadow transition-all duration-200 mb-4" x-data="{ expanded: false, fileSubmissionOpen: false }">
 
                                             <div @click="expanded = !expanded" class="pb-2 cursor-pointer">
                                                 <div class="flex justify-between items-start">
@@ -590,21 +588,20 @@
                                                     @endif
                                                 </div>
                                             @endif
-                                        </div>
+                                        </x-card>
                                     @empty
-                                        <div
-                                            class="col-span-2 bg-white p-6 border border-neutral-200 rounded-lg text-center">
+                                        <x-card rounded="lg" shadow="none" class="col-span-2 p-6 text-center">
                                             <x-icon name="clipboard-list" class="h-8 w-8 text-neutral-300 mx-auto mb-2" stroke-width="1.5" />
                                             <p class="text-neutral-500 italic font-tertiary">No deliverables
                                                 specified for this
                                                 project yet.</p>
-                                        </div>
+                                        </x-card>
                                     @endforelse
                                 </div>
 
                                 <!-- Project Progress Overview -->
                                 @if ($engagement->deliverables->isNotEmpty())
-                                    <div class="mt-8 bg-white border border-neutral-200 rounded-lg shadow-sm p-5">
+                                    <x-card rounded="lg" class="mt-8 p-5">
                                         <h5 class="font-tertiary font-medium text-neutral-800 mb-4 flex items-center">
                                             <x-icon name="chart-bar" class="h-5 w-5 mr-2 text-primary" />
                                             Project Progress
@@ -657,7 +654,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </x-card>
                                 @endif
                             </div>
 
@@ -687,8 +684,7 @@
                                 <!-- Deliverables List -->
                                 <div class="grid grid-cols-1 gap-6">
                                     @forelse($engagement->deliverables as $deliverable)
-                                        <div x-data="{ expanded: false }"
-                                            class="bg-white border border-neutral-200 rounded-lg shadow-sm hover:shadow transition-all overflow-hidden">
+                                        <x-card rounded="lg" clip class="hover:shadow transition-all" x-data="{ expanded: false }">
                                             <!-- Deliverable Header -->
                                             <div @click="expanded = !expanded"
                                                 class="p-5 flex justify-between items-start cursor-pointer">
@@ -812,8 +808,7 @@
 
                                                 <!-- Submission Details (when submitted) -->
                                                 @if ($deliverable->status === 'submitted' || $deliverable->status === 'approved' || $deliverable->status === 'rejected')
-                                                    <div
-                                                        class="bg-white border border-neutral-200 rounded-lg p-4 mb-4">
+                                                    <x-card rounded="lg" shadow="none" class="p-4 mb-4">
                                                         <!-- Submission Notes -->
                                                         <h6 class="font-medium font-tertiary text-primary mb-1">
                                                             Submission Notes
@@ -862,7 +857,7 @@
                                                                     files uploaded</span>
                                                             </div>
                                                         @endif
-                                                    </div>
+                                                    </x-card>
                                                 @endif
 
                                                 <!-- Feedback -->
@@ -929,9 +924,9 @@
                                                     @endif
                                                 </div>
                                             </div>
-                                        </div>
+                                        </x-card>
                                     @empty
-                                        <div class="bg-white p-8 border border-neutral-200 rounded-lg text-center">
+                                        <x-card rounded="lg" shadow="none" class="p-8 text-center">
                                             <div class="bg-primary/5 inline-flex rounded-full p-4 mb-4">
                                                 <x-icon name="clipboard-list" class="h-8 w-8 text-primary" stroke-width="1.5" />
                                             </div>
@@ -941,13 +936,13 @@
                                             <p class="text-neutral-600 mb-6 font-tertiary text-sm">Define project
                                                 deliverables to track
                                                 progress and ensure clear expectations.</p>
-                                        </div>
+                                        </x-card>
                                     @endforelse
                                 </div>
 
                                 <!-- Project Progress Overview -->
                                 @if ($engagement->deliverables->isNotEmpty())
-                                    <div class="mt-8 bg-white border border-neutral-200 rounded-lg shadow-sm p-5">
+                                    <x-card rounded="lg" class="mt-8 p-5">
                                         <h5 class="font-tertiary font-medium text-neutral-800 mb-4 flex items-center">
                                             <x-icon name="chart-bar" class="h-5 w-5 mr-2 text-primary" />
                                             Project Progress
@@ -1000,7 +995,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </x-card>
                                 @endif
                             </div>
 
@@ -1038,7 +1033,7 @@
 
                 <!-- Cancellation Modal -->
                 @include('jobBoard.engagements.partials.components.modals.cancellation')
-            </div>
+            </x-card>
         @endforeach
     </div>
 

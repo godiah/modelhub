@@ -27,7 +27,7 @@
                 @endphp
 
                 @foreach (['hired' => 'green', 'rejected' => 'red', 'withdrawn' => 'gray', 'other' => 'neutral'] as $status => $color)
-                    <div class="bg-white rounded-xl shadow-sm p-6 border border-neutral-200">
+                    <x-card class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-tertiary font-secondary">{{ ucfirst($status) }}</p>
@@ -59,15 +59,14 @@
                                 </svg>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 @endforeach
             </div>
 
             {{-- Archived Applications List --}}
             <div class="grid gap-4 md:grid-cols-1">
                 @forelse ($applications as $application)
-                    <div
-                        class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-md transition-all duration-200">
+                    <x-card clip class="hover:shadow-md transition-all duration-200">
                         <div class="p-6 flex flex-col md:flex-row gap-6 items-start md:items-center">
                             {{-- Job Details --}}
                             <div class="flex items-center flex-grow">
@@ -147,9 +146,9 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 @empty
-                    <div class="bg-white rounded-xl shadow-sm p-12 text-center border border-neutral-200">
+                    <x-card class="p-12 text-center">
                         <div class="max-w-md mx-auto">
                             <x-icon name="clipboard-check" class="h-16 w-16 mx-auto text-neutral-400 mb-4" />
                             <h3 class="text-xl font-bold text-neutral-800 mb-2 font-tertiary">No Archived Applications
@@ -160,7 +159,7 @@
                                 View Active Applications
                             </a>
                         </div>
-                    </div>
+                    </x-card>
                 @endforelse
             </div>
             {{-- Pagination --}}

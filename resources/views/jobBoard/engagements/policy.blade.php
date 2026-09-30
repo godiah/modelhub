@@ -39,7 +39,7 @@
             </div>
 
             <!-- Table of Contents -->
-            <div class="mb-8 bg-white rounded-lg shadow-md overflow-hidden border border-neutral-200">
+            <x-card rounded="lg" shadow="md" clip class="mb-8">
                 <div class="px-6 py-5 border-b border-neutral-200 bg-neutral-50">
                     <div class="flex items-center">
                         <x-icon name="list-bullet" class="w-5 h-5 text-secondary mr-2" />
@@ -113,7 +113,7 @@
                         </li>
                     </ul>
                 </div>
-            </div>
+            </x-card>
 
             <!-- Main Content Sections -->
             <div class="space-y-6">
@@ -523,28 +523,25 @@
 
                             <!-- Communication Methods Illustration -->
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
-                                <div
-                                    class="bg-white shadow-sm rounded-lg p-4 border border-neutral-200 flex flex-col items-center text-center">
+                                <x-card rounded="lg" class="p-4 flex flex-col items-center text-center">
                                     <div class="rounded-full bg-primary/10 p-3 mb-3">
                                         <x-icon name="bell-2" class="w-6 h-6 text-primary" />
                                     </div>
                                     <h4 class="text-sm font-semibold text-primary">In-App Notifications</h4>
                                     <p class="text-xs text-neutral-500 mt-2">Real-time updates directly within your
                                         dashboard for immediate awareness.</p>
-                                </div>
+                                </x-card>
 
-                                <div
-                                    class="bg-white shadow-sm rounded-lg p-4 border border-neutral-200 flex flex-col items-center text-center">
+                                <x-card rounded="lg" class="p-4 flex flex-col items-center text-center">
                                     <div class="rounded-full bg-secondary/10 p-3 mb-3">
                                         <x-icon name="envelope-2" class="w-6 h-6 text-secondary" />
                                     </div>
                                     <h4 class="text-sm font-semibold text-primary">Email Alerts</h4>
                                     <p class="text-xs text-neutral-500 mt-2">Detailed notifications sent to your
                                         registered email address with actionable information.</p>
-                                </div>
+                                </x-card>
 
-                                <div
-                                    class="bg-white shadow-sm rounded-lg p-4 border border-neutral-200 flex flex-col items-center text-center">
+                                <x-card rounded="lg" class="p-4 flex flex-col items-center text-center">
                                     <div class="rounded-full bg-accent/10 p-3 mb-3">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                             stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-accent">
@@ -555,7 +552,7 @@
                                     <h4 class="text-sm font-semibold text-primary">Activity Timeline</h4>
                                     <p class="text-xs text-neutral-500 mt-2">Chronological record of all
                                         cancellation-related events for complete transparency.</p>
-                                </div>
+                                </x-card>
                             </div>
 
                             <!-- Communication Settings Panel -->

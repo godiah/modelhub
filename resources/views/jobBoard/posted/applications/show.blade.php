@@ -26,7 +26,7 @@
                 <!-- Left Column - Applicant Information -->
                 <div class="font-main lg:col-span-2 space-y-6">
                     <!-- Applicant Profile Card -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                    <x-card clip>
                         <div class="relative px-6 pt-6 pb-4">
                             <div class="absolute top-0 right-0 mt-4 mr-4">
                                 @if ($application->status === ApplicationStatus::Submitted)
@@ -104,10 +104,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Financial Card -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                    <x-card clip>
                         <div class="px-6 py-5">
                             <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-main">
                                 <x-icon name="coins" class="h-5 w-5 mr-2 text-secondary" fill="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -152,10 +152,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Proposal Section -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                    <x-card clip>
                         <div class="px-6 py-5">
                             <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-main">
                                 <x-icon name="document-text-solid" class="h-5 w-5 mr-2 text-secondary" />
@@ -177,10 +177,10 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Portfolio Section -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                    <x-card clip>
                         <div class="px-6 py-5">
                             <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-main">
                                 <x-icon name="photo-solid" class="h-5 w-5 mr-2 text-secondary" />
@@ -211,8 +211,7 @@
 
                                         @if ($isImage)
                                             <!-- Image Preview -->
-                                            <div
-                                                class="group relative bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden transition-all hover:shadow-md">
+                                            <x-card rounded="lg" clip class="group relative transition-all hover:shadow-md">
                                                 <div class="aspect-square overflow-hidden bg-neutral-100">
                                                     <img src="{{ asset('storage/' . $item) }}" alt="Portfolio image"
                                                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
@@ -228,11 +227,10 @@
                                                         </a>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </x-card>
                                         @elseif($isDocument)
                                             <!-- Document Preview -->
-                                            <div
-                                                class="group bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden transition-all hover:shadow-md">
+                                            <x-card rounded="lg" clip class="group transition-all hover:shadow-md">
                                                 <div
                                                     class="aspect-square bg-gradient-to-br from-primary/5 to-neutral-100 p-5 flex items-center justify-center">
                                                     <x-icon name="document-text" class="h-16 w-16 text-primary/30" />
@@ -246,11 +244,10 @@
                                                         <x-icon name="cloud-arrow-down" class="h-5 w-5" />
                                                     </a>
                                                 </div>
-                                            </div>
+                                            </x-card>
                                         @else
                                             <!-- Other File Types -->
-                                            <div
-                                                class="group bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden transition-all hover:shadow-md">
+                                            <x-card rounded="lg" clip class="group transition-all hover:shadow-md">
                                                 <div
                                                     class="aspect-square bg-gradient-to-br from-neutral-50 to-neutral-100 p-5 flex items-center justify-center">
                                                     <x-icon name="folder-open" class="h-16 w-16 text-tertiary/30" />
@@ -264,7 +261,7 @@
                                                         <x-icon name="cloud-arrow-down" class="h-5 w-5" />
                                                     </a>
                                                 </div>
-                                            </div>
+                                            </x-card>
                                         @endif
                                     @endforeach
                                 </div>
@@ -277,10 +274,10 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Reviews Section -->
-                    <div class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+                    <x-card clip>
                         <div class="px-6 py-5 border-b border-neutral-200">
                             <h2 class="flex items-center text-lg font-semibold text-neutral-800 font-main">
                                 <x-icon name="star-solid" class="h-5 w-5 mr-2 text-secondary" />
@@ -359,13 +356,13 @@
                                 </div>
                             @endif
                         </div>
-                    </div>
+                    </x-card>
                 </div>
 
                 <!-- Right Column - Application Management -->
                 <div class="space-y-6">
                     <!-- Job Details Card -->
-                    <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <x-card shadow="md" clip>
                         <div class="relative">
                             <!-- Decorative gradient background with subtle pattern -->
                             <div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-secondary/5">
@@ -433,10 +430,10 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Update Application Status -->
-                    <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <x-card shadow="md" clip>
                         <div class="px-6 py-5">
                             <div class="flex items-center mb-5">
                                 <div class="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center mr-3">
@@ -770,8 +767,7 @@
                                                         x-show="deliverables.length > 0">
                                                         <template x-for="(deliverable, index) in deliverables"
                                                             :key="index">
-                                                            <div
-                                                                class="deliverable-item rounded-lg border border-neutral-200 bg-white shadow-sm overflow-hidden">
+                                                            <x-card rounded="lg" clip class="deliverable-item">
                                                                 <!-- Deliverable header -->
                                                                 <div
                                                                     class="bg-neutral-50 px-4 py-3 border-b border-neutral-200">
@@ -820,7 +816,7 @@
                                                                             rows="2" placeholder="Add details, specifications, or acceptance criteria..."></textarea>
                                                                     </div>
                                                                 </div>
-                                                            </div>
+                                                            </x-card>
                                                         </template>
                                                     </div>
 
@@ -861,10 +857,10 @@
                                 @endif
                             </div>
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Contact Applicant -->
-                    <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <x-card shadow="md" clip>
                         <div class="px-6 py-5">
                             <div class="flex items-center mb-5">
                                 <div
@@ -935,10 +931,10 @@
                                 </div>
                             </form>
                         </div>
-                    </div>
+                    </x-card>
 
                     <!-- Applicant Timeline -->
-                    <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <x-card shadow="md" clip>
                         <div class="px-6 py-5">
                             <div class="flex items-center mb-5">
                                 <div class="h-9 w-9 rounded-full bg-accent/10 flex items-center justify-center mr-3">
@@ -1006,7 +1002,7 @@
                                 @endif
                             </div>
                         </div>
-                    </div>
+                    </x-card>
                 </div>
             </div>
         </div>

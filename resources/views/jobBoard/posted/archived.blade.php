@@ -20,8 +20,7 @@
     <section class="bg-gradient-to-br from-neutral-50 to-neutral-100">
         <div class="container mx-auto max-w-7xl px-4 py-12 min-h-screen">
             @if ($archivedJobs->isEmpty())
-                <div
-                    class="flex flex-col items-center justify-center min-h-[300px] bg-white rounded-xl shadow-sm border border-neutral-200 p-12">
+                <x-card class="flex flex-col items-center justify-center min-h-[300px] p-12">
                     <div class="relative">
                         <div class="absolute inset-0 bg-primary/10 rounded-full blur-3xl animate-pulse"></div>
                         <x-icon name="archive-box" class="relative h-24 w-24 text-primary mb-6" stroke-width="1.5" />
@@ -39,12 +38,11 @@
                         </svg>
                         View Active Jobs
                     </a>
-                </div>
+                </x-card>
             @else
                 <div class="grid gap-6">
                     @foreach ($archivedJobs as $job)
-                        <div x-data="{ showingRestore: false }"
-                            class="bg-white rounded-xl shadow-sm border border-neutral-200 hover:shadow-lg transition-all duration-300 overflow-hidden group">
+                        <x-card clip class="hover:shadow-lg transition-all duration-300 group" x-data="{ showingRestore: false }">
                             <div class="p-6">
                                 <div class="flex justify-between items-start">
                                     <div class="flex-grow">
@@ -221,7 +219,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </x-card>
                     @endforeach
                 </div>
             @endif

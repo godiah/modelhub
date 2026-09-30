@@ -18,7 +18,7 @@
             <!-- Main Content Container -->
             <div class="space-y-8">
                 <!-- Job Details Card -->
-                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-neutral-200">
+                <x-card shadow="lg" clip>
                     <!-- Main Job Card Container -->
                     <div>
                         <!-- Job Header  -->
@@ -295,10 +295,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </x-card>
 
                 <!-- Application Form -->
-                <div class="bg-white rounded-xl shadow-lg p-8 border border-neutral-100">
+                <x-card shadow="lg" border="neutral-100" class="p-8">
                     <h2 class="text-2xl font-bold text-primary mb-6 font-tertiary flex items-center">
                         <x-icon name="pencil" class="h-6 w-6 mr-3 text-secondary" />
                         Submit Your Proposal
@@ -433,7 +433,7 @@
                             </button>
                         </div>
                     </form>
-                </div>
+                </x-card>
             </div>
 
             <!-- Similar Jobs -->
@@ -451,8 +451,7 @@
                         <!-- Projects Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                             @foreach ($similarJobs as $similarJob)
-                                <div
-                                    class="bg-white rounded-2xl shadow-sm hover:shadow-md border border-neutral-100 hover:border-secondary overflow-hidden transition-all duration-300 flex flex-col h-full">
+                                <x-card rounded="2xl" border="neutral-100" clip class="hover:shadow-md hover:border-secondary transition-all duration-300 flex flex-col h-full">
                                     <!-- Image -->
                                     <div class="relative aspect-[4/3] overflow-hidden">
                                         @if ($similarJob->images)
@@ -523,7 +522,7 @@
                                             <x-icon name="arrow-right" class="h-4 w-4 ml-2" />
                                         </a>
                                     </div>
-                                </div>
+                                </x-card>
                             @endforeach
                         </div>
                     </div>

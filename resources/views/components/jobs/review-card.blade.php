@@ -1,7 +1,6 @@
 @props(['review'])
 
-<div
-    class="bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+<x-card clip class="hover:shadow-md transition-shadow duration-300">
     <div class="p-5">
         <!-- Header -->
         <div class="flex justify-between items-start">
@@ -41,7 +40,7 @@
             </div>
         </div>
     </div>
-</div>
+</x-card>
 
 {{-- 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

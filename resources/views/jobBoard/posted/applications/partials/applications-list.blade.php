@@ -157,7 +157,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 mt-4">
                     <!-- Proposal -->
                     <div class="md:col-span-9">
-                        <div class="bg-white rounded-lg border border-neutral-200 p-4">
+                        <x-card rounded="lg" shadow="none" class="p-4">
                             <h4 class="text-sm font-secondary font-medium text-neutral-800 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 text-secondary"
                                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -181,13 +181,12 @@
                                     </div>
                                 @endif
                             </div>
-                        </div>
+                        </x-card>
                     </div>
 
                     <!-- Bid Amount & Actions -->
                     <div class="md:col-span-3">
-                        <div
-                            class="bg-white rounded-lg border border-neutral-200 p-4 h-full flex flex-col justify-between">
+                        <x-card rounded="lg" shadow="none" class="p-4 h-full flex flex-col justify-between">
                             <!-- Bid Amount -->
                             @if (isset($application->offer_amount))
                                 <div>
@@ -265,7 +264,7 @@
                                     </a>
                                 @endif
                             </div>
-                        </div>
+                        </x-card>
                     </div>
                 </div>
             </div>

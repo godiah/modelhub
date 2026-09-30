@@ -25,8 +25,7 @@
     <section class="bg-gradient-to-br from-neutral-50 to-neutral-100">
         <div class="container mx-auto max-w-7xl px-4 py-12 min-h-screen">
             <!-- Filters/Stats Bar -->
-            <div
-                class="bg-white rounded-xl shadow-sm mb-6 p-4 border border-neutral-200 flex flex-wrap items-center justify-between">
+            <x-card class="mb-6 p-4 flex flex-wrap items-center justify-between">
                 <div class="flex items-center space-x-4 text-tertiary font-main">
                     <div class="flex items-center space-x-2">
                         <x-icon name="clipboard-list" class="h-5 w-5 text-secondary" />
@@ -69,11 +68,11 @@
                     </select>
                 </div>
 
-            </div>
+            </x-card>
             <!-- Applications Container -->
             <div id="applicationsList">
                 @if ($applications->isEmpty() && !$activeFilters)
-                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-neutral-200 relative overflow-hidden">
+                    <x-card rounded="2xl" shadow="lg" clip class="p-8 relative">
                         <div class="text-center py-16 relative z-10">
                             <div
                                 class="bg-neutral-100 h-24 w-24 mx-auto rounded-full flex items-center justify-center mb-6">
@@ -89,7 +88,7 @@
                                 <x-icon name="arrow-right" class="h-5 w-5 ml-2" />
                             </a>
                         </div>
-                    </div>
+                    </x-card>
                 @else
                     @include('jobBoard.applications.partials.applications-list')
                 @endif

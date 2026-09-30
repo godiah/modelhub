@@ -63,7 +63,7 @@
             </div>
 
             <!-- Job and Application Details -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-200">
+            <x-card shadow="md" clip>
                 <!-- Job Header Section -->
                 <div class="md:flex">
                     <!-- Job Image -->
@@ -115,24 +115,24 @@
                     <h2 class="text-lg font-semibold text-neutral-800 mb-4 font-secondary">Financial Details</h2>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white rounded-lg p-4 border border-neutral-200">
+                        <x-card rounded="lg" shadow="none" class="p-4">
                             <p class="text-sm text-neutral-500 mb-1">Your Offer</p>
                             <p class="text-xl font-bold text-primary">
                                 <x-money :amount="$application->offer_amount" /></p>
-                        </div>
+                        </x-card>
 
-                        <div class="bg-white rounded-lg p-4 border border-neutral-200">
+                        <x-card rounded="lg" shadow="none" class="p-4">
                             <p class="text-sm text-neutral-500 mb-1">Service Fee</p>
                             <p class="text-xl font-bold text-tertiary">
                                 <x-money :amount="$application->service_fee" /></p>
-                        </div>
+                        </x-card>
 
-                        <div class="bg-white rounded-lg p-4 border border-neutral-200">
+                        <x-card rounded="lg" shadow="none" class="p-4">
                             <p class="text-sm text-neutral-500 mb-1">You'll Receive</p>
                             <p class="text-xl font-bold text-secondary">
                                 <x-money :amount="$application->net_amount" />
                             </p>
-                        </div>
+                        </x-card>
                     </div>
                 </div>
 
@@ -185,7 +185,7 @@
 
                                 @if ($isImage)
                                     <!-- Image Preview -->
-                                    <div class="bg-white rounded-lg border border-neutral-200 overflow-hidden group">
+                                    <x-card rounded="lg" shadow="none" clip class="group">
                                         <div class="aspect-square w-full overflow-hidden bg-neutral-100">
                                             <img src="{{ asset('storage/' . $item) }}" alt="Portfolio image"
                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
@@ -198,10 +198,10 @@
                                                 <x-icon name="arrow-top-right-on-square" class="h-5 w-5" />
                                             </a>
                                         </div>
-                                    </div>
+                                    </x-card>
                                 @elseif($isDocument)
                                     <!-- Document Preview -->
-                                    <div class="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                                    <x-card rounded="lg" shadow="none" clip>
                                         <div
                                             class="aspect-square w-full flex items-center justify-center bg-neutral-50 p-4">
                                             <x-icon name="document-text" class="h-16 w-16 text-neutral-300" />
@@ -214,10 +214,10 @@
                                                 <x-icon name="cloud-arrow-down" class="h-5 w-5" />
                                             </a>
                                         </div>
-                                    </div>
+                                    </x-card>
                                 @else
                                     <!-- Other File Types -->
-                                    <div class="bg-white rounded-lg border border-neutral-200 overflow-hidden">
+                                    <x-card rounded="lg" shadow="none" clip>
                                         <div
                                             class="aspect-square w-full flex items-center justify-center bg-neutral-50 p-4">
                                             <x-icon name="folder-open" class="h-16 w-16 text-neutral-300" />
@@ -230,7 +230,7 @@
                                                 <x-icon name="cloud-arrow-down" class="h-5 w-5" />
                                             </a>
                                         </div>
-                                    </div>
+                                    </x-card>
                                 @endif
                             @endforeach
                         </div>
@@ -262,7 +262,7 @@
                         @endif
                     </div> --}}
                 </div>
-            </div>
+            </x-card>
         </div>
 
         <!-- Footer -->
