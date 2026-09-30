@@ -1230,3 +1230,18 @@ This order is a proposal, not a commitment — reorder freely based on what matt
   against seeded jobs (with/without images, with/without a deadline, with/without skills) on both
   `jobs.apply` and `jobs.show` — visually identical to the pre-refactor rendering, no new console
   errors. Full suite re-run clean; seeded verification data deleted after.
+- **2026-09-30 (Cross-cutting: `preventLazyLoading` sweep of Modules 5-8)**: Swept every GET page
+  (client/freelancer/admin, every tab/filter, every engagement/payment/dispute status), every POST
+  action, and every notification (refetched fresh so lazy loading is actually enforced) with temp
+  Pest tests (deleted after). 3 lazy-loading violations fixed: `card-footer.blade.php`
+  (`$engagement->job` → `$engagement->application->job`, already eager-loaded),
+  `EngagementManagementService::getUserEngagements()` (+`cancellation.dispute`),
+  `AdminDisputeController::index()` (+`disputedBy`). The sweep also surfaced 3 non-lazy bugs, fixed:
+  (1) **cancelling an engagement was completely broken** — `EngagementCancelledNotification` built
+  its email with `route('engagements.process-payment')`, a route that doesn't exist (it's
+  `process-partial-payment`, POST-only), now links to `engagements.show-cancelled`; and its
+  `toBroadcast()` returned `broadcast(new BroadcastMessage(...))` (a `PendingBroadcast`, not a
+  message) — both threw inside the cancel flow; (2) `disputed-engagements.blade.php` called
+  `ucfirst()` on the `PartialPaymentStatus` enum (fatal on that page for any engagement with a
+  partial payment), now `->status->label()`. Open, not fixed: `engagements.cancel.form` route has no
+  view (`engagements.cancel` doesn't exist) and nothing links to it — dead route.
