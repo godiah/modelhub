@@ -1,766 +1,236 @@
+@php
+    $app = config('app.name');
+    $sections = [
+        'cancellation-overview' => __('Cancellation overview'),
+        'handling-deliverables' => __('Handling deliverables'),
+        'payment-eligibility' => __('Payment eligibility'),
+        'payment-processing' => __('Payment processing flow'),
+        'escrow' => __('Escrow and fund release'),
+        'dispute' => __('Dispute resolution'),
+        'platform-rights' => __('Platform rights'),
+        'communication' => __('Communication and notifications'),
+        'policy-updates' => __('Policy updates'),
+    ];
+@endphp
 <x-app-layout>
-    <div class="py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Introduction Card with Gradient Background -->
-            <div class="mb-8 bg-gradient-to-r from-primary/90 to-primary rounded-lg shadow-lg overflow-hidden">
-                <div class="px-6 py-8 text-white">
-                    <div class="flex items-center mb-4">
-                        <x-icon name="information-circle-2" class="w-8 h-8 mr-3" />
-                        <h3 class="text-xl font-tertiary font-bold">{{ config('app.name') }} Cancellation & Payment
-                            Policy</h3>
-                    </div>
-                    <p class="font-main text-neutral-100">This policy governs cancellations, payment processing, and
-                        dispute resolution for engagements between Clients and Freelancers on {{ config('app.name') }}.
-                    </p>
-                    <div class="mt-4 flex items-center text-sm">
-                        <div class="mr-6 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                stroke-width="1.5" stroke="currentColor" class="w-5 h-5 mr-1">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 9v7.5" />
-                            </svg>
-                            <span>Effective Date: May 15, 2025</span>
-                        </div>
-                        <div class="flex items-center">
-                            <x-icon name="arrow-path-2" class="w-5 h-5 mr-1" />
-                            <span>Last Updated: May 15, 2025</span>
-                        </div>
-                    </div>
-                </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <!-- Header -->
+        <x-card class="mb-6 rounded-2xl">
+            <div class="p-6">
+                <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Policy') }}</p>
+                <h1 class="mt-1 font-tertiary text-2xl font-semibold text-neutral-900">{{ $app }} {{ __('Cancellation & Payment Policy') }}</h1>
+                <p class="mt-2 max-w-3xl text-sm text-neutral-700">
+                    {{ __('This policy governs cancellations, payment processing, and dispute resolution for engagements between Clients and Freelancers on :app.', ['app' => $app]) }}
+                </p>
+                <p class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-tertiary">
+                    <span>{{ __('Effective date: May 15, 2025') }}</span>
+                    <span>{{ __('Last updated: May 15, 2025') }}</span>
+                </p>
             </div>
+        </x-card>
 
-            <!-- Table of Contents -->
-            <x-card rounded="lg" shadow="md" clip class="mb-8">
-                <div class="px-6 py-5 border-b border-neutral-200 bg-neutral-50">
-                    <div class="flex items-center">
-                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mr-2" />
-                        <h3 class="text-lg font-tertiary font-bold text-primary">Quick Navigation</h3>
-                    </div>
-                </div>
-                <div class="px-6 py-4">
-                    <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 font-main">
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">1</span>
-                            <a href="#cancellation-overview"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Cancellation
-                                Overview</a>
-                        </li>
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">2</span>
-                            <a href="#handling-deliverables"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Handling
-                                Deliverables</a>
-                        </li>
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">3</span>
-                            <a href="#payment-eligibility"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Payment
-                                Eligibility</a>
-                        </li>
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">4</span>
-                            <a href="#payment-processing"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Payment
-                                Processing Flow</a>
-                        </li>
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">5</span>
-                            <a href="#escrow"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Escrow and Fund
-                                Release</a>
-                        </li>
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">6</span>
-                            <a href="#dispute"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Dispute
-                                Resolution</a>
-                        </li>
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">7</span>
-                            <a href="#platform-rights"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Platform
-                                Rights</a>
-                        </li>
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">8</span>
-                            <a href="#communication"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Communication
-                                and Notifications</a>
-                        </li>
-                        <li class="flex items-center">
-                            <span
-                                class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-xs mr-2">9</span>
-                            <a href="#policy-updates"
-                                class="text-primary hover:text-secondary transition-colors duration-200">Policy
-                                Updates</a>
-                        </li>
-                    </ul>
-                </div>
-            </x-card>
-
-            <!-- Main Content Sections -->
-            <div class="space-y-6">
-                <!-- Section 1: Cancellation Overview -->
-                <x-policy.section id="cancellation-overview" number="1" title="Cancellation Overview">
-                    <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </x-slot:icon>
-                            <p class="mb-4">Either the Client or the Freelancer may cancel an engagement at any time
-                                for any reason. All cancellations must include:</p>
-
-                            <ul class="mt-4 space-y-3">
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>A stated reason for cancellation.</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>Selection of a cancellation type (e.g., mutual, early termination,
-                                        dispute).</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>A review of submitted deliverables (if any).</span>
-                                </li>
-                            </ul>
-                </x-policy.section>
-
-                <!-- Section 2: Handling Deliverables -->
-                <x-policy.section id="handling-deliverables" number="2" title="Handling Deliverables Upon Cancellation">
-                    <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25-2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                        </svg>
-                    </x-slot:icon>
-                            <p class="mb-4">Upon cancellation, the platform will identify whether any deliverables
-                                have been:</p>
-
-                            <ul class="mt-4 space-y-3">
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>Submitted but not approved.</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>Approved by the Client.</span>
-                                </li>
-                            </ul>
-
-                            <div class="mt-5 bg-neutral-50 p-4 rounded-lg border border-neutral-200">
-                                <div class="flex items-center">
-                                    <x-icon name="exclamation-triangle-4" class="w-5 h-5 text-accent mr-2" />
-                                    <p class="font-medium text-sm">Deliverables that have already been approved are
-                                        considered
-                                        final and eligible for payment.</p>
-                                </div>
-                            </div>
-                </x-policy.section>
-
-                <!-- Section 3: Payment Eligibility -->
-                <x-policy.section id="payment-eligibility" number="3" title="Payment Eligibility">
-                    <x-slot:icon>
-                        <x-icon name="banknotes-2" class="w-6 h-6 text-secondary mr-2" />
-                    </x-slot:icon>
-                            <div class="mb-6">
-                                <h4 class="text-md font-tertiary font-semibold mb-3 text-primary">A. Approved
-                                    Deliverables</h4>
-                                <ul class="space-y-3">
-                                    <li class="flex items-start">
-                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>Approved deliverables will be considered for payment regardless of who
-                                            initiated the cancellation.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>The Freelancer is eligible to receive payment for approved work.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>Funds will be released from escrow or requested from the Client if not
-                                            already funded.</span>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div>
-                                <h4 class="text-md font-tertiary font-semibold mb-3 text-primary">B. Unapproved
-                                    Deliverables</h4>
-                                <ul class="space-y-3">
-                                    <li class="flex items-start">
-                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>Clients may choose to approve submitted work at the time of
-                                            cancellation.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>If no approval is granted, no payment will be processed for unapproved
-                                            work unless the dispute process is triggered.</span>
-                                    </li>
-                                </ul>
-                            </div>
-                </x-policy.section>
-
-                <!-- Section 4: Payment Processing Flow  -->
-                <x-policy.section id="payment-processing" number="4" title="Payment Processing Flow">
-                    <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
-                        </svg>
-                    </x-slot:icon>
-                            <div class="mb-6">
-                                <div
-                                    class="inline-flex items-center px-3 py-1 rounded-full bg-accent/10 text-accent font-medium text-sm mb-3">
-                                    <x-icon name="arrows-cross" class="w-4 h-4 mr-1" />
-                                    If the Client Cancels
-                                </div>
-                                <ul class="space-y-3">
-                                    <li class="flex items-start">
-                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>The Freelancer will be shown a breakdown of deliverables that were
-                                            approved and the corresponding payable amount.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>The Freelancer may accept the payment or request a dispute if they believe
-                                            the payment is insufficient.</span>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="mb-4">
-                                <div
-                                    class="inline-flex items-center px-3 py-1 rounded-full bg-secondary/10 text-secondary font-medium text-sm mb-3">
-                                    <x-icon name="arrows-cross" class="w-4 h-4 mr-1" />
-                                    If the Freelancer Cancels
-                                </div>
-                                <ul class="space-y-3">
-                                    <li class="flex items-start">
-                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>The Client will be prompted to review submitted deliverables and approve
-                                            those they find satisfactory.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>The platform will calculate the payment due based on approved work.</span>
-                                    </li>
-                                    <li class="flex items-start">
-                                        <x-icon name="list-bullet" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                        <span>The Freelancer will then be notified of the payment status.</span>
-                                    </li>
-                                </ul>
-                            </div>
-
-                            <div class="mt-6 flex items-center p-4 bg-primary/5 rounded-lg border border-primary/10">
-                                <x-icon name="information-circle-2" class="flex-shrink-0 w-6 h-6 text-primary mr-3" />
-                                <p class="text-sm">Both parties will receive a detailed cancellation summary that
-                                    outlines the approved deliverables, payment amounts, and next steps.</p>
-                            </div>
-                </x-policy.section>
-
-                <!-- Section 5: Escrow and Fund Release -->
-                <x-policy.section id="escrow" number="5" title="Escrow and Fund Release">
-                    <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
-                        </svg>
-                    </x-slot:icon>
-                            <ul class="space-y-3">
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>Funds held in escrow will only be released for approved deliverables.</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>If no deliverables are approved, the full escrowed amount will be refunded to
-                                        the Client.</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>For milestone-based engagements, only the current milestone amount is
-                                        affected.</span>
-                                </li>
-                            </ul>
-
-                            <div class="flex flex-col md:flex-row gap-4 mt-6">
-                                <div class="flex-1 p-4 rounded-lg border border-neutral-200 bg-neutral-50">
-                                    <div class="flex items-center mb-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor"
-                                            class="w-5 h-5 text-accent mr-2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        <h4 class="font-tertiary font-semibold text-sm text-primary">Processing Time
-                                        </h4>
-                                    </div>
-                                    <p class="text-sm text-neutral-600">Escrow funds are typically processed within 3-5
-                                        business days after approval.</p>
-                                </div>
-                                <div class="flex-1 p-4 rounded-lg border border-secondary/20 bg-secondary/5">
-                                    <div class="flex items-center mb-2">
-                                        <x-icon name="banknotes-2" class="w-5 h-5 text-secondary mr-2" />
-                                        <h4 class="font-tertiary font-semibold text-sm text-primary">Fund Security</h4>
-                                    </div>
-                                    <p class="text-sm text-neutral-600">All escrowed funds are held in secure,
-                                        third-party accounts separate from platform operating funds.</p>
-                                </div>
-                            </div>
-                </x-policy.section>
-
-                <!-- Section 6: Dispute Resolution -->
-                <x-policy.section id="dispute" number="6" title="Dispute Resolution">
-                    <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 12.75c1.148 0 2.278.08 3.383.237 1.037.146 1.866.966 1.866 2.013 0 3.728-2.35 6.75-5.25 6.75S6.75 18.728 6.75 15c0-1.046.83-1.867 1.866-2.013A24.204 24.204 0 0112 12.75zm0 0c2.883 0 5.647.508 8.207 1.44a23.91 23.91 0 01-1.152 6.06M12 12.75c-2.883 0-5.647.508-8.208 1.44.125 2.104.52 4.136 1.153 6.06M12 12.75a2.25 2.25 0 002.248-2.354M12 12.75a2.25 2.25 0 01-2.248-2.354M12 8.25c.995 0 1.971-.08 2.922-.236.403-.066.74-.358.795-.762a3.778 3.778 0 00-.399-2.25M12 8.25c-.995 0-1.97-.08-2.922-.236-.402-.066-.74-.358-.795-.762a3.734 3.734 0 01.4-2.253M12 8.25a2.25 2.25 0 00-2.248 2.146M12 8.25a2.25 2.25 0 012.248 2.146M8.683 5a6.032 6.032 0 01-1.155-1.002c.07-.63.27-1.222.574-1.747m.581 2.749A3.75 3.75 0 0115.318 5m0 0c.427-.283.815-.62 1.155-.999a4.471 4.471 0 00-.575-1.752M4.921 6a24.048 24.048 0 00-.392 3.314c1.668.546 3.416.914 5.223 1.082M19.08 6c.205 1.08.337 2.187.392 3.314a23.882 23.882 0 01-5.223 1.082" />
-                        </svg>
-                    </x-slot:icon>
-                            <p class="mb-4">If either party disagrees with the payment outcome:</p>
-
-                            <ul class="space-y-3">
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>A dispute can be raised by selecting "Dispute this decision" within 5 days of
-                                        the cancellation notice.</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>Our admin team will review engagement history, deliverables, and communication
-                                        logs.</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>A final resolution will be provided within 7–14 business days.</span>
-                                </li>
-                            </ul>
-
-                            <div class="mt-6">
-                                <div class="relative">
-                                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                        <div class="w-full border-t border-neutral-200"></div>
-                                    </div>
-                                    <div class="relative flex justify-center">
-                                        <span class="bg-white px-3 text-sm text-neutral-500 font-medium">Dispute
-                                            Process</span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="border border-neutral-200 rounded-lg p-4 relative">
-                                        <div
-                                            class="absolute -top-3 left-4 bg-white px-2 text-sm font-medium text-primary">
-                                            Step 1</div>
-                                        <div class="mt-1 flex flex-col items-center text-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-8 h-8 text-accent">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
-                                            </svg>
-                                            <h4 class="text-sm font-semibold mt-2">File Dispute</h4>
-                                            <p class="text-xs text-neutral-500 mt-1">Submit detailed reasoning for the
-                                                dispute with any supporting evidence.</p>
-                                        </div>
-                                    </div>
-                                    <div class="border border-neutral-200 rounded-lg p-4 relative">
-                                        <div
-                                            class="absolute -top-3 left-4 bg-white px-2 text-sm font-medium text-primary">
-                                            Step 2</div>
-                                        <div class="mt-1 flex flex-col items-center text-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-8 h-8 text-accent">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm3.75 11.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                                            </svg>
-                                            <h4 class="text-sm font-semibold mt-2">Review Process</h4>
-                                            <p class="text-xs text-neutral-500 mt-1">Admin team evaluates all project
-                                                communications, deliverables and contract terms.</p>
-                                        </div>
-                                    </div>
-                                    <div class="border border-neutral-200 rounded-lg p-4 relative">
-                                        <div
-                                            class="absolute -top-3 left-4 bg-white px-2 text-sm font-medium text-primary">
-                                            Step 3</div>
-                                        <div class="mt-1 flex flex-col items-center text-center">
-                                            <x-icon name="check-circle-2" class="w-8 h-8 text-accent" />
-                                            <h4 class="text-sm font-semibold mt-2">Resolution</h4>
-                                            <p class="text-xs text-neutral-500 mt-1">Final decision with detailed
-                                                explanation and fund distribution instructions.</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Dispute Resolution Tips Box -->
-                                <div class="mt-6 bg-neutral-50 rounded-lg border border-neutral-200 p-4">
-                                    <div class="flex items-start">
-                                        <div class="flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-6 h-6 text-secondary">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
-                                            </svg>
-                                        </div>
-                                        <div class="ml-3">
-                                            <h4 class="text-base font-semibold text-primary">Tips for Successful
-                                                Dispute Resolution</h4>
-                                            <ul class="mt-2 text-sm text-neutral-600 space-y-1">
-                                                <li class="flex items-start">
-                                                    <x-icon name="check" class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" />
-                                                    <span>Provide clear, factual evidence related to your
-                                                        claim</span>
-                                                </li>
-                                                <li class="flex items-start">
-                                                    <x-icon name="check" class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" />
-                                                    <span>Reference specific contract terms or project
-                                                        milestones</span>
-                                                </li>
-                                                <li class="flex items-start">
-                                                    <x-icon name="check" class="h-3.5 w-3.5 text-secondary mr-1 mt-0.5" />
-                                                    <span>Maintain professional communication throughout the
-                                                        process</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                </x-policy.section>
-
-                <!-- Section 7: Platform Rights -->
-                <x-policy.section id="platform-rights" number="7" title="Platform Rights">
-                    <x-slot:icon>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-secondary mr-2">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                        </svg>
-                    </x-slot:icon>
-                            <p class="mb-4">{{ config('app.name') }} reserves the right to:</p>
-
-                            <ul class="space-y-3">
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>Withhold or reverse payment in the event of fraud or policy violations.</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>Suspend accounts involved in repeated or malicious cancellations.</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <x-icon name="check-circle-2" class="w-5 h-5 text-secondary mt-0.5 mr-2" />
-                                    <span>Use discretion in resolving disputes where platform policy or deliverable
-                                        clarity is in question.</span>
-                                </li>
-                            </ul>
-
-                            <!-- Platform Rights Visual Element -->
-                            <div
-                                class="mt-6 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg p-5 border border-neutral-200">
-                                <div class="flex flex-col md:flex-row items-center">
-                                    <div class="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-                                        <!-- Shield Icon with Platform Protection -->
-                                        <div class="relative">
-                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                                                fill="none" stroke="currentColor" stroke-width="1.5"
-                                                class="w-6 h-6 text-secondary">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h4 class="text-sm font-tertiary font-semibold text-primary mb-2">Platform
-                                            Protection Measures</h4>
-                                        <p class="text-sm text-neutral-600">
-                                            {{ config('app.name') }} employs these rights to maintain platform integrity
-                                            and protect all users from potential fraud and abuse. These measures help
-                                            ensure fair transactions and maintain trust within our marketplace
-                                            ecosystem.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                </x-policy.section>
-
-                <!-- Section 8: Communication and Notifications -->
-                <x-policy.section id="communication" number="8" title="Communication and Notifications">
-                    <x-slot:icon>
-                        <x-icon name="chat-bubble-text-2" class="w-6 h-6 text-secondary mr-2" />
-                    </x-slot:icon>
-                        <div class="px-6 py-5 font-main text-neutral-700">
-                            <p class="mb-4">All actions in the cancellation flow will trigger platform notifications
-                                and email alerts to both parties to ensure transparency and timely resolution.</p>
-
-                            <!-- Communication Methods Illustration -->
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
-                                <x-card rounded="lg" class="p-4 flex flex-col items-center text-center">
-                                    <div class="rounded-full bg-primary/10 p-3 mb-3">
-                                        <x-icon name="bell-2" class="w-6 h-6 text-primary" />
-                                    </div>
-                                    <h4 class="text-sm font-semibold text-primary">In-App Notifications</h4>
-                                    <p class="text-xs text-neutral-500 mt-2">Real-time updates directly within your
-                                        dashboard for immediate awareness.</p>
-                                </x-card>
-
-                                <x-card rounded="lg" class="p-4 flex flex-col items-center text-center">
-                                    <div class="rounded-full bg-secondary/10 p-3 mb-3">
-                                        <x-icon name="envelope-2" class="w-6 h-6 text-secondary" />
-                                    </div>
-                                    <h4 class="text-sm font-semibold text-primary">Email Alerts</h4>
-                                    <p class="text-xs text-neutral-500 mt-2">Detailed notifications sent to your
-                                        registered email address with actionable information.</p>
-                                </x-card>
-
-                                <x-card rounded="lg" class="p-4 flex flex-col items-center text-center">
-                                    <div class="rounded-full bg-accent/10 p-3 mb-3">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-accent">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
-                                        </svg>
-                                    </div>
-                                    <h4 class="text-sm font-semibold text-primary">Activity Timeline</h4>
-                                    <p class="text-xs text-neutral-500 mt-2">Chronological record of all
-                                        cancellation-related events for complete transparency.</p>
-                                </x-card>
-                            </div>
-
-                            <!-- Communication Settings Panel -->
-                            <div class="mt-6 bg-neutral-50 rounded-lg border border-neutral-200 p-4">
-                                <div class="flex items-center mb-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-secondary mr-2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    <h4 class="text-sm font-semibold text-primary">Communication Preferences</h4>
-                                </div>
-                                <p class="text-xs text-neutral-600 mb-3">
-                                    You can customize your notification preferences in your account settings to control
-                                    how you receive cancellation and payment updates.
-                                </p>
-                                <a href="#"
-                                    class="inline-flex items-center text-xs font-medium text-secondary hover:text-primary transition-colors duration-200">
-                                    <span>Manage notification settings</span>
-                                    <x-icon name="chevron-right" class="h-3.5 w-3.5 ml-1" />
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]" x-data="{
+            active: @js(array_key_first($sections)),
+            init() {
+                const observer = new IntersectionObserver((entries) => {
+                    const visible = entries.filter(entry => entry.isIntersecting);
+                    if (visible.length) this.active = visible[0].target.id;
+                }, { rootMargin: '-80px 0px -65% 0px' });
+                this.$root.querySelectorAll('section[id]').forEach(section => observer.observe(section));
+            },
+        }">
+            <!-- Table of contents -->
+            <nav aria-label="{{ __('On this page') }}" class="lg:sticky lg:top-24">
+                <div class="-mx-4 overflow-x-auto px-4 [scrollbar-width:none] lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+                    <p class="mb-2 hidden text-xs font-medium uppercase tracking-wide text-tertiary lg:block">{{ __('On this page') }}</p>
+                    <ol class="flex gap-1 lg:flex-col">
+                        @foreach ($sections as $id => $label)
+                            <li class="shrink-0">
+                                <a href="#{{ $id }}" :aria-current="active === '{{ $id }}' ? 'true' : null"
+                                    :class="active === '{{ $id }}' ? 'bg-white font-medium text-neutral-900 shadow-sm ring-1 ring-neutral-200' : 'text-neutral-600 hover:bg-white/70 hover:text-neutral-900'"
+                                    class="flex items-baseline gap-2.5 whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 lg:whitespace-normal">
+                                    <span class="text-xs tabular-nums text-tertiary">{{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}</span>
+                                    {{ $label }}
                                 </a>
-                            </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+            </nav>
+
+            <article class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
+                <x-policy.section id="cancellation-overview" number="1" :title="$sections['cancellation-overview']">
+                    <p>Either the Client or the Freelancer may cancel an engagement at any time for any reason. All cancellations must include:</p>
+                    <x-policy.list :items="[
+                        'A stated reason for cancellation.',
+                        'Selection of a cancellation type (e.g., mutual, early termination, dispute).',
+                        'A review of submitted deliverables (if any).',
+                    ]" />
                 </x-policy.section>
 
-                <!-- Section 9: Policy Updates -->
-                <x-policy.section id="policy-updates" number="9" title="Policy Updates">
-                    <x-slot:icon>
-                        <x-icon name="arrow-path-2" class="w-6 h-6 text-secondary mr-2" />
-                    </x-slot:icon>
-                            <p>This policy is subject to change. Users will be notified of significant changes via email
-                                and platform notification.</p>
-
-                            <!-- Policy Update Details -->
-                            <div class="mt-5 bg-primary/5 rounded-lg p-4 border border-primary/10">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <x-icon name="information-circle-2" class="w-6 h-6 text-primary" />
-                                    </div>
-                                    <div class="ml-3">
-                                        <h4 class="text-sm font-semibold text-primary">Policy Version Control</h4>
-                                        <div class="mt-2 space-y-2 text-sm">
-                                            <div class="flex justify-between text-xs">
-                                                <span class="text-neutral-600">Effective Date:</span>
-                                                <span class="font-medium text-neutral-800">January 15, 2025</span>
-                                            </div>
-                                            <div class="flex justify-between text-xs">
-                                                <span class="text-neutral-600">Last Updated:</span>
-                                                <span class="font-medium text-neutral-800">May 1, 2025</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Policy Update Notification Pattern -->
-                            <div class="mt-5 relative">
-                                <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                    <div class="w-full border-t border-neutral-200"></div>
-                                </div>
-                                <div class="relative flex justify-start">
-                                    <span class="bg-white pr-3 text-xs text-neutral-500 font-medium">Update
-                                        Process</span>
-                                </div>
-                            </div>
-
-                            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <div class="flex items-center justify-center">
-                                    <div class="flex flex-col items-center text-center">
-                                        <div
-                                            class="rounded-full bg-primary/10 h-12 w-12 flex items-center justify-center mb-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-6 h-6 text-primary">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
-                                            </svg>
-                                        </div>
-                                        <p class="text-xs font-medium text-neutral-700">Policy Review</p>
-                                        <span class="text-xs text-neutral-500 mt-1">Regular evaluation of policy
-                                            effectiveness</span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-center">
-                                    <div class="flex flex-col items-center text-center">
-                                        <div
-                                            class="rounded-full bg-primary/10 h-12 w-12 flex items-center justify-center mb-2">
-                                            <x-icon name="check-circle-2" class="w-6 h-6 text-primary" />
-                                        </div>
-                                        <p class="text-xs font-medium text-neutral-700">Policy Update</p>
-                                        <span class="text-xs text-neutral-500 mt-1">Changes implemented based on
-                                            platform needs</span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center justify-center">
-                                    <div class="flex flex-col items-center text-center">
-                                        <div
-                                            class="rounded-full bg-primary/10 h-12 w-12 flex items-center justify-center mb-2">
-                                            <x-icon name="chat-bubble-text-2" class="w-6 h-6 text-primary" />
-                                        </div>
-                                        <p class="text-xs font-medium text-neutral-700">User Notification</p>
-                                        <span class="text-xs text-neutral-500 mt-1">Transparent communication of
-                                            changes</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Notification Types -->
-                            <div class="mt-6">
-                                <div class="relative">
-                                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                        <div class="w-full border-t border-neutral-200"></div>
-                                    </div>
-                                    <div class="relative flex justify-start">
-                                        <span class="bg-white pr-3 text-xs text-neutral-500 font-medium">Notification
-                                            Methods</span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 space-y-3">
-                                    <div class="flex items-start">
-                                        <div class="flex-shrink-0">
-                                            <x-icon name="envelope-2" class="w-5 h-5 text-secondary mt-0.5" />
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-neutral-800">Email Notifications</p>
-                                            <p class="text-xs text-neutral-600 mt-1">Direct emails sent to users
-                                                detailing significant policy changes with summary of key updates.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-start">
-                                        <div class="flex-shrink-0">
-                                            <x-icon name="bell-2" class="w-5 h-5 text-secondary mt-0.5" />
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-neutral-800">Platform Notifications</p>
-                                            <p class="text-xs text-neutral-600 mt-1">In-app alerts highlighting policy
-                                                changes with links to detailed documentation.</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="flex items-start">
-                                        <div class="flex-shrink-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none"
-                                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
-                                                class="w-5 h-5 text-secondary mt-0.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                            </svg>
-                                        </div>
-                                        <div class="ml-3">
-                                            <p class="text-sm font-medium text-neutral-800">Documentation Updates</p>
-                                            <p class="text-xs text-neutral-600 mt-1">Versioned policy documents
-                                                accessible in user dashboard with change tracking.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- User acknowledgment -->
-                            <div class="mt-6 bg-neutral-50 rounded-lg p-4 border border-neutral-200">
-                                <div class="flex">
-                                    <div class="flex-shrink-0">
-                                        <x-icon name="information-circle-2" class="w-5 h-5 text-primary" />
-                                    </div>
-                                    <div class="ml-3">
-                                        <h4 class="text-sm font-semibold text-primary">User Acknowledgment</h4>
-                                        <p class="mt-1 text-xs text-neutral-600">For substantial policy changes that
-                                            affect user rights or obligations, users may be required to acknowledge the
-                                            updated terms before continuing to use the platform.</p>
-
-                                        {{-- <div class="mt-3 flex items-center">
-                                            <a href="#"
-                                                class="inline-flex items-center text-xs font-medium text-secondary hover:text-primary transition-colors duration-200">
-                                                <span>Learn more about policy acknowledgment</span>
-                                                <x-icon name="chevron-right" class="h-3.5 w-3.5 ml-1" />
-                                            </a>
-                                        </div> --}}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Policy Change Feedback -->
-                            <div class="mt-6">
-                                <div class="relative">
-                                    <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                                        <div class="w-full border-t border-neutral-200"></div>
-                                    </div>
-                                    <div class="relative flex justify-start">
-                                        <span class="bg-white pr-3 text-xs text-neutral-500 font-medium">User
-                                            Feedback</span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4">
-                                    <p class="text-sm text-neutral-700">We value your input on our policies. If you
-                                        have questions or suggestions regarding policy updates, please contact our
-                                        support team.</p>
-
-                                    <div class="mt-4">
-                                        <x-btn href="#">
-                                            Submit Feedback
-                                        </x-btn>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Final footer -->
-                            <div class="mt-8 pt-6 border-t border-neutral-200 text-center">
-                                <p class="text-xs text-neutral-500">By continuing to use the platform after policy
-                                    updates,
-                                    users agree to abide by the modified terms.</p>
-                            </div>
+                <x-policy.section id="handling-deliverables" number="2" title="Handling Deliverables Upon Cancellation">
+                    <p>Upon cancellation, the platform will identify whether any deliverables have been:</p>
+                    <x-policy.list :items="['Submitted but not approved.', 'Approved by the Client.']" />
+                    <p>Deliverables that have already been approved are considered <strong class="font-semibold text-neutral-900">final and eligible for payment</strong>.</p>
                 </x-policy.section>
-            </div>
+
+                <x-policy.section id="payment-eligibility" number="3" :title="$sections['payment-eligibility']">
+                    <h3 class="font-semibold text-neutral-900">A. Approved Deliverables</h3>
+                    <x-policy.list :items="[
+                        'Approved deliverables will be considered for payment regardless of who initiated the cancellation.',
+                        'The Freelancer is eligible to receive payment for approved work.',
+                        'Funds will be released from escrow or requested from the Client if not already funded.',
+                    ]" />
+                    <h3 class="pt-2 font-semibold text-neutral-900">B. Unapproved Deliverables</h3>
+                    <x-policy.list :items="[
+                        'Clients may choose to approve submitted work at the time of cancellation.',
+                        'If no approval is granted, no payment will be processed for unapproved work unless the dispute process is triggered.',
+                    ]" />
+                </x-policy.section>
+
+                <x-policy.section id="payment-processing" number="4" :title="$sections['payment-processing']">
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <x-policy.callout title="If the Client Cancels">
+                            <x-policy.list :items="[
+                                'The Freelancer will be shown a breakdown of deliverables that were approved and the corresponding payable amount.',
+                                'The Freelancer may accept the payment or request a dispute if they believe the payment is insufficient.',
+                            ]" />
+                        </x-policy.callout>
+                        <x-policy.callout title="If the Freelancer Cancels">
+                            <x-policy.list :items="[
+                                'The Client will be prompted to review submitted deliverables and approve those they find satisfactory.',
+                                'The platform will calculate the payment due based on approved work.',
+                                'The Freelancer will then be notified of the payment status.',
+                            ]" />
+                        </x-policy.callout>
+                    </div>
+                    <p>Both parties will receive a detailed cancellation summary that outlines the approved deliverables, payment amounts, and next steps.</p>
+                </x-policy.section>
+
+                <x-policy.section id="escrow" number="5" :title="$sections['escrow']">
+                    <x-policy.list :items="[
+                        'Funds held in escrow will only be released for approved deliverables.',
+                        'If no deliverables are approved, the full escrowed amount will be refunded to the Client.',
+                        'For milestone-based engagements, only the current milestone amount is affected.',
+                    ]" />
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <x-policy.callout title="Processing Time">
+                            <p>Escrow funds are typically processed within 3-5 business days after approval.</p>
+                        </x-policy.callout>
+                        <x-policy.callout title="Fund Security">
+                            <p>All escrowed funds are held in secure, third-party accounts separate from platform operating funds.</p>
+                        </x-policy.callout>
+                    </div>
+                </x-policy.section>
+
+                <x-policy.section id="dispute" number="6" :title="$sections['dispute']">
+                    <p>If either party disagrees with the payment outcome:</p>
+                    <x-policy.list :items="[
+                        'A dispute can be raised by selecting “Dispute this decision” within 5 days of the cancellation notice.',
+                        'Our admin team will review engagement history, deliverables, and communication logs.',
+                        'A final resolution will be provided within 7–14 business days.',
+                    ]" />
+
+                    <h3 class="pt-2 font-semibold text-neutral-900">Dispute Process</h3>
+                    <ol class="grid gap-3 md:grid-cols-3">
+                        @foreach ([
+                            ['File Dispute', 'Submit detailed reasoning for the dispute with any supporting evidence.'],
+                            ['Review Process', 'Admin team evaluates all project communications, deliverables and contract terms.'],
+                            ['Resolution', 'Final decision with detailed explanation and fund distribution instructions.'],
+                        ] as [$step, $text])
+                            <li class="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3.5">
+                                <p class="text-xs font-semibold text-teal-700">Step {{ $loop->iteration }}</p>
+                                <p class="mt-1 font-semibold text-neutral-900">{{ $step }}</p>
+                                <p class="mt-1 text-neutral-700">{{ $text }}</p>
+                            </li>
+                        @endforeach
+                    </ol>
+
+                    <x-policy.callout title="Tips for Successful Dispute Resolution">
+                        <x-policy.list :items="[
+                            'Provide clear, factual evidence related to your claim',
+                            'Reference specific contract terms or project milestones',
+                            'Maintain professional communication throughout the process',
+                        ]" />
+                    </x-policy.callout>
+                </x-policy.section>
+
+                <x-policy.section id="platform-rights" number="7" :title="$sections['platform-rights']">
+                    <p>{{ $app }} reserves the right to:</p>
+                    <x-policy.list :items="[
+                        'Withhold or reverse payment in the event of fraud or policy violations.',
+                        'Suspend accounts involved in repeated or malicious cancellations.',
+                        'Use discretion in resolving disputes where platform policy or deliverable clarity is in question.',
+                    ]" />
+                    <x-policy.callout title="Platform Protection Measures">
+                        <p>{{ $app }} employs these rights to maintain platform integrity and protect all users from potential fraud and abuse. These measures help ensure fair transactions and maintain trust within our marketplace ecosystem.</p>
+                    </x-policy.callout>
+                </x-policy.section>
+
+                <x-policy.section id="communication" number="8" :title="$sections['communication']">
+                    <p>All actions in the cancellation flow will trigger platform notifications and email alerts to both parties to ensure transparency and timely resolution.</p>
+                    <div class="grid gap-4 md:grid-cols-3">
+                        <x-policy.callout title="In-App Notifications">
+                            <p>Real-time updates directly within your dashboard for immediate awareness.</p>
+                        </x-policy.callout>
+                        <x-policy.callout title="Email Alerts">
+                            <p>Detailed notifications sent to your registered email address with actionable information.</p>
+                        </x-policy.callout>
+                        <x-policy.callout title="Activity Timeline">
+                            <p>Chronological record of all cancellation-related events for complete transparency.</p>
+                        </x-policy.callout>
+                    </div>
+                    <x-policy.callout title="Communication Preferences">
+                        <p>You can customize your notification preferences in your account settings to control how you receive cancellation and payment updates.</p>
+                    </x-policy.callout>
+                </x-policy.section>
+
+                <x-policy.section id="policy-updates" number="9" :title="$sections['policy-updates']">
+                    <p>This policy is subject to change. Users will be notified of significant changes via email and platform notification.</p>
+
+                    <x-policy.callout title="Policy Version Control">
+                        <p>Effective Date: <span class="font-medium text-neutral-900">January 15, 2025</span></p>
+                        <p>Last Updated: <span class="font-medium text-neutral-900">May 1, 2025</span></p>
+                    </x-policy.callout>
+
+                    <h3 class="pt-2 font-semibold text-neutral-900">Update Process</h3>
+                    <ol class="grid gap-3 md:grid-cols-3">
+                        @foreach ([
+                            ['Policy Review', 'Regular evaluation of policy effectiveness'],
+                            ['Policy Update', 'Changes implemented based on platform needs'],
+                            ['User Notification', 'Transparent communication of changes'],
+                        ] as [$step, $text])
+                            <li class="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3.5">
+                                <p class="text-xs font-semibold text-teal-700">Step {{ $loop->iteration }}</p>
+                                <p class="mt-1 font-semibold text-neutral-900">{{ $step }}</p>
+                                <p class="mt-1 text-neutral-700">{{ $text }}</p>
+                            </li>
+                        @endforeach
+                    </ol>
+
+                    <h3 class="pt-2 font-semibold text-neutral-900">Notification Methods</h3>
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <x-policy.callout title="Email Notifications">
+                            <p>Direct emails sent to users detailing significant policy changes with summary of key updates.</p>
+                        </x-policy.callout>
+                        <x-policy.callout title="Platform Notifications">
+                            <p>In-app alerts highlighting policy changes with links to detailed documentation.</p>
+                        </x-policy.callout>
+                        <x-policy.callout title="Documentation Updates">
+                            <p>Versioned policy documents accessible in user dashboard with change tracking.</p>
+                        </x-policy.callout>
+                        <x-policy.callout title="User Acknowledgment">
+                            <p>For substantial policy changes that affect user rights or obligations, users may be required to acknowledge the updated terms before continuing to use the platform.</p>
+                        </x-policy.callout>
+                    </div>
+
+                    <x-policy.callout title="User Feedback">
+                        <p>We value your input on our policies. If you have questions or suggestions regarding policy updates, please contact our support team.</p>
+                    </x-policy.callout>
+
+                    <p class="font-medium text-neutral-900">By continuing to use the platform after policy updates, users agree to abide by the modified terms.</p>
+                </x-policy.section>
+            </article>
         </div>
     </div>
 </x-app-layout>

@@ -160,18 +160,26 @@ class JobPaymentDispute extends Model
     }
 
     /**
-     * Map dispute reason
+     * The reasons a freelancer can pick when disputing a payment, keyed by the stored value.
+     *
+     * @return array<string, string>
      */
-    public function getFormattedReasonAttribute()
+    public static function reasons(): array
     {
-        $map = [
+        return [
             'incorrect_amount' => 'Incorrect Amount',
             'work_not_considered' => 'Work Completed Not Considered',
             'agreement_violated' => 'Agreement Terms Violated',
             'cancellation_dispute' => 'Cancellation Terms Dispute',
             'other' => 'Other (please specify)',
         ];
+    }
 
-        return $map[$this->dispute_reason] ?? ucfirst(str_replace('_', ' ', $this->dispute_reason));
+    /**
+     * Map dispute reason
+     */
+    public function getFormattedReasonAttribute()
+    {
+        return self::reasons()[$this->dispute_reason] ?? ucfirst(str_replace('_', ' ', $this->dispute_reason));
     }
 }

@@ -99,7 +99,7 @@ class DashboardOverviewService
             $application = $engagement->application;
             $jobTitle = $application->job->title;
             $isApplicant = $application->applicant_id === $user->id;
-            $engagementUrl = route('engagements.archived-details', $engagement->id);
+            $engagementUrl = route('engagements.show', $engagement->id);
 
             if ($engagement->status === EngagementStatus::EmployerAccepted && $isApplicant) {
                 $items[] = $this->item('paper-airplane', 'amber', __('Respond to offer'), $jobTitle,
@@ -161,7 +161,7 @@ class DashboardOverviewService
         return $engagements->filter(fn (JobEngagement $e) => $unread->has($e->id))
             ->map(fn (JobEngagement $e) => $this->item('chat-bubble-left-right', 'blue',
                 trans_choice(':count unread message|:count unread messages', (int) $unread[$e->id], ['count' => (int) $unread[$e->id]]),
-                $e->application->job->title, route('engagements.archived-details', $e->id), __('Reply'), 35))
+                $e->application->job->title, route('engagements.show', $e->id), __('Reply'), 35))
             ->values()
             ->all();
     }
@@ -212,7 +212,7 @@ class DashboardOverviewService
                 $nextDue = $engagement->deliverables->where('status', '!=', 'approved')->whereNotNull('due_date')->min('due_date');
 
                 return [
-                    'url' => route('engagements.archived-details', $engagement->id),
+                    'url' => route('engagements.show', $engagement->id),
                     'title' => $application->job->title,
                     'role' => $isApplicant ? __('Freelancer') : __('Client'),
                     'counterpart' => ($isApplicant ? $application->poster : $application->applicant)?->name,

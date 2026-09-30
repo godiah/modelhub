@@ -1,15 +1,12 @@
 @props(['id', 'number', 'title'])
 
-<section id="{{ $id }}" class="bg-white rounded-lg shadow-md overflow-hidden">
-    <div class="border-l-4 border-secondary">
-        <div class="px-6 py-5 bg-gradient-to-r from-secondary/10 to-white border-b border-neutral-200">
-            <div class="flex items-center">
-                {{ $icon }}
-                <h3 class="text-lg font-tertiary font-bold text-primary">{{ $number }}. {{ $title }}</h3>
-            </div>
-        </div>
-        <div class="px-6 py-5 font-main text-neutral-700">
-            {{ $slot }}
-        </div>
+{{-- One numbered policy section; `id` is the anchor the table of contents links to. --}}
+<section id="{{ $id }}" aria-labelledby="{{ $id }}-title" class="scroll-mt-24 border-b border-neutral-200 py-8 first:pt-0 last:border-b-0 last:pb-0">
+    <h2 id="{{ $id }}-title" class="flex items-baseline gap-3 font-tertiary text-xl font-semibold text-neutral-900">
+        <span class="text-sm font-semibold tabular-nums text-teal-700">{{ str_pad($number, 2, '0', STR_PAD_LEFT) }}</span>
+        {{ $title }}
+    </h2>
+    <div {{ $attributes->class('mt-4 space-y-4 text-sm leading-relaxed text-neutral-700') }}>
+        {{ $slot }}
     </div>
 </section>

@@ -1,195 +1,272 @@
-<x-app-layout :crumb="$engagement->job->title">
-    <div class="container mx-auto max-w-7xl px-4 py-8 pb-24 font-main text-neutral-800">
-        <!--  Status Banner -->
-        <div class="mb-8 relative overflow-hidden">
-            <!-- Background Pattern -->
-            <div class="absolute inset-0 bg-gradient-to-r from-accent/5 to-accent/10 z-0">
-                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="opacity-20">
-                    <pattern id="diagonalPattern" width="10" height="10" patternUnits="userSpaceOnUse"
-                        patternTransform="rotate(45)">
-                        <line x1="0" y1="0" x2="0" y2="10" stroke="#F59E0B"
-                            stroke-width="1" />
-                    </pattern>
-                    <rect width="100%" height="100%" fill="url(#diagonalPattern)" />
-                </svg>
+@use('App\Enums\PartialPaymentStatus')
+@use('App\Enums\EngagementStatus')
+@php
+    $application = $engagement->application;
+    $job = $application->job;
+    $cancellation = $engagement->cancellation;
+    $user = auth()->user();
+    $isPoster = $user->id === $application->poster_id;
+    $isApplicant = $user->id === $application->applicant_id;
+    $canProcessAsClient = $isPoster || $user->hasRole('admin');
+    $toReview = $engagement->deliverables->where('status', 'submitted');
+    $approved = $engagement->getCompletedDeliverablesCount();
+    $total = $engagement->getTotalDeliverablesCount();
+    $paymentStatus = $payment?->status;
+    $cancelledAt = $engagement->cancelled_at ?? $cancellation?->created_at;
+
+    $steps = [
+        ['label' => __('Review submitted work'), 'state' => $toReview->isEmpty() ? 'done' : 'current'],
+        ['label' => __('Client processes payment'), 'state' => $payment ? 'done' : ($toReview->isEmpty() ? 'current' : 'todo')],
+        ['label' => __('Freelancer responds'), 'state' => match (true) {
+            in_array($paymentStatus, [PartialPaymentStatus::Accepted, PartialPaymentStatus::Finalized], true) => 'done',
+            $paymentStatus === PartialPaymentStatus::Disputed => 'failed',
+            $paymentStatus === PartialPaymentStatus::Pending => 'current',
+            default => 'todo',
+        }],
+        ['label' => __('Settled'), 'state' => ($paymentStatus === PartialPaymentStatus::Finalized || $engagement->status === EngagementStatus::Settled) ? 'done' : 'todo'],
+    ];
+
+    $statusTone = ['pending' => 'amber', 'accepted' => 'green', 'disputed' => 'red', 'finalized' => 'blue'];
+    $deliverableTone = ['pending' => 'neutral', 'submitted' => 'amber', 'approved' => 'green', 'rejected' => 'red'];
+    $deliverableLabel = ['pending' => __('Not submitted'), 'submitted' => __('Awaiting review'), 'approved' => __('Approved'), 'rejected' => __('Changes requested')];
+@endphp
+<x-app-layout :crumb="__('Settlement') . ' · ' . $job->title">
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <!-- Header -->
+        <x-card class="mb-6 rounded-2xl">
+            <div class="flex flex-col gap-4 p-6 lg:flex-row lg:items-start lg:justify-between">
+                <div class="min-w-0">
+                    <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Settlement') }}</p>
+                    <div class="mt-1 flex flex-wrap items-center gap-3">
+                        <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ $job->title }}</h1>
+                        <x-engagement.status-badge :status="$engagement->status" class="px-2.5 py-0.5 text-xs font-medium" icon-class="w-3 h-3 mr-1" />
+                    </div>
+                    <p class="mt-1.5 text-sm text-tertiary">
+                        @if ($cancellation?->initiator)
+                            {{ __('Cancelled by :name', ['name' => $cancellation->initiator_id === $user->id ? __('you') : $cancellation->initiator->name]) }}
+                        @else
+                            {{ __('Cancelled') }}
+                        @endif
+                        @if ($cancelledAt)
+                            · <x-date :date="$cancelledAt" />
+                        @endif
+                    </p>
+                </div>
+                <div class="flex shrink-0 flex-wrap items-center gap-2">
+                    <x-btn variant="secondary" size="sm" href="{{ route('engagements.show', $engagement) }}">
+                        <x-icon name="arrow-left" class="h-4 w-4" />
+                        {{ __('Back to engagement') }}
+                    </x-btn>
+                    @if ($canReopen)
+                        <form action="{{ route('engagements.reopen-job', $engagement) }}" method="POST">
+                            @csrf
+                            <x-btn size="sm" type="submit">
+                                <x-icon name="arrow-path" class="h-4 w-4" />
+                                {{ __('Reopen job') }}
+                            </x-btn>
+                        </form>
+                    @endif
+                </div>
+            </div>
+            <x-engagement.stepper :steps="$steps" class="border-t border-neutral-100 px-6 py-5" />
+        </x-card>
+
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <div class="space-y-6">
+                <!-- Payment -->
+                <x-panel :title="__('Payment')" :description="__('Payment for the work approved before the engagement ended.')">
+                    <dl class="divide-y divide-neutral-100 text-sm">
+                        <div class="flex items-center justify-between gap-4 py-2.5 first:pt-0">
+                            <dt class="text-tertiary">{{ __('Agreed amount') }}</dt>
+                            <dd class="font-medium tabular-nums text-neutral-900"><x-money :amount="$engagement->agreed_amount" /></dd>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 py-2.5">
+                            <dt class="text-tertiary">{{ __('Approved deliverables') }}</dt>
+                            <dd class="font-medium text-neutral-900">{{ __(':approved of :total', ['approved' => $approved, 'total' => $total]) }}</dd>
+                        </div>
+                        <div class="flex items-center justify-between gap-4 py-2.5 last:pb-0">
+                            <dt class="text-tertiary">{{ __('Calculated payable amount') }}</dt>
+                            <dd class="font-tertiary text-lg font-semibold tabular-nums text-neutral-900"><x-money :amount="$engagement->calculatePartialPaymentAmount()" /></dd>
+                        </div>
+                    </dl>
+
+                    <div class="mt-6 border-t border-neutral-100 pt-6">
+                        @if ($payment)
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs text-tertiary">{{ __('Processed payment') }}</p>
+                                    <p class="font-tertiary text-xl font-semibold tabular-nums text-neutral-900"><x-money :amount="$payment->amount" /></p>
+                                </div>
+                                <x-badge :tone="$statusTone[$payment->status->value] ?? 'neutral'" class="px-2.5 py-0.5 text-xs font-medium">{{ $payment->status->label() }}</x-badge>
+                            </div>
+                            <p class="mt-3 text-sm text-neutral-700">
+                                @if ($isPoster)
+                                    {{ match ($paymentStatus) {
+                                        PartialPaymentStatus::Pending => __('Payment processed. Waiting for the freelancer to respond.'),
+                                        PartialPaymentStatus::Accepted => __('The freelancer accepted this payment.'),
+                                        PartialPaymentStatus::Disputed => __('The freelancer disputed this payment.'),
+                                        PartialPaymentStatus::Finalized => __('This payment has been finalised.'),
+                                        default => '',
+                                    } }}
+                                @else
+                                    {{ match ($paymentStatus) {
+                                        PartialPaymentStatus::Pending => __('The client has processed this payment. Please review and respond.'),
+                                        PartialPaymentStatus::Accepted => __('You accepted this payment.'),
+                                        PartialPaymentStatus::Disputed => __('You disputed this payment.'),
+                                        PartialPaymentStatus::Finalized => __('This payment has been finalised.'),
+                                        default => '',
+                                    } }}
+                                @endif
+                            </p>
+                            <p class="mt-1 text-xs text-tertiary">
+                                @if ($payment->processed_at)
+                                    {{ __('Processed :date', ['date' => $payment->processed_at->format('M j, Y')]) }}
+                                @endif
+                                @if ($payment->accepted_at)
+                                    · {{ __('Accepted :date', ['date' => $payment->accepted_at->format('M j, Y')]) }}
+                                @endif
+                                @if ($payment->final_amount !== null)
+                                    · {{ __('Final amount :amount', ['amount' => \App\Support\Money::format($payment->final_amount)]) }}
+                                @endif
+                            </p>
+
+                            @if ($isApplicant && $paymentStatus === PartialPaymentStatus::Pending)
+                                <div class="mt-5 flex flex-wrap gap-2">
+                                    <form action="{{ route('engagements.accept-partial-payment', $payment->id) }}" method="POST">
+                                        @csrf
+                                        <x-btn type="submit">
+                                            <x-icon name="check" class="h-4 w-4" />
+                                            {{ __('Accept payment') }}
+                                        </x-btn>
+                                    </form>
+                                    <x-btn variant="danger-outline" type="button" @click="$dispatch('open-modal', 'dispute-warning')">
+                                        <x-icon name="exclamation-triangle" class="h-4 w-4" />
+                                        {{ __('Dispute payment') }}
+                                    </x-btn>
+                                </div>
+                            @endif
+                        @elseif ($canProcess && $canProcessAsClient)
+                            <p class="mb-4 text-sm text-neutral-700">{{ $paymentInfo['message'] }}</p>
+                            <form action="{{ route('engagements.process-partial-payment', $engagement->id) }}" method="POST" class="max-w-sm space-y-4">
+                                @csrf
+                                <x-field name="payment_amount" error="payment_amount" type="number" step="0.01" min="0.01"
+                                    :label="__('Payment amount (:currency)', ['currency' => config('app.currency_symbol')])"
+                                    :hint="__('Leave blank to pay the calculated amount of :amount.', ['amount' => \App\Support\Money::format($engagement->calculatePartialPaymentAmount())])"
+                                    value="{{ old('payment_amount') }}" />
+                                <x-btn type="submit">
+                                    <x-icon name="banknotes" class="h-4 w-4" />
+                                    {{ __('Process payment') }}
+                                </x-btn>
+                            </form>
+                        @elseif ($canProcess && $isApplicant)
+                            <p class="text-sm text-neutral-700">{{ __('The client has not processed the payment yet.') }}</p>
+                        @else
+                            <p class="text-sm text-neutral-700">{{ $paymentInfo['message'] }}</p>
+                        @endif
+                    </div>
+                </x-panel>
+
+                <!-- Deliverables -->
+                <x-panel :title="__('Deliverables')" :description="$toReview->isNotEmpty() && $isPoster ? __('Review the submitted work before the payment can be processed.') : null">
+                    @if ($engagement->deliverables->isEmpty())
+                        <p class="text-sm text-tertiary">{{ __('No deliverables were added to this engagement.') }}</p>
+                    @else
+                        <ul class="divide-y divide-neutral-100">
+                            @foreach ($engagement->deliverables as $deliverable)
+                                <li class="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-medium text-neutral-900">{{ $deliverable->title }}</p>
+                                        @if ($deliverable->due_date)
+                                            <p class="text-xs text-tertiary">{{ __('Due :date', ['date' => $deliverable->due_date->format('M j, Y')]) }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <x-badge :tone="$deliverableTone[$deliverable->status] ?? 'neutral'" class="px-2.5 py-0.5 text-xs font-medium">{{ $deliverableLabel[$deliverable->status] ?? \Illuminate\Support\Str::headline($deliverable->status) }}</x-badge>
+                                        @if ($isPoster && $deliverable->status === 'submitted')
+                                            <x-btn size="sm" variant="secondary" type="button" @click="$dispatch('open-modal', 'reject-deliverable-{{ $deliverable->id }}')">{{ __('Request changes') }}</x-btn>
+                                            <x-btn size="sm" type="button" @click="$dispatch('open-modal', 'approve-deliverable-{{ $deliverable->id }}')">{{ __('Approve') }}</x-btn>
+                                        @endif
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    <p class="mt-4 border-t border-neutral-100 pt-4 text-sm">
+                        <a href="{{ route('engagements.show', $engagement) }}#deliverables" class="font-medium text-teal-700 hover:text-teal-800 hover:underline">{{ __('See submissions and feedback') }}</a>
+                    </p>
+                </x-panel>
             </div>
 
-            <!-- Main Banner Content -->
-            <div class="relative z-10 rounded-2xl border border-accent/30 shadow-lg overflow-hidden">
-                <!-- Colored Top Border -->
-                <div class="h-1.5 bg-gradient-to-r from-accent to-accent/80 w-full"></div>
-
-                <!-- Banner Content -->
-                <div class="bg-white p-5 flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                        <!-- Alert Icon with Animated Pulse -->
-                        <div class="relative">
-                            <div class="absolute -inset-1 bg-accent/20 rounded-full animate-pulse opacity-75"></div>
-                            <div class="relative bg-accent/10 text-accent rounded-full p-2">
-                                <x-icon name="exclamation-triangle-3" class="w-10 h-10" />
+            <div class="space-y-6">
+                <x-panel :title="__('Cancellation')">
+                    @if ($cancellation)
+                        <dl class="space-y-4 text-sm">
+                            <div>
+                                <dt class="text-xs text-tertiary">{{ __('Ended by') }}</dt>
+                                <dd class="mt-1 flex items-center gap-2.5">
+                                    @if ($cancellation->initiator)
+                                        <x-user-avatar :user="$cancellation->initiator" size="h-8 w-8" />
+                                        <span class="font-medium text-neutral-900">{{ $cancellation->initiator->name }}</span>
+                                        <x-badge tone="neutral" class="px-2 py-0.5 text-xs font-medium">{{ $cancellation->initiator_id === $application->poster_id ? __('Client') : __('Freelancer') }}</x-badge>
+                                    @else
+                                        <span class="text-neutral-700">{{ $cancellation->type_label }}</span>
+                                    @endif
+                                </dd>
                             </div>
-                        </div>
-
-                        <!-- Status Information -->
-                        <div>
-                            <div class="flex items-center space-x-2">
-                                <h3 class="font-tertiary font-bold text-lg text-neutral-800">Engagement Cancelled</h3>
-                                @if ($engagement->cancellation && $engagement->cancellation->cancellation_type === 'dispute')
-                                    <x-badge tone="red" class="px-2.5 py-0.5 text-xs font-medium border border-red-200">
-                                        <span class="w-1.5 h-1.5 mr-1 bg-red-500 rounded-full animate-pulse"></span>
-                                        In Dispute
-                                    </x-badge>
-                                @else
-                                    @php
-                                        $cancellationTypes = [
-                                            'mutual' => [
-                                                'label' => 'Mutual Agreement',
-                                                'class' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                            ],
-                                            'client_initiated' => [
-                                                'label' => 'Client Initiated',
-                                                'class' => 'bg-purple-50 text-purple-700 border-purple-200',
-                                            ],
-                                            'freelancer_initiated' => [
-                                                'label' => 'Freelancer Initiated',
-                                                'class' => 'bg-green-50 text-green-700 border-green-200',
-                                            ],
-                                            'dispute' => [
-                                                'label' => 'In Dispute',
-                                                'class' => 'bg-red-50 text-red-700 border-red-200',
-                                            ],
-                                        ];
-                                        $typeInfo = $cancellationTypes[
-                                            $engagement->cancellation->cancellation_type
-                                        ] ?? [
-                                            'label' => ucfirst($engagement->cancellation->cancellation_type),
-                                            'class' => 'bg-neutral-50 text-neutral-700 border-neutral-200',
-                                        ];
-                                    @endphp
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $typeInfo['class'] }} border">
-                                        {{ $typeInfo['label'] }}
-                                    </span>
+                            <div>
+                                <dt class="text-xs text-tertiary">{{ __('Type') }}</dt>
+                                <dd class="mt-1 font-medium text-neutral-900">{{ $cancellation->type_label }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs text-tertiary">{{ __('Reason') }}</dt>
+                                <dd class="mt-1 font-medium text-neutral-900">{{ $cancellation->reason_label }}</dd>
+                                @if ($cancellation->reason_details)
+                                    <dd class="mt-1.5 whitespace-pre-line break-words rounded-xl bg-neutral-50 px-3 py-2 text-neutral-700">{{ $cancellation->reason_details }}</dd>
                                 @endif
                             </div>
-                            <p class="text-sm text-neutral-600 mt-1 flex items-center">
-                                <x-icon name="calendar-2" class="w-4 h-4 mr-1.5 text-neutral-500" />
-                                Cancelled on <span
-                                    class="font-medium text-neutral-700 ml-1"><x-date :date="$engagement->cancelled_at" format="M d, Y" /></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
+                        </dl>
+                    @else
+                        <p class="text-sm text-tertiary">{{ __('No cancellation details were recorded.') }}</p>
+                    @endif
+                </x-panel>
 
-                <!-- Progress Bar / Timeline (visible only for specific statuses) -->
-                @if ($engagement->cancellation->cancellation_type === 'dispute')
-                    <div class="bg-neutral-50 p-4 border-t border-neutral-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-medium text-neutral-500">Dispute Resolution Progress</span>
-                            <span class="text-xs font-medium text-neutral-700">Review in Progress</span>
-                        </div>
-                        <div class="relative w-full h-2 bg-neutral-200 rounded-full overflow-hidden">
-                            <div class="absolute top-0 left-0 h-full bg-accent rounded-full" style="width: 35%"></div>
-                        </div>
-                        <div class="flex justify-between mt-2 text-xs text-neutral-500">
-                            <span>Submitted</span>
-                            <span>Under Review</span>
-                            <span>Decision</span>
-                            <span>Closed</span>
-                        </div>
-                    </div>
-                @endif
+                <x-panel :title="__('Need help?')">
+                    <p class="text-sm text-neutral-700">{{ __('Read how cancellations, partial payments and disputes work.') }}</p>
+                    <a href="{{ route('engagements.policy') }}" class="mt-3 inline-block text-sm font-medium text-teal-700 hover:text-teal-800 hover:underline">{{ __('Cancellation & payment policy') }}</a>
+                </x-panel>
             </div>
-        </div>
-
-        <!-- Main Content -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left Column (2/3 width) -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Job Information Card -->
-                @include('jobBoard.engagements.partials.cancelled.job-details')
-
-                <!-- Project Deliverables Component -->
-                @include('jobBoard.engagements.partials.cancelled.deliverables-details')
-            </div>
-
-            <!-- Right Column (1/3 width) -->
-            <div class="space-y-6">
-                <!--  Cancellation Details -->
-                @include('jobBoard.engagements.partials.cancelled.cancellation-details')
-
-                <!-- Payment Proccessing -->
-                @include('jobBoard.engagements.partials.cancelled.payment-details')
-
-                <!-- Deliverables Timeline -->
-                @include('jobBoard.engagements.partials.cancelled.audit-details')
-            </div>
-
         </div>
     </div>
 
-    <!-- Dispute Warning Modal -->
-    <x-modal name="dispute-warning" max-width="4xl">
-        <x-modal.header title="Important: Before Disputing Payment" icon="exclamation-triangle-4" />
+    @if ($isPoster)
+        @include('jobBoard.engagements.partials.components.modals.approve')
+        @include('jobBoard.engagements.partials.components.modals.reject')
+    @endif
 
-        <div class="p-6">
-            <div class="mb-6 text-sm font-main text-gray-600 space-y-3">
-                <p>
-                    <strong>Please read before proceeding:</strong>
-                </p>
-                <!-- Alert box about job being frozen -->
-                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-4">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <x-icon name="exclamation-triangle-solid" class="h-5 w-5 text-amber-600" />
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-amber-800 font-medium">
-                                <strong>Job Will Be Frozen</strong>: During the dispute resolution process, this job
-                                will be completely
-                                frozen. No further actions, payments, or deliverables can be processed until the dispute
-                                is resolved.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <p>
-                    Disputing a payment is a serious action that will involve platform administrators in the resolution
-                    process. Please be aware of the following:
-                </p>
-                <ul class="list-disc pl-5 space-y-2">
-                    <li>Once submitted, you cannot withdraw a dispute without admin approval.</li>
-                    <li>You will need to provide a valid reason and detailed explanation for your dispute.</li>
-                    <li>Supporting evidence may strengthen your case (screenshots, communications, delivered work).</li>
-                    <li>Disputes are reviewed by administrators and can take 3-5 business days to resolve.</li>
-                    <li>Filing frivolous disputes may affect your account standing on the platform.</li>
-                    <li>While under review, the disputed amount will be held in escrow.</li>
-                </ul>
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mt-2">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <x-icon name="information-circle-solid" class="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div class="ml-3">
-                            <p class="text-sm text-blue-700">
-                                We strongly recommend attempting to resolve payment issues directly with the client
-                                before
-                                initiating a dispute.
-                            </p>
-                        </div>
-                    </div>
-                </div>
+    <!-- Dispute warning -->
+    <x-modal name="dispute-warning" max-width="2xl">
+        <x-modal.header :title="__('Before you dispute this payment')" icon="exclamation-triangle" />
+
+        <div class="space-y-4 p-6 text-sm text-neutral-700">
+            <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900">
+                <p class="font-medium">{{ __('The engagement will be frozen') }}</p>
+                <p class="mt-1">{{ __('While the dispute is open, no further actions, payments or deliverables can be processed.') }}</p>
             </div>
+            <ul class="list-disc space-y-1.5 pl-5">
+                <li>{{ __('An administrator reviews every dispute, usually within 3-5 business days.') }}</li>
+                <li>{{ __('You can only withdraw a dispute with the administrator\'s approval.') }}</li>
+                <li>{{ __('Give a clear reason and, if you have it, supporting evidence.') }}</li>
+                <li>{{ __('The disputed amount stays in escrow until the decision.') }}</li>
+                <li>{{ __('Frivolous disputes can affect your account standing.') }}</li>
+            </ul>
+            <p class="text-tertiary">{{ __('We recommend trying to resolve payment questions with the client directly first.') }}</p>
         </div>
 
-        <x-modal.footer class="items-center font-main">
-            <x-btn type="button" variant="secondary" x-on:click="dismiss()">Cancel</x-btn>
+        <x-modal.footer class="items-center">
+            <x-btn type="button" variant="secondary" x-on:click="dismiss()">{{ __('Cancel') }}</x-btn>
             @if ($payment)
-                <x-btn variant="danger" href="{{ route('engagements.dispute-form', $payment->id) }}">Continue</x-btn>
-            @else
-                <span class="text-sm italic text-gray-500">Dispute unavailable until payment is processed.</span>
+                <x-btn variant="danger" href="{{ route('engagements.dispute-form', $payment->id) }}">{{ __('Continue to dispute') }}</x-btn>
             @endif
         </x-modal.footer>
     </x-modal>
-
 </x-app-layout>

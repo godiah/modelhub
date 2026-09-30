@@ -39,7 +39,7 @@ class ReviewSubmittedNotification extends Notification implements ShouldQueue
                 'job' => $job,
                 'reviewer' => $reviewer,
                 'review' => $this->review,
-                'actionUrl' => route('engagements.archived-details', $engagement),
+                'actionUrl' => route('engagements.show', $engagement),
             ]);
     }
 
@@ -68,7 +68,7 @@ class ReviewSubmittedNotification extends Notification implements ShouldQueue
             'reviewer_name' => $reviewer->name,
             'rating' => $this->review->rating,
             'type' => 'review',
-            'url' => route('engagements.archived-details', $engagement),
+            'url' => route('engagements.show', $engagement),
         ];
     }
 

@@ -149,7 +149,7 @@ it('titles the browser tab after the current page', function () {
     $this->get(route('notifications.index'))->assertOk()->assertSee('<title>Notifications · ', false);
 });
 
-it('renders the engagements list with real engagements, deliverable actions and the chat box', function () {
+it('renders the engagements list with real engagements linking to their workspace and the row-level cues', function () {
     $client = User::factory()->create(['name' => 'Kevin Mwangi']);
 
     // As the client: a submitted deliverable to approve or send back.
@@ -176,8 +176,8 @@ it('renders the engagements list with real engagements, deliverable actions and 
     $response = $this->get(route('engagements.index'));
 
     assertInShell($response, ['Client-side job', 'Freelance-side job']);
-    $response->assertSee('Approve')->assertSee('Resubmit Deliverable');
-
-    // The migrated buttons keep their Alpine bindings instead of turning them into PHP expressions.
-    expect($response->getContent())->toContain(':disabled="sending || !newMessage.trim()"');
+    $response->assertSee(route('engagements.show', $asClient), false)
+        ->assertSee(route('engagements.show', $asFreelancer), false)
+        ->assertSee('Review work')
+        ->assertSee('Revise');
 });

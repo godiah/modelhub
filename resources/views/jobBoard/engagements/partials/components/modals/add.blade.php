@@ -3,7 +3,7 @@
     <form action="{{ route('engagements.deliverables.store', ['engagement' => $engagement->id]) }}" method="POST">
         @csrf
 
-        <x-modal.header variant="brand" title="Add New Deliverable" icon="clipboard-list" />
+        <x-modal.header title="Add New Deliverable" icon="clipboard-list" />
 
         <div class="p-6">
             <div class="mb-4">

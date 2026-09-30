@@ -42,7 +42,7 @@ class PaymentAcceptedNotification extends Notification implements ShouldQueue
                 'job' => $job,
                 'freelancer' => $freelancer,
                 'payment' => $this->payment,
-                'actionUrl' => route('engagements.archived-details', $this->engagement),
+                'actionUrl' => route('engagements.show', $this->engagement),
             ]);
     }
 
@@ -71,7 +71,7 @@ class PaymentAcceptedNotification extends Notification implements ShouldQueue
             'amount' => $this->payment->amount,
             'accepted_at' => $this->payment->accepted_at,
             'type' => 'payment_accepted',
-            'url' => route('engagements.archived-details', $this->engagement),
+            'url' => route('engagements.show', $this->engagement),
         ];
     }
 
