@@ -2,10 +2,10 @@
 
 @if ($applications->isEmpty() && $hasFilters)
     <x-empty-state icon="magnifying-glass" title="No Applications Found" description="We couldn't find any applications matching your current search criteria. Try adjusting your filters or search terms.">
-        <x-button href="#" id="clearFilters">
-            <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
+        <x-btn variant="secondary" href="#" id="clearFilters">
+            <x-icon name="arrow-path" class="w-4 h-4" />
             Clear All Filters
-        </x-button>
+        </x-btn>
     </x-empty-state>
 @else
     <div class="space-y-6">

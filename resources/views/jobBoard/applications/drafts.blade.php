@@ -47,10 +47,10 @@
 
                                 <!-- Action Buttons -->
                                 <div class="flex items-center space-x-3">
-                                    <x-button class="text-sm" href="{{ route('applications.continue', ['slug' => $draft->job->slug]) }}">
-                                        <x-icon name="pencil" class="h-4 w-4 mr-2" />
+                                    <x-btn class="text-sm" href="{{ route('applications.continue', ['slug' => $draft->job->slug]) }}">
+                                        <x-icon name="pencil" class="h-4 w-4" />
                                         Continue
-                                    </x-button>
+                                    </x-btn>
                                     <form action="{{ route('destroy.drafts', ['application' => $draft->id]) }}"
                                         method="POST" class="inline-block" id="delete-form-{{ $draft->id }}">
                                         @csrf

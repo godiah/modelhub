@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="toolbar">
-        <x-button class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
-            <x-icon name="archive-box-2" class="h-5 w-5 mr-2" />
+        <x-btn variant="secondary" class="text-sm shadow-sm" href="{{ route('my-jobs.archived.posted-jobs') }}">
+            <x-icon name="archive-box-2" class="h-5 w-5" />
             Archived Jobs
-        </x-button>
+        </x-btn>
     </x-slot>
 
     <div class="py-8">
@@ -13,10 +13,10 @@
                     <div class="p-12 flex flex-col items-center justify-center">
                         <x-icon name="document-text" class="h-24 w-24 text-neutral-300" stroke-width="1.5" />
                         <p class="mt-6 text-neutral-500 font-main text-lg">You haven't posted any jobs yet.</p>
-                        <x-button variant="secondary" class="mt-4" href="{{ route('jobs.create') }}">
-                            <x-icon name="plus-solid" class="h-5 w-5 mr-2" />
+                        <x-btn class="mt-4" href="{{ route('jobs.create') }}">
+                            <x-icon name="plus-solid" class="h-5 w-5" />
                             Post Your First Job
-                        </x-button>
+                        </x-btn>
                     </div>
                 </div>
             @else

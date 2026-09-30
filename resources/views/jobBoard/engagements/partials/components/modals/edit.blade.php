@@ -41,11 +41,11 @@
             </div>
 
             <x-modal.footer>
-                <x-button type="button" variant="neutral" x-on:click="dismiss()">Cancel</x-button>
-                <x-button type="submit">
-                    <x-icon name="check" class="mr-1.5 h-4 w-4" />
+                <x-btn type="button" variant="secondary" x-on:click="dismiss()">Cancel</x-btn>
+                <x-btn type="submit">
+                    <x-icon name="check" class="h-4 w-4" />
                     Save Changes
-                </x-button>
+                </x-btn>
             </x-modal.footer>
         </form>
     </x-modal>

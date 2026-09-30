@@ -1,10 +1,10 @@
 @use('App\Enums\EngagementStatus')
 @if ($engagements->isEmpty() && $hasFilters)
     <x-empty-state icon="chat-bubble-text" title="No Engagements Found" description="We couldn't find any present engagements matching your current search criteria. Try adjusting your filters or search terms.">
-        <x-button href="#" id="clearEngagementFilters">
-            <x-icon name="arrow-path" class="w-4 h-4 mr-2" />
+        <x-btn variant="secondary" href="#" id="clearEngagementFilters">
+            <x-icon name="arrow-path" class="w-4 h-4" />
             Clear All Filters
-        </x-button>
+        </x-btn>
     </x-empty-state>
 @else
     <div class="space-y-6">

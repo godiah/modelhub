@@ -1,10 +1,10 @@
 <x-app-layout title="3D Project Application" :crumb="$job->title">
     <x-slot name="toolbar">
         @guest
-            <x-button variant="secondary" class="text-sm shadow-sm" href="{{ route('jobs.browse') }}">
-                <x-icon name="magnifying-glass" class="h-5 w-5 mr-2" />
+            <x-btn variant="secondary" class="text-sm shadow-sm" href="{{ route('jobs.browse') }}">
+                <x-icon name="magnifying-glass" class="h-5 w-5" />
                 Browse More Jobs
-            </x-button>
+            </x-btn>
         @endguest
     </x-slot>
 

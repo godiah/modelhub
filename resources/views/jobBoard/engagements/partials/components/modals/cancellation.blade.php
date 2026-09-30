@@ -104,12 +104,12 @@
             </div>
 
             <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <x-button type="button" variant="neutral" x-on:click="dismiss()" class="justify-center">
+                <x-btn type="button" variant="secondary" x-on:click="dismiss()" class="justify-center">
                     Keep Engagement Active
-                </x-button>
-                <x-button type="submit" variant="danger" class="justify-center">
+                </x-btn>
+                <x-btn type="submit" variant="danger" class="justify-center">
                     Confirm Cancellation
-                </x-button>
+                </x-btn>
             </div>
         </form>
     </div>

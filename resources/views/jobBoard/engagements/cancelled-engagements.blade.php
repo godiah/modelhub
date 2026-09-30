@@ -183,9 +183,9 @@
         </div>
 
         <x-modal.footer class="items-center font-main">
-            <x-button type="button" variant="neutral" x-on:click="dismiss()">Cancel</x-button>
+            <x-btn type="button" variant="secondary" x-on:click="dismiss()">Cancel</x-btn>
             @if ($payment)
-                <x-button variant="danger" href="{{ route('engagements.dispute-form', $payment->id) }}">Continue</x-button>
+                <x-btn variant="danger" href="{{ route('engagements.dispute-form', $payment->id) }}">Continue</x-btn>
             @else
                 <span class="text-sm italic text-gray-500">Dispute unavailable until payment is processed.</span>
             @endif

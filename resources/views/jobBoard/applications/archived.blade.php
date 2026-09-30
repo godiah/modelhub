@@ -131,9 +131,9 @@
                             <h3 class="text-xl font-bold text-neutral-800 mb-2 font-tertiary">No Archived Applications
                             </h3>
                             <p class="text-tertiary mb-6 font-main">You haven't archived any job applications yet.</p>
-                            <x-button size="lg" class="justify-center border border-transparent text-base" href="{{ route('applications.my') }}">
+                            <x-btn size="lg" class="justify-center" href="{{ route('applications.my') }}">
                                 View Active Applications
-                            </x-button>
+                            </x-btn>
                         </div>
                     </x-card>
                 @endforelse

@@ -27,7 +27,7 @@
         'primary' => 'bg-primary/10 text-primary',
         'success' => 'bg-secondary/10 text-secondary',
     ][$tone];
-    $buttonVariant = ['danger' => 'danger', 'primary' => 'primary', 'success' => 'secondary'][$tone];
+    $buttonVariant = ['danger' => 'danger', 'primary' => 'primary', 'success' => 'primary'][$tone];
 @endphp
 
 <x-modal :name="$name" :bind="$bind" :max-width="$maxWidth" focusable>
@@ -54,16 +54,16 @@
         </div>
 
         <x-modal.footer>
-            <x-button type="button" variant="neutral" x-on:click="dismiss()">{{ $cancelLabel }}</x-button>
-            <x-button type="submit" :variant="$buttonVariant" x-bind:disabled="loading || ({{ $disabledWhen }})" class="justify-center disabled:cursor-not-allowed disabled:opacity-60">
+            <x-btn type="button" variant="secondary" x-on:click="dismiss()">{{ $cancelLabel }}</x-btn>
+            <x-btn type="submit" :variant="$buttonVariant" x-bind:disabled="loading || ({{ $disabledWhen }})" class="justify-center disabled:cursor-not-allowed disabled:opacity-60">
                 <span x-show="! loading" class="inline-flex items-center">
                     @if ($confirmIcon)
-                        <x-icon :name="$confirmIcon" class="mr-1.5 h-4 w-4" />
+                        <x-icon :name="$confirmIcon" class="h-4 w-4" />
                     @endif
                     {{ $confirmLabel }}
                 </span>
                 <span x-show="loading" x-cloak>Processing...</span>
-            </x-button>
+            </x-btn>
         </x-modal.footer>
     </form>
 </x-modal>
