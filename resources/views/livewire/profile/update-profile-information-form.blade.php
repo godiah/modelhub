@@ -61,90 +61,42 @@ new class extends Component {
     }
 }; ?>
 
-<section class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-    <x-section-header :title="__('Profile Information')"
-        :subtitle="__('Update your account\'s profile information and email address.')">
-        <x-slot:icon>
-            <x-icon name="user" class="w-5 h-5 text-white" />
-        </x-slot:icon>
-    </x-section-header>
+<div>
+    <form wire:submit="updateProfileInformation">
+        <x-panel :title="__('Personal information')" :description="__('Your name and the email address we use to reach you.')">
+            <div class="space-y-5">
+                <x-field name="name" :label="__('Full name')" wire:model="name" icon="user"
+                    placeholder="{{ __('Enter your full name') }}" required autocomplete="name" />
 
-    <!-- Form Section -->
-    <div class="p-6">
-        <form wire:submit="updateProfileInformation" class="space-y-6">
-            <!-- Name Field -->
-            <div class="space-y-2">
-                <x-form.label class="font-main" for="name">
-                    {{ __('Full Name') }}
-                </x-form.label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <x-icon name="user" class="h-5 w-5 text-neutral-400" />
-                    </div>
-                    <input wire:model="name" id="name" name="name" type="text"
-                        class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main text-neutral-900"
-                        placeholder="Enter your full name" required autofocus autocomplete="name" />
-                </div>
-                <x-form.error name="name" />
-            </div>
+                <div class="space-y-3">
+                    <x-field name="email" type="email" :label="__('Email address')" wire:model="email" icon="envelope"
+                        placeholder="{{ __('you@example.com') }}" required autocomplete="username" />
 
-            <!-- Email Field -->
-            <div class="space-y-2">
-                <x-form.label class="font-main" for="email">
-                    {{ __('Email Address') }}
-                </x-form.label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207">
-                            </path>
-                        </svg>
-                    </div>
-                    <input wire:model="email" id="email" name="email" type="email"
-                        class="block w-full pl-10 pr-3 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main text-neutral-900"
-                        placeholder="Enter your email address" required autocomplete="username" />
-                </div>
-                <x-form.error name="email" />
-
-                <!-- Email Verification Notice -->
-                @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !auth()->user()->hasVerifiedEmail())
-                    <div class="bg-accent/10 border border-accent/20 rounded-lg p-4 space-y-3">
-                        <div class="flex items-start space-x-3">
-                            <div class="flex-shrink-0">
-                                <x-icon name="exclamation-triangle-solid" class="w-5 h-5 text-accent mt-0.5" />
+                    @if (auth()->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !auth()->user()->hasVerifiedEmail())
+                        <div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                            <div class="flex items-start gap-3">
+                                <x-icon name="exclamation-triangle-solid" class="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-semibold text-amber-900">{{ __('Verify your email address') }}</p>
+                                    <p class="mt-0.5 text-sm text-amber-800">{{ __('Your email address is unverified.') }}</p>
+                                    <button type="button" wire:click.prevent="sendVerification"
+                                        class="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-amber-900 underline-offset-2 hover:underline">
+                                        <x-icon name="paper-airplane" class="h-4 w-4" />
+                                        {{ __('Resend verification email') }}
+                                    </button>
+                                </div>
                             </div>
-                            <div class="flex-1">
-                                <p class="text-sm text-accent font-medium font-main">
-                                    {{ __('Email Verification Required') }}
-                                </p>
-                                <p class="text-sm text-neutral-600 font-main mt-1">
-                                    {{ __('Your email address is unverified.') }}
-                                </p>
-                                <button wire:click.prevent="sendVerification"
-                                    class="inline-flex items-center mt-2 text-sm font-medium text-secondary hover:text-secondary/80 transition-colors duration-200 font-main focus:outline-none focus:underline">
-                                    <x-icon name="paper-airplane" class="w-4 h-4 mr-1" />
-                                    {{ __('Resend verification email') }}
-                                </button>
-                            </div>
+                            <x-auth-session-status class="mt-3" :status="session('status')" />
                         </div>
-
-                        <x-auth-session-status :status="session('status')" />
-                    </div>
-                @endif
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
-                <div class="flex items-center space-x-4">
-                    <x-button size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-sm" type="submit">
-                        <x-icon name="check" class="w-4 h-4 mr-2" />
-                        {{ __('Save Changes') }}
-                    </x-button>
-
-                    <x-success-toast event="profile-info-updated" :message="__('Profile updated successfully!')" />
+                    @endif
                 </div>
             </div>
-        </form>
-    </div>
-</section>
+
+            <x-slot:footer>
+                <x-success-toast event="profile-info-updated" :message="__('Profile updated successfully!')" />
+                <span class="hidden text-xs text-tertiary sm:block">{{ __('Changing your email requires verifying it again.') }}</span>
+                <x-btn wire:target="updateProfileInformation">{{ __('Save changes') }}</x-btn>
+            </x-slot:footer>
+        </x-panel>
+    </form>
+</div>

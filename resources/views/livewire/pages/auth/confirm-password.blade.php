@@ -39,9 +39,9 @@ new #[Layout('layouts.guest')] class extends Component
     :panelText="__('We ask for your password again before sensitive actions to keep your account and payments safe.')">
 
     <form wire:submit="confirmPassword" class="space-y-5">
-        <x-auth-field name="password" type="password" :label="__('Password')" wire:model="password"
+        <x-field size="lg" name="password" type="password" :label="__('Password')" wire:model="password"
             placeholder="{{ __('Enter your password') }}" required autofocus autocomplete="current-password" />
 
-        <x-auth-button wire:target="confirmPassword">{{ __('Confirm') }}</x-auth-button>
+        <x-btn block size="lg" wire:target="confirmPassword">{{ __('Confirm') }}</x-btn>
     </form>
 </x-auth-layout>

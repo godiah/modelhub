@@ -37,181 +37,74 @@ new class extends Component {
     }
 }; ?>
 
-<section class="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
-    <x-section-header :title="__('Update Password')"
-        :subtitle="__('Ensure your account is using a long, random password to stay secure.')">
-        <x-slot:icon>
-            <x-icon name="lock-closed" class="w-5 h-5 text-white" />
-        </x-slot:icon>
-    </x-section-header>
+<div>
+    <form wire:submit="updatePassword">
+        <x-panel :title="__('Change password')" :description="__('Use a long, unique password so your account stays secure.')">
+            <div class="space-y-5">
+                <x-field id="update_password_current_password" name="current_password" type="password"
+                    :label="__('Current password')" wire:model="current_password" icon="lock-closed"
+                    placeholder="{{ __('Enter your current password') }}" autocomplete="current-password" />
 
-    <!-- Form Section -->
-    <div class="p-6">
-        <form wire:submit="updatePassword" class="space-y-6">
-            <!-- Current Password Field -->
-            <div class="space-y-2">
-                <x-form.label class="font-main" for="update_password_current_password">
-                    {{ __('Current Password') }}
-                </x-form.label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z">
-                            </path>
-                        </svg>
-                    </div>
-                    <input wire:model="current_password" id="update_password_current_password" name="current_password"
-                        type="password"
-                        class="block w-full pl-10 pr-10 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main text-neutral-900"
-                        placeholder="Enter your current password" autocomplete="current-password" />
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <button type="button" class="text-neutral-400 hover:text-neutral-600 focus:outline-none"
-                            onclick="togglePasswordVisibility('update_password_current_password')">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <x-form.error name="current_password" />
-            </div>
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <div>
+                        <x-field id="update_password_password" name="password" type="password" :label="__('New password')"
+                            wire:model="password" icon="lock-closed" placeholder="{{ __('Enter a new password') }}"
+                            autocomplete="new-password" />
 
-            <!-- New Password Field -->
-            <div class="space-y-2">
-                <x-form.label class="font-main" for="update_password_password">
-                    {{ __('New Password') }}
-                </x-form.label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <x-icon name="lock-closed" class="h-5 w-5 text-neutral-400" />
-                    </div>
-                    <input wire:model="password" id="update_password_password" name="password" type="password"
-                        class="block w-full pl-10 pr-10 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main text-neutral-900"
-                        placeholder="Enter your new password" autocomplete="new-password" />
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <button type="button" class="text-neutral-400 hover:text-neutral-600 focus:outline-none"
-                            onclick="togglePasswordVisibility('update_password_password')">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <x-form.error name="password" />
+                        <!-- Strength meter -->
+                        <div x-data="{ strength: 0, width: '0%', color: 'bg-neutral-200' }" x-init="$watch('$wire.password', value => {
+                            if (!value) {
+                                strength = 0;
+                                width = '0%';
+                                color = 'bg-neutral-200';
+                                return;
+                            }
 
-                <!-- Password Strength Indicator -->
-                <div x-data="{ strength: 0, width: '0%', color: 'bg-neutral-200' }" x-init="$watch('$wire.password', value => {
-                    if (!value) {
-                        strength = 0;
-                        width = '0%';
-                        color = 'bg-neutral-200';
-                        return;
-                    }
-                
-                    // Calculate password strength
-                    let s = 0;
-                    if (value.length > 6) s++;
-                    if (value.length > 10) s++;
-                    if (value.match(/[A-Z]/)) s++;
-                    if (value.match(/[0-9]/)) s++;
-                    if (value.match(/[^A-Za-z0-9]/)) s++;
-                
-                    strength = s;
-                
-                    // Update UI
-                    width = (s * 20) + '%';
-                
-                    if (s <= 1) color = 'bg-red-500';
-                    else if (s <= 2) color = 'bg-orange-500';
-                    else if (s <= 3) color = 'bg-yellow-500';
-                    else if (s <= 4) color = 'bg-secondary';
-                    else color = 'bg-green-500';
-                })" class="mt-2">
-                    <div class="w-full h-1.5 bg-neutral-200 rounded-full overflow-hidden">
-                        <div class="h-full transition-all duration-300 ease-out" :class="color"
-                            :style="'width: ' + width"></div>
+                            // Calculate password strength
+                            let s = 0;
+                            if (value.length > 6) s++;
+                            if (value.length > 10) s++;
+                            if (value.match(/[A-Z]/)) s++;
+                            if (value.match(/[0-9]/)) s++;
+                            if (value.match(/[^A-Za-z0-9]/)) s++;
+
+                            strength = s;
+                            width = (s * 20) + '%';
+
+                            if (s <= 1) color = 'bg-red-500';
+                            else if (s <= 2) color = 'bg-orange-500';
+                            else if (s <= 3) color = 'bg-yellow-500';
+                            else if (s <= 4) color = 'bg-secondary';
+                            else color = 'bg-green-500';
+                        })" class="mt-2">
+                            <div class="h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                                <div class="h-full transition-all duration-300 ease-out" :class="color"
+                                    :style="'width: ' + width"></div>
+                            </div>
+                            <p class="mt-1 h-4 text-xs text-tertiary" x-show="strength > 0">
+                                <span x-show="strength <= 2">{{ __('Weak') }}</span>
+                                <span x-show="strength === 3">{{ __('Medium') }}</span>
+                                <span x-show="strength === 4">{{ __('Strong') }}</span>
+                                <span x-show="strength === 5">{{ __('Very strong') }}</span>
+                            </p>
+                        </div>
                     </div>
-                    <div class="flex justify-between mt-1">
-                        <p class="text-xs text-neutral-500 font-main" x-show="strength > 0">
-                            <span x-show="strength <= 2">Weak</span>
-                            <span x-show="strength === 3">Medium</span>
-                            <span x-show="strength === 4">Strong</span>
-                            <span x-show="strength === 5">Very Strong</span>
-                        </p>
-                        <p class="text-xs text-neutral-500 font-main">
-                            <template x-if="strength > 0">
-                                <span x-text="width"></span>
-                            </template>
-                        </p>
-                    </div>
+
+                    <x-field id="update_password_password_confirmation" name="password_confirmation" type="password"
+                        :label="__('Confirm new password')" wire:model="password_confirmation" icon="shield-check"
+                        placeholder="{{ __('Repeat password') }}" autocomplete="new-password" />
                 </div>
 
-                <p class="text-xs text-neutral-500 font-main mt-1">
-                    {{ __('Password should be at least 8 characters and include uppercase, lowercase, numbers, and special characters.') }}
+                <p class="text-xs text-tertiary">
+                    {{ __('At least 8 characters, including uppercase and lowercase letters, numbers and a symbol.') }}
                 </p>
             </div>
 
-            <!-- Confirm Password Field -->
-            <div class="space-y-2">
-                <x-form.label class="font-main" for="update_password_password_confirmation">
-                    {{ __('Confirm Password') }}
-                </x-form.label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <x-icon name="shield-check" class="h-5 w-5 text-neutral-400" />
-                    </div>
-                    <input wire:model="password_confirmation" id="update_password_password_confirmation"
-                        name="password_confirmation" type="password"
-                        class="block w-full pl-10 pr-10 py-3 border border-neutral-300 rounded-lg shadow-sm placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors duration-200 font-main text-neutral-900"
-                        placeholder="Confirm your new password" autocomplete="new-password" />
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <button type="button" class="text-neutral-400 hover:text-neutral-600 focus:outline-none"
-                            onclick="togglePasswordVisibility('update_password_password_confirmation')">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                                </path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <x-form.error name="password_confirmation" />
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
-                <div class="flex items-center space-x-4">
-                    <x-button size="lg" class="shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 text-sm" type="submit">
-                        <x-icon name="check" class="w-4 h-4 mr-2" />
-                        {{ __('Update Password') }}
-                    </x-button>
-
-                    <x-success-toast event="password-updated" :message="__('Password updated successfully!')" />
-                </div>
-            </div>
-        </form>
-    </div>
-</section>
-
-<!-- Password Toggle Script -->
-<script>
-    function togglePasswordVisibility(inputId) {
-        const input = document.getElementById(inputId);
-        if (input.type === 'password') {
-            input.type = 'text';
-        } else {
-            input.type = 'password';
-        }
-    }
-</script>
+            <x-slot:footer>
+                <x-success-toast event="password-updated" :message="__('Password updated successfully!')" />
+                <span class="hidden text-xs text-tertiary sm:block">{{ __('You stay signed in on this device.') }}</span>
+                <x-btn wire:target="updatePassword">{{ __('Update password') }}</x-btn>
+            </x-slot:footer>
+        </x-panel>
+    </form>
+</div>

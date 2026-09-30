@@ -44,20 +44,20 @@ new #[Layout('layouts.guest')] class extends Component {
 
     <!-- Register Form -->
     <form wire:submit="register" class="space-y-5">
-        <x-auth-field name="name" :label="__('Full name')" wire:model="name" placeholder="{{ __('Jane Doe') }}"
+        <x-field size="lg" name="name" :label="__('Full name')" wire:model="name" placeholder="{{ __('Jane Doe') }}"
             required autofocus autocomplete="name" />
 
-        <x-auth-field name="email" type="email" :label="__('Email')" wire:model="email"
+        <x-field size="lg" name="email" type="email" :label="__('Email')" wire:model="email"
             placeholder="you@example.com" required autocomplete="username" />
 
-        <x-auth-field name="password" type="password" :label="__('Password')" wire:model="password"
+        <x-field size="lg" name="password" type="password" :label="__('Password')" wire:model="password"
             placeholder="{{ __('Create a password') }}" required autocomplete="new-password" />
 
-        <x-auth-field name="password_confirmation" type="password" :label="__('Confirm password')"
+        <x-field size="lg" name="password_confirmation" type="password" :label="__('Confirm password')"
             wire:model="password_confirmation" placeholder="{{ __('Repeat your password') }}" required
             autocomplete="new-password" />
 
-        <x-auth-button wire:target="register">{{ __('Create account') }}</x-auth-button>
+        <x-btn block size="lg" wire:target="register">{{ __('Create account') }}</x-btn>
     </form>
 
     <x-slot:footer>

@@ -45,13 +45,13 @@ new #[Layout('layouts.guest')] class extends Component
 
     <!-- Action Buttons -->
     <div class="space-y-3">
-        <x-auth-button type="button" wire:click="sendVerification" wire:target="sendVerification">
+        <x-btn block size="lg" type="button" wire:click="sendVerification" wire:target="sendVerification">
             {{ __('Resend verification email') }}
-        </x-auth-button>
+        </x-btn>
 
-        <x-auth-button type="button" variant="secondary" wire:click="logout" wire:target="logout">
+        <x-btn block size="lg" type="button" variant="secondary" wire:click="logout" wire:target="logout">
             {{ __('Log out') }}
-        </x-auth-button>
+        </x-btn>
     </div>
 
     <x-slot:footer>
