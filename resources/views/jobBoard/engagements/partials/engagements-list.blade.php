@@ -595,7 +595,7 @@
 
                                     <!-- Add Deliverable Button -->
                                     @if (!$engagement->isCompleted() && !$engagement->isCancelled())
-                                        <button id="openDeliverableModal-{{ $engagement->id }}"
+                                        <button type="button" x-data x-on:click="$dispatch('open-modal', 'add-deliverable-{{ $engagement->id }}')"
                                             class="font-tertiary inline-flex items-center px-4 py-2 rounded-lg text-white bg-secondary hover:bg-secondary/90 transition-colors shadow-sm">
                                             <x-icon name="plus" class="h-5 w-5 mr-2" />
                                             Add Deliverable
@@ -892,101 +892,74 @@
                 <!-- Card Footer -->
                 @include('jobBoard.engagements.partials.components.card-footer')
 
-                <!-- Archive Engagement Modal -->
-                @include('jobBoard.engagements.partials.components.modals.archive')
-
-                <!-- Review Modal -->
-                @include('jobBoard.engagements.partials.components.modals.review')
 
                 <!-- Cancellation Modal -->
                 @include('jobBoard.engagements.partials.components.modals.cancellation')
             </x-card>
         @endforeach
+
+        {{-- Single-instance modals shared by every engagement card --}}
+        @include('jobBoard.engagements.partials.components.modals.archive')
+        @include('jobBoard.engagements.partials.components.modals.review')
     </div>
 
     <!-- Message Modal -->
-    <div x-data="messageModal()" x-on:open-message-modal.window="openModal($event.detail.engagementId)"
-        @keydown.escape.window="closeModal()" x-show="open" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
-        aria-labelledby="message-modal" role="dialog" aria-modal="true">
+    <div x-data="messageModal()" x-on:open-message-modal.window="openModal($event.detail.engagementId)">
+        <x-modal bind="open" on-close="closeModal()">
+            <!-- Header -->
+            <div class="bg-primary px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <div
+                        class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold">
+                        <x-icon name="chat-bubble-left-right" class="size-6" />
 
-        <!-- Overlay -->
-        <div x-show="open" @click="closeModal()"
-            class="fixed inset-0 bg-neutral-900/50 backdrop-blur-sm transition-opacity"></div>
-
-        <!-- Modal Content -->
-        <div class="fixed inset-0 flex items-center justify-center p-4">
-            <div @click.outside="closeModal()"
-                class="bg-white rounded-xl overflow-hidden shadow-2xl w-full max-w-2xl transition-all">
-
-                <!-- Header -->
-                <div class="bg-primary px-6 py-4 flex justify-between items-center">
-                    <div class="flex items-center">
-                        <div
-                            class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-white font-bold">
-                            <x-icon name="chat-bubble-left-right" class="size-6" />
-
-                        </div>
-                        <div class="ml-3">
-                            <h3 class="text-lg font-tertiary text-white"
-                                x-text="engagement.job_title || 'Loading...'"></h3>
-                        </div>
                     </div>
-                    <button @click="closeModal()" class="text-white hover:text-white/80 focus:outline-none">
-                        <x-icon name="x-mark" class="h-6 w-6" />
-                    </button>
-                </div>
-
-                <!-- Message List -->
-                <div class="bg-neutral-50 px-4 py-4 h-80 overflow-y-auto space-y-3" id="messages-container">
-                    <!-- Loading State -->
-                    <div x-show="loading"
-                        class="flex flex-col items-center justify-center h-full text-neutral-400 text-sm">
-                        <svg class="animate-spin h-8 w-8 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                                stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                            </path>
-                        </svg>
-                        Loading messages...
-                    </div>
-
-                    <!-- Messages -->
-                    <div x-show="!loading" id="messages-list">
-                        <!-- Rendered dynamically by renderMessages() -->
+                    <div class="ml-3">
+                        <h3 class="text-lg font-tertiary text-white"
+                            x-text="engagement.job_title || 'Loading...'"></h3>
                     </div>
                 </div>
+                <button @click="closeModal()" class="text-white hover:text-white/80 focus:outline-none">
+                    <x-icon name="x-mark" class="h-6 w-6" />
+                </button>
+            </div>
 
-                <!-- Footer / Input -->
-                <div class="bg-white px-6 py-4 border-t border-neutral-200">
-                    <div x-show="canMessage">
-                        <form @submit.prevent="sendMessage()" id="message-form">
-                            <div class="flex items-center">
-                                <textarea x-model="newMessage" rows="2" required @keydown.enter.prevent="sendMessage()"
-                                    class="flex-grow rounded-md border-neutral-300 shadow-sm text-sm font-main resize-none focus:border-secondary focus:ring-secondary"
-                                    placeholder="Type your message..."></textarea>
-                                <button type="submit" :disabled="sending || !newMessage.trim()"
-                                    class="ml-3 inline-flex items-center justify-center rounded-md px-4 py-2 bg-secondary text-white hover:bg-secondary/90 disabled:opacity-50">
-                                    <x-icon name="paper-airplane" x-show="!sending" class="h-5 w-5" />
-                                    <svg x-show="sending" class="animate-spin h-5 w-5"
-                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10"
-                                            stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                        </path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                    <div x-show="!canMessage" class="text-sm text-red-600 text-center py-2 font-main">
-                        Messaging is only available for active or cancelled engagements.
-                    </div>
+            <!-- Message List -->
+            <div class="bg-neutral-50 px-4 py-4 h-80 overflow-y-auto space-y-3" id="messages-container">
+                <!-- Loading State -->
+                <div x-show="loading"
+                    class="flex flex-col items-center justify-center h-full text-neutral-400 text-sm">
+                    <x-spinner class="h-8 w-8 mb-2" />
+                    Loading messages...
+                </div>
+
+                <!-- Messages -->
+                <div x-show="!loading" id="messages-list">
+                    <!-- Rendered dynamically by renderMessages() -->
                 </div>
             </div>
-        </div>
+
+            <!-- Footer / Input -->
+            <div class="bg-white px-6 py-4 border-t border-neutral-200">
+                <div x-show="canMessage">
+                    <form @submit.prevent="sendMessage()" id="message-form">
+                        <div class="flex items-center">
+                            <textarea x-model="newMessage" rows="2" required @keydown.enter.prevent="sendMessage()"
+                                class="flex-grow rounded-md border-neutral-300 shadow-sm text-sm font-main resize-none focus:border-secondary focus:ring-secondary"
+                                placeholder="Type your message..."></textarea>
+                            <button type="submit" :disabled="sending || !newMessage.trim()"
+                                class="ml-3 inline-flex items-center justify-center rounded-md px-4 py-2 bg-secondary text-white hover:bg-secondary/90 disabled:opacity-50">
+                                <x-icon name="paper-airplane" x-show="!sending" class="h-5 w-5" />
+                                <x-spinner class="h-5 w-5" x-show="sending" />
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div x-show="!canMessage" class="text-sm text-red-600 text-center py-2 font-main">
+                    Messaging is only available for active or cancelled engagements.
+                </div>
+            </div>
+        </x-modal>
     </div>
 
     <script>

@@ -39,14 +39,7 @@
                         <div class="flex items-center space-x-2">
                             <!-- Loading Spinner -->
                             <div id="filter-loading" class="hidden">
-                                <svg class="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg"
-                                    fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10"
-                                        stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-                                    </path>
-                                </svg>
+                                <x-spinner class="h-4 w-4 text-primary" />
                             </div>
 
                             <select id="status-filter"
@@ -66,39 +59,6 @@
                     ])
                 </div>
             </x-card>
-        </div>
-    </div>
-
-    <!-- Restore Confirmation Modal -->
-    <div id="restore-modal" x-data="{ open: false, engagementId: null }" x-cloak>
-        <!-- Modal backdrop -->
-        <div x-show="open" class="fixed inset-0 z-40 bg-black bg-opacity-25" @click="open = false"></div>
-
-        <!-- Modal content -->
-        <div x-show="open" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
-                <div class="p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Restore Engagement</h3>
-                    <p class="text-gray-600 mb-4">
-                        Are you sure you want to restore this engagement? It will be moved back to your active
-                        engagements list.
-                    </p>
-                    <div class="flex justify-end space-x-3 mt-6">
-                        <button @click="open = false"
-                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                            Cancel
-                        </button>
-                        <form id="restore-form" action="{{ route('engagements.restore') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="engagement_id" x-bind:value="engagementId">
-                            <button type="submit"
-                                class="px-4 py-2 bg-green-600 border border-transparent rounded-md text-white hover:bg-green-700">
-                                Restore
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 

@@ -68,9 +68,9 @@
                     </div>
                     <div>
                         <p class="text-xs text-red-500 mb-1">Engagement Actions</p>
-                        <button type="button"
+                        <button type="button" x-data
                             class="text-sm font-medium text-red-600 flex items-center hover:text-red-800 transition-colors"
-                            onclick="document.getElementById('cancelEngagementModal-{{ $engagement->id }}').classList.remove('hidden')">
+                            x-on:click="$dispatch('open-modal', 'cancel-engagement-{{ $engagement->id }}')">
                             <span>Cancel Engagement</span>
                             <x-icon name="chevron-right" class="h-4 w-4 ml-1" />
                         </button>
@@ -120,10 +120,7 @@
             @if ($engagement->isCompleted() || $engagement->isCancelled() || $engagement->isSettled())
                 @if (!$engagement->hasBeenReviewedByUser())
                     <button
-                        @click="$dispatch('open-review-modal', { 
-                          id: {{ $engagement->id }}, 
-                          status: '{{ $engagement->status->value }}'
-                        })"
+                        @click="$dispatch('open-modal', { name: 'review-engagement', id: {{ $engagement->id }}, status: '{{ $engagement->status->value }}' })"
                         class="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary transition-all duration-300">
                         <x-icon name="chat-bubble-text" class="h-4 w-4 mr-2" stroke-width="1.5" />
                         Leave a Review
@@ -131,7 +128,7 @@
                 @else
                     <div class="w-full flex justify-between items-center">
                         <!-- Archive Button -->
-                        <button @click="$dispatch('open-archive-modal', { id: {{ $engagement->id }} })"
+                        <button @click="$dispatch('open-modal', { name: 'archive-engagement', id: {{ $engagement->id }} })"
                             class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-200">
                             <x-icon name="archive-box-3" class="h-5 w-5 mr-1" stroke-width="1.5" />
                             Archive

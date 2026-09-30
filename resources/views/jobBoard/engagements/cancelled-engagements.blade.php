@@ -15,7 +15,7 @@
         </div>
     </x-slot>
 
-    <div class="container mx-auto max-w-7xl px-4 py-8 pb-24 font-main text-neutral-800" x-data="cancelledEngagement()">
+    <div class="container mx-auto max-w-7xl px-4 py-8 pb-24 font-main text-neutral-800">
         <!--  Status Banner -->
         <div class="mb-8 relative overflow-hidden">
             <!-- Background Pattern -->
@@ -145,18 +145,10 @@
     </div>
 
     <!-- Dispute Warning Modal -->
-    <div id="disputeWarningModal"
-        class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 max-w-5xl w-full">
-            <div class="mb-5 flex flex-row items-center justify-center text-center bg-red-100 rounded-full">
-                <div class="p-3">
-                    <x-icon name="exclamation-triangle-4" class="w-7 h-7 text-red-600" />
-                </div>
-                <h3 class="text-xl font-semibold text-gray-900 font-main">
-                    Important: Before Disputing Payment
-                </h3>
-            </div>
+    <x-modal name="dispute-warning" max-width="4xl">
+        <x-modal.header title="Important: Before Disputing Payment" icon="exclamation-triangle-4" />
 
+        <div class="p-6">
             <div class="mb-6 text-sm font-main text-gray-600 space-y-3">
                 <p>
                     <strong>Please read before proceeding:</strong>
@@ -204,37 +196,16 @@
                     </div>
                 </div>
             </div>
-
-            <div class="flex justify-between font-main">
-                <button type="button"
-                    class="py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg text-sm"
-                    onclick="closeDisputeModal()">
-                    Cancel
-                </button>
-                @if ($payment)
-                    <a href="{{ route('engagements.dispute-form', $payment->id) }}"
-                        class="py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm">
-                        Continue
-                    </a>
-                @else
-                    <span class="text-sm text-gray-500 italic">
-                        Dispute unavailable until payment is processed.
-                    </span>
-                @endif
-
-            </div>
         </div>
-    </div>
 
-    <!-- JavaScript for modal functionality -->
-    <script>
-        function openDisputeModal() {
-            document.getElementById('disputeWarningModal').classList.remove('hidden');
-        }
-
-        function closeDisputeModal() {
-            document.getElementById('disputeWarningModal').classList.add('hidden');
-        }
-    </script>
+        <x-modal.footer class="items-center font-main">
+            <x-button type="button" variant="neutral" x-on:click="dismiss()">Cancel</x-button>
+            @if ($payment)
+                <x-button variant="danger" href="{{ route('engagements.dispute-form', $payment->id) }}">Continue</x-button>
+            @else
+                <span class="text-sm italic text-gray-500">Dispute unavailable until payment is processed.</span>
+            @endif
+        </x-modal.footer>
+    </x-modal>
 
 </x-app-layout>

@@ -285,7 +285,7 @@
                                     Accept Payment
                                 </button>
                             </form>
-                            <button type="button" onclick="openDisputeModal()"
+                            <button type="button" x-data x-on:click="$dispatch('open-modal', 'dispute-warning')"
                                 class="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg text-sm transition-colors duration-200 flex items-center justify-center flex-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" width="24"
                                     height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"

@@ -26,16 +26,11 @@
                             @endif
 
                             @if ($notifications->count() > 0)
-                                <form action="{{ route('notifications.delete-all') }}" method="POST" class="inline"
-                                    onsubmit="return confirm('Are you sure you want to delete all notifications? This action cannot be undone.')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                        class="inline-flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
-                                        <x-icon name="trash" class="h-4 w-4 mr-2" />
-                                        Clear all notifications
-                                    </button>
-                                </form>
+                                <button type="button" x-data x-on:click="$dispatch('open-modal', 'clear-notifications')"
+                                    class="inline-flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg text-sm font-medium hover:bg-red-100 transition">
+                                    <x-icon name="trash" class="h-4 w-4 mr-2" />
+                                    Clear all notifications
+                                </button>
                             @endif
                         </div>
                     </div>
@@ -115,33 +110,6 @@
                                                         } else {
                                                             this.expanded = !this.expanded;
                                                         }
-                                                    },
-                                                    deleteNotification() {
-                                                        if (confirm('Are you sure you want to delete this notification?')) {
-                                                            fetch('{{ route('notifications.delete', $notification->id) }}', {
-                                                                    method: 'DELETE',
-                                                                    headers: {
-                                                                        'X-Requested-With': 'XMLHttpRequest',
-                                                                        'Content-Type': 'application/json',
-                                                                        'Accept': 'application/json',
-                                                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').getAttribute('content')
-                                                                    }
-                                                                })
-                                                                .then(response => response.json())
-                                                                .then(data => {
-                                                                    if (data.success) {
-                                                                        const element = document.getElementById('notification-{{ $notification->id }}');
-                                                                        element.remove();
-                                                
-                                                                        // Check if there are any notifications left
-                                                                        if (document.getElementById('notifications-container').children.length === 0) {
-                                                                            location.reload();
-                                                                        }
-                                                                    }
-                                                                }).catch(error => {
-                                                                    console.error('Error:', error);
-                                                                });
-                                                        }
                                                     }
                                                 }"
                                                     class="p-5 border {{ $notification->read_at ? 'border-neutral-200 bg-white' : 'border-l-4 border-l-secondary border-r border-t border-b border-neutral-200 bg-neutral-50' }} rounded-xl shadow-sm transition-all duration-200 hover:shadow-md">
@@ -171,7 +139,7 @@
                                                                 {{ $notification->created_at->diffForHumans() }}
                                                             </span>
 
-                                                            <button @click="deleteNotification"
+                                                            <button type="button" @click="$dispatch('open-modal', { name: 'delete-notification', id: '{{ $notification->id }}' })"
                                                                 class="p-1.5 rounded-full text-neutral-400 hover:text-red-500 hover:bg-neutral-100 transition-colors duration-150"
                                                                 type="button" title="Delete notification">
                                                                 <x-icon name="trash" class="h-4 w-4" />
@@ -237,6 +205,15 @@
             </div>
         </div>
     </div>
+
+    <x-confirm-dialog name="clear-notifications" title="Clear all notifications" icon="trash" confirm-icon="trash"
+        confirm-label="Clear all" method="DELETE" :action="route('notifications.delete-all')"
+        message="Are you sure you want to delete all notifications? This action cannot be undone." />
+
+    <x-confirm-dialog name="delete-notification" title="Delete notification" icon="trash" confirm-icon="trash"
+        confirm-label="Delete" method="DELETE"
+        action-bind="'{{ route('notifications.delete', '__ID__') }}'.replace('__ID__', payload.id)"
+        message="Are you sure you want to delete this notification?" />
 
     @include('partials.footer-secondary')
 </x-app-layout>

@@ -612,239 +612,147 @@
                                     </form>
 
                                     <!-- Hire Confirmation Modal -->
-                                    <div x-show="showHireModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto"
-                                        x-transition:enter="transition ease-out duration-300"
-                                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                        x-transition:leave="transition ease-in duration-200"
-                                        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-
-                                        <!-- Modal backdrop -->
-                                        <div
-                                            class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
-                                        </div>
-
-                                        <!-- Modal container -->
-                                        <div class="flex min-h-screen items-center justify-center p-4">
-                                            <div class="relative w-full max-w-2xl transform overflow-hidden rounded-xl bg-white shadow-xl transition-all"
-                                                x-transition:enter="transition ease-out duration-300"
-                                                x-transition:enter-start="opacity-0 translate-y-4"
-                                                x-transition:enter-end="opacity-100 translate-y-0"
-                                                x-transition:leave="transition ease-in duration-200"
-                                                x-transition:leave-start="opacity-100 translate-y-0"
-                                                x-transition:leave-end="opacity-0 translate-y-4">
-
-                                                <!-- Close button -->
-                                                <button
-                                                    @click="showHireModal = false; selectedStatus = '{{ $application->status }}'"
-                                                    class="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary">
-                                                    <x-icon name="x-mark-solid" class="h-5 w-5" />
-                                                </button>
-
-                                                <!-- Modal content -->
-                                                <div class="p-6">
-                                                    <div class="flex items-center mb-4">
-                                                        <div
-                                                            class="mr-3 flex-shrink-0 rounded-full bg-primary bg-opacity-10 p-2">
-                                                            <x-icon name="user" class="h-6 w-6 text-primary" />
-                                                        </div>
-                                                        <h3 class="text-xl font-bold text-neutral-800 font-tertiary">
-                                                            Confirm Hiring</h3>
-                                                    </div>
-
-                                                    <p class="mb-8 text-neutral-600 font-main">
-                                                        You're about to hire this applicant. This will notify them and
-                                                        create an engagement between you and the freelancer.
-                                                    </p>
-
-                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                        <button
-                                                            @click="showHireModal = false; showDeliverablesForm = true"
-                                                            class="flex items-center justify-center py-3 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 shadow-sm">
-                                                            <x-icon name="clipboard-list" class="h-5 w-5 mr-2" />
-                                                            Setup Deliverables
-                                                        </button>
-                                                        <button
-                                                            @click="showHireModal = false; document.getElementById('hireForm').submit();"
-                                                            class="flex items-center justify-center py-3 px-4 bg-secondary text-white rounded-lg font-medium hover:bg-teal-700 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 shadow-sm">
-                                                            <x-icon name="check" class="h-5 w-5 mr-2" />
-                                                            Hire Without Deliverables
-                                                        </button>
-                                                    </div>
-                                                    <div class="mt-4">
-                                                        <button
-                                                            @click="showHireModal = false; selectedStatus = '{{ $application->status }}'"
-                                                            class="w-full py-2 px-4 bg-neutral-100 text-neutral-700 rounded-lg font-medium hover:bg-neutral-200 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:ring-offset-2">
-                                                            Cancel
-                                                        </button>
-                                                    </div>
+                                    <x-modal bind="showHireModal" max-width="2xl" on-close="selectedStatus = '{{ $application->status }}'">
+                                        <div class="p-6">
+                                            <div class="mb-4 flex items-center">
+                                                <div class="mr-3 flex-shrink-0 rounded-full bg-primary bg-opacity-10 p-2">
+                                                    <x-icon name="user" class="h-6 w-6 text-primary" />
                                                 </div>
+                                                <h3 class="text-xl font-bold text-neutral-800 font-tertiary">Confirm Hiring</h3>
+                                            </div>
+
+                                            <p class="mb-8 text-neutral-600 font-main">
+                                                You're about to hire this applicant. This will notify them and create an engagement
+                                                between you and the freelancer.
+                                            </p>
+
+                                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                                <x-button size="lg" class="justify-center"
+                                                    x-on:click="showHireModal = false; showDeliverablesForm = true">
+                                                    <x-icon name="clipboard-list" class="mr-2 h-5 w-5" />
+                                                    Setup Deliverables
+                                                </x-button>
+                                                <x-button variant="secondary" size="lg" class="justify-center"
+                                                    x-on:click="showHireModal = false; document.getElementById('hireForm').submit();">
+                                                    <x-icon name="check" class="mr-2 h-5 w-5" />
+                                                    Hire Without Deliverables
+                                                </x-button>
+                                            </div>
+
+                                            <div class="mt-4">
+                                                <x-button type="button" variant="neutral" class="w-full justify-center" x-on:click="dismiss()">
+                                                    Cancel
+                                                </x-button>
                                             </div>
                                         </div>
-                                    </div>
+                                    </x-modal>
 
                                     <!-- Deliverables Form Modal -->
-                                    <div x-show="showDeliverablesForm" x-cloak
-                                        class="fixed inset-0 z-50 overflow-y-auto"
-                                        x-transition:enter="transition ease-out duration-300"
-                                        x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-                                        x-transition:leave="transition ease-in duration-200"
-                                        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
+                                    <x-modal bind="showDeliverablesForm" max-width="3xl" on-close="selectedStatus = '{{ $application->status }}'">
+                                        <x-modal.header title="Set Project Deliverables" icon="clipboard-list" />
 
-                                        <!-- Modal backdrop -->
-                                        <div
-                                            class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
-                                        </div>
+                                        <div class="max-h-[calc(100vh-200px)] overflow-y-auto px-6 py-4">
+                                            <p class="mb-6 text-neutral-600 font-main">
+                                                Define clear deliverables for this project. These will help
+                                                track
+                                                progress and set expectations with the freelancer.
+                                            </p>
 
-                                        <!-- Modal container -->
-                                        <div class="flex min-h-screen items-center justify-center p-4">
-                                            <div class="relative w-full max-w-3xl transform overflow-hidden rounded-xl bg-white shadow-xl transition-all"
-                                                x-transition:enter="transition ease-out duration-300"
-                                                x-transition:enter-start="opacity-0 translate-y-4"
-                                                x-transition:enter-end="opacity-100 translate-y-0"
-                                                x-transition:leave="transition ease-in duration-200"
-                                                x-transition:leave-start="opacity-100 translate-y-0"
-                                                x-transition:leave-end="opacity-0 translate-y-4">
-
-                                                <!-- Modal header -->
-                                                <div class="border-b border-neutral-200 bg-neutral-50 px-6 py-4">
-                                                    <div class="flex items-center justify-between">
-                                                        <div class="flex items-center">
-                                                            <div
-                                                                class="mr-3 flex-shrink-0 rounded-full bg-secondary bg-opacity-10 p-2">
-                                                                <x-icon name="clipboard-list" class="h-6 w-6 text-secondary" />
-                                                            </div>
-                                                            <h3
-                                                                class="text-xl font-bold text-neutral-800 font-tertiary">
-                                                                Set Project Deliverables</h3>
-                                                        </div>
-
-                                                        <!-- Close button -->
-                                                        <button
-                                                            @click="showDeliverablesForm = false; selectedStatus = '{{ $application->status }}'"
-                                                            class="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-600 hover:bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-primary">
-                                                            <x-icon name="x-mark-solid" class="h-5 w-5" />
-                                                        </button>
+                                            <!-- Empty state when no deliverables are added -->
+                                            <div x-show="deliverables.length === 0"
+                                                class="bg-neutral-50 rounded-lg border border-dashed border-neutral-300 p-8 mb-6 text-center">
+                                                <div class="mb-3 flex justify-center">
+                                                    <div class="rounded-full bg-neutral-100 p-3">
+                                                        <x-icon name="clipboard-list" class="h-8 w-8 text-neutral-400" />
                                                     </div>
                                                 </div>
-
-                                                <!-- Modal content -->
-                                                <div class="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-                                                    <p class="mb-6 text-neutral-600 font-main">
-                                                        Define clear deliverables for this project. These will help
-                                                        track
-                                                        progress and set expectations with the freelancer.
-                                                    </p>
-
-                                                    <!-- Empty state when no deliverables are added -->
-                                                    <div x-show="deliverables.length === 0"
-                                                        class="bg-neutral-50 rounded-lg border border-dashed border-neutral-300 p-8 mb-6 text-center">
-                                                        <div class="mb-3 flex justify-center">
-                                                            <div class="rounded-full bg-neutral-100 p-3">
-                                                                <x-icon name="clipboard-list" class="h-8 w-8 text-neutral-400" />
-                                                            </div>
-                                                        </div>
-                                                        <h4 class="text-lg font-medium text-neutral-700 mb-2">No
-                                                            deliverables added yet</h4>
-                                                        <p class="text-neutral-500 mb-4">Add deliverables to create
-                                                            clear
-                                                            milestones for this project</p>
-                                                        <button
-                                                            @click.prevent="deliverables.push({title: '', description: '', due_date: ''})"
-                                                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                                                            <x-icon name="plus-2" class="h-5 w-5 mr-2" />
-                                                            Add First Deliverable
-                                                        </button>
-                                                    </div>
-
-                                                    <!-- Deliverables list -->
-                                                    <div id="deliverables-container" class="space-y-4 mb-6"
-                                                        x-show="deliverables.length > 0">
-                                                        <template x-for="(deliverable, index) in deliverables"
-                                                            :key="index">
-                                                            <x-card rounded="lg" clip class="deliverable-item">
-                                                                <!-- Deliverable header -->
-                                                                <div
-                                                                    class="bg-neutral-50 px-4 py-3 border-b border-neutral-200">
-                                                                    <div class="flex items-center justify-between">
-                                                                        <h4 class="font-medium text-neutral-800">
-                                                                            Deliverable #<span
-                                                                                x-text="index + 1"></span>
-                                                                        </h4>
-                                                                        <button
-                                                                            @click.prevent="deliverables.splice(index, 1)"
-                                                                            class="text-neutral-500 hover:text-red-600 flex items-center text-sm">
-                                                                            <x-icon name="trash" class="h-4 w-4 mr-1" />
-                                                                            Remove
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-
-                                                                <!-- Deliverable content -->
-                                                                <div class="p-4">
-                                                                    <div
-                                                                        class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                                                        <div class="md:col-span-2">
-                                                                            <x-form.label class="mb-1">Title<span
-                                                                                    class="text-red-500">*</span></x-form.label>
-                                                                            <input type="text"
-                                                                                x-model="deliverable.title"
-                                                                                class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                                                placeholder="What needs to be delivered?"
-                                                                                required>
-                                                                        </div>
-                                                                        <div>
-                                                                            <x-form.label class="mb-1">Due
-                                                                                Date</x-form.label>
-                                                                            <input type="date"
-                                                                                x-model="deliverable.due_date"
-                                                                                class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div>
-                                                                        <x-form.label class="mb-1">Description</x-form.label>
-                                                                        <textarea x-model="deliverable.description"
-                                                                            class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
-                                                                            rows="2" placeholder="Add details, specifications, or acceptance criteria..."></textarea>
-                                                                    </div>
-                                                                </div>
-                                                            </x-card>
-                                                        </template>
-                                                    </div>
-
-                                                    <!-- Add button when deliverables exist -->
-                                                    <button x-show="deliverables.length > 0"
-                                                        @click.prevent="deliverables.push({title: '', description: '', due_date: ''})"
-                                                        class="mb-6 flex items-center text-primary hover:text-primary-dark font-medium">
-                                                        <x-icon name="plus-2" class="h-5 w-5 mr-1" />
-                                                        Add Another Deliverable
-                                                    </button>
-                                                </div>
-
-                                                <!-- Modal footer -->
-                                                <div class="border-t border-neutral-200 bg-neutral-50 px-6 py-4">
-                                                    <div class="flex justify-end space-x-4">
-                                                        <button
-                                                            @click="showDeliverablesForm = false; selectedStatus = '{{ $application->status }}'"
-                                                            class="py-2 px-4 bg-white border border-neutral-300 text-neutral-700 rounded-lg font-medium hover:bg-neutral-50 transition-colors focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:ring-offset-2">
-                                                            Cancel
-                                                        </button>
-                                                        <button @click="submitDeliverables()"
-                                                            :disabled="deliverables.length === 0 || deliverables.some(d => !d
-                                                                .title)"
-                                                            :class="{
-                                                                'opacity-50 cursor-not-allowed': deliverables.length ===
-                                                                    0 ||
-                                                                    deliverables.some(d => !d.title)
-                                                            }"
-                                                            class="py-2 px-4 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 flex items-center">
-                                                            <x-icon name="check" class="h-5 w-5 mr-2" />
-                                                            Submit and Hire
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                                <h4 class="text-lg font-medium text-neutral-700 mb-2">No
+                                                    deliverables added yet</h4>
+                                                <p class="text-neutral-500 mb-4">Add deliverables to create
+                                                    clear
+                                                    milestones for this project</p>
+                                                <button
+                                                    @click.prevent="deliverables.push({title: '', description: '', due_date: ''})"
+                                                    class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                                                    <x-icon name="plus-2" class="h-5 w-5 mr-2" />
+                                                    Add First Deliverable
+                                                </button>
                                             </div>
+
+                                            <!-- Deliverables list -->
+                                            <div id="deliverables-container" class="space-y-4 mb-6"
+                                                x-show="deliverables.length > 0">
+                                                <template x-for="(deliverable, index) in deliverables"
+                                                    :key="index">
+                                                    <x-card rounded="lg" clip class="deliverable-item">
+                                                        <!-- Deliverable header -->
+                                                        <div
+                                                            class="bg-neutral-50 px-4 py-3 border-b border-neutral-200">
+                                                            <div class="flex items-center justify-between">
+                                                                <h4 class="font-medium text-neutral-800">
+                                                                    Deliverable #<span
+                                                                        x-text="index + 1"></span>
+                                                                </h4>
+                                                                <button
+                                                                    @click.prevent="deliverables.splice(index, 1)"
+                                                                    class="text-neutral-500 hover:text-red-600 flex items-center text-sm">
+                                                                    <x-icon name="trash" class="h-4 w-4 mr-1" />
+                                                                    Remove
+                                                                </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Deliverable content -->
+                                                        <div class="p-4">
+                                                            <div
+                                                                class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                                                <div class="md:col-span-2">
+                                                                    <x-form.label class="mb-1">Title<span
+                                                                            class="text-red-500">*</span></x-form.label>
+                                                                    <input type="text"
+                                                                        x-model="deliverable.title"
+                                                                        class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                                        placeholder="What needs to be delivered?"
+                                                                        required>
+                                                                </div>
+                                                                <div>
+                                                                    <x-form.label class="mb-1">Due
+                                                                        Date</x-form.label>
+                                                                    <input type="date"
+                                                                        x-model="deliverable.due_date"
+                                                                        class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary">
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <x-form.label class="mb-1">Description</x-form.label>
+                                                                <textarea x-model="deliverable.description"
+                                                                    class="w-full py-2 px-3 border border-neutral-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+                                                                    rows="2" placeholder="Add details, specifications, or acceptance criteria..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                    </x-card>
+                                                </template>
+                                            </div>
+
+                                            <!-- Add button when deliverables exist -->
+                                            <button x-show="deliverables.length > 0"
+                                                @click.prevent="deliverables.push({title: '', description: '', due_date: ''})"
+                                                class="mb-6 flex items-center text-primary hover:text-primary-dark font-medium">
+                                                <x-icon name="plus-2" class="h-5 w-5 mr-1" />
+                                                Add Another Deliverable
+                                            </button>
                                         </div>
-                                    </div>
+
+                                        <x-modal.footer>
+                                            <x-button type="button" variant="neutral" x-on:click="dismiss()">Cancel</x-button>
+                                            <x-button type="button" x-on:click="submitDeliverables()"
+                                                ::disabled="deliverables.length === 0 || deliverables.some(d => !d.title)"
+                                                ::class="{ 'opacity-50 cursor-not-allowed': deliverables.length === 0 || deliverables.some(d => !d.title) }">
+                                                <x-icon name="check" class="mr-2 h-5 w-5" />
+                                                Submit and Hire
+                                            </x-button>
+                                        </x-modal.footer>
+                                    </x-modal>
                                 @endif
                             </div>
                         </div>

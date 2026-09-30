@@ -132,16 +132,11 @@
                                         </button>
                                     </form>
 
-                                    <form action="{{ route('applications.destroy', $application) }}" method="POST"
-                                        onsubmit="return confirm('Are you sure you want to permanently delete this application?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="p-2 text-red-600 hover:text-red-800 bg-neutral-50 hover:bg-neutral-100 rounded-full transition-colors"
-                                            title="Delete Application">
-                                            <x-icon name="trash" class="h-5 w-5" />
-                                        </button>
-                                    </form>
+                                    <button type="button" x-data x-on:click="$dispatch('open-modal', { name: 'delete-application', id: {{ $application->id }} })"
+                                        class="p-2 text-red-600 hover:text-red-800 bg-neutral-50 hover:bg-neutral-100 rounded-full transition-colors"
+                                        title="Delete Application">
+                                        <x-icon name="trash" class="h-5 w-5" />
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -168,4 +163,9 @@
             @endif
         </div>
     </section>
+
+    <x-confirm-dialog name="delete-application" title="Delete Application" icon="trash" confirm-icon="trash"
+        confirm-label="Delete permanently" method="DELETE"
+        action-bind="'{{ route('applications.destroy', '__ID__') }}'.replace('__ID__', payload.id)"
+        message="Are you sure you want to permanently delete this application? This action cannot be undone." />
 </x-app-layout>
