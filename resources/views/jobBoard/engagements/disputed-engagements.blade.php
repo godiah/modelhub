@@ -392,7 +392,7 @@
                                 <span class="text-sm font-medium text-neutral-600 font-tertiary">Status</span>
                             </div>
                             <p class="text-lg font-semibold text-neutral-800 font-secondary">
-                                {{ ucfirst($partialPayment->status) }}
+                                {{ $partialPayment->status->label() }}
                             </p>
                         </div>
 

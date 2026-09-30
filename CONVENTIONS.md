@@ -194,8 +194,12 @@ applicant-review/hiring actions in one class with almost no shared state; split 
   Modules 2–4 with real data before enabling — all clean. **Module 9 (2026-09-25)**: verified clean
   against `admin/disputes/index.blade.php` and the new `admin/staff/index.blade.php`; also trimmed
   that controller's eager-load (`resolvedBy`, `cancellation.engagement` were loaded but never read
-  by the view). Modules 5–8 still not re-checked beyond their own prior audits; worth a quick look
-  if any of them are revisited.
+  by the view). **Modules 5–8 (2026-09-30)**: swept every GET page (all roles, all tabs/filters,
+  every engagement/payment/dispute status) plus every POST action and every notification
+  (rendered fresh-from-DB, as a queue worker would) with lazy loading prevented. Found and fixed
+  3 real violations: `engagements/index` card-footer (`$engagement->job` → `application->job`),
+  `getUserEngagements()` missing `cancellation.dispute`, and `AdminDisputeController::index()`
+  missing `disputedBy`. Everything else clean.
 - **Query scopes over repeated `where` chains** — already the consistent, established pattern
   (`scopeActive`, `scopeArchived`, `scopeActiveForUser`/`scopeArchivedForUser`, `scopeDraft`, etc.
   across `ModelJob`, `JobApplication`, `JobEngagement`). Nothing to change, just keep following it.

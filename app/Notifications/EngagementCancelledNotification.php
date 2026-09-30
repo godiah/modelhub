@@ -49,7 +49,7 @@ class EngagementCancelledNotification extends Notification implements ShouldQueu
                 'applicant' => $applicant,
                 'initiatorType' => $initiatorType,
                 'actionUrl' => route('engagements.show-cancelled', $this->engagement->id),
-                'paymentUrl' => route('engagements.process-payment', $this->engagement->id),
+                'paymentUrl' => route('engagements.show-cancelled', $this->engagement->id),
 
             ]);
     }
@@ -80,7 +80,7 @@ class EngagementCancelledNotification extends Notification implements ShouldQueu
 
     public function toBroadcast($notifiable)
     {
-        return broadcast(new BroadcastMessage($this->toArray($notifiable)));
+        return new BroadcastMessage($this->toArray($notifiable));
     }
 
     public static function present(array $data): array

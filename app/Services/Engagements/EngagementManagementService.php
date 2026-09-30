@@ -28,7 +28,7 @@ class EngagementManagementService
             'application.poster',
             'application.applicant',
             'deliverables',
-            'cancellation',
+            'cancellation.dispute',
         ])
             ->whereHas('application', function ($q) use ($user) {
                 $q->where('applicant_id', $user->id)
