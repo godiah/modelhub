@@ -36,6 +36,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'suspended_at' => 'datetime',
+            'last_login_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_enabled' => 'boolean',
             'two_factor_expires_at' => 'datetime',
@@ -45,6 +47,28 @@ class User extends Authenticatable implements MustVerifyEmail
     public function jobs()
     {
         return $this->hasMany(ModelJob::class);
+    }
+
+    /** A suspended member cannot sign in, and their projects and models are off the public pages. */
+    /** The applications this member sent to other people's projects. */
+    public function jobApplications()
+    {
+        return $this->hasMany(JobApplication::class, 'applicant_id');
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
+    public function suspendedBy()
+    {
+        return $this->belongsTo(Staff::class, 'suspended_by');
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(MemberNote::class)->latest();
     }
 
     /** The member's avatar picture; a stable fallback stands in if none is stored. */

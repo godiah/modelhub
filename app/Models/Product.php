@@ -122,7 +122,9 @@ class Product extends Model
         return $query->where('products.status', ProductStatus::Published->value)
             ->whereExists(fn ($seller) => $seller->selectRaw('1')->from('seller_profiles')
                 ->whereColumn('seller_profiles.user_id', 'products.user_id')
-                ->where('seller_profiles.status', 'approved'));
+                ->where('seller_profiles.status', 'approved'))
+            // ...and neither are those of a member staff have suspended
+            ->whereNotExists(fn ($owner) => $owner->selectRaw('1')->from('users')->whereColumn('users.id', 'products.user_id')->whereNotNull('users.suspended_at'));
     }
 
     public function wishlistItems()

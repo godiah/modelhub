@@ -7,6 +7,7 @@ use App\Models\JobApplication;
 use App\Models\Staff;
 use App\Observers\JobApplicationObserver;
 use App\Support\Mail\BrandedMail;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
@@ -75,6 +76,13 @@ class AppServiceProvider extends ServiceProvider
 
         // Inline each email's <style> block into style="" attributes for clients that strip <head><style> (Laravel
         // only does this on the markdown path, so this closes the gap for every outgoing email).
+        // When a member last signed in, shown in the staff member directory
+        Event::listen(function (Login $event) {
+            if ($event->guard === 'web') {
+                $event->user->forceFill(['last_login_at' => now()])->saveQuietly();
+            }
+        });
+
         Event::listen(function (MessageSending $event) {
             $event->message->html(
                 EmailCssInlinerHelper::inline($event->message->getHtmlBody())
