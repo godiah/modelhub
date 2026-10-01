@@ -33,9 +33,13 @@
         @else
             <div class="space-y-4">
                 @foreach ($sellers as $seller)
-                    <article x-data="{ approving: false, rejecting: false, suspending: false }" class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+                    <article x-data="{ approving: false, rejecting: false, suspending: false, removingLogo: false }" class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
                         <div class="flex flex-wrap items-start justify-between gap-3">
-                            <div class="min-w-0">
+                            <div class="flex min-w-0 items-start gap-3">
+                                @if ($logo = $seller->logoUrl())
+                                    <img src="{{ $logo }}" alt="" class="h-12 w-12 shrink-0 rounded-xl border border-neutral-200 object-cover">
+                                @endif
+                                <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <h2 class="font-tertiary text-lg font-semibold text-neutral-900">{{ $seller->display_name }}</h2>
                                     <x-badge :tone="$seller->status->tone()" class="px-2.5 py-0.5 text-xs font-medium">{{ __($seller->status->label()) }}</x-badge>
@@ -43,6 +47,9 @@
                                 <p class="mt-1 text-sm text-tertiary">
                                     {{ $seller->user->name }} · {{ $seller->user->email }} · {{ __('applied :date', ['date' => $seller->submitted_at?->format('M j, Y')]) }}
                                 </p>
+                                @if ($seller->tagline)<p class="mt-0.5 text-sm text-neutral-700">{{ $seller->tagline }}</p>@endif
+                                @if ($seller->name_changed_at)<p class="mt-0.5 text-xs text-tertiary">{{ __('Renamed :date', ['date' => $seller->name_changed_at->format('M j, Y')]) }}</p>@endif
+                                </div>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2">
@@ -56,6 +63,10 @@
                                     <x-btn size="sm" variant="danger-outline" type="button" @click="rejecting = true">{{ __('Reject') }}</x-btn>
                                 @endif
                                 @if ($seller->status === SellerStatus::Approved)
+                                    <x-btn size="sm" variant="secondary" href="{{ route('sellers.show', $seller->slug) }}" target="_blank">{{ __('Storefront') }}</x-btn>
+                                    @if ($seller->logo_path)
+                                        <x-btn size="sm" variant="secondary" type="button" @click="removingLogo = true">{{ __('Remove logo') }}</x-btn>
+                                    @endif
                                     <x-btn size="sm" variant="danger-outline" type="button" @click="suspending = true">{{ __('Suspend') }}</x-btn>
                                 @endif
                             </div>
@@ -69,8 +80,12 @@
                             <div>
                                 <dt class="text-xs text-tertiary">{{ __('What they plan to sell') }}</dt>
                                 <dd class="mt-1 whitespace-pre-line break-words text-neutral-800">{{ $seller->focus }}</dd>
+                                @if ($seller->website_url)
+                                    <dt class="mt-3 text-xs text-tertiary">{{ __('Public website') }}</dt>
+                                    <dd class="mt-1 break-all"><a href="{{ $seller->website_url }}" target="_blank" rel="noopener nofollow" class="text-teal-700 hover:underline">{{ $seller->website_url }}</a></dd>
+                                @endif
                                 @if ($seller->portfolio_url)
-                                    <dt class="mt-3 text-xs text-tertiary">{{ __('Portfolio') }}</dt>
+                                    <dt class="mt-3 text-xs text-tertiary">{{ __('Portfolio (private)') }}</dt>
                                     <dd class="mt-1 break-all"><a href="{{ $seller->portfolio_url }}" target="_blank" rel="noopener nofollow" class="text-teal-700 hover:underline">{{ $seller->portfolio_url }}</a></dd>
                                 @endif
                             </div>
@@ -83,6 +98,10 @@
                             </p>
                         @endif
 
+                        @if ($seller->logo_path)
+                            <x-confirm-dialog bind="removingLogo" title="Remove this logo" confirm-label="Remove" method="DELETE" :action="route('admin.sellers.remove-logo', $seller)"
+                                message="The logo disappears from their storefront and models. They can upload another." />
+                        @endif
                         <x-confirm-dialog bind="approving" :title="$seller->status === SellerStatus::Suspended ? 'Reinstate seller' : 'Approve seller'" icon="check" tone="success" confirm-label="Approve" method="PATCH"
                             :action="route('admin.sellers.review', [$seller, 'approve'])"
                             :message="'This lets '.$seller->display_name.' list models once the marketplace opens, and tells them.'" />

@@ -21,6 +21,9 @@ use App\Http\Controllers\PostedJobApplicationController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SellerProductController;
 use App\Http\Controllers\SellerProductFileController;
+use App\Http\Controllers\SellerStoreController;
+use App\Http\Controllers\SellerStorefrontController;
+use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 // Signed-in users go straight to the app shell; the landing page is for guests.
@@ -167,11 +170,24 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
 // The public models catalogue
 Route::get('/models', [ModelCatalogueController::class, 'index'])->name('models.index');
 Route::get('/models/{product}', [ModelCatalogueController::class, 'show'])->name('models.show');
+Route::get('/sellers/{seller:slug}', [SellerStorefrontController::class, 'show'])->name('sellers.show');
+
+// Saved models
+Route::middleware(['auth'])->group(function () {
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/models/{product}/wishlist', [WishlistController::class, 'toggle'])->middleware('throttle:60,1')->name('models.wishlist.toggle');
+});
 
 // Selling 3D models: becoming an approved seller
 Route::middleware(['auth'])->prefix('sell')->name('seller.')->group(function () {
     Route::get('/', [SellerController::class, 'index'])->name('index');
     Route::post('/apply', [SellerController::class, 'apply'])->middleware('throttle:6,1')->name('apply');
+});
+
+// An approved seller's store settings
+Route::middleware(['auth', 'seller'])->prefix('sell/store')->name('seller.store.')->group(function () {
+    Route::get('/', [SellerStoreController::class, 'edit'])->name('edit');
+    Route::patch('/', [SellerStoreController::class, 'update'])->name('update');
 });
 
 // An approved seller's model listings
@@ -219,6 +235,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     });
     Route::middleware(['permission:review sellers'])->group(function () {
         Route::get('/sellers', [AdminSellerController::class, 'index'])->name('sellers.index');
+        Route::delete('/sellers/{seller}/logo', [AdminSellerController::class, 'removeLogo'])->name('sellers.remove-logo');
         Route::patch('/sellers/{seller}/{decision}', [AdminSellerController::class, 'review'])->whereIn('decision', ['approve', 'reject', 'suspend'])->name('sellers.review');
     });
     Route::middleware(['permission:review models'])->group(function () {

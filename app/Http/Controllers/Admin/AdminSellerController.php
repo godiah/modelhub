@@ -7,12 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Marketplace\ReviewSellerRequest;
 use App\Models\SellerProfile;
 use App\Services\Marketplace\SellerOnboardingService;
+use App\Services\Marketplace\SellerStoreService;
 use Illuminate\Http\Request;
 
 /** The review queue for seller applications. Permission: review sellers (see routes/web.php). */
 class AdminSellerController extends Controller
 {
-    public function __construct(protected SellerOnboardingService $onboarding) {}
+    public function __construct(protected SellerOnboardingService $onboarding, protected SellerStoreService $stores) {}
 
     public function index(Request $request)
     {
@@ -45,5 +46,13 @@ class AdminSellerController extends Controller
             'reject' => 'Application rejected',
             default => 'Seller suspended',
         }, 'The seller has been told.'));
+    }
+
+    /** Take down an unsuitable logo. The seller keeps their store and can upload another. */
+    public function removeLogo(SellerProfile $seller)
+    {
+        $this->stores->removeLogo($seller);
+
+        return back()->with(FlashAlertHelper::success('Logo removed', 'The seller can upload a new one.'));
     }
 }

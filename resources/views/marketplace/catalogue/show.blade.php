@@ -72,14 +72,30 @@
             <aside class="space-y-6 lg:sticky lg:top-24">
                 <x-panel>
                     <h1 class="font-tertiary text-xl font-semibold leading-snug text-neutral-900">{{ $product->title }}</h1>
-                    <p class="mt-1 text-sm text-tertiary">{{ __('by :seller', ['seller' => $product->sellerProfile?->display_name ?? __('a ModelHub seller')]) }}</p>
+                    @if ($product->sellerProfile?->slug)
+                        <a href="{{ route('sellers.show', $product->sellerProfile->slug) }}" class="mt-3 flex items-center gap-3 rounded-xl border border-neutral-200 p-2.5 transition-colors hover:border-neutral-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
+                            @if ($logo = $product->sellerProfile->logoUrl())
+                                <img src="{{ $logo }}" alt="" class="h-10 w-10 shrink-0 rounded-lg border border-neutral-200 object-cover">
+                            @else
+                                <span aria-hidden="true" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-teal-700/15 bg-teal-50 text-sm font-bold text-teal-800">{{ $product->sellerProfile->initials() }}</span>
+                            @endif
+                            <span class="min-w-0">
+                                <span class="block truncate text-sm font-medium text-neutral-900">{{ $product->sellerProfile->display_name }}</span>
+                                <span class="block truncate text-xs text-tertiary">{{ $product->sellerProfile->tagline ?: __('View store') }}</span>
+                            </span>
+                        </a>
+                    @endif
                     <p class="mt-4 font-tertiary text-3xl font-bold tabular-nums text-neutral-900">{{ $product->isFree() ? __('Free') : \App\Support\Money::formatMinor($product->price_minor) }}</p>
                     <p class="mt-1 text-xs text-tertiary">{{ __('Standard licence') }}</p>
 
+                    @unless ($preview)
+                        <x-models.wishlist-button :product="$product" :saved="in_array($product->id, $savedIds)" :count="$saves" variant="button" class="mt-5" />
+                    @endunless
+
                     @if (config('marketplace.purchases_enabled'))
-                        <x-btn block size="lg" class="mt-5" type="button" disabled>{{ $product->isFree() ? __('Download') : __('Add to cart') }}</x-btn>
+                        <x-btn block size="lg" class="mt-3" type="button" disabled>{{ $product->isFree() ? __('Download') : __('Add to cart') }}</x-btn>
                     @else
-                        <x-btn block size="lg" class="mt-5" type="button" disabled>{{ __('Purchases open soon') }}</x-btn>
+                        <x-btn block size="lg" class="mt-3" type="button" disabled>{{ __('Purchases open soon') }}</x-btn>
                         <p class="mt-2 text-center text-xs text-tertiary">{{ __('Checkout is not open yet. Models are visible so sellers can see how their listings look.') }}</p>
                     @endif
                 </x-panel>
@@ -126,7 +142,7 @@
             <section class="mt-12 border-t border-neutral-200 pt-8" aria-labelledby="related-models">
                 <h2 id="related-models" class="mb-4 font-tertiary text-lg font-semibold text-neutral-900">{{ __('More in this category') }}</h2>
                 <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-                    @foreach ($related as $item)<x-models.card :product="$item" />@endforeach
+                    @foreach ($related as $item)<x-models.card :product="$item" :saved="in_array($item->id, $savedIds)" />@endforeach
                 </div>
             </section>
         @endif

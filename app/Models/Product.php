@@ -106,9 +106,18 @@ class Product extends Model
         return $this->belongsTo(User::class, 'reviewed_by');
     }
 
+    /** Live in the catalogue: published, and the seller is still approved (suspending a seller hides their models). */
     public function scopePublished($query)
     {
-        return $query->where('status', ProductStatus::Published->value);
+        return $query->where('products.status', ProductStatus::Published->value)
+            ->whereExists(fn ($seller) => $seller->selectRaw('1')->from('seller_profiles')
+                ->whereColumn('seller_profiles.user_id', 'products.user_id')
+                ->where('seller_profiles.status', 'approved'));
+    }
+
+    public function wishlistItems()
+    {
+        return $this->hasMany(WishlistItem::class);
     }
 
     /** The price in whole currency units (KES), for display. */

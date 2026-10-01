@@ -17,6 +17,7 @@ use App\Notifications\ProductSubmittedNotification;
 use App\Notifications\ReviewSubmittedNotification;
 use App\Notifications\SellerApplicationSubmittedNotification;
 use App\Notifications\SellerReviewedNotification;
+use App\Notifications\StoreNameChangedNotification;
 
 /**
  * The filter groups on the notifications page. Each notification class belongs to exactly one;
@@ -75,7 +76,7 @@ enum NotificationCategory: string
             self::Disputes => [DisputeCreatedNotification::class],
             self::Reviews => [ReviewSubmittedNotification::class],
             self::Projects => [JobPostedNotification::class],
-            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class],
+            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class],
             self::Other => [],
         };
     }

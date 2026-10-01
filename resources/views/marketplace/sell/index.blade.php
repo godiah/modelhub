@@ -34,7 +34,7 @@
                                     {{ __('Thanks, we have your application. A reviewer will look at it soon and we will tell you the outcome by email and in your notifications.') }}
                                     @break
                                 @case(SellerStatus::Approved)
-                                    {{ __('You are approved to sell. You will be able to add your first model as soon as the marketplace opens, and we will let you know.') }}
+                                    {{ __('You are approved to sell. Add your models, and keep your store details up to date.') }}
                                     @break
                                 @case(SellerStatus::Rejected)
                                     {{ __('We could not approve your application this time. You can improve it below and send it again.') }}
@@ -44,6 +44,14 @@
                                     @break
                             @endswitch
                         </p>
+
+                        @if ($status === SellerStatus::Approved)
+                            <div class="mt-5 flex flex-wrap gap-2">
+                                <x-btn size="sm" href="{{ route('seller.models.index') }}"><x-icon name="squares-2x2" class="h-4 w-4" />{{ __('My models') }}</x-btn>
+                                <x-btn size="sm" variant="secondary" href="{{ route('seller.store.edit') }}">{{ __('Edit my store') }}</x-btn>
+                                <x-btn size="sm" variant="secondary" href="{{ route('sellers.show', $profile->slug) }}">{{ __('View storefront') }}</x-btn>
+                            </div>
+                        @endif
 
                         @if ($profile->review_notes && in_array($status, [SellerStatus::Rejected, SellerStatus::Suspended], true))
                             <div class="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
