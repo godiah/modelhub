@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\SellerStatus;
 use App\Mail\TwoFactorCode;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -152,9 +153,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(SellerProfile::class);
     }
 
+    /** The 3D model listings this member has created as a seller. */
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    /** Read from the database each time (one small query), so a decision made a moment ago is never missed. */
     public function isApprovedSeller(): bool
     {
-        return (bool) $this->sellerProfile?->isApproved();
+        return SellerProfile::where('user_id', $this->id)->where('status', SellerStatus::Approved->value)->exists();
     }
 
     /**

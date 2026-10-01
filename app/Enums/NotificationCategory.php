@@ -12,6 +12,8 @@ use App\Notifications\NewApplicationMessage;
 use App\Notifications\PartialPaymentProcessedNotification;
 use App\Notifications\PaymentAcceptedNotification;
 use App\Notifications\PaymentDisputedNotification;
+use App\Notifications\ProductReviewedNotification;
+use App\Notifications\ProductSubmittedNotification;
 use App\Notifications\ReviewSubmittedNotification;
 use App\Notifications\SellerApplicationSubmittedNotification;
 use App\Notifications\SellerReviewedNotification;
@@ -73,7 +75,7 @@ enum NotificationCategory: string
             self::Disputes => [DisputeCreatedNotification::class],
             self::Reviews => [ReviewSubmittedNotification::class],
             self::Projects => [JobPostedNotification::class],
-            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class],
+            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class],
             self::Other => [],
         };
     }

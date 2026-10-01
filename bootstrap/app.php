@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\DeactivateExpiredJobs;
+use App\Http\Middleware\EnsureApprovedSeller;
 use App\Http\Middleware\VerifyJobEngagementOwnership;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'verify-engagement-ownership' => VerifyJobEngagementOwnership::class,
+            'seller' => EnsureApprovedSeller::class,
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
