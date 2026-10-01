@@ -13,6 +13,8 @@ use App\Notifications\PartialPaymentProcessedNotification;
 use App\Notifications\PaymentAcceptedNotification;
 use App\Notifications\PaymentDisputedNotification;
 use App\Notifications\ReviewSubmittedNotification;
+use App\Notifications\SellerApplicationSubmittedNotification;
+use App\Notifications\SellerReviewedNotification;
 
 /**
  * The filter groups on the notifications page. Each notification class belongs to exactly one;
@@ -26,6 +28,7 @@ enum NotificationCategory: string
     case Disputes = 'disputes';
     case Reviews = 'reviews';
     case Projects = 'projects';
+    case Marketplace = 'marketplace';
     case Other = 'other';
 
     public function label(): string
@@ -37,6 +40,7 @@ enum NotificationCategory: string
             self::Disputes => 'Disputes',
             self::Reviews => 'Reviews',
             self::Projects => 'Projects',
+            self::Marketplace => 'Marketplace',
             self::Other => 'Other',
         };
     }
@@ -50,6 +54,7 @@ enum NotificationCategory: string
             self::Disputes => 'shield-check',
             self::Reviews => 'star',
             self::Projects => 'clipboard-list',
+            self::Marketplace => 'cube',
             self::Other => 'bell',
         };
     }
@@ -68,6 +73,7 @@ enum NotificationCategory: string
             self::Disputes => [DisputeCreatedNotification::class],
             self::Reviews => [ReviewSubmittedNotification::class],
             self::Projects => [JobPostedNotification::class],
+            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class],
             self::Other => [],
         };
     }

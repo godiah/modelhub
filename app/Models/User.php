@@ -146,6 +146,17 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(UserProfile::class);
     }
 
+    /** The member's application to sell 3D models (and its outcome), if they have made one. */
+    public function sellerProfile()
+    {
+        return $this->hasOne(SellerProfile::class);
+    }
+
+    public function isApprovedSeller(): bool
+    {
+        return (bool) $this->sellerProfile?->isApproved();
+    }
+
     /**
      * Get the user's skills.
      */

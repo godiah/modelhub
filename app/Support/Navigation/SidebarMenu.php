@@ -109,6 +109,12 @@ final class SidebarMenu
                 ],
             ],
             [
+                'label' => 'Marketplace',
+                'items' => [
+                    ['label' => 'Sell models', 'route' => 'seller.index', 'icon' => 'cube', 'match' => ['seller.*']],
+                ],
+            ],
+            [
                 'label' => 'Delivery',
                 'items' => [
                     ['label' => 'Engagements', 'route' => 'engagements.index', 'icon' => 'chat-bubble-left-right', 'match' => ['engagements.*'], 'except' => ['engagements.policy']],
@@ -118,6 +124,7 @@ final class SidebarMenu
                 'label' => 'Administration',
                 'items' => [
                     ['label' => 'Disputed engagements', 'route' => 'admin.disputes.index', 'icon' => 'shield-check', 'match' => ['admin.disputes.*'], 'can' => 'view disputes'],
+                    ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'cube', 'match' => ['admin.sellers.*'], 'can' => 'review sellers'],
                     ['label' => 'Staff roles', 'route' => 'admin.staff.index', 'icon' => 'users', 'match' => ['admin.staff.*'], 'can' => 'manage users'],
                 ],
             ],

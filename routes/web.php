@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDisputeController;
+use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\HomeController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
 use App\Http\Controllers\PolicyManagementController;
 use App\Http\Controllers\PostedJobApplicationController;
+use App\Http\Controllers\SellerController;
 use Illuminate\Support\Facades\Route;
 
 // Signed-in users go straight to the app shell; the landing page is for guests.
@@ -158,6 +160,12 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     Route::post('/{engagement}/reopen-job', [JobEngagementController::class, 'reopenJob'])->name('reopen-job');
 });
 
+// Selling 3D models: becoming an approved seller
+Route::middleware(['auth'])->prefix('sell')->name('seller.')->group(function () {
+    Route::get('/', [SellerController::class, 'index'])->name('index');
+    Route::post('/apply', [SellerController::class, 'apply'])->middleware('throttle:6,1')->name('apply');
+});
+
 // Public documents: readable by guests and signed-in users alike
 Route::get('/engagements/policies/cancellation', [PolicyManagementController::class, 'index'])->name('engagements.policy');
 Route::get('/terms', [LegalController::class, 'terms'])->name('legal.terms');
@@ -181,6 +189,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::middleware(['permission:resolve disputes'])->group(function () {
         Route::post('/disputes/{dispute}/assign', [AdminDisputeController::class, 'assign'])->name('disputes.assign');
         Route::post('/disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+    });
+    Route::middleware(['permission:review sellers'])->group(function () {
+        Route::get('/sellers', [AdminSellerController::class, 'index'])->name('sellers.index');
+        Route::patch('/sellers/{seller}/{decision}', [AdminSellerController::class, 'review'])->whereIn('decision', ['approve', 'reject', 'suspend'])->name('sellers.review');
     });
     Route::middleware(['permission:view users'])->group(function () {
         Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff.index');
