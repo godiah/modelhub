@@ -1,11 +1,10 @@
 @php $field = 'block w-full rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25'; @endphp
 <x-staff-layout :title="__('Your account')">
-    <div class="container mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <div>
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Your account') }}</h1>
-            <p class="mt-1 text-sm text-tertiary">{{ __('Your staff account is separate from any member account you may have.') }}</p>
-        </div>
+    <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8">
+        <x-staff.header class="!mb-0" :title="__('Your account')">{{ __('Your staff account is separate from any member account you may have.') }}</x-staff.header>
 
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+        <div class="space-y-6">
         <x-panel :title="__('Avatar')" :description="__('Shown beside what you do in the activity log.')">
             <x-avatar-picker kind="people" :current="$staff->avatar" :fallback="$staff->id" :action="route('admin.account.avatar')" />
         </x-panel>
@@ -20,6 +19,8 @@
             </form>
         </x-panel>
 
+        </div>
+        <div class="space-y-6">
         <x-panel :title="__('Password')" :description="\App\Support\Auth\PasswordPolicy::describe(staff: true)">
             <form method="POST" action="{{ route('admin.account.password') }}" class="space-y-4">
                 @csrf @method('PUT')
@@ -34,5 +35,7 @@
         @if (\App\Support\Settings\PlatformSettings::bool('security.otp_staff_required'))
             <p class="rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-700">{{ __('A sign-in code is required for all staff. Without an authenticator app, a code is emailed to you at every sign-in.') }}</p>
         @endif
+        </div>
+        </div>
     </div>
 </x-staff-layout>

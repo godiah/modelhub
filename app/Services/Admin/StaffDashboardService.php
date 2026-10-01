@@ -11,6 +11,7 @@ use App\Models\JobPaymentDispute;
 use App\Models\ModelJob;
 use App\Models\Product;
 use App\Models\ProductReview;
+use App\Models\ReviewReport;
 use App\Models\SellerProfile;
 use App\Models\Staff;
 use App\Models\StaffActivity;
@@ -18,6 +19,8 @@ use App\Models\User;
 use App\Models\WishlistItem;
 use App\Support\Money;
 use App\Support\Navigation\StaffMenu;
+use App\Support\Settings\PlatformSettings;
+use App\Support\Staff\StaffAccess;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -52,6 +55,7 @@ class StaffDashboardService
             'notifications' => $staff->notifications()->limit(5)->get(),
             'pulse' => $staff->can('view platform overview') ? $this->pulse() : null,
             'feeds' => $this->feeds($staff),
+            'activity' => $staff->can('view audit log') ? StaffActivity::with('staff:id,name,avatar')->where('action', 'not like', self::NOT_DECISIONS)->latest('id')->limit(4)->get() : null,
             'team' => $this->team($staff),
         ];
     }
@@ -81,7 +85,7 @@ class StaffDashboardService
         if ($staff->can('review models')) {
             $count = StaffMenu::count('models');
             $late = Product::where('status', ProductStatus::InReview)->where('submitted_at', '<=', $limit)->count();
-            $queues[] = ['label' => 'Models', 'count' => $count, 'late' => $late, 'url' => route('admin.models.index')];
+            $queues[] = ['key' => 'models', 'label' => 'Models', 'title' => 'Models to review', 'icon' => 'clipboard-check', 'count' => $count, 'late' => $late, 'oldest' => $this->oldest(Product::where('status', ProductStatus::InReview)->min('submitted_at')), 'url' => route('admin.models.index')];
             $overdue += $late;
 
             Product::with('sellerProfile:id,user_id,display_name')->where('status', ProductStatus::InReview)->orderBy('submitted_at')->limit(self::PER_QUEUE)->get()
@@ -91,7 +95,7 @@ class StaffDashboardService
         if ($staff->can('review sellers')) {
             $count = StaffMenu::count('sellers');
             $late = SellerProfile::where('status', SellerStatus::Pending)->where('submitted_at', '<=', $limit)->count();
-            $queues[] = ['label' => 'Applications', 'count' => $count, 'late' => $late, 'url' => route('admin.sellers.index')];
+            $queues[] = ['key' => 'sellers', 'label' => 'Applications', 'title' => 'Seller applications', 'icon' => 'clipboard-list', 'count' => $count, 'late' => $late, 'oldest' => $this->oldest(SellerProfile::where('status', SellerStatus::Pending)->min('submitted_at')), 'url' => route('admin.sellers.index')];
             $overdue += $late;
 
             SellerProfile::with('user:id,name')->where('status', SellerStatus::Pending)->orderBy('submitted_at')->limit(self::PER_QUEUE)->get()
@@ -102,7 +106,7 @@ class StaffDashboardService
             $open = fn ($reports) => $reports->where('status', 'open');
             $count = StaffMenu::count('reports');
             $late = ProductReview::visible()->whereHas('reports', fn ($r) => $open($r)->where('created_at', '<=', $limit))->count();
-            $queues[] = ['label' => 'Reports', 'count' => $count, 'late' => $late, 'url' => route('admin.reviews.index')];
+            $queues[] = ['key' => 'reports', 'label' => 'Reports', 'title' => 'Reported reviews', 'icon' => 'flag', 'count' => $count, 'late' => $late, 'oldest' => $this->oldest(ReviewReport::where('status', 'open')->min('created_at')), 'url' => route('admin.reviews.index')];
             $overdue += $late;
 
             ProductReview::visible()->with('product:id,title')
@@ -116,7 +120,7 @@ class StaffDashboardService
         if ($staff->can('view disputes')) {
             $count = StaffMenu::count('disputes');
             $late = JobPaymentDispute::whereIn('status', [DisputeStatus::Pending, DisputeStatus::UnderReview])->where('created_at', '<=', $limit)->count();
-            $queues[] = ['label' => 'Disputes', 'count' => $count, 'late' => $late, 'url' => route('admin.disputes.index')];
+            $queues[] = ['key' => 'disputes', 'label' => 'Disputes', 'title' => 'Payment disputes', 'icon' => 'scale', 'count' => $count, 'late' => $late, 'oldest' => $this->oldest(JobPaymentDispute::whereIn('status', [DisputeStatus::Pending, DisputeStatus::UnderReview])->min('created_at')), 'url' => route('admin.disputes.index')];
             $overdue += $late;
 
             JobPaymentDispute::with(['cancellation.engagement.application.job:id,title', 'assignedAdmin:id,name'])
@@ -137,6 +141,11 @@ class StaffDashboardService
         ];
     }
 
+    private function oldest(mixed $date): ?Carbon
+    {
+        return $date ? Carbon::parse($date) : null;
+    }
+
     private function item(string $icon, string $kind, string $title, string $detail, ?Carbon $since, string $url, ?string $tag = null): array
     {
         return ['icon' => $icon, 'kind' => $kind, 'title' => $title, 'detail' => $detail, 'since' => $since, 'tone' => self::tone($since), 'url' => $url, 'tag' => $tag];
@@ -147,14 +156,19 @@ class StaffDashboardService
     /** @return array{disputes: Collection, week: array<string, int>, recent: Collection} */
     private function myWork(Staff $staff): array
     {
-        $week = StaffActivity::where('staff_id', $staff->id)->where('action', 'not like', self::NOT_DECISIONS)->where('created_at', '>=', now()->subDays(7))->pluck('action')
-            ->countBy(fn ($action) => explode('.', $action)[0])->all();
+        // Two weeks of this person's decisions: this week for the numbers, last week for the trend
+        $rows = StaffActivity::where('staff_id', $staff->id)->where('action', 'not like', self::NOT_DECISIONS)->where('created_at', '>=', today()->subDays(13))->get(['action', 'created_at']);
+        $thisWeek = $rows->filter(fn ($row) => $row->created_at->gte(today()->subDays(6)));
+        $perDay = $thisWeek->countBy(fn ($row) => $row->created_at->format('Y-m-d'));
 
         return [
             'disputes' => $staff->can('view disputes')
                 ? JobPaymentDispute::where('admin_assigned', $staff->id)->where('status', DisputeStatus::UnderReview)->with('cancellation.engagement.application.job:id,title')->latest()->limit(5)->get()
                 : collect(),
-            'week' => $week,
+            'week' => $thisWeek->pluck('action')->countBy(fn ($action) => explode('.', $action)[0])->sortDesc()->all(),
+            'total' => $thisWeek->count(),
+            'previous' => $rows->count() - $thisWeek->count(),
+            'daily' => collect(range(6, 0))->map(fn ($ago) => ['label' => today()->subDays($ago)->format('D'), 'count' => (int) ($perDay[today()->subDays($ago)->format('Y-m-d')] ?? 0), 'today' => $ago === 0])->all(),
             'recent' => StaffActivity::where('staff_id', $staff->id)->where('action', 'not like', self::NOT_DECISIONS)->latest('id')->limit(5)->get(),
         ];
     }
@@ -174,7 +188,10 @@ class StaffDashboardService
             return [($pct >= 0 ? '+' : '').$pct.'%', $pct >= 0];
         };
 
+        $weekly = fn (string $label, string $key) => ['label' => $label, 'points' => $stats['series'][$key]];
+
         return [
+            'chart' => ['members' => $weekly('Members', 'members'), 'projects' => $weekly('Projects', 'projects'), 'models' => $weekly('Models', 'models'), 'applications' => $weekly('Applications', 'applications')],
             'tiles' => [
                 ['label' => 'Members', 'value' => number_format($stats['members']['total']), 'icon' => 'user-group', 'hint' => __(':n today', ['n' => $stats['today']['members']]), 'trend' => $change($stats['members']['new']), 'series' => $stats['series']['members']],
                 ['label' => 'Open projects', 'value' => number_format($stats['projects']['open']), 'icon' => 'briefcase', 'hint' => __(':n posted today', ['n' => $stats['today']['projects']]), 'trend' => $change($stats['projects']['new']), 'series' => $stats['series']['projects']],
@@ -210,7 +227,7 @@ class StaffDashboardService
         }
 
         if ($staff->can('view engagements')) {
-            $feeds['hires'] = ['stuck' => $this->stuckHires()];
+            $feeds['hires'] = ['stuck' => $this->stuckHires(), 'late' => $this->lateHires()->count(), 'active' => JobEngagement::where('status', EngagementStatus::Active)->count()];
         }
 
         if ($staff->can('view models')) {
@@ -223,14 +240,22 @@ class StaffDashboardService
         return $feeds;
     }
 
-    /** Active hires with deliverables past their due date, worst first. @return Collection<int, JobEngagement> */
+    /** Active hires with a deliverable still pending past its due date. */
+    private function lateHires()
+    {
+        return JobEngagement::where('status', EngagementStatus::Active)
+            ->whereHas('deliverables', fn ($d) => $d->where('status', 'pending')->whereNotNull('due_date')->where('due_date', '<', today()));
+    }
+
+    /** The worst of them first, with how many deliverables are overdue and how much of the work has been approved. @return Collection<int, JobEngagement> */
     private function stuckHires(): Collection
     {
-        return JobEngagement::with(['application.job:id,title', 'application.poster:id,name', 'application.applicant:id,name'])
-            ->where('status', EngagementStatus::Active)
-            ->whereHas('deliverables', fn ($d) => $d->where('status', 'pending')->whereNotNull('due_date')->where('due_date', '<', today()))
-            ->withCount(['deliverables as overdue_count' => fn ($d) => $d->where('status', 'pending')->whereNotNull('due_date')->where('due_date', '<', today())])
-            ->withMin(['deliverables as oldest_due' => fn ($d) => $d->where('status', 'pending')->whereNotNull('due_date')->where('due_date', '<', today())], 'due_date')
+        $overdue = fn ($d) => $d->where('status', 'pending')->whereNotNull('due_date')->where('due_date', '<', today());
+
+        return $this->lateHires()
+            ->with(['application.job:id,title', 'application.poster:id,name,avatar', 'application.applicant:id,name,avatar'])
+            ->withCount(['deliverables as overdue_count' => $overdue, 'deliverables as total_deliverables', 'deliverables as approved_deliverables' => fn ($d) => $d->where('status', 'approved')])
+            ->withMin(['deliverables as oldest_due' => $overdue], 'due_date')
             ->orderBy('oldest_due')->limit(5)->get();
     }
 
@@ -273,7 +298,16 @@ class StaffDashboardService
             $team['no_role'] = Staff::where('is_active', true)->doesntHave('roles')->count();
             $team['never_signed_in'] = Staff::where('is_active', true)->whereNull('last_login_at')->count();
             $team['deactivated'] = Staff::where('is_active', false)->count();
+            $team['active_staff'] = Staff::where('is_active', true)->count();
+            $team['with_app'] = Staff::where('is_active', true)->whereNotNull('two_factor_confirmed_at')->count();
         }
+
+        // What the platform currently enforces, for the people who can change it
+        $team['posture'] = $staff->hasRole(StaffAccess::SUPER_ADMIN) ? [
+            ['label' => 'Member sign-in codes', 'on' => PlatformSettings::bool('security.otp_members_required')],
+            ['label' => 'Staff sign-in codes', 'on' => PlatformSettings::bool('security.otp_staff_required')],
+            ['label' => 'One session per account', 'on' => PlatformSettings::bool('security.member_single_session') && PlatformSettings::bool('security.staff_single_session')],
+        ] : null;
 
         return $team;
     }

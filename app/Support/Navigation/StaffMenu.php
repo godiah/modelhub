@@ -54,6 +54,34 @@ final class StaffMenu
         return $groups;
     }
 
+    /**
+     * The trail shown in the top bar: the menu group, the menu page we are under, then the page itself when it is a detail page.
+     *
+     * @param  list<array{label: string, items: list<array<string, mixed>>}>  $menu  the result of for()
+     * @return list<array{label: string, url: ?string}>
+     */
+    public static function breadcrumb(array $menu, ?string $title = null): array
+    {
+        foreach ($menu as $group) {
+            foreach ($group['items'] as $item) {
+                if (! $item['active']) {
+                    continue;
+                }
+
+                $onListPage = request()->routeIs($item['route']);
+                $crumbs = [['label' => $group['label'], 'url' => null], ['label' => $item['label'], 'url' => $onListPage ? null : route($item['route'])]];
+
+                if (! $onListPage && $title && $title !== $item['label']) {
+                    $crumbs[] = ['label' => $title, 'url' => null];
+                }
+
+                return $crumbs;
+            }
+        }
+
+        return [['label' => $title ?: 'Staff portal', 'url' => null]];
+    }
+
     /** What is waiting, per queue. Used by the menu badges and the dashboard. */
     public static function count(string $queue, ?Staff $staff = null): int
     {

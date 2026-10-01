@@ -4,10 +4,7 @@
 @endphp
 <x-staff-layout title="Model reviews">
     <div class="container mx-auto max-w-7xl px-4 py-8">
-        <div class="mb-6">
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Model reviews') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Check each model before it goes live: the previews, the files and the details. A model that needs changes goes back to the seller with your reason.') }}</p>
-        </div>
+        <x-staff.header :title="__('Model reviews')">{{ __('Check each model before it goes live: the previews, the files and the details. A model that needs changes goes back to the seller with your reason.') }}</x-staff.header>
 
         <nav aria-label="{{ __('Filter by status') }}" class="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
             <ul class="flex min-w-max items-center gap-2">

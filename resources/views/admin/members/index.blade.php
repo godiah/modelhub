@@ -1,70 +1,59 @@
 @use('App\Support\Staff\Masking')
-@php $statuses = \App\Http\Controllers\Admin\AdminMemberController::STATUSES; $activities = \App\Http\Controllers\Admin\AdminMemberController::ACTIVITY; @endphp
+@php
+    $statuses = \App\Http\Controllers\Admin\AdminMemberController::STATUSES;
+    $activities = \App\Http\Controllers\Admin\AdminMemberController::ACTIVITY;
+    $tabs = collect($statuses)->map(fn ($label, $key) => ['label' => $label, 'count' => $counts[$key], 'on' => $status === $key, 'url' => route('admin.members.index', array_filter(['status' => $key, 'activity' => $activity !== 'all' ? $activity : null, 'q' => $term, 'sort' => request('sort'), 'dir' => request('dir')]))])->values()->all();
+    $chips = [$term !== '' ? ['label' => __('Search: :term', ['term' => $term]), 'remove' => ['q']] : null, $activity !== 'all' ? ['label' => __($activities[$activity]), 'remove' => ['activity']] : null];
+    $filtered = $term !== '' || $activity !== 'all' || $status !== 'all';
+    $columns = [
+        ['key' => 'name', 'label' => 'Member', 'sort' => 'name'],
+        ['key' => 'projects', 'label' => 'Projects', 'sort' => 'projects', 'first' => 'desc', 'align' => 'right', 'class' => 'hidden lg:table-cell'],
+        ['key' => 'applications', 'label' => 'Applications', 'sort' => 'applications', 'first' => 'desc', 'align' => 'right', 'class' => 'hidden lg:table-cell'],
+        ['key' => 'models', 'label' => 'Models', 'sort' => 'models', 'first' => 'desc', 'align' => 'right', 'class' => 'hidden lg:table-cell'],
+        ['key' => 'joined', 'label' => 'Joined', 'sort' => 'joined', 'first' => 'desc', 'class' => 'hidden sm:table-cell'],
+        ['key' => 'seen', 'label' => 'Last seen', 'sort' => 'seen', 'first' => 'desc', 'align' => 'right'],
+    ];
+@endphp
 <x-staff-layout :title="__('Members')">
-    <div class="container mx-auto max-w-6xl px-4 py-8">
-        <div class="mb-6">
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Members') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Everyone with an account on the platform: buyers, sellers, clients and freelancers.') }}@unless ($canSeeContact) {{ __('Email addresses and phone numbers are masked for your role.') }}@endunless</p>
-        </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <x-staff.header :title="__('Members')" :description="__('Everyone with an account on the platform: buyers, sellers, clients and freelancers.').($canSeeContact ? '' : ' '.__('Email addresses and phone numbers are masked for your role.'))" />
 
-        <nav aria-label="{{ __('Filter by status') }}" class="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-            <ul class="flex min-w-max items-center gap-2">
-                @foreach ($statuses as $key => $label)
-                    @php $on = $status === $key; @endphp
-                    <li><a href="{{ route('admin.members.index', array_filter(['status' => $key, 'activity' => $activity !== 'all' ? $activity : null, 'q' => $term])) }}" @if ($on) aria-current="true" @endif
-                        @class(['inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40', 'border-teal-600 bg-teal-600 text-white' => $on, 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50' => ! $on])>
-                        {{ __($label) }}<span @class(['text-xs tabular-nums', 'text-teal-100' => $on, 'text-tertiary' => ! $on])>{{ number_format($counts[$key]) }}</span></a></li>
-                @endforeach
-            </ul>
-        </nav>
-
-        <form method="GET" action="{{ route('admin.members.index') }}" role="search" class="mb-5 flex flex-wrap items-end gap-3">
-            <input type="hidden" name="status" value="{{ $status }}">
-            <div class="min-w-[14rem] flex-1">
-                <label for="q" class="sr-only">{{ __('Search members') }}</label>
-                <input id="q" type="search" name="q" value="{{ $term }}" placeholder="{{ $canSeeContact ? __('Search by name or email') : __('Search by name') }}" class="block w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25">
-            </div>
-            <div>
-                <label for="activity" class="sr-only">{{ __('Activity') }}</label>
-                <select id="activity" name="activity" onchange="this.form.requestSubmit()" class="rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25">
-                    @foreach ($activities as $key => $label)<option value="{{ $key }}" @selected($activity === $key)>{{ __($label) }}</option>@endforeach
-                </select>
-            </div>
-            <x-btn type="submit" variant="secondary">{{ __('Search') }}</x-btn>
-        </form>
+        <x-staff.toolbar :tabs="$tabs" :search="$term" :placeholder="$canSeeContact ? __('Search by name or email') : __('Search by name')" :chips="$chips" :action="route('admin.members.index')">
+            <label for="activity" class="sr-only">{{ __('Activity') }}</label>
+            <select id="activity" name="activity" onchange="this.form.requestSubmit()" class="rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25">
+                @foreach ($activities as $key => $label)<option value="{{ $key }}" @selected($activity === $key)>{{ __($label) }}</option>@endforeach
+            </select>
+        </x-staff.toolbar>
 
         @if ($members->isEmpty())
-            <x-empty-state icon="user-group" :title="__('Nobody here')" :description="__('No members match this search.')" />
+            <x-empty-state icon="user-group" :title="$filtered ? __('No members match') : __('No members yet')" :description="$filtered ? __('Try a different search or clear the filters.') : __('People appear here as they sign up.')">
+                @if ($filtered)<x-btn variant="secondary" :href="route('admin.members.index')" wire:navigate>{{ __('Clear filters') }}</x-btn>@endif
+            </x-empty-state>
         @else
-            <x-card clip>
-                <ul class="divide-y divide-neutral-100">
-                    @foreach ($members as $member)
-                        <li>
-                            <a href="{{ route('admin.members.show', $member) }}" class="flex flex-wrap items-center gap-4 px-5 py-4 hover:bg-neutral-50 focus:outline-none focus-visible:bg-neutral-50">
-                                <x-user-avatar :user="$member" size="h-10 w-10" />
-                                <div class="min-w-0 flex-1">
-                                    <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-neutral-900">{{ $member->name }}
+            <x-staff.table :columns="$columns" :sort="$sort" :dir="$dir" :paginator="$members" :summary="trans_choice(':count member|:count members', $members->total(), ['count' => number_format($members->total())])">
+                @foreach ($members as $member)
+                    <x-staff.row :href="route('admin.members.show', $member)">
+                        <td class="px-4">
+                            <a href="{{ route('admin.members.show', $member) }}" wire:navigate class="flex items-center gap-3 focus:outline-none focus-visible:underline">
+                                <x-user-avatar :user="$member" size="h-9 w-9" />
+                                <span class="min-w-0">
+                                    <span class="flex flex-wrap items-center gap-2 font-semibold text-neutral-900">{{ $member->name }}
                                         @if ($member->isSuspended())<x-badge tone="red" class="px-2 py-0.5 text-xs font-medium">{{ __('Suspended') }}</x-badge>@endif
                                         @unless ($member->email_verified_at)<x-badge tone="amber" class="px-2 py-0.5 text-xs font-medium">{{ __('Unverified') }}</x-badge>@endunless
                                         @if ($member->sellerProfile?->status->value === 'approved')<x-badge tone="blue" class="px-2 py-0.5 text-xs font-medium">{{ __('Seller') }}</x-badge>@endif
-                                    </p>
-                                    <p class="truncate text-xs text-tertiary">{{ Masking::email($member->email, $canSeeContact) }}</p>
-                                </div>
-                                <p class="hidden gap-4 text-xs tabular-nums text-tertiary md:flex">
-                                    <span title="{{ __('Projects posted') }}">{{ $member->jobs_count }} {{ __('projects') }}</span>
-                                    <span title="{{ __('Applications sent') }}">{{ $member->job_applications_count }} {{ __('applications') }}</span>
-                                    <span title="{{ __('Models listed') }}">{{ $member->products_count }} {{ __('models') }}</span>
-                                </p>
-                                <p class="w-36 shrink-0 text-right text-xs text-tertiary">
-                                    {{ __('Joined :date', ['date' => $member->created_at->format('M j, Y')]) }}<br>
-                                    {{ $member->last_login_at ? __('Seen :when', ['when' => $member->last_login_at->diffForHumans()]) : __('Never signed in') }}
-                                </p>
+                                    </span>
+                                    <span class="block truncate text-xs font-normal text-tertiary">{{ Masking::email($member->email, $canSeeContact) }}</span>
+                                </span>
                             </a>
-                        </li>
-                    @endforeach
-                </ul>
-            </x-card>
-            <x-pager :paginator="$members" />
+                        </td>
+                        <td class="hidden px-4 text-right tabular-nums text-neutral-700 lg:table-cell">{{ $member->jobs_count }}</td>
+                        <td class="hidden px-4 text-right tabular-nums text-neutral-700 lg:table-cell">{{ $member->job_applications_count }}</td>
+                        <td class="hidden px-4 text-right tabular-nums text-neutral-700 lg:table-cell">{{ $member->products_count }}</td>
+                        <td class="hidden whitespace-nowrap px-4 text-neutral-600 sm:table-cell">{{ $member->created_at->format('M j, Y') }}</td>
+                        <td class="whitespace-nowrap px-4 text-right text-neutral-600">{{ $member->last_login_at ? $member->last_login_at->diffForHumans() : __('Never') }}</td>
+                    </x-staff.row>
+                @endforeach
+            </x-staff.table>
         @endif
     </div>
 </x-staff-layout>

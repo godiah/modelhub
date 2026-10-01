@@ -257,3 +257,103 @@ it('renders fully for a Super admin on a busy platform without lazy loading anyt
     dashboardFor($admin)->assertSee('Needs attention')->assertSee('Your work')->assertSee('Platform')->assertSee('Newest sign-ups')->assertSee('Newly posted')
         ->assertSee('Hires needing a look')->assertSee('Newly published')->assertSee('Team and security');
 });
+
+it('counts the person\'s decisions per day, for the week and the week before', function () {
+    $staff = staffWith('Marketplace moderator');
+    foreach ([0, 0, 1, 3] as $daysAgo) {
+        StaffAudit::log('model.published', 'Published a model', staffId: $staff->id);
+        StaffActivity::latest('id')->first()->forceFill(['created_at' => now()->subDays($daysAgo)])->save();
+    }
+    foreach ([8, 10, 12] as $daysAgo) {
+        StaffAudit::log('seller.approved', 'Approved a store', staffId: $staff->id);
+        StaffActivity::latest('id')->first()->forceFill(['created_at' => now()->subDays($daysAgo)])->save();
+    }
+    StaffAudit::log('model.published', 'Too old to count', staffId: $staff->id);
+    StaffActivity::latest('id')->first()->forceFill(['created_at' => now()->subDays(20)])->save();
+
+    $work = app(StaffDashboardService::class)->for($staff)['work'];
+
+    expect($work['total'])->toBe(4)->and($work['previous'])->toBe(3)->and($work['week'])->toBe(['model' => 4])
+        ->and(collect($work['daily'])->pluck('count')->all())->toBe([0, 0, 0, 1, 0, 1, 2])
+        ->and(collect($work['daily'])->last()['today'])->toBeTrue()->and($work['daily'])->toHaveCount(7);
+
+    dashboardFor($staff)->assertSee('Your last 7 days')->assertSee('+1')->assertSee('3 the week before');
+});
+
+it('shows an empty week as a friendly note, not a blank chart', function () {
+    $work = app(StaffDashboardService::class)->for(staffWith('Support'))['work'];
+
+    expect($work['total'])->toBe(0)->and(collect($work['daily'])->sum('count'))->toBe(0);
+
+    dashboardFor(staffWith('Support'))->assertSee('No decisions yet this week.')->assertSee('are counted here');
+});
+
+it('shows each late hire with both people, delivery progress and how late it is, and counts them all', function () {
+    $late = hire('Progress hire');
+    JobDeliverable::create(['engagement_id' => $late->id, 'title' => 'a', 'description' => 'd', 'status' => 'approved']);
+    JobDeliverable::create(['engagement_id' => $late->id, 'title' => 'b', 'description' => 'd', 'status' => 'approved']);
+    JobDeliverable::create(['engagement_id' => $late->id, 'title' => 'c', 'description' => 'd', 'status' => 'pending', 'due_date' => today()->subDays(8)]);
+    foreach (range(1, 6) as $i) {
+        $other = hire("Other late {$i}");
+        JobDeliverable::create(['engagement_id' => $other->id, 'title' => 'x', 'description' => 'd', 'status' => 'pending', 'due_date' => today()->subDay()]);
+    }
+
+    $feed = app(StaffDashboardService::class)->for(staffWith('Dispute manager'))['feeds']['hires'];
+    $row = $feed['stuck']->firstWhere('id', $late->id);
+
+    // Five rows are shown, but the badge counts every late hire
+    expect($feed['stuck'])->toHaveCount(5)->and($feed['late'])->toBe(7)->and($feed['active'])->toBe(7)
+        ->and($row->approved_deliverables)->toBe(2)->and($row->total_deliverables)->toBe(3)->and($row->overdue_count)->toBe(1);
+
+    dashboardFor(staffWith('Dispute manager'))->assertSee('7 late')->assertSee('Progress hire')->assertSee('2/3')->assertSee('oldest 8 days late');
+});
+
+it('says how many hires are in progress when none is late', function () {
+    hire();
+    hire('Second hire');
+
+    dashboardFor(staffWith('Dispute manager'))->assertSee('Every active hire is on schedule.')->assertSee('2 hires in progress, none overdue.')->assertDontSee('1 late')->assertDontSee('2 late');
+});
+
+it('ranks decisions, counts who is active and flags security gaps for the team block', function () {
+    $quiet = staffWith('Support');
+    $busy = staffWith('Marketplace moderator');
+    $busy->forceFill(['last_login_at' => now()->subMinutes(5)])->save();
+    foreach (range(1, 3) as $i) {
+        StaffAudit::log('model.published', 'Published', staffId: $busy->id);
+    }
+    StaffAudit::log('model.rejected', 'Rejected', staffId: $quiet->id);
+    authenticatorFor($busy);
+    Staff::factory()->create(); // no role, never signed in
+
+    $team = app(StaffDashboardService::class)->for(staffWith('Super admin'))['team'];
+
+    expect($team['decisions']->pluck('total')->all())->toBe([3, 1])->and($team['decisions'][0]['staff']->is($busy))->toBeTrue()
+        ->and($team['active_staff'])->toBe(4)->and($team['with_app'])->toBe(1)->and($team['no_role'])->toBe(1);
+
+    dashboardFor(staffWith('Super admin'))->assertSee('staff use an authenticator app')->assertSee('Active in the last 15 minutes');
+});
+
+it('shows the platform rules in force to Super admins only', function () {
+    setting('security.otp_staff_required', true);
+
+    $team = app(StaffDashboardService::class)->for(staffWith('Super admin'))['team'];
+    expect(collect($team['posture'])->pluck('on', 'label')->all())->toBe(['Member sign-in codes' => false, 'Staff sign-in codes' => true, 'One session per account' => false]);
+
+    dashboardFor(staffWith('Super admin'))->assertSee('Platform rules')->assertSee('Staff sign-in codes: on')->assertSee('Member sign-in codes: off');
+    expect(app(StaffDashboardService::class)->for(staffWith('Auditor'))['team']['posture'])->toBeNull();
+    dashboardFor(staffWith('Auditor'))->assertSee('Team and security')->assertDontSee('Platform rules');
+});
+
+it('shows only the latest four entries in recent staff activity, newest first', function () {
+    $admin = staffWith('Super admin');
+    foreach (range(1, 6) as $i) {
+        StaffAudit::log('model.published', "Published model number {$i}", staffId: $admin->id);
+    }
+
+    $activity = app(StaffDashboardService::class)->for($admin)['activity'];
+
+    expect($activity)->toHaveCount(4)->and($activity->pluck('summary')->all())->toBe(['Published model number 6', 'Published model number 5', 'Published model number 4', 'Published model number 3']);
+
+    dashboardFor($admin)->assertSee('published model number 6')->assertDontSee('published model number 2')->assertDontSee('published model number 1');
+});

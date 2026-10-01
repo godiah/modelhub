@@ -5,7 +5,7 @@
     $size = fn ($bytes) => $bytes >= 1048576 ? number_format($bytes / 1048576, 1).' MB' : number_format($bytes / 1024, 0).' KB';
 @endphp
 <x-staff-layout :title="$product->title">
-    <div class="container mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8">
         <a href="{{ route('admin.catalogue.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"><x-icon name="arrow-left" class="h-4 w-4" />{{ __('All models') }}</a>
 
         <x-card class="rounded-2xl">

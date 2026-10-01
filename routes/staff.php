@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminRoleController;
+use App\Http\Controllers\Admin\AdminSearchController;
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminStaffController;
@@ -63,6 +64,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('recovery-codes', [AuthenticatorController::class, 'recoveryCodes'])->middleware('throttle:10,1')->name('recovery');
             Route::delete('/', [AuthenticatorController::class, 'destroy'])->middleware('throttle:10,1')->name('destroy');
         });
+        Route::get('search', AdminSearchController::class)->middleware('throttle:60,1')->name('search');
         Route::get('notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('notifications/read', [AdminNotificationController::class, 'readAll'])->name('notifications.read-all');
         Route::get('notifications/{id}', [AdminNotificationController::class, 'open'])->name('notifications.open');

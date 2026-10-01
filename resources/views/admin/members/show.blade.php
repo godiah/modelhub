@@ -5,7 +5,7 @@
     $seller = $member->sellerProfile;
 @endphp
 <x-staff-layout :title="$member->name">
-    <div class="container mx-auto max-w-6xl space-y-6 px-4 py-8" x-data="{ suspending: false, reinstating: false }">
+    <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8" x-data="{ suspending: false, reinstating: false }">
         <a href="{{ route('admin.members.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"><x-icon name="arrow-left" class="h-4 w-4" />{{ __('All members') }}</a>
 
         @if ($member->isSuspended())
@@ -86,7 +86,11 @@
                             <dd class="text-xs {{ $member->email_verified_at ? 'text-green-700' : 'text-amber-700' }}">{{ $member->email_verified_at ? __('Verified :date', ['date' => $member->email_verified_at->format('M j, Y')]) : __('Not verified') }}</dd></div>
                         <div><dt class="text-xs text-tertiary">{{ __('Phone') }}</dt><dd class="mt-0.5 font-medium text-neutral-900">{{ Masking::phone($member->profile?->telephone_number, $canSeeContact) }}</dd></div>
                         <div><dt class="text-xs text-tertiary">{{ __('Location') }}</dt><dd class="mt-0.5 text-neutral-900">{{ $member->profile?->location ?: '—' }}</dd></div>
-                        <div><dt class="text-xs text-tertiary">{{ __('Two-factor sign-in') }}</dt><dd class="mt-0.5 text-neutral-900">{{ $member->hasTwoFactorEnabled() ? __('On') : __('Off') }}</dd></div>
+                        <div><dt class="text-xs text-tertiary">{{ __('Two-factor sign-in') }}</dt><dd class="mt-0.5 text-neutral-900">@php
+                            $method = $member->secondFactorMethod();
+                            $required = \App\Support\Settings\PlatformSettings::bool('security.otp_members_required');
+                        @endphp
+                        {{ match ($method) { 'authenticator' => __('Authenticator app'), 'email' => __('Emailed code'), default => __('Off') } }}@if ($method && $required && ! $member->hasAuthenticator() && ! $member->hasTwoFactorEnabled()) <span class="text-xs text-tertiary">{{ __('(required by the platform)') }}</span>@endif</dd></div>
                     </dl>
                     @unless ($canSeeContact)<p class="mt-4 rounded-lg bg-neutral-50 px-3 py-2 text-xs text-tertiary">{{ __('Full contact details are hidden for your role.') }}</p>@endunless
                 </x-panel>

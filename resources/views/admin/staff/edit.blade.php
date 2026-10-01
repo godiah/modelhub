@@ -1,6 +1,6 @@
 @php $isMe = $member->is(auth()->user()); @endphp
 <x-staff-layout :title="$member->name">
-    <div class="container mx-auto max-w-3xl space-y-6 px-4 py-8" x-data="{ deactivating: false }">
+    <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8" x-data="{ deactivating: false }">
         <a href="{{ route('admin.staff.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"><x-icon name="arrow-left" class="h-4 w-4" />{{ __('All staff') }}</a>
 
         <x-card class="rounded-2xl">
@@ -13,6 +13,7 @@
             </div>
         </x-card>
 
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         <form method="POST" action="{{ route('admin.staff.update', $member) }}">
             @csrf @method('PATCH')
             <x-panel :title="__('Roles')" :description="__('What this person can do. Changes take effect straight away.')">
@@ -33,6 +34,8 @@
             </div>
             @if ($member->is_active && ! $isMe)<p class="mt-3 text-xs text-tertiary">{{ __('Deactivating signs them out and stops them signing in. Their history stays in the activity log.') }}</p>@endif
         </x-panel>
+
+        </div>
 
         <x-confirm-dialog bind="deactivating" title="Deactivate this account" confirm-label="Deactivate" :action="route('admin.staff.deactivate', $member)" message="They are signed out and can no longer sign in. You can reactivate the account later." />
     </div>

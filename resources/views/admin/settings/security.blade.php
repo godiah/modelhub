@@ -1,10 +1,7 @@
 @php $field = 'block w-28 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25'; @endphp
 <x-staff-layout :title="__('Security settings')">
-    <div class="container mx-auto max-w-3xl space-y-6 px-4 py-8">
-        <div>
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Platform settings') }}</h1>
-            <p class="mt-1 text-sm text-tertiary">{{ __('Rules for the whole platform. Only Super admins see this page, and every change is recorded in the activity log.') }}</p>
-        </div>
+    <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8">
+        <x-staff.header class="!mb-0" :title="__('Platform settings')">{{ __('Rules for the whole platform. Only Super admins see this page, and every change is recorded in the activity log.') }}</x-staff.header>
 
         <nav aria-label="{{ __('Settings') }}" class="flex gap-1 border-b border-neutral-200">
             <a href="{{ route('admin.settings.security') }}" aria-current="page" class="-mb-px border-b-2 border-secondary px-3 py-2 text-sm font-medium text-neutral-900">{{ __('Security') }}</a>
@@ -13,7 +10,12 @@
         <form method="POST" action="{{ route('admin.settings.security.update') }}" class="space-y-6">
             @csrf @method('PATCH')
 
-            @foreach ($sections as $section)
+            {{-- Two balanced columns of settings groups (by position in SecuritySettings::sections()) --}}
+            <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
+                @foreach ([[0, 1, 3], [2, 4]] as $column)
+                    <div class="space-y-6">
+                        @foreach ($column as $position)
+                            @php $section = $sections[$position]; @endphp
                 <x-panel :title="__($section['title'])" :description="__($section['description'])">
                     <div class="divide-y divide-neutral-100">
                         @foreach ($section['keys'] as $key)
@@ -36,7 +38,10 @@
                         @endforeach
                     </div>
                 </x-panel>
-            @endforeach
+                        @endforeach
+                    </div>
+                @endforeach
+            </div>
 
             <div class="flex justify-end"><x-btn type="submit">{{ __('Save settings') }}</x-btn></div>
         </form>

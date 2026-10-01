@@ -1,6 +1,6 @@
 @php $canReview = auth()->user()->can('review sellers'); @endphp
 <x-staff-layout :title="$store->display_name">
-    <div class="container mx-auto max-w-6xl space-y-6 px-4 py-8" x-data="{ suspending: false, reinstating: false }">
+    <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8" x-data="{ suspending: false, reinstating: false }">
         <a href="{{ route('admin.stores.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"><x-icon name="arrow-left" class="h-4 w-4" />{{ __('All stores') }}</a>
 
         <x-card class="rounded-2xl">

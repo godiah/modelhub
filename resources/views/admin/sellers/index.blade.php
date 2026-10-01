@@ -4,10 +4,7 @@
 @endphp
 <x-staff-layout title="Seller applications">
     <div class="container mx-auto max-w-7xl px-4 py-8">
-        <div class="mb-6">
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Seller applications') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Members who want to sell 3D models. Approved sellers can list models; whoever you reject or suspend is shown your reason.') }}</p>
-        </div>
+        <x-staff.header :title="__('Seller applications')">{{ __('Members who want to sell 3D models. Approved sellers can list models; whoever you reject or suspend is shown your reason.') }}</x-staff.header>
 
         <nav aria-label="{{ __('Filter by status') }}" class="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
             <ul class="flex min-w-max items-center gap-2">

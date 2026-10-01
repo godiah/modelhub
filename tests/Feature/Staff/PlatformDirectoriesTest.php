@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ProductFile;
 use App\Models\ProductReview;
 use App\Models\SellerProfile;
+use App\Models\Staff;
 use App\Models\StaffActivity;
 use App\Models\User;
 use App\Notifications\ProjectRestoredNotification;
@@ -219,7 +220,7 @@ it('lists every store whatever its status, and shows one with its models', funct
     SellerProfile::factory()->suspended()->create(['display_name' => 'Suspended Studio']);
     Product::factory()->published()->create(['user_id' => $approved->user_id, 'title' => 'Oak armchair model']);
 
-    $this->actingAs(staffWith('Auditor'), 'staff')->get(route('admin.stores.index'))->assertOk()->assertSee('Approved Studio')->assertSee('Pending Studio')->assertSee('Rejected Studio')->assertSee('Suspended Studio')->assertSee('1 / 1 live');
+    $this->actingAs(staffWith('Auditor'), 'staff')->get(route('admin.stores.index'))->assertOk()->assertSee('Approved Studio')->assertSee('Pending Studio')->assertSee('Rejected Studio')->assertSee('Suspended Studio')->assertSee('Live / all models')->assertSee('1 / 1');
     $this->get(route('admin.stores.index', ['status' => 'suspended']))->assertSee('Suspended Studio')->assertDontSee('Approved Studio');
     $this->get(route('admin.stores.show', $approved))->assertOk()->assertSee('Approved Studio')->assertSee('Oak armchair model')->assertDontSee('Suspend store');
 
@@ -229,7 +230,7 @@ it('lists every store whatever its status, and shows one with its models', funct
 
 /** ---------------------------------------------------------------- the overview */
 it('shows platform numbers and trends to staff who may view the overview, and nobody else', function () {
-    Cache::forget('staff.platform-stats');
+    Cache::forget(PlatformStatsService::CACHE_KEY);
     User::factory()->count(3)->create();
     User::factory()->create(['created_at' => now()->subDays(10)]);
     openProject();
@@ -245,12 +246,60 @@ it('shows platform numbers and trends to staff who may view the overview, and no
 });
 
 it('caches the platform numbers for a few minutes', function () {
-    Cache::forget('staff.platform-stats');
+    Cache::forget(PlatformStatsService::CACHE_KEY);
     $first = app(PlatformStatsService::class)->get();
     User::factory()->count(2)->create();
 
     expect(app(PlatformStatsService::class)->get()['members']['total'])->toBe($first['members']['total']);
 
-    Cache::forget('staff.platform-stats');
+    Cache::forget(PlatformStatsService::CACHE_KEY);
     expect(app(PlatformStatsService::class)->get()['members']['total'])->toBe($first['members']['total'] + 2);
+});
+
+/** ---------------------------------------------------------------- sorting the lists */
+it('sorts projects by budget and applicants, newest first by default, and ignores unknown sorts', function () {
+    openProject(['title' => 'Cheap job', 'budget' => 100, 'created_at' => now()->subDays(1)]);
+    openProject(['title' => 'Pricey job', 'budget' => 9000, 'created_at' => now()->subDays(3)]);
+    openProject(['title' => 'Mid job', 'budget' => 500, 'created_at' => now()->subDays(2)]);
+    $this->actingAs(staffWith('Auditor'), 'staff');
+
+    $this->get(route('admin.projects.index'))->assertSeeInOrder(['Cheap job', 'Mid job', 'Pricey job']);
+    $this->get(route('admin.projects.index', ['sort' => 'budget']))->assertSeeInOrder(['Pricey job', 'Mid job', 'Cheap job']);
+    $this->get(route('admin.projects.index', ['sort' => 'budget', 'dir' => 'asc']))->assertSeeInOrder(['Cheap job', 'Mid job', 'Pricey job'])->assertSee('aria-sort="ascending"', false);
+    $this->get(route('admin.projects.index', ['sort' => 'title', 'dir' => 'asc']))->assertSeeInOrder(['Cheap job', 'Mid job', 'Pricey job']);
+    $this->get(route('admin.projects.index', ['sort' => 'nonsense', 'dir' => 'up']))->assertOk()->assertSeeInOrder(['Cheap job', 'Mid job', 'Pricey job']);
+});
+
+it('sorts the model catalogue by price and rating, keeping unrated models last', function () {
+    $store = SellerProfile::factory()->approved()->create();
+    Product::factory()->published()->create(['user_id' => $store->user_id, 'title' => 'Mid model', 'price_minor' => 5000, 'rating_avg' => 4.0, 'rating_count' => 3]);
+    Product::factory()->published()->create(['user_id' => $store->user_id, 'title' => 'Dear model', 'price_minor' => 90000, 'rating_avg' => null, 'rating_count' => 0]);
+    Product::factory()->published()->create(['user_id' => $store->user_id, 'title' => 'Cheap model', 'price_minor' => 100, 'rating_avg' => 5.0, 'rating_count' => 9]);
+    $this->actingAs(staffWith('Auditor'), 'staff');
+
+    $this->get(route('admin.catalogue.index', ['sort' => 'price']))->assertSeeInOrder(['Dear model', 'Mid model', 'Cheap model']);
+    $this->get(route('admin.catalogue.index', ['sort' => 'price', 'dir' => 'asc']))->assertSeeInOrder(['Cheap model', 'Mid model', 'Dear model']);
+    $this->get(route('admin.catalogue.index', ['sort' => 'rating']))->assertSeeInOrder(['Cheap model', 'Mid model', 'Dear model']);
+});
+
+it('sorts stores and staff by their columns', function () {
+    SellerProfile::factory()->approved()->create(['display_name' => 'Zed Store']);
+    SellerProfile::factory()->approved()->create(['display_name' => 'Alpha Store']);
+    $this->actingAs(staffWith('Auditor'), 'staff')->get(route('admin.stores.index', ['sort' => 'name', 'dir' => 'asc']))->assertSeeInOrder(['Alpha Store', 'Zed Store']);
+    $this->get(route('admin.stores.index', ['sort' => 'name', 'dir' => 'desc']))->assertSeeInOrder(['Zed Store', 'Alpha Store']);
+
+    Staff::factory()->create(['name' => 'Aaron Staffer']);
+    Staff::factory()->create(['name' => 'Zoe Staffer']);
+    $this->actingAs(staffWith('Super admin'), 'staff')->get(route('admin.staff.index', ['sort' => 'name', 'dir' => 'asc']))->assertSeeInOrder(['Aaron Staffer', 'Zoe Staffer']);
+    $this->get(route('admin.staff.index', ['sort' => 'name', 'dir' => 'desc']))->assertSeeInOrder(['Zoe Staffer', 'Aaron Staffer']);
+});
+
+it('sorts hires by amount', function () {
+    $small = hire('Small hire');
+    $big = hire('Big hire');
+    $small->update(['agreed_amount' => 100]);
+    $big->update(['agreed_amount' => 9000]);
+
+    $this->actingAs(staffWith('Auditor'), 'staff')->get(route('admin.engagements.index', ['sort' => 'amount']))->assertSeeInOrder(['Big hire', 'Small hire']);
+    $this->get(route('admin.engagements.index', ['sort' => 'amount', 'dir' => 'asc']))->assertSeeInOrder(['Small hire', 'Big hire']);
 });

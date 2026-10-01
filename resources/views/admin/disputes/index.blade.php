@@ -4,11 +4,8 @@
     $canResolve = auth()->user()->can('resolve disputes');
 @endphp
 <x-staff-layout title="Disputed engagements">
-    <div class="container mx-auto max-w-5xl px-4 py-8">
-        <div class="mb-6">
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Disputed engagements') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Freelancers dispute a payment decision after a project is cancelled. Take one on, read both sides and the evidence, then settle it with a final amount. The dispute that has waited longest is at the top.') }}</p>
-        </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <x-staff.header :title="__('Disputed engagements')">{{ __('Freelancers dispute a payment decision after a project is cancelled. Take one on, read both sides and the evidence, then settle it with a final amount. The dispute that has waited longest is at the top.') }}</x-staff.header>
 
         <nav aria-label="{{ __('Filter by status') }}" class="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
             <ul class="flex min-w-max items-center gap-2">

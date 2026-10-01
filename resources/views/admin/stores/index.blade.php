@@ -1,49 +1,43 @@
+@php
+    $tabs = collect($statuses)->map(fn ($label, $key) => ['label' => $label, 'count' => $counts[$key], 'on' => $status === $key, 'url' => route('admin.stores.index', array_filter(['status' => $key, 'q' => $term, 'sort' => request('sort'), 'dir' => request('dir')]))])->values()->all();
+    $chips = [$term !== '' ? ['label' => __('Search: :term', ['term' => $term]), 'remove' => ['q']] : null];
+    $filtered = $term !== '' || $status !== 'all';
+    $columns = [
+        ['key' => 'name', 'label' => 'Store', 'sort' => 'name'],
+        ['key' => 'models', 'label' => 'Live / all models', 'sort' => 'models', 'first' => 'desc', 'align' => 'right'],
+        ['key' => 'rating', 'label' => 'Rating', 'sort' => 'rating', 'first' => 'desc', 'class' => 'hidden md:table-cell'],
+        ['key' => 'applied', 'label' => 'Applied', 'sort' => 'applied', 'first' => 'desc', 'align' => 'right', 'class' => 'hidden sm:table-cell'],
+    ];
+@endphp
 <x-staff-layout :title="__('All stores')">
-    <div class="container mx-auto max-w-6xl px-4 py-8">
-        <div class="mb-6">
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('All stores') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Every seller, whatever their status. Applications waiting for a decision are in the Seller applications queue.') }}</p>
-        </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <x-staff.header :title="__('All stores')" :description="__('Every seller, whatever their status. Applications waiting for a decision are in the Seller applications queue.')" />
 
-        <nav aria-label="{{ __('Filter by status') }}" class="-mx-4 mb-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-            <ul class="flex min-w-max items-center gap-2">
-                @foreach ($statuses as $key => $label)
-                    @php $on = $status === $key; @endphp
-                    <li><a href="{{ route('admin.stores.index', array_filter(['status' => $key, 'q' => $term])) }}" @if ($on) aria-current="true" @endif
-                        @class(['inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40', 'border-teal-600 bg-teal-600 text-white' => $on, 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50' => ! $on])>
-                        {{ __($label) }}<span @class(['text-xs tabular-nums', 'text-teal-100' => $on, 'text-tertiary' => ! $on])>{{ $counts[$key] }}</span></a></li>
-                @endforeach
-            </ul>
-        </nav>
-
-        <form method="GET" action="{{ route('admin.stores.index') }}" role="search" class="mb-5 flex gap-2">
-            <input type="hidden" name="status" value="{{ $status }}">
-            <label for="q" class="sr-only">{{ __('Search stores') }}</label>
-            <input id="q" type="search" name="q" value="{{ $term }}" placeholder="{{ __('Store or seller name') }}" class="min-w-0 flex-1 rounded-xl border border-neutral-300 px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25 sm:max-w-sm">
-            <x-btn type="submit" variant="secondary">{{ __('Search') }}</x-btn>
-        </form>
+        <x-staff.toolbar :tabs="$tabs" :search="$term" :placeholder="__('Store or seller name')" :chips="$chips" :action="route('admin.stores.index')" />
 
         @if ($stores->isEmpty())
-            <x-empty-state icon="tag" :title="__('Nothing here')" :description="__('No stores match this filter.')" />
+            <x-empty-state icon="tag" :title="$filtered ? __('No stores match') : __('No stores yet')" :description="$filtered ? __('Try a different search or filter.') : __('Stores appear here as members apply to sell.')">
+                @if ($filtered)<x-btn variant="secondary" :href="route('admin.stores.index')" wire:navigate>{{ __('Clear filters') }}</x-btn>@endif
+            </x-empty-state>
         @else
-            <x-card clip>
-                <ul class="divide-y divide-neutral-100">
-                    @foreach ($stores as $store)
-                        <li>
-                            <a href="{{ route('admin.stores.show', $store) }}" class="flex flex-wrap items-center gap-4 px-5 py-4 hover:bg-neutral-50 focus:outline-none focus-visible:bg-neutral-50">
-                                <x-store-avatar :store="$store" size="h-11 w-11" />
-                                <div class="min-w-0 flex-1">
-                                    <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-neutral-900">{{ $store->display_name }}<x-badge :tone="match ($store->status->value) { 'approved' => 'green', 'pending' => 'amber', 'rejected' => 'neutral', default => 'red' }" class="px-2 py-0.5 text-xs font-medium">{{ ucfirst($store->status->value) }}</x-badge>@if ($store->user?->isSuspended())<x-badge tone="red" class="px-2 py-0.5 text-xs font-medium">{{ __('Member suspended') }}</x-badge>@endif</p>
-                                    <p class="mt-0.5 truncate text-xs text-tertiary">{{ $store->user?->name }} · {{ __('applied :date', ['date' => ($store->submitted_at ?? $store->created_at)->format('M j, Y')]) }}</p>
-                                </div>
-                                <p class="w-28 text-right text-xs tabular-nums text-tertiary">{{ $store->published_count }} / {{ $store->products_count }} {{ __('live') }}</p>
-                                <p class="hidden w-28 text-right md:block">@if ($store->hasPublicRating())<x-models.stars :rating="$store->rating_avg" :count="$store->rating_count" size="h-3.5 w-3.5" />@else<span class="text-xs text-tertiary">{{ $store->rating_count ? trans_choice(':count review|:count reviews', $store->rating_count, ['count' => $store->rating_count]) : __('No reviews') }}</span>@endif</p>
+            <x-staff.table :columns="$columns" :sort="$sort" :dir="$dir" :paginator="$stores" :summary="trans_choice(':count store|:count stores', $stores->total(), ['count' => number_format($stores->total())])">
+                @foreach ($stores as $store)
+                    <x-staff.row :href="route('admin.stores.show', $store)">
+                        <td class="px-4">
+                            <a href="{{ route('admin.stores.show', $store) }}" wire:navigate class="flex items-center gap-3 focus:outline-none focus-visible:underline">
+                                <x-store-avatar :store="$store" size="h-10 w-10" />
+                                <span class="min-w-0">
+                                    <span class="flex flex-wrap items-center gap-2 font-semibold text-neutral-900">{{ $store->display_name }}<x-badge :tone="match ($store->status->value) { 'approved' => 'green', 'pending' => 'amber', 'rejected' => 'neutral', default => 'red' }" class="px-2 py-0.5 text-xs font-medium">{{ ucfirst($store->status->value) }}</x-badge>@if ($store->user?->isSuspended())<x-badge tone="red" class="px-2 py-0.5 text-xs font-medium">{{ __('Owner suspended') }}</x-badge>@endif</span>
+                                    <span class="block truncate text-xs font-normal text-tertiary">{{ $store->user?->name }}</span>
+                                </span>
                             </a>
-                        </li>
-                    @endforeach
-                </ul>
-            </x-card>
-            <x-pager :paginator="$stores" />
+                        </td>
+                        <td class="whitespace-nowrap px-4 text-right tabular-nums text-neutral-700">{{ $store->published_count }} / {{ $store->products_count }}</td>
+                        <td class="hidden whitespace-nowrap px-4 md:table-cell">@if ($store->hasPublicRating())<x-models.stars :rating="$store->rating_avg" :count="$store->rating_count" size="h-3.5 w-3.5" />@else<span class="text-xs text-tertiary">{{ $store->rating_count ? trans_choice(':count review|:count reviews', $store->rating_count, ['count' => $store->rating_count]) : __('No reviews') }}</span>@endif</td>
+                        <td class="hidden whitespace-nowrap px-4 text-right text-neutral-600 sm:table-cell">{{ ($store->submitted_at ?? $store->created_at)->format('M j, Y') }}</td>
+                    </x-staff.row>
+                @endforeach
+            </x-staff.table>
         @endif
     </div>
 </x-staff-layout>
