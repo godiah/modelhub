@@ -8,6 +8,8 @@
         ['key' => 'roles', 'label' => 'Roles', 'class' => 'hidden sm:table-cell'],
         ['key' => 'seen', 'label' => 'Last signed in', 'sort' => 'seen', 'first' => 'desc', 'align' => 'right'],
     ];
+    $actions = \App\Support\Staff\BulkActions::forPage('staff', auth()->user());
+    $others = $members->reject(fn ($m) => $m->is(auth()->user()));
 @endphp
 <x-staff-layout :title="__('Staff')">
     <div class="container mx-auto max-w-7xl px-4 py-8">
@@ -22,9 +24,10 @@
                 @if ($filtered)<x-btn variant="secondary" :href="route('admin.staff.index')" wire:navigate>{{ __('Clear filters') }}</x-btn>@endif
             </x-empty-state>
         @else
-            <x-staff.table :columns="$columns" :sort="$sort" :dir="$dir" :paginator="$members" :summary="trans_choice(':count account|:count accounts', $members->total(), ['count' => number_format($members->total())])">
+            <x-staff.bulk :actions="$actions" :ids="$others->pluck('id')->all()">
+            <x-staff.table :selectable="$actions !== []" :columns="$columns" :sort="$sort" :dir="$dir" :paginator="$members" :summary="trans_choice(':count account|:count accounts', $members->total(), ['count' => number_format($members->total())])">
                 @foreach ($members as $member)
-                    <x-staff.row :href="route('admin.staff.edit', $member)">
+                    <x-staff.row :href="route('admin.staff.edit', $member)" :select="$actions ? ($member->is(auth()->user()) ? false : $member->id) : null">
                         <td class="px-4">
                             <a href="{{ route('admin.staff.edit', $member) }}" wire:navigate class="flex items-center gap-3 focus:outline-none focus-visible:underline">
                                 <x-user-avatar :user="$member" size="h-9 w-9" />
@@ -39,6 +42,7 @@
                     </x-staff.row>
                 @endforeach
             </x-staff.table>
+            </x-staff.bulk>
         @endif
     </div>
 </x-staff-layout>

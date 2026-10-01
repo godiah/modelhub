@@ -2,6 +2,10 @@
     $pills = ['reported' => __('Reported'), 'hidden' => __('Hidden'), 'all' => __('All')];
     $reasons = \App\Models\ProductReview::REPORT_REASONS;
 @endphp
+@php
+    $actions = $reviews->filter(fn ($r) => $r->isVisible() && $r->open_reports_count > 0)->isNotEmpty() ? \App\Support\Staff\BulkActions::forPage('reviews', auth()->user()) : [];
+    $bulkIds = $reviews->filter(fn ($r) => $r->isVisible() && $r->open_reports_count > 0)->pluck('id')->all();
+@endphp
 <x-staff-layout title="Review moderation">
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <x-staff.header :title="__('Review moderation')">{{ __('Buyers report reviews that look like spam, abuse or fakes. Hide one that breaks the rules (it stops counting towards the rating and its author is told why), or dismiss the reports and leave it up.') }}</x-staff.header>
@@ -28,9 +32,13 @@
         @if ($reviews->isEmpty())
             <x-empty-state icon="flag" :title="__('Nothing here')" :description="$status === 'reported' ? __('No reviews are waiting on a report.') : __('No reviews match this filter.')" />
         @else
+            <x-staff.bulk :actions="$actions" :ids="$bulkIds">
+            @if ($actions)<x-staff.bulk-selectall />@endif
             <div class="space-y-4">
                 @foreach ($reviews as $review)
-                    <article x-data="{ hiding: false }" class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+                    <div class="flex items-start gap-3">
+                    @if ($actions && $review->isVisible() && $review->open_reports_count > 0)<div class="pt-6"><x-staff.bulk-check :value="$review->id" :label="__('Select the review by :name', ['name' => $review->author->name])" /></div>@elseif ($actions)<div class="w-4 shrink-0"></div>@endif
+                    <article x-data="{ hiding: false }" class="min-w-0 flex-1 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -88,8 +96,10 @@
                                 class="mt-3 block w-full resize-none rounded-xl border border-neutral-300 px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25"></textarea>
                         </x-confirm-dialog>
                     </article>
+                    </div>
                 @endforeach
             </div>
+            </x-staff.bulk>
             <x-pager :paginator="$reviews" />
         @endif
     </div>

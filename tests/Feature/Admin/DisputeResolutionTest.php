@@ -1,12 +1,7 @@
 <?php
 
 use App\Enums\DisputeStatus;
-use App\Enums\EngagementStatus;
 use App\Helpers\Engagements\EngagementNotificationHelper;
-use App\Models\JobApplication;
-use App\Models\JobCancellation;
-use App\Models\JobEngagement;
-use App\Models\JobPaymentDispute;
 use App\Models\StaffActivity;
 use App\Models\User;
 use App\Notifications\DisputeCreatedNotification;
@@ -18,42 +13,6 @@ use Illuminate\Support\Facades\Storage;
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
 });
-
-function makeDisputedEngagement(float $netAmount = 1000): array
-{
-    $application = JobApplication::factory()->hired()->create(['net_amount' => $netAmount]);
-
-    $engagement = JobEngagement::create([
-        'application_id' => $application->id,
-        'status' => EngagementStatus::Disputed,
-        'agreed_amount' => $application->offer_amount,
-        'service_fee' => $application->service_fee,
-        'net_amount' => $netAmount,
-    ]);
-
-    // A real dispute is always preceded by a processed partial payment, which already set
-    // partial_payment_amount on the cancellation — mirror that here so resolveDispute()'s
-    // null-$finalAmount fallback (partial_payment_amount) has a real value to fall back to.
-    $cancellation = JobCancellation::create([
-        'engagement_id' => $engagement->id,
-        'initiator_id' => $application->applicant_id,
-        'cancellation_type' => 'dispute',
-        'reason_category' => 'other',
-        'reason_details' => 'test reason',
-        'partial_payment_amount' => $netAmount * 0.5,
-        'is_dispute' => true,
-    ]);
-
-    $dispute = JobPaymentDispute::create([
-        'cancellation_id' => $cancellation->id,
-        'disputed_by' => $application->applicant_id,
-        'dispute_reason' => 'incorrect_amount',
-        'dispute_details' => 'test details',
-        'status' => DisputeStatus::Pending,
-    ]);
-
-    return compact('application', 'engagement', 'cancellation', 'dispute');
-}
 
 test('super admins reach the whole portal; members and signed-out visitors are sent to the staff sign-in', function () {
     $super = staffWith('Super admin');

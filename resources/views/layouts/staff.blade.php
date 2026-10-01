@@ -35,7 +35,10 @@
         <div class="flex min-h-screen flex-col transition-[padding] duration-200 ease-out lg:pl-64 lg:[.sidebar-collapsed_&]:pl-[72px]">
             <x-staff-topbar :crumbs="$crumbs" :staff="$staff" />
 
-            <main class="flex-1">{{ $slot }}</main>
+            <main class="flex-1">
+                @if (session('bulk_result'))<div class="container mx-auto max-w-7xl px-4 pt-6"><x-staff.bulk-report :result="session('bulk_result')" /></div>@endif
+                {{ $slot }}
+            </main>
 
             <footer class="border-t border-neutral-200/70 px-4 py-4 text-xs text-neutral-500 sm:px-6 lg:px-8">
                 {{ config('app.name') }} {{ __('staff portal') }} · {{ __('Your actions here are recorded in the activity log.') }}

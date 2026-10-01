@@ -2,6 +2,10 @@
 @php
     $pills = ['pending' => __('Pending'), 'approved' => __('Approved'), 'rejected' => __('Not approved'), 'suspended' => __('Suspended'), 'all' => __('All')];
 @endphp
+@php
+    $actions = $sellers->filter(fn ($s) => $s->status === SellerStatus::Pending)->isNotEmpty() ? \App\Support\Staff\BulkActions::forPage('sellers', auth()->user()) : [];
+    $bulkIds = $sellers->filter(fn ($s) => $s->status === SellerStatus::Pending)->pluck('id')->all();
+@endphp
 <x-staff-layout title="Seller applications">
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <x-staff.header :title="__('Seller applications')">{{ __('Members who want to sell 3D models. Approved sellers can list models; whoever you reject or suspend is shown your reason.') }}</x-staff.header>
@@ -28,9 +32,13 @@
         @if ($sellers->isEmpty())
             <x-empty-state icon="cube" :title="__('Nothing here')" :description="$status === 'pending' ? __('No applications are waiting for review.') : __('No sellers match this filter.')" />
         @else
+            <x-staff.bulk :actions="$actions" :ids="$bulkIds">
+            @if ($actions)<x-staff.bulk-selectall />@endif
             <div class="space-y-4">
                 @foreach ($sellers as $seller)
-                    <article x-data="{ approving: false, rejecting: false, suspending: false }" class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+                    <div class="flex items-start gap-3">
+                    @if ($actions && $seller->status === SellerStatus::Pending)<div class="pt-6"><x-staff.bulk-check :value="$seller->id" :label="__('Select :name', ['name' => $seller->display_name])" /></div>@elseif ($actions)<div class="w-4 shrink-0"></div>@endif
+                    <article x-data="{ approving: false, rejecting: false, suspending: false }" class="min-w-0 flex-1 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="flex min-w-0 items-start gap-3">
                                 <x-store-avatar :store="$seller" size="h-12 w-12" />
@@ -106,8 +114,10 @@
                                 class="mt-3 block w-full resize-none rounded-xl border border-neutral-300 px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25"></textarea>
                         </x-confirm-dialog>
                     </article>
+                    </div>
                 @endforeach
             </div>
+            </x-staff.bulk>
 
             <x-pager :paginator="$sellers" />
         @endif
