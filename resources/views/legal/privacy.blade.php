@@ -19,7 +19,7 @@
         'contact' => __('Contact us'),
     ];
 @endphp
-<x-app-layout title="Privacy Policy" crumb="Privacy policy">
+<x-app-layout title="Privacy Policy">
     <x-legal.document :title="__('Privacy Policy')" :sections="$sections" :effective="$effective" :updated="$effective"
         :intro="__('This policy explains what personal information :app collects, why, who can see it, and the choices you have.', ['app' => $app])">
 

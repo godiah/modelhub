@@ -39,15 +39,15 @@ class LandingMarketplaceService
     }
 
     /**
-     * "Browse by type": the catalogue's own filters (free, animated, rigged, PBR, low-poly, print-ready) as tiles,
+     * "Browse by type": the catalogue's own filters (free, animated, rigged, PBR, low-poly, textures, VR/AR, print-ready) as tiles,
      * each with the number of published models and the newest one's preview as its cover. Types with none are left out.
      *
      * @return Collection<int, array{key: string, label: string, count: int, cover: ?ProductImage}>
      */
     public function types(): Collection
     {
-        $columns = ['animated' => 'is_animated', 'rigged' => 'is_rigged', 'pbr' => 'is_pbr', 'low_poly' => 'is_low_poly', 'print' => 'is_print_ready'];
-        $labels = ['free' => 'Free', 'animated' => 'Animated', 'rigged' => 'Rigged', 'pbr' => 'PBR', 'low_poly' => 'Low-poly', 'print' => '3D print ready'];
+        $columns = ['animated' => 'is_animated', 'rigged' => 'is_rigged', 'pbr' => 'is_pbr', 'low_poly' => 'is_low_poly', 'textures' => 'has_textures', 'vr' => 'is_vr_ready', 'print' => 'is_print_ready'];
+        $labels = ['free' => 'Free', 'animated' => 'Animated', 'rigged' => 'Rigged', 'pbr' => 'PBR', 'low_poly' => 'Low-poly', 'textures' => 'Textures', 'vr' => 'VR / AR ready', 'print' => '3D print ready'];
         $scope = fn ($query, string $key) => $key === 'free' ? $query->where('price_minor', 0) : $query->where($columns[$key], true);
 
         $used = [];

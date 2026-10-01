@@ -147,6 +147,7 @@ it('shows browse by type with real counts, linking to the catalogue filters', fu
     landingModel(['title' => 'Walking robot', 'is_animated' => true, 'is_rigged' => true]);
     landingModel(['title' => 'Metal crate', 'is_pbr' => true, 'price_minor' => 0]);
     landingModel(['title' => 'Plain chair']);
+    landingModel(['title' => 'Textured lamp', 'has_textures' => true, 'is_vr_ready' => true]);
     landingModel(['title' => 'Draft rigged', 'is_rigged' => true])->update(['status' => ProductStatus::Draft]);
 
     $html = $this->get('/')->assertOk()->assertSee('Browse by type')->getContent();
@@ -157,10 +158,23 @@ it('shows browse by type with real counts, linking to the catalogue filters', fu
         ->toContain(route('models.index', ['features' => ['rigged']]))
         ->toContain(route('models.index', ['features' => ['pbr']]))
         ->toContain(route('models.index', ['features' => ['free']]))
+        ->toContain(route('models.index', ['features' => ['textures']]))
+        ->toContain(route('models.index', ['features' => ['vr']]))
+        ->toContain('VR / AR ready')
         ->not->toContain(route('models.index', ['features' => ['low_poly']]))
         ->not->toContain(route('models.index', ['features' => ['print']]));
     // Rigged counts the published one only
     expect(preg_match('/Rigged<\/span>\s*<span[^>]*>1 model</', $types))->toBe(1);
+});
+
+it('wraps more than six types into even rows instead of leaving one stranded', function () {
+    landingModel(['title' => 'All-rounder', 'price_minor' => 0, 'is_animated' => true, 'is_rigged' => true, 'is_pbr' => true, 'is_low_poly' => true, 'has_textures' => true, 'is_vr_ready' => true, 'is_print_ready' => true]);
+    $html = $this->get('/')->assertOk()->getContent();
+    expect($html)->toContain('sm:grid-cols-3 lg:grid-cols-4')->not->toContain('auto-fit');
+
+    Product::query()->update(['is_print_ready' => false, 'is_vr_ready' => false]);
+    $html = $this->get('/')->assertOk()->getContent();
+    expect($html)->toContain('auto-fit')->not->toContain('sm:grid-cols-3 lg:grid-cols-4');
 });
 
 it('shows browse by format from the files on published models only', function () {

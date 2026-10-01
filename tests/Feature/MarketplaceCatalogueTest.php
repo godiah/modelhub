@@ -204,6 +204,22 @@ it('filters by free, features and price, and sorts', function () {
     $this->get(route('models.index', ['features' => ['bogus']]))->assertSessionHasErrors('features.0');
 });
 
+it('filters by textures and VR / AR ready, alone and together with other features', function () {
+    liveModel(['title' => 'Textured crate', 'has_textures' => true]);
+    liveModel(['title' => 'Headset ready robot', 'is_vr_ready' => true, 'is_rigged' => true]);
+    liveModel(['title' => 'Textured VR lamp', 'has_textures' => true, 'is_vr_ready' => true]);
+    liveModel(['title' => 'Bare mesh rock']);
+
+    $this->get(route('models.index', ['features' => ['textures']]))->assertOk()
+        ->assertSee('Textured crate')->assertSee('Textured VR lamp')->assertDontSee('Headset ready robot')->assertDontSee('Bare mesh rock');
+    $this->get(route('models.index', ['features' => ['vr']]))->assertOk()
+        ->assertSee('Headset ready robot')->assertSee('Textured VR lamp')->assertDontSee('Textured crate')->assertDontSee('Bare mesh rock');
+    $this->get(route('models.index', ['features' => ['textures', 'vr']]))->assertOk()
+        ->assertSee('Textured VR lamp')->assertDontSee('Textured crate')->assertDontSee('Headset ready robot');
+
+    $this->get(route('models.index', ['features' => ['vr']]))->assertSee('value="textures"', false)->assertSee('value="vr"', false)->assertSee('VR / AR');
+});
+
 it('paginates the catalogue', function () {
     foreach (range(1, 26) as $i) {
         liveModel(['title' => "Catalogue model number {$i}"], ['fbx'], false);

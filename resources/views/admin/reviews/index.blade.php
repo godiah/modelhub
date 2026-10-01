@@ -2,7 +2,7 @@
     $pills = ['reported' => __('Reported'), 'hidden' => __('Hidden'), 'all' => __('All')];
     $reasons = \App\Models\ProductReview::REPORT_REASONS;
 @endphp
-<x-app-layout title="Review moderation" crumb="Review moderation">
+<x-app-layout title="Review moderation">
     <div class="container mx-auto max-w-5xl px-4 py-8">
         <div class="mb-6">
             <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Review moderation') }}</h1>

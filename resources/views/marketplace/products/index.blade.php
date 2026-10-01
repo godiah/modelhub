@@ -3,7 +3,7 @@
     $pills = ['all' => __('All')] + collect(ProductStatus::cases())->mapWithKeys(fn ($case) => [$case->value => __($case->label())])->all();
     $fieldClass = 'block w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors hover:border-neutral-400 focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25';
 @endphp
-<x-app-layout title="My models" crumb="My models">
+<x-app-layout title="My models">
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>

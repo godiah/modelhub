@@ -7,6 +7,7 @@ use App\Models\JobCancellation;
 use App\Models\JobEngagement;
 use App\Models\JobPaymentDispute;
 use App\Models\User;
+use App\Notifications\DisputeCreatedNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
 
 beforeEach(function () {
@@ -229,8 +230,8 @@ test('the disputes index only shows "Assign to Me" to users who can actually res
     $manager->assignRole('dispute_manager');
     makeDisputedEngagement();
 
-    $this->actingAs($support)->get(route('admin.disputes.index'))->assertOk()->assertDontSee('Assign to Me');
-    $this->actingAs($manager)->get(route('admin.disputes.index'))->assertOk()->assertSee('Assign to Me');
+    $this->actingAs($support)->get(route('admin.disputes.index'))->assertOk()->assertDontSee('Assign to me');
+    $this->actingAs($manager)->get(route('admin.disputes.index'))->assertOk()->assertSee('Assign to me');
 });
 
 test('staff nav links only show for users who hold the matching permission', function () {
@@ -258,4 +259,111 @@ test('an invalid role value on the staff screen is rejected', function () {
     $this->actingAs($admin)
         ->patch(route('admin.staff.update-role', $staffCandidate), ['role' => 'super_admin'])
         ->assertSessionHasErrors('role');
+});
+
+/** ---------------------------------------------------------------- the disputes queue page */
+function staffWith(string $role): User
+{
+    $user = User::factory()->create();
+    $user->assignRole($role);
+
+    return $user;
+}
+
+test('the queue shows each dispute with its job, both parties, reason, amount and details', function () {
+    ['application' => $application, 'dispute' => $dispute] = makeDisputedEngagement(2000);
+    $dispute->update(['dispute_details' => 'The amount ignores two approved deliverables']);
+
+    $this->actingAs(staffWith('dispute_manager'))->get(route('admin.disputes.index'))->assertOk()
+        ->assertSee($application->job->title)
+        ->assertSee($application->poster->name)
+        ->assertSee($application->applicant->name)
+        ->assertSee('Incorrect Amount')
+        ->assertSee('1,000.00')
+        ->assertSee('The amount ignores two approved deliverables')
+        ->assertSee('Not assigned to anyone yet')
+        ->assertSee(route('engagements.show-disputed', $dispute->cancellation->engagement_id), false);
+});
+
+test('anyone who can view disputes can open one, whoever it is assigned to', function () {
+    ['dispute' => $dispute] = makeDisputedEngagement();
+    $manager = staffWith('dispute_manager');
+    $dispute->assignAdmin(staffWith('admin')->id);
+    $url = route('engagements.show-disputed', $dispute->cancellation->engagement_id);
+
+    foreach ([staffWith('support'), $manager] as $viewer) {
+        $this->actingAs($viewer)->get(route('admin.disputes.index', ['status' => 'under_review']))->assertOk()->assertSee('Open dispute')->assertSee($url, false);
+        $this->actingAs($viewer)->get($url)->assertOk();
+    }
+});
+
+test('the status filter is whitelisted, defaults to pending, and shows counts on every pill', function () {
+    makeDisputedEngagement();
+    ['dispute' => $assigned] = makeDisputedEngagement();
+    $assigned->assignAdmin(staffWith('admin')->id);
+    $admin = staffWith('admin');
+
+    $html = $this->actingAs($admin)->get(route('admin.disputes.index'))->assertOk()->getContent();
+    expect(substr_count($html, 'Open dispute'))->toBe(1);
+
+    $this->actingAs($admin)->get(route('admin.disputes.index', ['status' => 'under_review']))->assertOk()->assertSee('Assigned to ');
+    $this->actingAs($admin)->get(route('admin.disputes.index', ['status' => 'resolved']))->assertOk()->assertSee('No disputes have been resolved yet.');
+    expect(substr_count($this->actingAs($admin)->get(route('admin.disputes.index', ['status' => 'all']))->getContent(), 'Open dispute'))->toBe(2);
+    // An unknown status falls back to pending instead of filtering by nonsense
+    expect(substr_count($this->actingAs($admin)->get(route('admin.disputes.index', ['status' => 'bogus']))->getContent(), 'Open dispute'))->toBe(1);
+});
+
+test('the queue lists the dispute that has waited longest first, then resolved ones newest first', function () {
+    ['dispute' => $newer, 'application' => $newerApp] = makeDisputedEngagement();
+    ['dispute' => $older, 'application' => $olderApp] = makeDisputedEngagement();
+    ['dispute' => $done, 'application' => $doneApp] = makeDisputedEngagement();
+    $older->forceFill(['created_at' => now()->subDays(5)])->save();
+    $done->update(['status' => DisputeStatus::Resolved, 'resolved_at' => now(), 'resolved_by' => staffWith('admin')->id]);
+
+    $this->actingAs(staffWith('admin'))->get(route('admin.disputes.index', ['status' => 'all']))->assertOk()
+        ->assertSeeInOrder([$olderApp->job->title, $newerApp->job->title, $doneApp->job->title])
+        ->assertSee('waiting 5 days');
+});
+
+test('assigning moves a dispute to under review and says who has it; a resolved dispute cannot be assigned', function () {
+    ['dispute' => $dispute] = makeDisputedEngagement();
+    $manager = staffWith('dispute_manager');
+
+    $this->actingAs($manager)->post(route('admin.disputes.assign', $dispute))->assertSessionHas('success');
+    expect($dispute->fresh())->status->toBe(DisputeStatus::UnderReview)->admin_assigned->toBe($manager->id);
+
+    $this->actingAs($manager)->get(route('admin.disputes.index', ['status' => 'under_review']))->assertOk()->assertSee('Assigned to you');
+    $this->actingAs(staffWith('support'))->get(route('admin.disputes.index', ['status' => 'under_review']))->assertOk()->assertSee('Assigned to '.$manager->name);
+
+    $dispute->update(['status' => DisputeStatus::Resolved]);
+    $this->actingAs($manager)->post(route('admin.disputes.assign', $dispute))->assertSessionHas('error');
+    expect($dispute->fresh()->status)->toBe(DisputeStatus::Resolved);
+});
+
+test('resolved disputes show who resolved them and the final amount', function () {
+    ['dispute' => $dispute] = makeDisputedEngagement(1000);
+    $manager = staffWith('dispute_manager');
+    $dispute->update(['status' => DisputeStatus::Resolved, 'resolved_at' => now(), 'resolved_by' => $manager->id, 'resolution_amount' => 420.50]);
+
+    $this->actingAs($manager)->get(route('admin.disputes.index', ['status' => 'resolved']))->assertOk()
+        ->assertSee('Resolved '.now()->format('M j, Y').' by '.$manager->name)
+        ->assertSee('Settled at')->assertSee('420.50')->assertDontSee('Assign to me');
+});
+
+test('only people who can resolve disputes may submit a resolution', function () {
+    ['dispute' => $dispute] = makeDisputedEngagement();
+
+    $this->actingAs(staffWith('support'))->post(route('admin.disputes.resolve', $dispute), ['resolution_notes' => 'Trying anyway.'])->assertForbidden();
+    expect($dispute->fresh()->status)->toBe(DisputeStatus::Pending);
+});
+
+test('old dispute links from earlier notifications still land on the dispute, and new ones point there directly', function () {
+    ['cancellation' => $cancellation, 'engagement' => $engagement, 'application' => $application] = makeDisputedEngagement();
+    $admin = staffWith('admin');
+
+    $this->actingAs($admin)->get('/admin/disputes/'.$cancellation->id)->assertRedirect(route('engagements.show-disputed', $engagement->id));
+    $this->actingAs(User::factory()->create())->get('/admin/disputes/'.$cancellation->id)->assertForbidden();
+
+    $notification = new DisputeCreatedNotification($engagement->fresh(), $cancellation->fresh());
+    expect($notification->toDatabase($admin)['url'])->toBe(route('engagements.show-disputed', $engagement->id));
 });

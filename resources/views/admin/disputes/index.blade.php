@@ -1,520 +1,114 @@
-@use('App\Enums\DisputeStatus')
-<x-app-layout>
-    <!-- Main Container with Background Pattern -->
-    <div class="relative overflow-hidden">
-        <!-- Background Pattern -->
-        {{-- <div class="absolute inset-0 opacity-5">
-            <svg class="w-full h-full" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <pattern id="admin-grid" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" stroke-width="0.5" />
-                </pattern>
-                <rect width="100" height="100" fill="url(#admin-grid)" />
-            </svg>
-        </div> --}}
+@php
+    $pills = ['pending' => __('Pending'), 'under_review' => __('Under review'), 'resolved' => __('Resolved'), 'all' => __('All')];
+    $tones = ['pending' => 'amber', 'under_review' => 'blue', 'resolved' => 'green'];
+    $canResolve = auth()->user()->can('resolve disputes');
+@endphp
+<x-app-layout title="Disputed engagements">
+    <div class="container mx-auto max-w-5xl px-4 py-8">
+        <div class="mb-6">
+            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Disputed engagements') }}</h1>
+            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Freelancers dispute a payment decision after a project is cancelled. Take one on, read both sides and the evidence, then settle it with a final amount. The dispute that has waited longest is at the top.') }}</p>
+        </div>
 
-        <div class="relative z-10 max-w-7xl mx-auto p-8">
-            <!-- Header Section -->
-            <div class="mb-8">
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-neutral-200/50 p-6">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <!-- Admin Icon -->
-                            <div class="bg-gradient-to-br from-primary to-primary/80 rounded-xl p-3 shadow-lg">
-                                <x-icon name="shield-check-2" class="h-8 w-8 text-white" />
+        <nav aria-label="{{ __('Filter by status') }}" class="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+            <ul class="flex min-w-max items-center gap-2">
+                @foreach ($pills as $key => $label)
+                    @php $active = $status === $key; @endphp
+                    <li>
+                        <a href="{{ route('admin.disputes.index', ['status' => $key]) }}" @if ($active) aria-current="true" @endif
+                            @class([
+                                'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40',
+                                'border-teal-600 bg-teal-600 text-white' => $active,
+                                'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50' => ! $active,
+                            ])>
+                            {{ $label }}
+                            <span @class(['text-xs tabular-nums', 'text-teal-100' => $active, 'text-tertiary' => ! $active])>{{ $counts[$key] }}</span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
+
+        @if ($disputes->isEmpty())
+            <x-empty-state icon="shield-check" :title="__('Nothing here')" :description="match ($status) {
+                'pending' => __('No disputes are waiting for someone to take them on.'),
+                'under_review' => __('No disputes are being reviewed right now.'),
+                'resolved' => __('No disputes have been resolved yet.'),
+                default => __('No payment disputes have been filed.'),
+            }" />
+        @else
+            <div class="space-y-4">
+                @foreach ($disputes as $dispute)
+                    @php
+                        $engagement = $dispute->cancellation->engagement;
+                        $application = $engagement->application;
+                        $resolved = $dispute->isResolved();
+                        $mine = $dispute->admin_assigned === auth()->id();
+                        $filedAs = $dispute->disputed_by === $application->applicant_id ? __('freelancer') : __('client');
+                        $waitingDays = $resolved ? 0 : (int) $dispute->created_at->diffInDays(now());
+                        $openUrl = route('engagements.show-disputed', $engagement->id);
+                    @endphp
+                    <article class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h2 class="font-tertiary text-lg font-semibold text-neutral-900"><a href="{{ $openUrl }}" class="rounded hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">{{ $application->job->title }}</a></h2>
+                                    <x-badge :tone="$tones[$dispute->status->value]" class="px-2.5 py-0.5 text-xs font-medium">{{ __($dispute->status->label()) }}</x-badge>
+                                </div>
+                                <p class="mt-1 text-sm text-tertiary">
+                                    {{ __('Filed by :name (:role)', ['name' => $dispute->disputedBy?->name ?? __('a deleted account'), 'role' => $filedAs]) }}
+                                    · {{ $dispute->created_at->format('M j, Y') }}
+                                    @unless ($resolved)
+                                        · <span @class(['font-medium text-amber-700' => $waitingDays >= 3])>{{ $waitingDays < 1 ? __('waiting less than a day') : trans_choice('waiting :count day|waiting :count days', $waitingDays, ['count' => $waitingDays]) }}</span>
+                                    @endunless
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                @if ($canResolve && ! $resolved && ! $dispute->admin_assigned)
+                                    <form method="POST" action="{{ route('admin.disputes.assign', $dispute) }}">@csrf<x-btn size="sm" type="submit">{{ __('Assign to me') }}</x-btn></form>
+                                @endif
+                                <x-btn size="sm" variant="secondary" href="{{ $openUrl }}">{{ $resolved ? __('View') : __('Open dispute') }}<x-icon name="arrow-right" class="h-4 w-4" /></x-btn>
+                            </div>
+                        </div>
+
+                        <dl class="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 text-sm sm:grid-cols-3">
+                            <div>
+                                <dt class="text-xs text-tertiary">{{ __('Reason') }}</dt>
+                                <dd class="mt-0.5 font-medium text-neutral-900">{{ $dispute->formatted_reason }}</dd>
                             </div>
                             <div>
-                                <h1 class="text-2xl font-bold font-main text-neutral-800 mb-1">Disputed Engagements</h1>
-                                <p class="text-neutral-600 font-secondary">Manage and resolve engagement disputes</p>
+                                <dt class="text-xs text-tertiary">{{ __('Between') }}</dt>
+                                <dd class="mt-0.5 text-neutral-900"><span class="font-medium">{{ $application->poster?->name ?? '—' }}</span> <span class="text-tertiary">{{ __('(client)') }}</span><br><span class="font-medium">{{ $application->applicant?->name ?? '—' }}</span> <span class="text-tertiary">{{ __('(freelancer)') }}</span></dd>
                             </div>
-                        </div>
+                            <div>
+                                <dt class="text-xs text-tertiary">{{ $resolved ? __('Settled at') : __('Amount in question') }}</dt>
+                                <dd class="mt-0.5 font-tertiary font-semibold tabular-nums text-neutral-900">
+                                    @php $amount = $resolved ? ($dispute->resolution_amount ?? $dispute->cancellation->partial_payment_amount) : $dispute->cancellation->partial_payment_amount; @endphp
+                                    @if ($amount !== null)<x-money :amount="$amount" />@else<span class="font-normal text-tertiary">—</span>@endif
+                                </dd>
+                            </div>
+                        </dl>
 
-                        <!-- Stats Summary -->
-                        <div class="hidden lg:flex items-center space-x-6">
-                            <div class="text-center">
-                                <div class="text-2xl font-bold font-main text-accent">
-                                    {{ $statusCounts['pending'] ?? 0 }}</div>
-                                <div class="text-xs font-secondary text-neutral-500 uppercase tracking-wide">Pending
-                                </div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold font-main text-secondary">
-                                    {{ $statusCounts['under_review'] ?? 0 }}</div>
-                                <div class="text-xs font-secondary text-neutral-500 uppercase tracking-wide">Under
-                                    Review</div>
-                            </div>
-                            <div class="text-center">
-                                <div class="text-2xl font-bold font-main text-primary">{{ $statusCounts['all'] ?? 0 }}
-                                </div>
-                                <div class="text-xs font-secondary text-neutral-500 uppercase tracking-wide">Total</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                        @if (filled($dispute->dispute_details))
+                            <p class="mt-4 line-clamp-2 whitespace-pre-line break-words rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-700">{{ $dispute->dispute_details }}</p>
+                        @endif
+
+                        <p class="mt-4 flex flex-wrap items-center gap-x-2 border-t border-neutral-100 pt-3 text-xs text-tertiary">
+                            @if ($resolved)
+                                <x-icon name="check-circle" class="h-4 w-4 text-green-600" />
+                                {{ __('Resolved :date by :name', ['date' => $dispute->resolved_at?->format('M j, Y'), 'name' => $dispute->resolvedBy?->name ?? __('a reviewer')]) }}
+                            @elseif ($dispute->assignedAdmin)
+                                <x-icon name="shield-check" class="h-4 w-4 text-teal-600" />
+                                {{ $mine ? __('Assigned to you') : __('Assigned to :name', ['name' => $dispute->assignedAdmin->name]) }}
+                            @else
+                                <x-icon name="user" class="h-4 w-4" />
+                                {{ __('Not assigned to anyone yet') }}
+                            @endif
+                        </p>
+                    </article>
+                @endforeach
             </div>
-
-            <!-- Navigation Bar -->
-            <div class="mb-8">
-                <!-- Enhanced Tab Navigation -->
-                <div
-                    class="bg-white backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 overflow-hidden">
-                    <!-- Tab Navigation Bar -->
-                    <div class="border-b border-neutral-200 bg-gradient-to-r from-neutral-50 to-white">
-                        <nav class="flex" aria-label="Dispute Status Tabs">
-                            <!-- All Disputes Tab -->
-                            <a href="{{ route('admin.disputes.index', ['status' => 'all']) }}"
-                                class="group relative flex-1 flex items-center justify-center px-6 py-4 text-sm font-medium font-tertiary transition-all duration-300 hover:bg-neutral-50
-                                      @if ($status === 'all') bg-white text-primary border-b-3 border-primary shadow-sm
-                                      @else 
-                                          text-tertiary hover:text-primary border-b-3 border-transparent @endif">
-
-                                <!-- Tab Icon -->
-                                <div
-                                    class="flex items-center justify-center w-8 h-8 rounded-lg mr-3 transition-all duration-300
-                                           @if ($status === 'all') bg-primary/10 text-primary
-                                           @else 
-                                               bg-neutral-100 text-tertiary group-hover:bg-primary/10 group-hover:text-primary @endif">
-                                    <x-icon name="inbox" class="w-4 h-4" />
-                                </div>
-
-                                <div class="flex flex-col items-start">
-                                    <span class="font-semibold">All Disputes</span>
-                                    <div class="flex items-center space-x-2 mt-1">
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold
-                                                     @if ($status === 'all') bg-primary text-white
-                                                     @else 
-                                                         bg-neutral-200 text-neutral-700 group-hover:bg-primary/20 group-hover:text-primary @endif
-                                                     transition-all duration-300">
-                                            {{ $statusCounts['all'] ?? 0 }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Active Tab Indicator -->
-                                @if ($status === 'all')
-                                    <div
-                                        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary to-secondary rounded-t-full">
-                                    </div>
-                                @endif
-                            </a>
-
-                            <!-- Pending Tab -->
-                            <a href="{{ route('admin.disputes.index', ['status' => 'pending']) }}"
-                                class="group relative flex-1 flex items-center justify-center px-6 py-4 text-sm font-medium font-tertiary transition-all duration-300 hover:bg-neutral-50
-                                      @if ($status === 'pending') bg-white text-accent border-b-3 border-accent shadow-sm
-                                      @else 
-                                          text-tertiary hover:text-accent border-b-3 border-transparent @endif">
-
-                                <!-- Tab Icon with Animation -->
-                                <div
-                                    class="flex items-center justify-center w-8 h-8 rounded-lg mr-3 transition-all duration-300
-                                           @if ($status === 'pending') bg-accent/10 text-accent animate-pulse
-                                           @else 
-                                               bg-neutral-100 text-tertiary group-hover:bg-accent/10 group-hover:text-accent @endif">
-                                    <x-icon name="clock" class="w-4 h-4" />
-                                </div>
-
-                                <div class="flex flex-col items-start">
-                                    <span class="font-semibold">Pending</span>
-                                    <div class="flex items-center space-x-2 mt-1">
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold
-                                                     @if ($status === 'pending') bg-accent text-white
-                                                     @else 
-                                                         bg-amber-100 text-amber-800 group-hover:bg-accent/20 group-hover:text-accent @endif
-                                                     transition-all duration-300">
-                                            {{ $statusCounts['pending'] ?? 0 }}
-                                        </span>
-                                        @if (($statusCounts['pending'] ?? 0) > 0)
-                                            <div class="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
-                                        @endif
-                                    </div>
-                                </div>
-
-                                @if ($status === 'pending')
-                                    <div
-                                        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-accent to-amber-400 rounded-t-full">
-                                    </div>
-                                @endif
-                            </a>
-
-                            <!-- Under Review Tab -->
-                            <a href="{{ route('admin.disputes.index', ['status' => 'under_review']) }}"
-                                class="group relative flex-1 flex items-center justify-center px-6 py-4 text-sm font-medium font-tertiary transition-all duration-300 hover:bg-neutral-50
-                                      @if ($status === 'under_review') bg-white text-secondary border-b-3 border-secondary shadow-sm
-                                      @else 
-                                          text-tertiary hover:text-secondary border-b-3 border-transparent @endif">
-
-                                <!-- Tab Icon -->
-                                <div
-                                    class="flex items-center justify-center w-8 h-8 rounded-lg mr-3 transition-all duration-300
-                                           @if ($status === 'under_review') bg-secondary/10 text-secondary
-                                           @else 
-                                               bg-neutral-100 text-tertiary group-hover:bg-secondary/10 group-hover:text-secondary @endif">
-                                    <x-icon name="clipboard-check-2" class="w-4 h-4" />
-                                </div>
-
-                                <div class="flex flex-col items-start">
-                                    <span class="font-semibold">Under Review</span>
-                                    <div class="flex items-center space-x-2 mt-1">
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold
-                                                     @if ($status === 'under_review') bg-secondary text-white
-                                                     @else 
-                                                         bg-teal-100 text-teal-800 group-hover:bg-secondary/20 group-hover:text-secondary @endif
-                                                     transition-all duration-300">
-                                            {{ $statusCounts['under_review'] ?? 0 }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                @if ($status === 'under_review')
-                                    <div
-                                        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary to-teal-400 rounded-t-full">
-                                    </div>
-                                @endif
-                            </a>
-
-                            <!-- Resolved Tab -->
-                            <a href="{{ route('admin.disputes.index', ['status' => 'resolved']) }}"
-                                class="group relative flex-1 flex items-center justify-center px-6 py-4 text-sm font-medium font-tertiary transition-all duration-300 hover:bg-neutral-50
-                                      @if ($status === 'resolved') bg-white text-green-600 border-b-3 border-green-600 shadow-sm
-                                      @else 
-                                          text-tertiary hover:text-green-600 border-b-3 border-transparent @endif">
-
-                                <!-- Tab Icon -->
-                                <div
-                                    class="flex items-center justify-center w-8 h-8 rounded-lg mr-3 transition-all duration-300
-                                           @if ($status === 'resolved') bg-green-100 text-green-600
-                                           @else 
-                                               bg-neutral-100 text-tertiary group-hover:bg-green-100 group-hover:text-green-600 @endif">
-                                    <x-icon name="check-circle" class="w-4 h-4" />
-                                </div>
-
-                                <div class="flex flex-col items-start">
-                                    <span class="font-semibold">Resolved</span>
-                                    <div class="flex items-center space-x-2 mt-1">
-                                        <span
-                                            class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold
-                                                     @if ($status === 'resolved') bg-green-600 text-white
-                                                     @else 
-                                                         bg-green-100 text-green-800 group-hover:bg-green-200 group-hover:text-green-700 @endif
-                                                     transition-all duration-300">
-                                            {{ $statusCounts['resolved'] ?? 0 }}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                @if ($status === 'resolved')
-                                    <div
-                                        class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-green-600 to-green-400 rounded-t-full">
-                                    </div>
-                                @endif
-                            </a>
-                        </nav>
-                    </div>
-
-                    <!-- Tab Content Summary Bar -->
-                    <div class="bg-gradient-to-r from-neutral-50 to-white px-6 py-4 border-b border-neutral-100">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-4">
-                                <div class="flex items-center space-x-2 text-sm text-tertiary font-secondary">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
-                                    </svg>
-                                    <span>
-                                        @if ($status === 'all')
-                                            Showing all dispute records
-                                        @else
-                                            Filtered by: <span
-                                                class="font-semibold capitalize">{{ str_replace('_', ' ', $status) }}</span>
-                                        @endif
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center space-x-3">
-                                <!-- Quick Stats -->
-                                <div class="hidden lg:flex items-center space-x-4 text-xs font-secondary">
-                                    <div class="flex items-center space-x-1">
-                                        <div class="w-2 h-2 bg-accent rounded-full"></div>
-                                        <span class="text-tertiary">{{ $statusCounts['pending'] ?? 0 }} Urgent</span>
-                                    </div>
-                                    <div class="flex items-center space-x-1">
-                                        <div class="w-2 h-2 bg-secondary rounded-full"></div>
-                                        <span class="text-tertiary">{{ $statusCounts['under_review'] ?? 0 }} In
-                                            Progress</span>
-                                    </div>
-                                    <div class="flex items-center space-x-1">
-                                        <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                                        <span class="text-tertiary">{{ $statusCounts['resolved'] ?? 0 }}
-                                            Completed</span>
-                                    </div>
-                                </div>
-
-                                <!-- Action Button -->
-                                {{-- <x-btn size="sm">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                    </svg>
-                                    Export
-                                </x-btn> --}}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional CSS for enhanced visual effects -->
-            <style>
-                @keyframes slideIn {
-                    from {
-                        transform: translateY(-10px);
-                        opacity: 0;
-                    }
-
-                    to {
-                        transform: translateY(0);
-                        opacity: 1;
-                    }
-                }
-
-                .border-b-3 {
-                    border-bottom-width: 3px;
-                }
-
-                /* Smooth gradient animation for active tabs */
-                .group:hover .animate-pulse {
-                    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-                }
-
-                /* Custom backdrop blur for modern glass effect */
-                .backdrop-blur-sm {
-                    backdrop-filter: blur(4px);
-                }
-            </style>
-
-            <!-- Disputes List -->
-            <div class="space-y-6">
-                @forelse($disputes as $dispute)
-                    <div
-                        class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-neutral-200/50 overflow-hidden group">
-                        <!-- Status Bar -->
-                        <div
-                            class="h-1 bg-gradient-to-r
-                            @if ($dispute->status === DisputeStatus::Pending) from-accent to-accent/70
-                            @elseif($dispute->status === DisputeStatus::UnderReview) from-secondary to-secondary/70 @endif">
-                        </div>
-
-                        <div class="p-6">
-                            <!-- Header Row -->
-                            <div class="flex items-start justify-between mb-4">
-                                <div class="flex items-center space-x-4">
-                                    <!-- Status Icon -->
-                                    <div class="relative">
-                                        @if ($dispute->status === DisputeStatus::Pending)
-                                            <div class="absolute inset-0 bg-accent/20 rounded-full"></div>
-                                            <div
-                                                class="relative bg-accent/10 backdrop-blur-sm rounded-full p-3 border border-accent/30">
-                                                <x-icon name="clock" class="h-5 w-5 text-accent" />
-                                            </div>
-                                        @elseif($dispute->status === DisputeStatus::UnderReview)
-                                            <div
-                                                class="bg-secondary/10 backdrop-blur-sm rounded-full p-3 border border-secondary/30">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-secondary"
-                                                    fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                                                    stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0 1 18 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3 1.5 1.5 3-3.75" />
-                                                </svg>
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <div>
-                                        <h3 class="text-xl font-bold font-main text-neutral-800 mb-1">
-                                            Engagement #{{ $dispute->cancellation->engagement_id }}
-                                        </h3>
-                                        <div class="flex items-center space-x-3">
-                                            <span
-                                                class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium font-tertiary
-                                                @if ($dispute->status === DisputeStatus::Pending) bg-accent/10 text-accent border border-accent/20
-                                                @elseif($dispute->status === DisputeStatus::UnderReview) bg-secondary/10 text-secondary border border-secondary/20
-                                                @else bg-green-50 text-green-600 border border-green-500 @endif">
-                                                <div
-                                                    class="w-1.5 h-1.5
-                                                    @if ($dispute->status === DisputeStatus::Pending) bg-accent
-                                                    @elseif($dispute->status === DisputeStatus::UnderReview) bg-secondary
-                                                    @else bg-green-600 @endif rounded-full mr-2">
-                                                </div>
-                                                {{ $dispute->status->label() }}
-                                            </span>
-                                            <span class="text-neutral-400">•</span>
-                                            <span class="text-sm text-neutral-500 font-secondary">
-                                                Filed {{ $dispute->created_at->diffForHumans() }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Priority Indicator -->
-                                <div class="flex items-center space-x-2">
-                                    @if ($dispute->status === DisputeStatus::Pending)
-                                        <div
-                                            class="bg-accent/10 text-accent px-2 py-1 rounded-lg text-xs font-medium font-tertiary">
-                                            High Priority
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <!-- Details Grid -->
-                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                <!-- Left Column -->
-                                <div class="space-y-4">
-                                    <!-- Dispute Reason -->
-                                    <div class="bg-neutral-50/80 rounded-lg p-4 border border-neutral-200/50">
-                                        <div class="flex items-center space-x-1 mb-1">
-                                            <x-icon name="question-mark-circle" class="h-5 w-5 text-neutral-500" />
-                                            <span class="text-sm font-medium text-neutral-700 font-tertiary">Dispute
-                                                Reason</span>
-                                        </div>
-                                        <p class="text-neutral-800 font-secondary">
-                                            {{ ucwords(str_replace('_', ' ', $dispute->dispute_reason)) }}
-                                        </p>
-                                    </div>
-
-                                    <!-- Filed By -->
-                                    <div class="bg-neutral-50/80 rounded-lg p-4 border border-neutral-200/50">
-                                        <div class="flex items-center space-x-1 mb-1">
-                                            <x-icon name="user" class="h-5 w-5 text-neutral-500" />
-                                            <span class="text-sm font-medium text-neutral-700 font-tertiary">Filed
-                                                By</span>
-                                        </div>
-                                        <div class="space-y-1">
-                                            <p class="text-neutral-800 font-secondary font-medium">
-                                                {{ $dispute->disputedBy->name ?? 'N/A' }}
-                                            </p>
-                                            <p class="text-sm text-neutral-600 font-secondary">
-                                                {{ $dispute->disputedBy->email ?? 'N/A' }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Right Column -->
-                                <div class="space-y-4">
-                                    <!-- Dispute Details -->
-                                    <div class="bg-neutral-50/80 rounded-lg p-4 border border-neutral-200/50">
-                                        <div class="flex items-center space-x-1 mb-1">
-                                            <x-icon name="document-text" class="h-5 w-5 text-neutral-500" />
-                                            <span
-                                                class="text-sm font-medium text-neutral-700 font-tertiary">Details</span>
-                                        </div>
-                                        <p
-                                            class="text-neutral-800 font-secondary leading-relaxed line-clamp-1 text-ellipsis">
-                                            {{ $dispute->dispute_details }}
-                                        </p>
-                                    </div>
-
-                                    <!-- Assigned Admin -->
-                                    <div class="bg-neutral-50/80 rounded-lg p-4 border border-neutral-200/50">
-                                        <div class="flex items-center space-x-1 mb-1">
-                                            <x-icon name="shield-check-2" class="h-5 w-5 text-neutral-500" />
-                                            <span class="text-sm font-medium text-neutral-700 font-tertiary">Assigned
-                                                Admin</span>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            @if ($dispute->assignedAdmin)
-                                                {{-- <div
-                                                    class="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
-                                                    <span class="text-white text-xs font-bold font-main">
-                                                        {{ substr($dispute->assignedAdmin->name ?? $dispute->assignedAdmin->email, 0, 1) }}
-                                                    </span>
-                                                </div> --}}
-                                                <span class="text-neutral-800 font-secondary font-medium">
-                                                    {{ $dispute->assignedAdmin->email }}
-                                                </span>
-                                            @else
-                                                <div class="flex items-center space-x-2 text-neutral-500">
-                                                    <div
-                                                        class="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center">
-                                                        <x-icon name="plus-2" class="h-4 w-4" />
-                                                    </div>
-                                                    <span class="font-secondary">Unassigned</span>
-                                                </div>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="flex items-center justify-between pt-4 border-t border-neutral-200/50">
-                                <div class="flex items-center space-x-3">
-                                    {{-- Only show button if assigned and current admin is the assignee --}}
-                                    @if ($dispute->admin_assigned && auth()->id() === $dispute->admin_assigned)
-                                        <x-btn href="{{ route('engagements.show-disputed', $dispute->cancellation->engagement_id) }}">
-                                            <x-icon name="document-text" class="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
-                                            View Dispute Details
-                                            <x-icon name="chevron-right" class="h-4 w-4 ml-1 group-hover:translate-x-0.5 transition-transform duration-200" />
-                                        </x-btn>
-                                    @endif
-
-                                    @can('resolve disputes')
-                                        @if (!$dispute->assignedAdmin)
-                                        <form action="{{ route('admin.disputes.assign', $dispute->id) }}"
-                                            method="POST">
-                                            @csrf
-                                            <x-btn type="submit">
-                                                <x-icon name="plus-2" class="h-4 w-4 group-hover:scale-110 transition-transform duration-200" />
-                                                Assign to Me
-                                            </x-btn>
-                                        </form>
-                                        @endif
-                                    @endcan
-                                </div>
-
-                                <!-- Quick Info -->
-                                <div class="flex items-center space-x-4 text-xs text-neutral-500 font-secondary">
-                                    <span class="flex items-center space-x-1">
-                                        <x-icon name="clock" class="h-4 w-4 text-secondary" />
-                                        <span>ID: {{ $dispute->id }}</span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <!-- Empty State -->
-                    <div
-                        class="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200/50 p-12 text-center">
-                        <div class="max-w-md mx-auto">
-                            <div
-                                class="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-full p-6 w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                                <x-icon name="check-circle" class="h-12 w-12 text-neutral-400" stroke-width="1.5" />
-                            </div>
-                            <h3 class="text-xl font-bold text-neutral-800 font-main mb-2">No Disputed Engagements</h3>
-                            <p class="text-neutral-600 font-secondary">
-                                @if ($status === 'all')
-                                    All engagements are running smoothly. There are
-                                    no disputes requiring your attention at this time.
-                                @else
-                                    No {{ str_replace('_', ' ', $status) }} disputes found.
-                                @endif
-                            </p>
-                        </div>
-                    </div>
-                @endforelse
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-8">
-            {{ $disputes->links() }}
-        </div>
+            <x-pager :paginator="$disputes" />
+        @endif
     </div>
 </x-app-layout>

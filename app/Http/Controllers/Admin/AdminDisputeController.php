@@ -3,66 +3,85 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\DisputeStatus;
+use App\Helpers\FlashAlertHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Dispute\ResolveDisputeRequest;
+use App\Models\JobCancellation;
 use App\Models\JobPaymentDispute;
 use App\Services\Payments\PartialPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/** The queue of payment disputes between clients and freelancers. Permissions: view disputes, resolve disputes (see routes/web.php). */
 class AdminDisputeController extends Controller
 {
-    protected $partialPaymentService;
-
-    public function __construct(PartialPaymentService $partialPaymentService)
-    {
-        $this->partialPaymentService = $partialPaymentService;
-    }
+    public function __construct(protected PartialPaymentService $partialPaymentService) {}
 
     public function index(Request $request)
     {
-        $status = $request->get('status', 'all');
+        $status = in_array($request->query('status'), ['pending', 'under_review', 'resolved', 'all'], true) ? $request->query('status') : 'pending';
 
-        $query = JobPaymentDispute::with(['assignedAdmin', 'cancellation', 'disputedBy'])
-            ->latest();
+        $disputes = JobPaymentDispute::with([
+            'disputedBy:id,name',
+            'assignedAdmin:id,name',
+            'resolvedBy:id,name',
+            'cancellation.engagement.application.job:id,title',
+            'cancellation.engagement.application.poster:id,name',
+            'cancellation.engagement.application.applicant:id,name',
+        ])
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
+            // Open disputes first, the one that has waited longest at the top; resolved ones after, newest first
+            ->orderByRaw("case status when 'resolved' then 1 else 0 end")
+            ->orderByRaw("case status when 'resolved' then -unix_timestamp(created_at) else unix_timestamp(created_at) end")
+            ->paginate(10)
+            ->withQueryString();
 
-        // Filter by status if specified
-        if ($status !== 'all') {
-            $query->where('status', $status);
-        }
+        $byStatus = JobPaymentDispute::selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
 
-        $disputes = $query->paginate(12)->appends(['status' => $status]);
+        return view('admin.disputes.index', [
+            'disputes' => $disputes,
+            'status' => $status,
+            'counts' => [
+                'pending' => (int) ($byStatus[DisputeStatus::Pending->value] ?? 0),
+                'under_review' => (int) ($byStatus[DisputeStatus::UnderReview->value] ?? 0),
+                'resolved' => (int) ($byStatus[DisputeStatus::Resolved->value] ?? 0),
+                'all' => (int) $byStatus->sum(),
+            ],
+        ]);
+    }
 
-        // Get counts for each status
-        $statusCounts = [
-            'all' => JobPaymentDispute::count(),
-            'pending' => JobPaymentDispute::where('status', DisputeStatus::Pending)->count(),
-            'under_review' => JobPaymentDispute::where('status', DisputeStatus::UnderReview)->count(),
-            'resolved' => JobPaymentDispute::where('status', DisputeStatus::Resolved)->count(),
-        ];
-
-        return view('admin.disputes.index', compact('disputes', 'status', 'statusCounts'));
+    /**
+     * Notifications sent before the dispute page had its own address linked to /admin/disputes/{cancellation id}.
+     * Keep those links working by sending staff to the dispute itself.
+     */
+    public function show(JobCancellation $cancellation)
+    {
+        return redirect()->route('engagements.show-disputed', $cancellation->engagement_id);
     }
 
     public function assign(JobPaymentDispute $dispute)
     {
+        if ($dispute->isResolved()) {
+            return back()->with(FlashAlertHelper::error('Cannot assign', 'This dispute has already been resolved.'));
+        }
+
         $dispute->assignAdmin(Auth::id());
 
-        return redirect()->back()->with('success', 'Dispute assigned to you successfully.');
+        return back()->with(FlashAlertHelper::success('Dispute assigned to you', 'It is now under review.'));
     }
 
     public function resolve(ResolveDisputeRequest $request, JobPaymentDispute $dispute)
     {
         try {
-            $result = $this->partialPaymentService->resolveDispute(
+            $this->partialPaymentService->resolveDispute(
                 $dispute,
                 $request->input('resolution_notes'),
                 $request->input('resolution_amount')
             );
 
-            return redirect()->back()->with('success', 'Dispute resolved successfully.');
+            return back()->with(FlashAlertHelper::success('Dispute resolved'));
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to resolve dispute: '.$e->getMessage());
+            return back()->with(FlashAlertHelper::error('Could not resolve the dispute', $e->getMessage()));
         }
     }
 }
