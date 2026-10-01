@@ -3,6 +3,9 @@
 use App\Models\Product;
 use App\Models\ProductFile;
 use App\Models\ProductImage;
+use App\Models\ProductReview;
+use App\Models\Purchase;
+use App\Models\ReviewReport;
 use App\Models\SellerProfile;
 use App\Models\User;
 use Database\Seeders\DemoModelsSeeder;
@@ -105,7 +108,25 @@ it('is safe to run twice', function () {
     expect(Product::count())->toBe(6)
         ->and(ProductImage::count())->toBe(12)
         ->and(ProductFile::count())->toBe(18)
-        ->and(User::where('email', 'like', '%@demo.test')->count())->toBe(4);
+        ->and(User::where('email', 'like', '%@demo.test')->count())->toBe(10);
+});
+
+it('gives published models demo buyers, purchases and reviews that match the stored ratings, and repeats cleanly', function () {
+    fakePolyHaven();
+
+    $this->seed(DemoModelsSeeder::class);
+    $reviews = ProductReview::count();
+    $purchases = Purchase::count();
+    $this->seed(DemoModelsSeeder::class);
+
+    expect($reviews)->toBeGreaterThan(0)->and(ProductReview::count())->toBe($reviews)->and(Purchase::count())->toBe($purchases);
+    expect(ProductReview::whereNotNull('purchase_id')->count())->toBe($reviews);
+    expect(ReviewReport::count())->toBeLessThanOrEqual(2);
+
+    Product::published()->where('rating_count', '>', 0)->each(function (Product $product) {
+        expect($product->rating_count)->toBe($product->reviews()->visible()->count())
+            ->and($product->rating_avg)->toBe(round((float) $product->reviews()->visible()->avg('rating'), 2));
+    });
 });
 
 it('does nothing without a network', function () {

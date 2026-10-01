@@ -14,12 +14,14 @@ class SellerProfile extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'status', 'display_name', 'slug', 'tagline', 'logo_path', 'website_url', 'name_changed_at', 'bio', 'focus', 'portfolio_url', 'terms_accepted_at',
+        'user_id', 'status', 'display_name', 'slug', 'tagline', 'logo_path', 'website_url', 'name_changed_at', 'bio', 'focus', 'rating_avg', 'rating_count', 'portfolio_url', 'terms_accepted_at',
         'submitted_at', 'reviewed_by', 'reviewed_at', 'review_notes',
     ];
 
     protected $casts = [
         'status' => SellerStatus::class,
+        'rating_avg' => 'float',
+        'rating_count' => 'integer',
         'name_changed_at' => 'datetime',
         'terms_accepted_at' => 'datetime',
         'submitted_at' => 'datetime',
@@ -41,6 +43,12 @@ class SellerProfile extends Model
                 $seller->slug = $slug;
             }
         });
+    }
+
+    /** A store's rating is shown only once enough buyers have reviewed its models for the number to mean something. */
+    public function hasPublicRating(): bool
+    {
+        return $this->rating_avg !== null && $this->rating_count >= config('marketplace.min_store_reviews');
     }
 
     public function logoUrl(): ?string

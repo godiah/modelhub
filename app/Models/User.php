@@ -158,6 +158,23 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(WishlistItem::class);
     }
 
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    /** "Amina O.": how a member is shown beside a review, so full names are not published. */
+    public function publicName(): string
+    {
+        $words = array_values(array_filter(preg_split('/\s+/', trim((string) $this->name))));
+
+        if (count($words) < 2) {
+            return $words[0] ?? __('A buyer');
+        }
+
+        return $words[0].' '.mb_strtoupper(mb_substr(end($words), 0, 1)).'.';
+    }
+
     /** The 3D model listings this member has created as a seller. */
     public function products()
     {

@@ -154,6 +154,29 @@ new class extends Component {
             </x-card>
         </div>
 
+        <!-- Store (sellers only): its own rating, from buyers of their models, kept apart from the freelance rating above -->
+        @if ($overview['store'])
+            @php $store = $overview['store']; @endphp
+            <x-card class="rounded-2xl">
+                <a href="{{ route('sellers.show', $store->slug) }}" class="flex items-center gap-4 rounded-2xl p-5 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
+                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-teal-50 text-teal-700"><x-icon name="cube" class="h-5 w-5" /></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-xs font-medium text-tertiary">{{ __('Model store') }}</p>
+                        <p class="truncate font-tertiary text-base font-semibold text-neutral-900">{{ $store->display_name }}</p>
+                    </div>
+                    <div class="shrink-0 text-right">
+                        @if ($store->hasPublicRating())
+                            <x-models.stars :rating="$store->rating_avg" :count="$store->rating_count" showNumber />
+                            <p class="mt-0.5 text-xs text-tertiary">{{ __('From buyers of your models') }}</p>
+                        @else
+                            <p class="text-sm font-medium text-tertiary">{{ __('Not rated yet') }}</p>
+                            <p class="mt-0.5 text-xs text-tertiary">{{ __('Shown after :count buyer reviews', ['count' => config('marketplace.min_store_reviews')]) }}</p>
+                        @endif
+                    </div>
+                </a>
+            </x-card>
+        @endif
+
         <!-- About -->
         <x-card class="rounded-2xl">
             <div class="p-6">

@@ -20,7 +20,12 @@
                     @if ($seller->tagline)
                         <p class="mt-1 text-base text-neutral-600">{{ $seller->tagline }}</p>
                     @endif
-                    <p class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-tertiary">
+                    <p class="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-tertiary">
+                        @if ($seller->hasPublicRating())
+                            <span title="{{ __('Average of :count buyer reviews across all their models', ['count' => $seller->rating_count]) }}"><x-models.stars :rating="$seller->rating_avg" :count="$seller->rating_count" showNumber /></span>
+                        @else
+                            <span class="inline-flex items-center gap-1.5"><x-icon name="star" class="h-4 w-4" />{{ __('Not rated yet') }}</span>
+                        @endif
                         <span class="inline-flex items-center gap-1.5"><x-icon name="cube" class="h-4 w-4" />{{ trans_choice(':count model|:count models', $total, ['count' => $total]) }}</span>
                         <span class="inline-flex items-center gap-1.5"><x-icon name="calendar" class="h-4 w-4" />{{ __('Selling since :date', ['date' => $since]) }}</span>
                         @if ($seller->website_url)
@@ -50,7 +55,7 @@
                 @if ($selected)<input type="hidden" name="category" value="{{ $selected }}">@endif
                 <label class="sr-only" for="sort">{{ __('Sort by') }}</label>
                 <select id="sort" name="sort" onchange="this.form.requestSubmit()" class="block rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-900 hover:border-neutral-400 focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25">
-                    @foreach (['newest' => __('Newest first'), 'price_low' => __('Price: low to high'), 'price_high' => __('Price: high to low')] as $value => $label)
+                    @foreach (['newest' => __('Newest first'), 'price_low' => __('Price: low to high'), 'price_high' => __('Price: high to low'), 'top_rated' => __('Top rated')] as $value => $label)
                         <option value="{{ $value }}" @selected(($filters['sort'] ?? 'newest') === $value)>{{ $label }}</option>
                     @endforeach
                 </select>

@@ -8,6 +8,9 @@ use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
 use App\Notifications\HiredNotification;
 use App\Notifications\JobPostedNotification;
+use App\Notifications\ModelReviewedNotification;
+use App\Notifications\ModelReviewHiddenNotification;
+use App\Notifications\ModelReviewReplyNotification;
 use App\Notifications\NewApplicationMessage;
 use App\Notifications\PartialPaymentProcessedNotification;
 use App\Notifications\PaymentAcceptedNotification;
@@ -76,7 +79,7 @@ enum NotificationCategory: string
             self::Disputes => [DisputeCreatedNotification::class],
             self::Reviews => [ReviewSubmittedNotification::class],
             self::Projects => [JobPostedNotification::class],
-            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class],
+            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class, ModelReviewedNotification::class, ModelReviewReplyNotification::class, ModelReviewHiddenNotification::class],
             self::Other => [],
         };
     }

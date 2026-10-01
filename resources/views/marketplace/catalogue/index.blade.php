@@ -77,7 +77,7 @@
 
             <label class="sr-only" for="sort">{{ __('Sort by') }}</label>
             <select id="sort" name="sort" onchange="this.form.requestSubmit()" class="{{ $barField }} w-auto font-medium">
-                @foreach (['newest' => __('Newest first'), 'price_low' => __('Price: low to high'), 'price_high' => __('Price: high to low')] as $value => $label)
+                @foreach (['newest' => __('Newest first'), 'price_low' => __('Price: low to high'), 'price_high' => __('Price: high to low'), 'top_rated' => __('Top rated')] as $value => $label)
                     <option value="{{ $value }}" @selected(($filters['sort'] ?? 'newest') === $value)>{{ $label }}</option>
                 @endforeach
             </select>

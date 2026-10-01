@@ -67,6 +67,7 @@ class ProductBrowsingService
         match ($filters['sort'] ?? 'newest') {
             'price_low' => $query->orderBy('price_minor')->latest('published_at'),
             'price_high' => $query->orderByDesc('price_minor')->latest('published_at'),
+            'top_rated' => $query->orderByRaw('rating_avg is null')->orderByDesc('rating_avg')->orderByDesc('rating_count')->latest('published_at'),
             default => $query->latest('published_at'),
         };
 
@@ -118,6 +119,7 @@ class ProductBrowsingService
         match ($filters['sort'] ?? 'newest') {
             'price_low' => $query->orderBy('price_minor')->latest('published_at'),
             'price_high' => $query->orderByDesc('price_minor')->latest('published_at'),
+            'top_rated' => $query->orderByRaw('rating_avg is null')->orderByDesc('rating_avg')->orderByDesc('rating_count')->latest('published_at'),
             default => $query->latest('published_at'),
         };
 
