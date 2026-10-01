@@ -52,6 +52,12 @@ class PlatformStatsService
                 'new' => $trend(Product::where('created_at', '>=', $week)->count(), Product::whereBetween('created_at', [$before, $week])->count())],
             'reviews' => $trend(ProductReview::where('created_at', '>=', $week)->count(), ProductReview::whereBetween('created_at', [$before, $week])->count()),
             'disputes' => ['open' => JobPaymentDispute::whereIn('status', [DisputeStatus::Pending, DisputeStatus::UnderReview])->count()],
+            'today' => [
+                'members' => User::where('created_at', '>=', today())->count(),
+                'projects' => ModelJob::where('created_at', '>=', today())->count(),
+                'models' => Product::where('created_at', '>=', today())->count(),
+                'applications' => JobApplication::where('created_at', '>=', today())->count(),
+            ],
             'series' => [
                 'members' => $this->weekly(User::class),
                 'projects' => $this->weekly(ModelJob::class),
