@@ -21,10 +21,13 @@ class PlatformStatsService
 {
     public const WEEKS = 12;
 
+    /** Bump the suffix when the shape of the numbers changes, so a deploy never reads the old shape from the cache. */
+    public const CACHE_KEY = 'staff.platform-stats.v2';
+
     /** @return array<string, mixed> */
     public function get(): array
     {
-        return Cache::remember('staff.platform-stats', 300, fn () => $this->compute());
+        return Cache::remember(self::CACHE_KEY, 300, fn () => $this->compute());
     }
 
     private function compute(): array
@@ -62,6 +65,7 @@ class PlatformStatsService
                 'members' => $this->weekly(User::class),
                 'projects' => $this->weekly(ModelJob::class),
                 'models' => $this->weekly(Product::class),
+                'applications' => $this->weekly(JobApplication::class),
             ],
         ];
     }

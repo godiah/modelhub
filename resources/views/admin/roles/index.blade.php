@@ -1,18 +1,14 @@
 @use('App\Support\Staff\StaffAccess')
 <x-staff-layout :title="__('Roles')">
-    <div class="container mx-auto max-w-5xl px-4 py-8" x-data="{ deleting: false, target: { name: '', url: '' } }" @delete-role.window="target = $event.detail; deleting = true">
-        <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-            <div>
-                <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Roles') }}</h1>
-                <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('A role is a set of permissions. Give staff one or several; what they can do is everything their roles allow.') }}</p>
-            </div>
-            <x-btn href="{{ route('admin.roles.create') }}"><x-icon name="plus" class="h-4 w-4" />{{ __('New role') }}</x-btn>
-        </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8" x-data="{ deleting: false, target: { name: '', url: '' } }" @delete-role.window="target = $event.detail; deleting = true">
+        <x-staff.header :title="__('Roles')">{{ __('A role is a set of permissions. Give staff one or several; what they can do is everything their roles allow.') }}
+            <x-slot:actions><x-btn href="{{ route('admin.roles.create') }}"><x-icon name="plus" class="h-4 w-4" />{{ __('New role') }}</x-btn></x-slot:actions>
+        </x-staff.header>
 
-        <div class="space-y-3">
+        <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
             @foreach ($roles as $role)
                 @php $locked = $role->name === StaffAccess::SUPER_ADMIN; @endphp
-                <x-card class="rounded-2xl">
+                <x-card class="h-full rounded-2xl">
                     <div class="flex flex-wrap items-center gap-4 p-5">
                         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-50 text-teal-700"><x-icon :name="$locked ? 'shield-check' : 'users'" class="h-5 w-5" /></span>
                         <div class="min-w-0 flex-1">
@@ -23,7 +19,7 @@
                         <div class="flex items-center gap-2">
                             <x-btn size="sm" variant="secondary" href="{{ route('admin.roles.edit', $role) }}">{{ $locked ? __('View') : __('Edit') }}</x-btn>
                             @unless ($locked)
-                                <x-btn size="sm" variant="danger-outline" type="button" @click="$dispatch('delete-role', { name: @js($role->name), url: @js(route('admin.roles.destroy', $role)) })">{{ __('Delete') }}</x-btn>
+                                <x-btn size="sm" variant="danger-outline" type="button" @click="$dispatch('delete-role', {{ \Illuminate\Support\Js::from(['name' => $role->name, 'url' => route('admin.roles.destroy', $role)]) }})">{{ __('Delete') }}</x-btn>
                             @endunless
                         </div>
                     </div>

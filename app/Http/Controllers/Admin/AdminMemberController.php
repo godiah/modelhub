@@ -10,6 +10,7 @@ use App\Models\ModelJob;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Admin\MemberManagementService;
+use App\Support\Staff\ListSort;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -21,6 +22,9 @@ class AdminMemberController extends Controller
 
     public const ACTIVITY = ['all' => 'Everyone', 'sellers' => 'Sellers', 'hirers' => 'Posted a project', 'freelancers' => 'Applied to a project'];
 
+    /** Sortable columns of the directory: sort key => the column or count alias it orders by. */
+    public const SORTS = ['name' => 'name', 'joined' => 'created_at', 'seen' => 'last_login_at', 'projects' => 'jobs_count', 'applications' => 'job_applications_count', 'models' => 'products_count'];
+
     public function __construct(protected MemberManagementService $members) {}
 
     public function index(Request $request)
@@ -29,6 +33,7 @@ class AdminMemberController extends Controller
         $activity = array_key_exists($request->query('activity'), self::ACTIVITY) ? $request->query('activity') : 'all';
         $term = trim((string) $request->query('q'));
         $canSeeContact = $request->user()->can('view contact details');
+        [$sort, $dir] = ListSort::resolve($request, array_keys(self::SORTS), default: 'joined', descFirst: ['joined', 'seen', 'projects', 'applications', 'models']);
 
         $members = User::query()
             ->with('sellerProfile:id,user_id,status,display_name')
@@ -39,12 +44,12 @@ class AdminMemberController extends Controller
             ->when($activity === 'freelancers', fn ($q) => $q->has('jobApplications'))
             // Searching by email would reveal masked addresses one letter at a time, so only people who may see them can
             ->when($term !== '', fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', "%{$term}%")->when($canSeeContact, fn ($e) => $e->orWhere('email', 'like', "%{$term}%"))))
-            ->latest()
+            ->tap(fn ($query) => ListSort::apply($query, $sort, $dir, self::SORTS))
             ->paginate(15)
             ->withQueryString();
 
         return view('admin.members.index', [
-            'members' => $members, 'status' => $status, 'activity' => $activity, 'term' => $term, 'canSeeContact' => $canSeeContact,
+            'members' => $members, 'sort' => $sort, 'dir' => $dir, 'status' => $status, 'activity' => $activity, 'term' => $term, 'canSeeContact' => $canSeeContact,
             'counts' => collect(array_keys(self::STATUSES))->mapWithKeys(fn ($key) => [$key => $this->narrowStatus(User::query(), $key)->count()])->all(),
         ]);
     }

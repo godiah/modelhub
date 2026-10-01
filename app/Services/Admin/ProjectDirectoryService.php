@@ -3,6 +3,7 @@
 namespace App\Services\Admin;
 
 use App\Models\ModelJob;
+use App\Support\Staff\ListSort;
 use Illuminate\Database\Eloquent\Builder;
 
 /** The staff view of every project on the board, whatever its state. */
@@ -10,14 +11,17 @@ class ProjectDirectoryService
 {
     public const STATUSES = ['open' => 'Open', 'closed' => 'Closed', 'expired' => 'Expired', 'archived' => 'Archived', 'taken_down' => 'Taken down', 'all' => 'All'];
 
-    public function query(string $status, string $term = ''): Builder
+    /** Sortable columns: sort key => the column or count alias it orders by. */
+    public const SORTS = ['posted' => 'created_at', 'title' => 'title', 'budget' => 'budget', 'applicants' => 'applications_count', 'deadline' => 'deadline'];
+
+    public function query(string $status, string $term = '', string $sort = 'posted', string $dir = 'desc'): Builder
     {
         return ModelJob::query()
             ->with('user:id,name,avatar')
             ->withCount('applications')
             ->when($term !== '', fn ($query) => $query->where(fn ($q) => $q->where('title', 'like', "%{$term}%")->orWhereHas('user', fn ($u) => $u->where('name', 'like', "%{$term}%"))))
             ->tap(fn ($query) => $this->narrow($query, $status))
-            ->latest();
+            ->tap(fn ($query) => ListSort::apply($query, $sort, $dir, self::SORTS));
     }
 
     /** @return array<string, int> */

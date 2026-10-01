@@ -25,12 +25,15 @@
         </div>
 
         @if ($hasAnyQueue)
-            <ul class="flex flex-wrap gap-2" aria-label="{{ __('Queues') }}">
+            <section aria-label="{{ __('Queues') }}" @class(['grid grid-cols-2 gap-4', 'lg:grid-cols-4' => count($a['queues']) >= 4, 'lg:grid-cols-3' => count($a['queues']) === 3])>
                 @foreach ($a['queues'] as $queue)
-                    <li><a href="{{ $queue['url'] }}" @class(['inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40', 'border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100' => $queue['late'] > 0, 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50' => $queue['late'] === 0])>
-                        {{ __($queue['label']) }}<span class="text-xs tabular-nums {{ $queue['late'] > 0 ? 'text-amber-800' : 'text-tertiary' }}">{{ $queue['count'] }}</span>@if ($queue['late'] > 0)<span class="text-xs font-semibold text-red-700">{{ __(':n late', ['n' => $queue['late']]) }}</span>@endif</a></li>
+                    @php
+                        $tone = $queue['count'] === 0 ? 'teal' : ['red' => 'red', 'amber' => 'amber', 'neutral' => 'teal'][\App\Services\Admin\StaffDashboardService::tone($queue['oldest'])];
+                        $hint = $queue['count'] === 0 ? __('Nothing waiting') : __('Oldest waiting :when', ['when' => $queue['oldest']?->diffForHumans(null, true) ?? '—']).($queue['late'] > 0 ? ' · '.__(':n late', ['n' => $queue['late']]) : '');
+                    @endphp
+                    <x-stat-tile :label="__($queue['title'])" :value="number_format($queue['count'])" :hint="$hint" :icon="$queue['icon']" :url="$queue['url']" :tone="$tone" />
                 @endforeach
-            </ul>
+            </section>
         @endif
 
         @include('admin.dashboard.attention')
@@ -41,13 +44,14 @@
         </div>
 
         @if ($pulse)@include('admin.dashboard.pulse')@endif
+        @if (! $pulse && $activity)@include('admin.dashboard.activity')@endif
 
         @if ($feeds)
             <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
                 @isset($feeds['members'])@include('admin.dashboard.feed-members', ['feed' => $feeds['members']])@endisset
                 @isset($feeds['projects'])@include('admin.dashboard.feed-projects', ['feed' => $feeds['projects']])@endisset
-                @isset($feeds['hires'])@include('admin.dashboard.feed-hires', ['feed' => $feeds['hires']])@endisset
                 @isset($feeds['models'])@include('admin.dashboard.feed-models', ['feed' => $feeds['models']])@endisset
+                @isset($feeds['hires'])@include('admin.dashboard.feed-hires', ['feed' => $feeds['hires']])@endisset
             </div>
         @endif
 

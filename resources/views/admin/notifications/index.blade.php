@@ -1,14 +1,8 @@
 <x-staff-layout :title="__('Notifications')">
-    <div class="container mx-auto max-w-4xl px-4 py-8">
-        <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
-            <div>
-                <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Notifications') }}</h1>
-                <p class="mt-1 text-sm text-tertiary">{{ __('New models, applications and disputes that need someone on staff.') }}</p>
-            </div>
-            @if ($unread > 0)
-                <form method="POST" action="{{ route('admin.notifications.read-all') }}">@csrf<x-btn variant="secondary" size="sm" type="submit">{{ __('Mark all as read') }}</x-btn></form>
-            @endif
-        </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <x-staff.header :title="__('Notifications')">{{ __('New models, applications and disputes that need someone on staff.') }}
+            <x-slot:actions>@if ($unread > 0)<form method="POST" action="{{ route('admin.notifications.read-all') }}">@csrf<x-btn variant="secondary" size="sm" type="submit">{{ __('Mark all as read') }}</x-btn></form>@endif</x-slot:actions>
+        </x-staff.header>
 
         @if ($notifications->isEmpty())
             <x-empty-state icon="bell" :title="__('Nothing here')" :description="__('You will be told here when something needs you.')" />

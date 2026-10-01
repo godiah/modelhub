@@ -1,54 +1,44 @@
-@php $pills = ['active' => __('Active'), 'inactive' => __('Deactivated'), 'all' => __('All')]; @endphp
+@php
+    $pills = ['active' => __('Active'), 'inactive' => __('Deactivated'), 'all' => __('All')];
+    $tabs = collect($pills)->map(fn ($label, $key) => ['label' => $label, 'count' => $counts[$key], 'on' => $status === $key, 'url' => route('admin.staff.index', array_filter(['status' => $key, 'q' => $term, 'sort' => request('sort'), 'dir' => request('dir')]))])->values()->all();
+    $chips = [$term !== '' ? ['label' => __('Search: :term', ['term' => $term]), 'remove' => ['q']] : null];
+    $filtered = $term !== '' || $status !== 'active';
+    $columns = [
+        ['key' => 'name', 'label' => 'Name', 'sort' => 'name'],
+        ['key' => 'roles', 'label' => 'Roles', 'class' => 'hidden sm:table-cell'],
+        ['key' => 'seen', 'label' => 'Last signed in', 'sort' => 'seen', 'first' => 'desc', 'align' => 'right'],
+    ];
+@endphp
 <x-staff-layout :title="__('Staff')">
-    <div class="container mx-auto max-w-5xl px-4 py-8">
-        <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
-            <div>
-                <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Staff') }}</h1>
-                <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Everyone with access to this portal. Staff have their own accounts, separate from members, and what they can do comes from their roles.') }}</p>
-            </div>
-            <x-btn href="{{ route('admin.staff.create') }}"><x-icon name="plus" class="h-4 w-4" />{{ __('Invite staff') }}</x-btn>
-        </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <x-staff.header :title="__('Staff')" :description="__('Everyone with access to this portal. Staff have their own accounts, separate from members, and what they can do comes from their roles.')">
+            <x-slot:actions><x-btn href="{{ route('admin.staff.create') }}" wire:navigate><x-icon name="plus" class="h-4 w-4" />{{ __('Invite staff') }}</x-btn></x-slot:actions>
+        </x-staff.header>
 
-        <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
-            <nav aria-label="{{ __('Filter by status') }}" class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-                <ul class="flex min-w-max items-center gap-2">
-                    @foreach ($pills as $key => $label)
-                        @php $on = $status === $key; @endphp
-                        <li><a href="{{ route('admin.staff.index', array_filter(['status' => $key, 'q' => $term])) }}" @if ($on) aria-current="true" @endif
-                            @class(['inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40', 'border-teal-600 bg-teal-600 text-white' => $on, 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:bg-neutral-50' => ! $on])>
-                            {{ $label }}<span @class(['text-xs tabular-nums', 'text-teal-100' => $on, 'text-tertiary' => ! $on])>{{ $counts[$key] }}</span></a></li>
-                    @endforeach
-                </ul>
-            </nav>
-            <form method="GET" action="{{ route('admin.staff.index') }}" role="search" class="flex gap-2">
-                <input type="hidden" name="status" value="{{ $status }}">
-                <label for="q" class="sr-only">{{ __('Search staff') }}</label>
-                <input id="q" type="search" name="q" value="{{ $term }}" placeholder="{{ __('Name or email') }}" class="w-56 rounded-xl border border-neutral-300 px-3 py-2 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25">
-                <x-btn type="submit" variant="secondary" size="sm">{{ __('Search') }}</x-btn>
-            </form>
-        </div>
+        <x-staff.toolbar :tabs="$tabs" :search="$term" :placeholder="__('Name or email')" :chips="$chips" :action="route('admin.staff.index')" />
 
         @if ($members->isEmpty())
-            <x-empty-state icon="users" :title="__('Nobody here')" :description="$term !== '' ? __('No staff match that search.') : __('No staff accounts match this filter.')" />
+            <x-empty-state icon="users" :title="$filtered ? __('No staff match') : __('No staff yet')" :description="$term !== '' ? __('No staff match that search.') : __('No staff accounts match this filter.')">
+                @if ($filtered)<x-btn variant="secondary" :href="route('admin.staff.index')" wire:navigate>{{ __('Clear filters') }}</x-btn>@endif
+            </x-empty-state>
         @else
-            <x-card clip>
-                <ul class="divide-y divide-neutral-100">
-                    @foreach ($members as $member)
-                        <li>
-                            <a href="{{ route('admin.staff.edit', $member) }}" class="flex flex-wrap items-center gap-4 px-5 py-4 hover:bg-neutral-50 focus:outline-none focus-visible:bg-neutral-50">
-                                <x-user-avatar :user="$member" size="h-10 w-10" />
-                                <div class="min-w-0 flex-1">
-                                    <p class="flex flex-wrap items-center gap-2 text-sm font-semibold text-neutral-900">{{ $member->name }}@unless ($member->is_active)<x-badge tone="red" class="px-2 py-0.5 text-xs font-medium">{{ __('Deactivated') }}</x-badge>@endunless</p>
-                                    <p class="truncate text-xs text-tertiary">{{ $member->email }}</p>
-                                </div>
-                                <p class="flex flex-wrap gap-1.5">@forelse ($member->roles as $role)<span class="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700">{{ $role->name }}</span>@empty<span class="text-xs text-tertiary">{{ __('No role') }}</span>@endforelse</p>
-                                <p class="w-32 shrink-0 text-right text-xs text-tertiary">{{ $member->last_login_at ? __('Signed in :when', ['when' => $member->last_login_at->diffForHumans()]) : __('Never signed in') }}</p>
+            <x-staff.table :columns="$columns" :sort="$sort" :dir="$dir" :paginator="$members" :summary="trans_choice(':count account|:count accounts', $members->total(), ['count' => number_format($members->total())])">
+                @foreach ($members as $member)
+                    <x-staff.row :href="route('admin.staff.edit', $member)">
+                        <td class="px-4">
+                            <a href="{{ route('admin.staff.edit', $member) }}" wire:navigate class="flex items-center gap-3 focus:outline-none focus-visible:underline">
+                                <x-user-avatar :user="$member" size="h-9 w-9" />
+                                <span class="min-w-0">
+                                    <span class="flex flex-wrap items-center gap-2 font-semibold text-neutral-900">{{ $member->name }}@unless ($member->is_active)<x-badge tone="red" class="px-2 py-0.5 text-xs font-medium">{{ __('Deactivated') }}</x-badge>@endunless</span>
+                                    <span class="block truncate text-xs font-normal text-tertiary">{{ $member->email }}</span>
+                                </span>
                             </a>
-                        </li>
-                    @endforeach
-                </ul>
-            </x-card>
-            <x-pager :paginator="$members" />
+                        </td>
+                        <td class="hidden px-4 sm:table-cell"><span class="flex flex-wrap gap-1.5">@forelse ($member->roles as $role)<span class="rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-medium text-neutral-700">{{ $role->name }}</span>@empty<span class="text-xs text-tertiary">{{ __('No role') }}</span>@endforelse</span></td>
+                        <td class="whitespace-nowrap px-4 text-right text-neutral-600">{{ $member->last_login_at ? $member->last_login_at->diffForHumans() : __('Never') }}</td>
+                    </x-staff.row>
+                @endforeach
+            </x-staff.table>
         @endif
     </div>
 </x-staff-layout>

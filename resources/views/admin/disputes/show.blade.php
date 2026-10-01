@@ -11,7 +11,7 @@
     $deliverables = $engagement->deliverables;
 @endphp
 <x-staff-layout :title="__('Dispute') . ' · ' . $application->job->title">
-    <div class="container mx-auto max-w-6xl px-4 py-8">
+    <div class="container mx-auto max-w-7xl px-4 py-8">
         <a href="{{ route('admin.disputes.index') }}" class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"><x-icon name="arrow-left" class="h-4 w-4" />{{ __('All disputes') }}</a>
 
         <x-card class="mb-6 rounded-2xl">

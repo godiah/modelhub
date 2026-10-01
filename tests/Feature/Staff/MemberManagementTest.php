@@ -55,7 +55,8 @@ it('lists members with their status, counts and filters, newest first', function
 
     $staff = staffWith('Platform manager');
     $this->actingAs($staff, 'staff')->get(route('admin.members.index'))->assertOk()
-        ->assertSee('Active Person')->assertSee('Suspended Person')->assertSee('Unverified Person')->assertSee('1 projects');
+        ->assertSee('Active Person')->assertSee('Suspended Person')->assertSee('Unverified Person')->assertSee('3 members')
+        ->assertSeeInOrder(['Active Person', '<td class="hidden px-4 text-right tabular-nums text-neutral-700 lg:table-cell">1</td>'], false);
 
     $this->get(route('admin.members.index', ['status' => 'suspended']))->assertSee('Suspended Person')->assertDontSee('Active Person');
     $this->get(route('admin.members.index', ['status' => 'unverified']))->assertSee('Unverified Person')->assertDontSee('Suspended Person');
@@ -74,7 +75,7 @@ it('masks email addresses and phone numbers for roles without contact details, a
     $this->actingAs($auditor, 'staff')->get(route('admin.members.index'))->assertSee('w••••••@example.test', false)->assertDontSee('wanjiru.kamau@example.test');
     $this->get(route('admin.members.show', $member))->assertSee('Full contact details are hidden for your role.')->assertSee('•••• 678', false)->assertDontSee('wanjiru.kamau@example.test')->assertDontSee('712 345');
     // An email search would unmask addresses a letter at a time, so it is ignored without the permission
-    $this->get(route('admin.members.index', ['q' => 'wanjiru.kamau@']))->assertSee('Nobody here');
+    $this->get(route('admin.members.index', ['q' => 'wanjiru.kamau@']))->assertSee('No members match');
 
     $support = staffWith('Support');
     $this->actingAs($support, 'staff')->get(route('admin.members.index'))->assertSee('wanjiru.kamau@example.test');
@@ -235,4 +236,38 @@ it('records when a member last signed in', function () {
     Volt::test('pages.auth.login')->set('form.email', 'w@example.test')->set('form.password', 'password')->call('login')->assertHasNoErrors();
 
     expect($member->fresh()->last_login_at)->not->toBeNull();
+});
+
+it('sorts the member list by the columns it offers, newest first by default, and ignores anything else', function () {
+    memberNamed('Bea Second', ['created_at' => now()->subDays(2)]);
+    memberNamed('Ann First', ['created_at' => now()->subDays(1)]);
+    memberNamed('Cy Third', ['created_at' => now()->subDays(3)]);
+    $this->actingAs(staffWith('Platform manager'), 'staff');
+
+    $this->get(route('admin.members.index'))->assertSeeInOrder(['Ann First', 'Bea Second', 'Cy Third']);
+    $this->get(route('admin.members.index', ['sort' => 'name', 'dir' => 'asc']))->assertSeeInOrder(['Ann First', 'Bea Second', 'Cy Third'])->assertSee('aria-sort="ascending"', false);
+    $this->get(route('admin.members.index', ['sort' => 'name', 'dir' => 'desc']))->assertSeeInOrder(['Cy Third', 'Bea Second', 'Ann First']);
+    $this->get(route('admin.members.index', ['sort' => 'joined', 'dir' => 'asc']))->assertSeeInOrder(['Cy Third', 'Bea Second', 'Ann First']);
+    $this->get(route('admin.members.index', ['sort' => 'password; drop table users', 'dir' => 'sideways']))->assertOk()->assertSeeInOrder(['Ann First', 'Bea Second', 'Cy Third']);
+});
+
+it('shows the filters in force as removable chips, with a way to clear them all', function () {
+    memberNamed('Ann First');
+    $this->actingAs(staffWith('Platform manager'), 'staff');
+
+    $this->get(route('admin.members.index', ['q' => 'ann', 'activity' => 'sellers']))->assertSee('Search: ann')->assertSee('Sellers')->assertSee('Clear all')->assertSee('No members match');
+    $this->get(route('admin.members.index'))->assertDontSee('Clear all');
+});
+
+it('says which two-step sign-in applies to a member, including when the platform requires it', function () {
+    $member = memberNamed('Two Step Person');
+    $this->actingAs(staffWith('Support'), 'staff');
+
+    $this->get(route('admin.members.show', $member))->assertSee('Two-factor sign-in')->assertSee('Off');
+
+    setting('security.otp_members_required', true);
+    $this->get(route('admin.members.show', $member))->assertSee('Emailed code')->assertSee('(required by the platform)');
+
+    authenticatorFor($member);
+    $this->get(route('admin.members.show', $member))->assertSee('Authenticator app')->assertDontSee('(required by the platform)');
 });

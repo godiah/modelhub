@@ -1,9 +1,6 @@
 <x-staff-layout :title="__('Activity log')">
-    <div class="container mx-auto max-w-5xl px-4 py-8">
-        <div class="mb-6">
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Activity log') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Who did what in the staff portal, and when: decisions on models, sellers, reviews and disputes, changes to staff and roles, and sign-ins. Entries are never edited or deleted.') }}</p>
-        </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <x-staff.header :title="__('Activity log')">{{ __('Who did what in the staff portal, and when: decisions on models, sellers, reviews and disputes, changes to staff and roles, and sign-ins. Entries are never edited or deleted.') }}</x-staff.header>
 
         <form method="GET" action="{{ route('admin.activity.index') }}" class="mb-5 flex flex-wrap items-end gap-3">
             <div>

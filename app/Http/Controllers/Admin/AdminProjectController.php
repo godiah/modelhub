@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ModelJob;
 use App\Services\Admin\ProjectDirectoryService;
 use App\Services\Admin\ProjectModerationService;
+use App\Support\Staff\ListSort;
 use Illuminate\Http\Request;
 
 /** Every project on the board, and taking one down. Permissions: view projects, moderate projects. */
@@ -18,10 +19,11 @@ class AdminProjectController extends Controller
     {
         $status = array_key_exists($request->query('status'), ProjectDirectoryService::STATUSES) ? $request->query('status') : 'all';
         $term = trim((string) $request->query('q'));
+        [$sort, $dir] = ListSort::resolve($request, array_keys(ProjectDirectoryService::SORTS), default: 'posted', descFirst: ['posted', 'budget', 'applicants']);
 
         return view('admin.projects.index', [
-            'projects' => $this->directory->query($status, $term)->paginate(12)->withQueryString(),
-            'status' => $status, 'term' => $term, 'counts' => $this->directory->counts(),
+            'projects' => $this->directory->query($status, $term, $sort, $dir)->paginate(12)->withQueryString(),
+            'status' => $status, 'term' => $term, 'sort' => $sort, 'dir' => $dir, 'counts' => $this->directory->counts(),
         ]);
     }
 

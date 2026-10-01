@@ -20,10 +20,7 @@
 @endphp
 <x-staff-layout :title="__('Platform overview')">
     <div class="container mx-auto max-w-7xl px-4 py-8">
-        <div class="mb-6">
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Platform overview') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('How the platform is doing. The numbers refresh every few minutes; trends compare the last 7 days with the 7 before.') }}</p>
-        </div>
+        <x-staff.header :title="__('Platform overview')">{{ __('How the platform is doing. The numbers refresh every few minutes; trends compare the last 7 days with the 7 before.') }}</x-staff.header>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             @foreach ($tiles as [$label, $value, $icon, $hint, $trend, $extra])

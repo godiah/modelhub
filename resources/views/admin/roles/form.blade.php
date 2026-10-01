@@ -5,15 +5,15 @@
     $held = old('permissions', $granted);
 @endphp
 <x-staff-layout :title="$role ? $role->name : __('New role')">
-    <div class="container mx-auto max-w-3xl px-4 py-8">
+    <div class="container mx-auto max-w-7xl px-4 py-8">
         <a href="{{ route('admin.roles.index') }}" class="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"><x-icon name="arrow-left" class="h-4 w-4" />{{ __('All roles') }}</a>
-        <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ $role ? $role->name : __('New role') }}</h1>
-        @if ($locked)<p class="mt-1 text-sm text-tertiary">{{ __('Super admin always holds every permission, including ones added later, so it cannot be edited or deleted.') }}</p>@endif
+        <x-staff.header class="!mb-0" :title="$role ? $role->name : __('New role')">@if ($locked){{ __('Super admin always holds every permission, including ones added later, so it cannot be edited or deleted.') }}@endif</x-staff.header>
 
         <form method="POST" action="{{ $role ? route('admin.roles.update', $role) : route('admin.roles.store') }}" class="mt-6 space-y-6">
             @csrf
             @if ($role) @method('PATCH') @endif
 
+            <div class="grid grid-cols-1 items-start gap-6 md:grid-cols-2 xl:grid-cols-3">
             <x-panel :title="__('About the role')">
                 <div class="space-y-4">
                     <div><label for="name" class="mb-1.5 block text-sm font-medium text-neutral-800">{{ __('Name') }}</label><input id="name" name="name" value="{{ old('name', $role?->name) }}" required maxlength="60" @disabled($locked) class="{{ $field }}">@error('name')<p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>@enderror</div>
@@ -35,6 +35,7 @@
                     </ul>
                 </x-panel>
             @endforeach
+            </div>
             @error('permissions.*')<p class="text-sm text-red-600" role="alert">{{ $message }}</p>@enderror
 
             @unless ($locked)

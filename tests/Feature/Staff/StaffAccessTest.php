@@ -182,7 +182,7 @@ it('lists and searches staff, with counts on the filters', function () {
     $gone = staffWith('Support');
     $gone->update(['name' => 'Gone Person', 'is_active' => false]);
 
-    $this->actingAs($super, 'staff')->get(route('admin.staff.index'))->assertOk()->assertSee('Rita Reviewer')->assertDontSee('Gone Person')->assertSee('Never signed in');
+    $this->actingAs($super, 'staff')->get(route('admin.staff.index'))->assertOk()->assertSee('Rita Reviewer')->assertDontSee('Gone Person')->assertSee('Last signed in')->assertSee('Never');
     $this->get(route('admin.staff.index', ['q' => 'rita@']))->assertSee('Rita Reviewer')->assertDontSee(route('admin.staff.edit', $super), false);
     $this->get(route('admin.staff.index', ['status' => 'all']))->assertSee('Gone Person');
     $this->get(route('admin.staff.index', ['q' => 'zzzz']))->assertSee('No staff match that search.');
@@ -298,4 +298,14 @@ it('only seeds the demo admin account in local development', function () {
     } finally {
         app()->detectEnvironment(fn () => 'testing');
     }
+});
+
+it('renders the role delete buttons with real data, not raw template directives', function () {
+    $role = Role::create(['name' => 'Temp reviewer', 'guard_name' => 'staff']);
+
+    $html = $this->actingAs(staffWith('Super admin'), 'staff')->get(route('admin.roles.index'))->assertOk()->getContent();
+
+    expect($html)->not->toContain('@js(')
+        ->and($html)->toContain('delete-role')
+        ->and($html)->toContain(route('admin.roles.destroy', $role));
 });

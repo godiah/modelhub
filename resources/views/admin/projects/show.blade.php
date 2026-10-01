@@ -4,7 +4,7 @@
     $canModerate = auth()->user()->can('moderate projects');
 @endphp
 <x-staff-layout :title="$job->title">
-    <div class="container mx-auto max-w-6xl space-y-6 px-4 py-8" x-data="{ takingDown: false, restoring: false }">
+    <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8" x-data="{ takingDown: false, restoring: false }">
         <a href="{{ route('admin.projects.index') }}" class="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"><x-icon name="arrow-left" class="h-4 w-4" />{{ __('All projects') }}</a>
 
         @if ($job->isTakenDown())

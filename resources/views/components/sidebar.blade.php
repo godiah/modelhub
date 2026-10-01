@@ -1,20 +1,22 @@
-@props(['groups'])
+@props(['groups', 'home' => 'dashboard', 'subtitle' => null, 'label' => null, 'badge' => 'bg-red-500 text-white'])
 
 {{--
     App sidebar. Desktop (lg+): fixed rail, 256px wide or 72px when html has .sidebar-collapsed (set before paint
     by the layout's head script and toggled here). Below lg: off-canvas drawer driven by the shell's `mobileOpen`.
 --}}
-<aside id="app-sidebar" aria-label="{{ __('Main navigation') }}"
+<aside id="app-sidebar" aria-label="{{ $label ?? __('Main navigation') }}"
     class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-neutral-200/70 bg-white transition-[transform,width] duration-200 ease-out lg:z-30 lg:w-64 lg:translate-x-0 lg:[.sidebar-collapsed_&]:w-[72px]"
     :class="{ '!translate-x-0 shadow-2xl': mobileOpen }" x-trap.noscroll="mobileOpen">
 
     <!-- Brand -->
     <div class="flex h-16 shrink-0 items-center justify-between border-b border-neutral-200/70 px-4">
-        <a href="{{ route('dashboard') }}" wire:navigate class="flex min-w-0 items-center gap-2.5"
+        <a href="{{ route($home) }}" wire:navigate class="flex min-w-0 items-center gap-2.5"
             aria-label="{{ config('app.name', 'ModelHub') }}">
             <x-application-logo variant="mark" class="h-9 w-auto shrink-0" />
-            <span
-                class="truncate font-secondary text-sm font-semibold uppercase tracking-[0.18em] text-neutral-800 lg:[.sidebar-collapsed_&]:hidden">{{ config('app.name', 'ModelHub') }}</span>
+            <span class="min-w-0 lg:[.sidebar-collapsed_&]:hidden">
+                <span class="block truncate font-secondary text-sm font-semibold uppercase tracking-[0.18em] text-neutral-800">{{ config('app.name', 'ModelHub') }}</span>
+                @if ($subtitle)<span class="block text-[10px] font-semibold uppercase tracking-widest text-teal-700">{{ $subtitle }}</span>@endif
+            </span>
         </a>
 
         <!-- Close (mobile drawer only) -->
@@ -38,7 +40,7 @@
                 <ul class="space-y-1">
                     @foreach ($group['items'] as $item)
                         {{-- A sub-label (or, when the rail is collapsed, a hairline) where a new section starts inside a group --}}
-                        @if ($item['section'] && $item['section'] !== ($group['items'][$loop->index - 1]['section'] ?? null))
+                        @if (($item['section'] ?? null) && $item['section'] !== ($group['items'][$loop->index - 1]['section'] ?? null))
                             <li class="mx-3 mt-3 border-t border-neutral-100 px-0 pb-1 pt-3 text-xs font-medium text-neutral-400 lg:[.sidebar-collapsed_&]:mt-2 lg:[.sidebar-collapsed_&]:border-neutral-200 lg:[.sidebar-collapsed_&]:pt-0">
                                 <span class="lg:[.sidebar-collapsed_&]:hidden">{{ $item['section'] }}</span>
                             </li>
@@ -56,9 +58,9 @@
 
                                 @if ($item['badge'] > 0)
                                     <span
-                                        class="rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white lg:[.sidebar-collapsed_&]:hidden">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>
+                                        class="rounded-full {{ $badge }} px-2 py-0.5 text-xs font-semibold tabular-nums lg:[.sidebar-collapsed_&]:hidden">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>
                                     <span aria-hidden="true"
-                                        class="absolute right-3 top-2 hidden h-2 w-2 rounded-full bg-red-500 ring-2 ring-white lg:[.sidebar-collapsed_&]:block"></span>
+                                        class="absolute right-3 top-2 hidden h-2 w-2 rounded-full {{ $badge }} ring-2 ring-white lg:[.sidebar-collapsed_&]:block"></span>
                                 @endif
                             </a>
                         </li>

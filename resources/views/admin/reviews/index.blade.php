@@ -3,11 +3,8 @@
     $reasons = \App\Models\ProductReview::REPORT_REASONS;
 @endphp
 <x-staff-layout title="Review moderation">
-    <div class="container mx-auto max-w-5xl px-4 py-8">
-        <div class="mb-6">
-            <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Review moderation') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('Buyers report reviews that look like spam, abuse or fakes. Hide one that breaks the rules (it stops counting towards the rating and its author is told why), or dismiss the reports and leave it up.') }}</p>
-        </div>
+    <div class="container mx-auto max-w-7xl px-4 py-8">
+        <x-staff.header :title="__('Review moderation')">{{ __('Buyers report reviews that look like spam, abuse or fakes. Hide one that breaks the rules (it stops counting towards the rating and its author is told why), or dismiss the reports and leave it up.') }}</x-staff.header>
 
         <nav aria-label="{{ __('Filter reviews') }}" class="-mx-4 mb-5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
             <ul class="flex min-w-max items-center gap-2">
