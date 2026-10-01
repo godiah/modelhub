@@ -38,20 +38,23 @@ class RolesAndPermissionsSeeder extends Seeder
             // User management
             'manage users',
             'view users',
+
+            // Marketplace
+            'review sellers',
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::findOrCreate($permission, 'web');
         }
 
         // Create roles and assign permissions
 
         // Admin role
-        $adminRole = Role::create(['name' => 'admin']);
+        $adminRole = Role::findOrCreate('admin', 'web');
         $adminRole->givePermissionTo(Permission::all());
 
         // Client role
-        $clientRole = Role::create(['name' => 'client']);
+        $clientRole = Role::findOrCreate('client', 'web');
         $clientRole->givePermissionTo([
             'view engagements',
             'create engagements',
@@ -62,7 +65,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Freelancer role
-        $freelancerRole = Role::create(['name' => 'freelancer']);
+        $freelancerRole = Role::findOrCreate('freelancer', 'web');
         $freelancerRole->givePermissionTo([
             'view engagements',
             'process cancellations',
@@ -70,7 +73,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Support role
-        $supportRole = Role::create(['name' => 'support']);
+        $supportRole = Role::findOrCreate('support', 'web');
         $supportRole->givePermissionTo([
             'view engagements',
             'view disputes',
@@ -79,7 +82,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Dispute manager role
-        $disputeManagerRole = Role::create(['name' => 'dispute_manager']);
+        $disputeManagerRole = Role::findOrCreate('dispute_manager', 'web');
         $disputeManagerRole->givePermissionTo([
             'view engagements',
             'view disputes',

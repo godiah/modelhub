@@ -202,9 +202,9 @@ carts with split payment at checkout beyond what the ledger gives us for free.
 
 | # | Decision | Options | Affects |
 |---|---|---|---|
-| D1 | Currency scope | KES only at launch vs USD/multi-currency from the start | ledger design, gateway, pricing UI |
-| D2 | Payment methods at launch | M-Pesa only; + cards; + PayPal/Stripe | gateway adapters, payout rails |
-| D3 | Who can sell | anyone / approved sellers / invite-only at first | onboarding, moderation load |
+| ~~D1~~ | ~~Currency scope~~ | **Decided 2026-10-01: KES only at launch; every money row still stores its currency** | ledger design, gateway, pricing UI |
+| ~~D2~~ | ~~Payment methods at launch~~ | **Decided 2026-10-01: M-Pesa first (via `laravel-common`), cards later** | gateway adapters, payout rails |
+| ~~D3~~ | ~~Who can sell~~ | **Decided 2026-10-01: approved sellers (apply, then an admin reviews)** | onboarding, moderation load |
 | D4 | Commission model | flat % / tiered by seller level / per category; separate rate for jobs vs models | fee config, admin |
 | D5 | Licence types | which tiers and their legal text | listings, `IssuedLicence`, terms |
 | D6 | Model pricing | fixed price only vs pay-what-you-want/free models | checkout, listing form |
@@ -217,3 +217,6 @@ carts with split payment at checkout beyond what the ledger gives us for free.
 | Date | Decision |
 |---|---|
 | 2026-10-01 | Direction agreed: freelance job board plus a CGTrader-style models marketplace on one platform. This note written; nothing else decided yet. |
+| 2026-10-01 | D1: KES only at launch, currency stored on every money row. D2: M-Pesa first, cards later. D3: approved sellers only. Build order: file pipeline and catalogue first; money core in parallel. |
+| 2026-10-01 | Code naming: the 3D model listing is `Product` in code (tables `products`, `product_files`, …) to avoid clashing with Eloquent's `Model` and the existing `ModelJob`; the UI word stays "Model". |
+| 2026-10-01 | Built: seller onboarding (apply at `/sell`, reviewers approve/reject/suspend at `/admin/sellers`, permission `review sellers`, notifications under category Marketplace). Seller terms (commission, licences, payouts) are still to be written before a first listing can be published. |
