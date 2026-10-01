@@ -41,6 +41,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
             // Marketplace
             'review sellers',
+            'review models',
         ];
 
         foreach ($permissions as $permission) {

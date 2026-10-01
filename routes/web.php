@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDisputeController;
+use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\DashBoardController;
@@ -12,11 +13,14 @@ use App\Http\Controllers\JobEngagementController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MessageTemplateController;
+use App\Http\Controllers\ModelCatalogueController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
 use App\Http\Controllers\PolicyManagementController;
 use App\Http\Controllers\PostedJobApplicationController;
 use App\Http\Controllers\SellerController;
+use App\Http\Controllers\SellerProductController;
+use App\Http\Controllers\SellerProductFileController;
 use Illuminate\Support\Facades\Route;
 
 // Signed-in users go straight to the app shell; the landing page is for guests.
@@ -160,10 +164,33 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     Route::post('/{engagement}/reopen-job', [JobEngagementController::class, 'reopenJob'])->name('reopen-job');
 });
 
+// The public models catalogue
+Route::get('/models', [ModelCatalogueController::class, 'index'])->name('models.index');
+Route::get('/models/{product}', [ModelCatalogueController::class, 'show'])->name('models.show');
+
 // Selling 3D models: becoming an approved seller
 Route::middleware(['auth'])->prefix('sell')->name('seller.')->group(function () {
     Route::get('/', [SellerController::class, 'index'])->name('index');
     Route::post('/apply', [SellerController::class, 'apply'])->middleware('throttle:6,1')->name('apply');
+});
+
+// An approved seller's model listings
+Route::middleware(['auth', 'seller'])->prefix('sell/models')->name('seller.models.')->group(function () {
+    Route::get('/', [SellerProductController::class, 'index'])->name('index');
+    Route::get('/create', [SellerProductController::class, 'create'])->name('create');
+    Route::post('/', [SellerProductController::class, 'store'])->name('store');
+    Route::get('/{product}/edit', [SellerProductController::class, 'edit'])->name('edit');
+    Route::patch('/{product}', [SellerProductController::class, 'update'])->name('update');
+    Route::delete('/{product}', [SellerProductController::class, 'destroy'])->name('destroy');
+    Route::post('/{product}/submit', [SellerProductController::class, 'submit'])->name('submit');
+    Route::post('/{product}/unpublish', [SellerProductController::class, 'unpublish'])->name('unpublish');
+
+    Route::post('/{product}/files', [SellerProductFileController::class, 'storeFile'])->name('files.store');
+    Route::delete('/{product}/files/{file}', [SellerProductFileController::class, 'destroyFile'])->name('files.destroy');
+    Route::get('/{product}/files/{file}/download', [SellerProductFileController::class, 'downloadFile'])->name('files.download');
+    Route::post('/{product}/images', [SellerProductFileController::class, 'storeImage'])->name('images.store');
+    Route::delete('/{product}/images/{image}', [SellerProductFileController::class, 'destroyImage'])->name('images.destroy');
+    Route::post('/{product}/images/{image}/cover', [SellerProductFileController::class, 'coverImage'])->name('images.cover');
 });
 
 // Public documents: readable by guests and signed-in users alike
@@ -193,6 +220,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::middleware(['permission:review sellers'])->group(function () {
         Route::get('/sellers', [AdminSellerController::class, 'index'])->name('sellers.index');
         Route::patch('/sellers/{seller}/{decision}', [AdminSellerController::class, 'review'])->whereIn('decision', ['approve', 'reject', 'suspend'])->name('sellers.review');
+    });
+    Route::middleware(['permission:review models'])->group(function () {
+        Route::get('/models', [AdminProductController::class, 'index'])->name('models.index');
+        Route::patch('/models/{product}/{decision}', [AdminProductController::class, 'review'])->whereIn('decision', ['publish', 'reject', 'takedown'])->name('models.review');
+        Route::get('/models/{product}/files/{file}', [AdminProductController::class, 'download'])->name('models.files.download');
     });
     Route::middleware(['permission:view users'])->group(function () {
         Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff.index');

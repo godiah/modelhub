@@ -25,7 +25,7 @@ final class SidebarMenu
             $items = [];
 
             foreach ($group['items'] as $item) {
-                if (($item['hidden'] ?? false) || (isset($item['can']) && ! $user->can($item['can']))) {
+                if (($item['hidden'] ?? false) || (isset($item['can']) && ! $user->can($item['can'])) || (($item['seller'] ?? false) && ! $user->isApprovedSeller())) {
                     continue;
                 }
 
@@ -111,7 +111,9 @@ final class SidebarMenu
             [
                 'label' => 'Marketplace',
                 'items' => [
-                    ['label' => 'Sell models', 'route' => 'seller.index', 'icon' => 'cube', 'match' => ['seller.*']],
+                    ['label' => 'Browse models', 'route' => 'models.index', 'icon' => 'magnifying-glass', 'match' => ['models.*']],
+                    ['label' => 'Sell models', 'route' => 'seller.index', 'icon' => 'cube', 'match' => ['seller.index', 'seller.apply']],
+                    ['label' => 'My models', 'route' => 'seller.models.index', 'icon' => 'squares-2x2', 'match' => ['seller.models.*'], 'seller' => true],
                 ],
             ],
             [
@@ -124,6 +126,7 @@ final class SidebarMenu
                 'label' => 'Administration',
                 'items' => [
                     ['label' => 'Disputed engagements', 'route' => 'admin.disputes.index', 'icon' => 'shield-check', 'match' => ['admin.disputes.*'], 'can' => 'view disputes'],
+                    ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'cube', 'match' => ['admin.models.*'], 'can' => 'review models'],
                     ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'cube', 'match' => ['admin.sellers.*'], 'can' => 'review sellers'],
                     ['label' => 'Staff roles', 'route' => 'admin.staff.index', 'icon' => 'users', 'match' => ['admin.staff.*'], 'can' => 'manage users'],
                 ],
