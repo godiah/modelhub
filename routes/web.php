@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminDisputeController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\DashBoardController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobDeliverableController;
@@ -16,7 +17,7 @@ use App\Http\Controllers\PostedJobApplicationController;
 use Illuminate\Support\Facades\Route;
 
 // Signed-in users go straight to the app shell; the landing page is for guests.
-Route::view('/', 'welcome')->middleware('guest')->name('home');
+Route::get('/', HomeController::class)->middleware('guest')->name('home');
 
 Route::get('dashboard', [DashBoardController::class, 'index'])
     ->middleware(['auth', 'verified'])

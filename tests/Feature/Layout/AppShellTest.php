@@ -102,12 +102,12 @@ it('resolves breadcrumbs for pages that are not sidebar entries', function () {
 });
 
 it('gives signed-in users the slim app footer and guests the marketing footer', function () {
-    $this->get(route('jobs.browse'))->assertOk()->assertSee('Connect With Us')->assertDontSee('Cancellation &amp; payment policy', false);
+    $this->get(route('jobs.browse'))->assertOk()->assertSee('Join free')->assertDontSee('Cancellation &amp; payment policy', false);
 
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard'))
         ->assertSee('Cancellation &amp; payment policy', false)
-        ->assertDontSee('Connect With Us');
+        ->assertDontSee('Join free');
 });
 
 it('keeps guests on the public shell with the page title in the header band', function () {
@@ -115,11 +115,11 @@ it('keeps guests on the public shell with the page title in the header band', fu
         ->assertOk()
         ->assertDontSee(SIDEBAR_MARKER, false)
         ->assertSee('Browse projects')
-        ->assertSee('Connect With Us');
+        ->assertSee('Join free');
 });
 
 it('shows the landing page footer to guests', function () {
-    $this->get('/')->assertOk()->assertSee('Connect With Us');
+    $this->get('/')->assertOk()->assertSee('Join free');
 });
 
 it('renders the sidebar collapsed when the collapse cookie is set', function () {

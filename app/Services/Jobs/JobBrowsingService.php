@@ -51,6 +51,16 @@ class JobBrowsingService
         return $query->paginate(self::PER_PAGE)->withQueryString();
     }
 
+    // The newest projects open for applications, for the public landing page
+    public function latestOpenProjects(int $limit = 6)
+    {
+        // No client data is loaded: the landing page shows projects without who posted them.
+        return ModelJob::openForApplications()
+            ->latest()
+            ->limit($limit)
+            ->get();
+    }
+
     // The signed-in user's application status for each listed job (job id => ApplicationStatus),
     // so cards can say "Applied" or "Continue draft" instead of a bare Apply button.
     public function applicationStatuses(?User $user, iterable $jobs): array

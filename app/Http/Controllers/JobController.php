@@ -32,10 +32,12 @@ class JobController extends Controller
         $this->jobBrowsingService = $jobBrowsingService;
     }
 
-    // Job Board Home Page
-    public function index()
+    // "How it works": the public explainer for clients (default) and freelancers, switched with ?for=
+    public function index(Request $request)
     {
-        return view('jobBoard.jobs.index');
+        return view('jobBoard.jobs.how-it-works', [
+            'audience' => $request->query('for') === 'work' ? 'work' : 'hire',
+        ]);
     }
 
     // Job Board New Job Page
