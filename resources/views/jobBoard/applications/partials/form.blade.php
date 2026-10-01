@@ -145,7 +145,7 @@
                 <div>
                     <label class="flex items-start gap-2.5 text-sm text-neutral-700">
                         <input type="checkbox" name="terms" value="1" x-model="terms" class="mt-0.5 h-4 w-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-600/30">
-                        <span>{{ __('I agree to the Terms of Service and Privacy Policy, and that my offer is binding if the client hires me.') }}</span>
+                        <span>{{ __('I agree to the') }} <a href="{{ route('legal.terms') }}" target="_blank" rel="noopener" class="font-medium text-teal-700 hover:underline">{{ __('Terms of Service') }}</a> {{ __('and') }} <a href="{{ route('legal.privacy') }}" target="_blank" rel="noopener" class="font-medium text-teal-700 hover:underline">{{ __('Privacy Policy') }}</a>. {{ __('My offer is the price I am willing to work for if the client hires me.') }}</span>
                     </label>
                     @error('terms')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
                 </div>

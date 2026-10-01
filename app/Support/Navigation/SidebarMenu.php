@@ -133,6 +133,8 @@ final class SidebarMenu
                 'label' => 'Help',
                 'items' => [
                     ['label' => 'Cancellation policy', 'route' => 'engagements.policy', 'icon' => 'scale', 'match' => ['engagements.policy'], 'hidden' => true],
+                    ['label' => 'Terms of service', 'route' => 'legal.terms', 'icon' => 'document-text', 'match' => ['legal.terms'], 'hidden' => true],
+                    ['label' => 'Privacy policy', 'route' => 'legal.privacy', 'icon' => 'shield-check', 'match' => ['legal.privacy'], 'hidden' => true],
                 ],
             ],
         ];

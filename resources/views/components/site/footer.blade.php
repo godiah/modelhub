@@ -14,11 +14,16 @@
             [__('Sign in'), route('login')],
             [__('Join free'), route('register')],
         ],
+        __('Legal') => [
+            [__('Terms of service'), route('legal.terms')],
+            [__('Privacy policy'), route('legal.privacy')],
+            [__('Cancellation & payment policy'), route('engagements.policy')],
+        ],
     ];
 @endphp
 <footer class="border-t border-neutral-200 bg-white">
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 gap-8 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))]">
+        <div class="grid grid-cols-2 gap-8 md:grid-cols-[minmax(0,1.6fr)_repeat(4,minmax(0,1fr))]">
             <div class="col-span-2 md:col-span-1">
                 <a href="{{ route('home') }}" class="inline-flex items-center gap-2.5">
                     <x-application-logo variant="mark" class="h-9 w-auto" />

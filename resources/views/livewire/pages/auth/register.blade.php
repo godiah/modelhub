@@ -58,6 +58,13 @@ new #[Layout('layouts.guest')] class extends Component {
             autocomplete="new-password" />
 
         <x-btn block size="lg" wire:target="register">{{ __('Create account') }}</x-btn>
+
+        <p class="text-center text-xs leading-relaxed text-tertiary">
+            {{ __('By creating an account you agree to our') }}
+            <a href="{{ route('legal.terms') }}" target="_blank" rel="noopener" class="font-medium text-teal-700 hover:underline">{{ __('Terms of Service') }}</a>
+            {{ __('and') }}
+            <a href="{{ route('legal.privacy') }}" target="_blank" rel="noopener" class="font-medium text-teal-700 hover:underline">{{ __('Privacy Policy') }}</a>.
+        </p>
     </form>
 
     <x-slot:footer>
