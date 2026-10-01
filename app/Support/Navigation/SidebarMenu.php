@@ -111,9 +111,11 @@ final class SidebarMenu
             [
                 'label' => 'Marketplace',
                 'items' => [
-                    ['label' => 'Browse models', 'route' => 'models.index', 'icon' => 'magnifying-glass', 'match' => ['models.*']],
+                    ['label' => 'Browse models', 'route' => 'models.index', 'icon' => 'magnifying-glass', 'match' => ['models.*', 'sellers.*']],
+                    ['label' => 'Wishlist', 'route' => 'wishlist.index', 'icon' => 'heart', 'match' => ['wishlist.*']],
                     ['label' => 'Sell models', 'route' => 'seller.index', 'icon' => 'cube', 'match' => ['seller.index', 'seller.apply']],
                     ['label' => 'My models', 'route' => 'seller.models.index', 'icon' => 'squares-2x2', 'match' => ['seller.models.*'], 'seller' => true],
+                    ['label' => 'My store', 'route' => 'seller.store.edit', 'icon' => 'user', 'match' => ['seller.store.*'], 'seller' => true],
                 ],
             ],
             [

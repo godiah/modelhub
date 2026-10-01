@@ -1,8 +1,8 @@
-@props(['product'])
+@props(['product', 'saved' => false])
 
 {{--
     One model in the catalogue: cover, file-format tags, price, title, feature tags and the seller's store name.
-    Needs images, sellerProfile and files loaded.
+    Needs images, sellerProfile and files loaded. `saved` fills the wishlist heart.
 --}}
 @php
     $cover = $product->images->first();
@@ -12,6 +12,7 @@
     $features = collect(\App\Models\Product::FEATURES)->only(['is_pbr', 'is_rigged', 'is_animated', 'is_low_poly', 'is_print_ready'])->filter(fn ($label, $field) => $product->{$field});
 @endphp
 <article {{ $attributes->class('group flex flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md') }}>
+    <div class="relative">
     <a href="{{ route('models.show', $product) }}" class="relative block aspect-square overflow-hidden bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40" tabindex="-1" aria-hidden="true">
         @if ($cover)
             <img src="{{ $cover->url() }}" alt="" loading="lazy" class="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
@@ -32,6 +33,8 @@
             {{ $product->isFree() ? __('Free') : \App\Support\Money::formatMinor($product->price_minor, 0) }}
         </span>
     </a>
+        <x-models.wishlist-button :product="$product" :saved="$saved" class="absolute bottom-2.5 right-2.5 z-10" />
+    </div>
     <div class="flex flex-1 flex-col p-4">
         <h3 class="font-tertiary text-sm font-semibold leading-snug text-neutral-900">
             <a href="{{ route('models.show', $product) }}" class="rounded transition-colors hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">{{ $product->title }}</a>
@@ -43,6 +46,12 @@
                 @endforeach
             </ul>
         @endif
-        <p class="mt-auto pt-3 text-xs text-tertiary">{{ $product->sellerProfile?->display_name ?? __('ModelHub seller') }}</p>
+        <p class="mt-auto pt-3 text-xs text-tertiary">
+            @if ($product->sellerProfile?->slug)
+                <a href="{{ route('sellers.show', $product->sellerProfile->slug) }}" class="rounded hover:text-teal-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">{{ $product->sellerProfile->display_name }}</a>
+            @else
+                {{ __('ModelHub seller') }}
+            @endif
+        </p>
     </div>
 </article>

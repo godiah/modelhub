@@ -10,7 +10,10 @@
                 <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('My models') }}</h1>
                 <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('The 3D models you are selling. Drafts are private; a reviewer checks each model before it goes live.') }}</p>
             </div>
-            <x-btn href="{{ route('seller.models.create') }}" class="shrink-0"><x-icon name="plus" class="h-4 w-4" />{{ __('Add a model') }}</x-btn>
+            <div class="flex shrink-0 flex-wrap items-center gap-2">
+                <x-btn variant="secondary" href="{{ route('seller.store.edit') }}"><x-icon name="user" class="h-4 w-4" />{{ __('My store') }}</x-btn>
+                <x-btn href="{{ route('seller.models.create') }}"><x-icon name="plus" class="h-4 w-4" />{{ __('Add a model') }}</x-btn>
+            </div>
         </div>
 
         @if (($counts['all'] ?? 0) === 0)
@@ -74,8 +77,13 @@
                                     <p class="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-800">{{ \Illuminate\Support\Str::limit($product->review_notes, 120) }}</p>
                                 @endif
                                 <div class="mt-auto flex items-center justify-between gap-3 border-t border-neutral-100 pt-4">
+                                    <span class="flex items-baseline gap-3">
                                     <span class="font-tertiary text-base font-semibold tabular-nums text-neutral-900">
                                         @if ($product->isFree()) {{ __('Free') }} @else {{ \App\Support\Money::formatMinor($product->price_minor, 0) }} @endif
+                                    </span>
+                                    @if ($product->wishlist_items_count > 0)
+                                        <span class="inline-flex items-center gap-1 text-xs text-tertiary" title="{{ __('Members who saved this model') }}"><x-icon name="heart" class="h-3.5 w-3.5" />{{ $product->wishlist_items_count }}</span>
+                                    @endif
                                     </span>
                                     <x-btn size="sm" variant="secondary" href="{{ route('seller.models.edit', $product) }}">{{ $product->status->isEditable() ? __('Edit') : __('Open') }}</x-btn>
                                 </div>

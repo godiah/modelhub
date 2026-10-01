@@ -41,6 +41,10 @@ return [
         'document' => ['pdf', 'txt', 'md'],
     ],
 
+    // A seller may rename their store this often (days), and upload a logo up to this size (MB)
+    'name_change_days' => 30,
+    'max_logo_mb' => 2,
+
     // Allowed preview image types
     'image_extensions' => ['jpg', 'jpeg', 'png', 'webp'],
 ];

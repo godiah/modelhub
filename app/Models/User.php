@@ -153,6 +153,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(SellerProfile::class);
     }
 
+    public function wishlistItems()
+    {
+        return $this->hasMany(WishlistItem::class);
+    }
+
     /** The 3D model listings this member has created as a seller. */
     public function products()
     {

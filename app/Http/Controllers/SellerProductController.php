@@ -28,6 +28,7 @@ class SellerProductController extends Controller
 
         $products = $seller->products()
             ->with(['category.parent', 'images'])
+            ->withCount('wishlistItems')
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
             ->when($search !== '', fn ($query) => $query->where('title', 'like', '%'.addcslashes($search, '%_\\').'%'))
             ->latest('updated_at')
