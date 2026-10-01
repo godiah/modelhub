@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminDisputeController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\DashBoardController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
 use App\Http\Controllers\PolicyManagementController;
 use App\Http\Controllers\PostedJobApplicationController;
+use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SellerProductController;
 use App\Http\Controllers\SellerProductFileController;
@@ -178,6 +180,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/models/{product}/wishlist', [WishlistController::class, 'toggle'])->middleware('throttle:60,1')->name('models.wishlist.toggle');
 });
 
+// Ratings and reviews of models
+Route::middleware(['auth'])->group(function () {
+    Route::post('/models/{product}/reviews', [ProductReviewController::class, 'store'])->middleware('throttle:20,1')->name('models.reviews.store');
+    Route::patch('/reviews/{review}', [ProductReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews/{review}', [ProductReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::post('/reviews/{review}/reply', [ProductReviewController::class, 'reply'])->middleware('seller')->name('reviews.reply');
+    Route::delete('/reviews/{review}/reply', [ProductReviewController::class, 'destroyReply'])->middleware('seller')->name('reviews.reply.destroy');
+    Route::post('/reviews/{review}/report', [ProductReviewController::class, 'report'])->middleware('throttle:20,1')->name('reviews.report');
+});
+
 // Selling 3D models: becoming an approved seller
 Route::middleware(['auth'])->prefix('sell')->name('seller.')->group(function () {
     Route::get('/', [SellerController::class, 'index'])->name('index');
@@ -237,6 +249,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::get('/sellers', [AdminSellerController::class, 'index'])->name('sellers.index');
         Route::delete('/sellers/{seller}/logo', [AdminSellerController::class, 'removeLogo'])->name('sellers.remove-logo');
         Route::patch('/sellers/{seller}/{decision}', [AdminSellerController::class, 'review'])->whereIn('decision', ['approve', 'reject', 'suspend'])->name('sellers.review');
+    });
+    Route::middleware(['permission:moderate reviews'])->group(function () {
+        Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+        Route::post('/reviews/{review}/hide', [AdminReviewController::class, 'hide'])->name('reviews.hide');
+        Route::post('/reviews/{review}/restore', [AdminReviewController::class, 'restore'])->name('reviews.restore');
+        Route::post('/reviews/{review}/dismiss', [AdminReviewController::class, 'dismiss'])->name('reviews.dismiss');
+        Route::delete('/reviews/{review}/reply', [AdminReviewController::class, 'removeReply'])->name('reviews.reply.remove');
     });
     Route::middleware(['permission:review models'])->group(function () {
         Route::get('/models', [AdminProductController::class, 'index'])->name('models.index');

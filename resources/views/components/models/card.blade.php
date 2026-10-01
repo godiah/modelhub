@@ -46,6 +46,9 @@
                 @endforeach
             </ul>
         @endif
+        @if ($product->rating_count > 0)
+            <x-models.stars :rating="$product->rating_avg" :count="$product->rating_count" size="h-3.5 w-3.5" class="mt-2" />
+        @endif
         <p class="mt-auto pt-3 text-xs text-tertiary">
             @if ($product->sellerProfile?->slug)
                 <a href="{{ route('sellers.show', $product->sellerProfile->slug) }}" class="rounded hover:text-teal-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">{{ $product->sellerProfile->display_name }}</a>

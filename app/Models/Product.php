@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\GeometryType;
 use App\Enums\ProductStatus;
 use App\Enums\UvLayout;
+use App\Services\Marketplace\ProductRatingService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,7 +24,7 @@ class Product extends Model
         'price_minor', 'currency', 'license',
         'geometry_type', 'polygons', 'vertices', 'uv_layout', 'render_engine',
         'is_rigged', 'is_animated', 'is_low_poly', 'is_pbr', 'has_textures', 'has_materials', 'is_uv_mapped', 'is_print_ready', 'is_vr_ready',
-        'submitted_at', 'reviewed_by', 'reviewed_at', 'review_notes', 'published_at',
+        'rating_avg', 'rating_count', 'submitted_at', 'reviewed_by', 'reviewed_at', 'review_notes', 'published_at',
     ];
 
     protected $casts = [
@@ -41,6 +42,8 @@ class Product extends Model
         'is_uv_mapped' => 'boolean',
         'is_print_ready' => 'boolean',
         'is_vr_ready' => 'boolean',
+        'rating_avg' => 'float',
+        'rating_count' => 'integer',
         'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
         'published_at' => 'datetime',
@@ -64,6 +67,13 @@ class Product extends Model
         static::creating(function (Product $product) {
             $product->slug = $product->slug ?: Str::slug($product->title).'-'.Str::lower(Str::random(6));
         });
+
+        // The store's rating counts reviews of published models only, so it follows a model going live, being
+        // taken down, deleted or restored, whichever path caused it.
+        $refreshStore = fn (Product $product) => app(ProductRatingService::class)->recomputeStore($product->user_id);
+        static::saved(fn (Product $product) => $product->wasChanged('status') ? $refreshStore($product) : null);
+        static::deleted($refreshStore);
+        static::restored($refreshStore);
     }
 
     public function getRouteKeyName(): string
@@ -118,6 +128,25 @@ class Product extends Model
     public function wishlistItems()
     {
         return $this->hasMany(WishlistItem::class);
+    }
+
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    /** Whether this member may write a review now: a verified buyer of a model that is not theirs, with no review yet. */
+    public function canBeReviewedBy(?User $user): bool
+    {
+        return $user !== null
+            && $user->id !== $this->user_id
+            && $this->purchases()->completed()->where('user_id', $user->id)->exists()
+            && ! $this->reviews()->where('user_id', $user->id)->exists();
     }
 
     /** The price in whole currency units (KES), for display. */

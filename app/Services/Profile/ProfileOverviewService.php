@@ -3,8 +3,10 @@
 namespace App\Services\Profile;
 
 use App\Enums\EngagementStatus;
+use App\Enums\SellerStatus;
 use App\Models\JobEngagement;
 use App\Models\JobReview;
+use App\Models\SellerProfile;
 use App\Models\User;
 use App\Models\UserSocialLink;
 use App\Support\Profile\ProfileCompleteness;
@@ -38,6 +40,7 @@ class ProfileOverviewService
             'stats' => $this->stats($user),
             'history' => $this->workHistory($user),
             'ratings' => $this->ratings($user),
+            'store' => SellerProfile::where('user_id', $user->id)->where('status', SellerStatus::Approved)->first(),
             'reviews' => $this->recentReviews($user),
         ];
     }

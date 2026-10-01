@@ -129,6 +129,7 @@ final class SidebarMenu
                 'items' => [
                     ['label' => 'Disputed engagements', 'route' => 'admin.disputes.index', 'icon' => 'shield-check', 'match' => ['admin.disputes.*'], 'can' => 'view disputes'],
                     ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'cube', 'match' => ['admin.models.*'], 'can' => 'review models'],
+                    ['label' => 'Review moderation', 'route' => 'admin.reviews.index', 'icon' => 'flag', 'match' => ['admin.reviews.*'], 'can' => 'moderate reviews'],
                     ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'cube', 'match' => ['admin.sellers.*'], 'can' => 'review sellers'],
                     ['label' => 'Staff roles', 'route' => 'admin.staff.index', 'icon' => 'users', 'match' => ['admin.staff.*'], 'can' => 'manage users'],
                 ],

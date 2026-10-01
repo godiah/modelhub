@@ -7,9 +7,13 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductFile;
 use App\Models\ProductImage;
+use App\Models\ProductReview;
+use App\Models\Purchase;
+use App\Models\ReviewReport;
 use App\Models\SellerProfile;
 use App\Models\Software;
 use App\Models\User;
+use App\Services\Marketplace\ProductRatingService;
 use Illuminate\Database\Seeder;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Hash;
@@ -83,6 +87,115 @@ class DemoModelsSeeder extends Seeder
         }
 
         $this->command?->info("Demo models ready: {$count} (CC0 models and renders from Poly Haven).");
+
+        $reviews = $this->reviews();
+        $this->command?->info("Demo buyers, purchases and reviews ready: {$reviews} reviews.");
+    }
+
+    /** @var list<array{name: string, email: string}> */
+    private const BUYERS = [
+        ['name' => 'Wanjiru Kamau', 'email' => 'demo.buyer1@demo.test'],
+        ['name' => 'Otieno Barasa', 'email' => 'demo.buyer2@demo.test'],
+        ['name' => 'Fatuma Hassan', 'email' => 'demo.buyer3@demo.test'],
+        ['name' => 'Kiprono Rotich', 'email' => 'demo.buyer4@demo.test'],
+        ['name' => 'Nyambura Mutua', 'email' => 'demo.buyer5@demo.test'],
+        ['name' => 'Ochieng Wafula', 'email' => 'demo.buyer6@demo.test'],
+    ];
+
+    /** @var list<array{0: int, 1: string}> */
+    private const REVIEW_TEXTS = [
+        [5, 'Clean topology and the textures are spot on. Dropped straight into my Blender scene and rendered without any fixes.'],
+        [5, 'Exactly as pictured. The scale is right out of the box, which saved me a lot of time on an interior job.'],
+        [5, 'Great value. Tidy hierarchy, sensible naming and the PBR maps worked first time in Unreal.'],
+        [4, 'Really nice model. UVs are tidy and it looks great up close. I would have liked a lower-poly version for web use.'],
+        [4, 'Good quality for the price. One of the materials needed a small tweak in my renderer but nothing serious.'],
+        [4, 'Solid asset, textures are sharp. The FBX imported fine into Unity, just needed the normals recalculated.'],
+        [5, 'I used this in a client walkthrough and it held up beautifully in close-ups. Will buy from this store again.'],
+        [3, 'Decent model but the polygon count is higher than I expected for what it is. Fine for renders, heavy for real-time.'],
+        [3, 'Looks good, though a few of the texture seams show at close range. Usable with some cleanup.'],
+        [4, 'Quick delivery of files and everything opened without errors. The glTF version worked well in three.js.'],
+        [2, 'The model looks fine, but the materials did not carry over to my software and the files had no readme.'],
+        [5, 'Lovely detail and well-built. The wear on the surfaces looks natural and not over-baked.'],
+    ];
+
+    private const REPLIES = [
+        'Thank you for the kind words, glad it worked well in your project!',
+        'Thanks for the feedback. I am preparing a low-poly version and will add it to this listing.',
+        'Sorry about the materials. I have added a short readme with the shader setup, so it should be easier now.',
+        'Appreciate the review. Let me know if you need any other file formats.',
+    ];
+
+    /**
+     * Demo buyers with completed purchases of published demo models, and reviews on most of them (some with a
+     * seller reply, two reported), so ratings, the review form and moderation all have something to show. The
+     * engagement-test logins also get a few purchases to try the form with. Safe to re-run.
+     */
+    private function reviews(): int
+    {
+        $buyers = array_map(fn (array $data) => User::firstOrCreate(
+            ['email' => $data['email']],
+            ['name' => $data['name'], 'password' => Hash::make('password'), 'email_verified_at' => now()],
+        ), self::BUYERS);
+
+        $products = Product::published()->where('slug', 'like', '%-demo')->orderBy('id')->get();
+        $ratings = app(ProductRatingService::class);
+        $made = 0;
+        $reviewed = [];
+
+        foreach ($products as $position => $product) {
+            $hash = crc32($product->slug);
+            $howMany = [0, 1, 2, 3, 4, 2, 3][$hash % 7];
+
+            for ($i = 0; $i < $howMany; $i++) {
+                $buyer = $buyers[($hash + $i * 2 + $position) % count($buyers)];
+                $purchase = Purchase::firstOrCreate(
+                    ['user_id' => $buyer->id, 'product_id' => $product->id],
+                    ['price_minor' => $product->price_minor, 'currency' => $product->currency, 'status' => 'completed', 'purchased_at' => now()->subDays(2 + ($hash + $i) % 25)],
+                );
+
+                [$stars, $text] = self::REVIEW_TEXTS[($hash + $i * 5) % count(self::REVIEW_TEXTS)];
+                $review = ProductReview::firstOrCreate(
+                    ['product_id' => $product->id, 'user_id' => $buyer->id],
+                    ['purchase_id' => $purchase->id, 'rating' => $stars, 'comment' => $text, 'status' => 'visible', 'created_at' => $purchase->purchased_at->copy()->addDays(1)],
+                );
+
+                if ($review->wasRecentlyCreated) {
+                    $made++;
+                    $reviewed[] = $review;
+
+                    if (($hash + $i) % 4 === 0) {
+                        $review->update(['seller_reply' => self::REPLIES[($hash + $i) % count(self::REPLIES)], 'seller_replied_at' => $review->created_at->copy()->addDay()]);
+                    }
+                }
+            }
+
+            $ratings->recompute($product);
+        }
+
+        // Two reports, so the moderation queue is not empty
+        foreach (array_slice($reviewed, 0, 2) as $n => $review) {
+            ReviewReport::firstOrCreate(
+                ['review_id' => $review->id, 'user_id' => $buyers[($n + 3) % count($buyers)]->id],
+                ['reason' => $n === 0 ? 'spam' : 'fake', 'details' => $n === 0 ? 'Reads like an advert.' : null, 'status' => 'open'],
+            );
+        }
+
+        // Purchases (without reviews) for the test logins, so they can try writing one
+        foreach (['eng-me@example.test' => 3, 'eng-kevin@example.test' => 2] as $email => $limit) {
+            if (! $user = User::where('email', $email)->first()) {
+                continue;
+            }
+
+            $products->where('user_id', '!=', $user->id)
+                ->reject(fn (Product $product) => $product->reviews()->where('user_id', $user->id)->exists())
+                ->take($limit)
+                ->each(fn (Product $product) => Purchase::firstOrCreate(
+                    ['user_id' => $user->id, 'product_id' => $product->id],
+                    ['price_minor' => $product->price_minor, 'currency' => $product->currency, 'status' => 'completed', 'purchased_at' => now()->subDays(1)],
+                ));
+        }
+
+        return $made;
     }
 
     /** @return array<string, array<string, mixed>>|null */

@@ -84,6 +84,9 @@
                                     @if ($product->wishlist_items_count > 0)
                                         <span class="inline-flex items-center gap-1 text-xs text-tertiary" title="{{ __('Members who saved this model') }}"><x-icon name="heart" class="h-3.5 w-3.5" />{{ $product->wishlist_items_count }}</span>
                                     @endif
+                                    @if ($product->rating_count > 0)
+                                        <a href="{{ route('models.show', $product) }}#reviews" class="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"><x-models.stars :rating="$product->rating_avg" :count="$product->rating_count" size="h-3.5 w-3.5" /></a>
+                                    @endif
                                     </span>
                                     <x-btn size="sm" variant="secondary" href="{{ route('seller.models.edit', $product) }}">{{ $product->status->isEditable() ? __('Edit') : __('Open') }}</x-btn>
                                 </div>

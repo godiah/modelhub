@@ -17,7 +17,7 @@ class SellerStorefrontController extends Controller
 
         $filters = $request->validate([
             'category' => ['nullable', 'string', 'max:100'],
-            'sort' => ['nullable', 'in:newest,price_low,price_high'],
+            'sort' => ['nullable', 'in:newest,price_low,price_high,top_rated'],
         ]);
 
         $seller->load('user.profile');

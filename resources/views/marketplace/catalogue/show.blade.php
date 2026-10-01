@@ -67,6 +67,10 @@
                         </ul>
                     @endif
                 </x-panel>
+
+                @unless ($preview)
+                    @include('marketplace.catalogue.partials.reviews', ['product' => $product, 'reviews' => $reviews, 'distribution' => $distribution, 'myReview' => $myReview, 'canReview' => $canReview, 'isOwner' => $isOwner])
+                @endunless
             </div>
 
             <aside class="space-y-6 lg:sticky lg:top-24">
@@ -81,9 +85,16 @@
                             @endif
                             <span class="min-w-0">
                                 <span class="block truncate text-sm font-medium text-neutral-900">{{ $product->sellerProfile->display_name }}</span>
-                                <span class="block truncate text-xs text-tertiary">{{ $product->sellerProfile->tagline ?: __('View store') }}</span>
+                                @if ($product->sellerProfile->hasPublicRating())
+                                    <span class="mt-0.5 flex items-center gap-1.5"><x-models.stars :rating="$product->sellerProfile->rating_avg" :count="$product->sellerProfile->rating_count" size="h-3.5 w-3.5" /><span class="text-xs text-tertiary">{{ __('store rating') }}</span></span>
+                                @else
+                                    <span class="block truncate text-xs text-tertiary">{{ $product->sellerProfile->tagline ?: __('View store') }}</span>
+                                @endif
                             </span>
                         </a>
+                    @endif
+                    @if ($product->rating_count > 0)
+                        <a href="#reviews" class="mt-3 inline-flex rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"><x-models.stars :rating="$product->rating_avg" :count="$product->rating_count" showNumber /></a>
                     @endif
                     <p class="mt-4 font-tertiary text-3xl font-bold tabular-nums text-neutral-900">{{ $product->isFree() ? __('Free') : \App\Support\Money::formatMinor($product->price_minor) }}</p>
                     <p class="mt-1 text-xs text-tertiary">{{ __('Standard licence') }}</p>

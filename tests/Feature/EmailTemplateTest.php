@@ -15,6 +15,9 @@ use App\Models\JobPartialPayment;
 use App\Models\JobPaymentDispute;
 use App\Models\JobReview;
 use App\Models\ModelJob;
+use App\Models\Product;
+use App\Models\ProductReview;
+use App\Models\SellerProfile;
 use App\Models\User;
 use App\Notifications\ApplicationWithdrawnNotification;
 use App\Notifications\DisputeCreatedNotification;
@@ -22,6 +25,9 @@ use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
 use App\Notifications\HiredNotification;
 use App\Notifications\JobPostedNotification;
+use App\Notifications\ModelReviewedNotification;
+use App\Notifications\ModelReviewHiddenNotification;
+use App\Notifications\ModelReviewReplyNotification;
 use App\Notifications\NewApplicationMessage;
 use App\Notifications\PartialPaymentProcessedNotification;
 use App\Notifications\PaymentAcceptedNotification;
@@ -74,6 +80,14 @@ beforeEach(function () {
         'subject' => 'Interview invite', 'message' => "Can you talk on Friday?\nBring your portfolio.",
     ]);
 
+    $this->modelSeller = User::factory()->create(['name' => 'Chebet Kiplagat']);
+    SellerProfile::factory()->approved()->create(['user_id' => $this->modelSeller->id, 'display_name' => 'Grain & Mesh']);
+    $this->modelListing = Product::factory()->published()->create(['user_id' => $this->modelSeller->id, 'title' => 'Oak armchair']);
+    $this->modelReview = ProductReview::factory()->create([
+        'product_id' => $this->modelListing->id, 'user_id' => $this->client->id, 'rating' => 4, 'comment' => 'Clean topology and sharp textures.',
+        'seller_reply' => 'Thank you, glad it worked.', 'seller_replied_at' => now(), 'hidden_reason' => 'Breaks the review rules.',
+    ]);
+
     Mail::mailer('array')->getSymfonyTransport()->flush();
 });
 
@@ -95,6 +109,9 @@ function allEmails(): array
         'payment disputed' => fn () => $t->client->notify(new PaymentDisputedNotification($t->engagement, $t->payment, $t->dispute)),
         'review submitted' => fn () => $t->freelancer->notify(new ReviewSubmittedNotification($t->review)),
         'job posted' => fn () => $t->client->notify(new JobPostedNotification($t->job)),
+        'model reviewed' => fn () => $t->modelSeller->notify(new ModelReviewedNotification($t->modelReview, $t->modelListing)),
+        'model review reply' => fn () => $t->client->notify(new ModelReviewReplyNotification($t->modelReview)),
+        'model review hidden' => fn () => $t->client->notify(new ModelReviewHiddenNotification($t->modelReview)),
         'deliverable submitted' => fn () => Mail::to($t->client)->send(new DeliverableSubmitted($t->deliverable)),
         'two-factor code' => fn () => Mail::to($t->client)->send(new TwoFactorCode('482913')),
         'password reset' => fn () => $t->client->notify(new ResetPassword('reset-token')),
