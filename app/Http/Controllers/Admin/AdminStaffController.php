@@ -91,6 +91,15 @@ class AdminStaffController extends Controller
         return back()->with(FlashAlertHelper::success('Invitation sent', "A new link to set a password was emailed to {$staff->email}."));
     }
 
+    public function twoFactorReset(Request $request, Staff $staff)
+    {
+        abort_if($staff->is($request->user()), 403, 'Manage your own two-step sign-in from your account page.');
+
+        $this->staff->resetTwoFactor($staff, $request->user());
+
+        return back()->with(FlashAlertHelper::success('Two-step sign-in reset', "{$staff->name} was emailed, and can set up a new authenticator app."));
+    }
+
     private function roles()
     {
         return Role::where('guard_name', StaffAccess::GUARD)->orderByRaw('name = ? desc', [StaffAccess::SUPER_ADMIN])->orderBy('name')->get(['id', 'name', 'description']);

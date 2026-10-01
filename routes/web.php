@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthenticatorController;
 use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\HomeController;
@@ -32,6 +33,14 @@ Route::get('dashboard', [DashBoardController::class, 'index'])
     ->name('dashboard');
 
 Route::patch('profile/avatar', [AvatarController::class, 'update'])->middleware('auth')->name('profile.avatar.update');
+
+Route::middleware('auth')->prefix('profile/authenticator')->name('authenticator.')->group(function () {
+    Route::post('/', [AuthenticatorController::class, 'start'])->middleware('throttle:10,1')->name('start');
+    Route::post('confirm', [AuthenticatorController::class, 'confirm'])->middleware('throttle:10,1')->name('confirm');
+    Route::delete('setup', [AuthenticatorController::class, 'cancel'])->name('cancel');
+    Route::post('recovery-codes', [AuthenticatorController::class, 'recoveryCodes'])->middleware('throttle:10,1')->name('recovery');
+    Route::delete('/', [AuthenticatorController::class, 'destroy'])->middleware('throttle:10,1')->name('destroy');
+});
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])

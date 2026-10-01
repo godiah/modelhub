@@ -26,7 +26,7 @@ function menuLabels(Staff $staff): array
 it('shows each staff member only the menu entries their roles allow', function () {
     $this->actingAs(staffWith('Super admin'), 'staff')->get(route('admin.dashboard')); // the request the menu reads the current route from
 
-    expect(menuLabels(staffWith('Super admin')))->toBe(['Dashboard', 'Platform overview', 'Notifications', 'Model reviews', 'Seller applications', 'Review reports', 'Members', 'Projects', 'Hires', 'All models', 'All stores', 'Payment disputes', 'Staff', 'Roles', 'Activity log'])
+    expect(menuLabels(staffWith('Super admin')))->toBe(['Dashboard', 'Platform overview', 'Notifications', 'Model reviews', 'Seller applications', 'Review reports', 'Members', 'Projects', 'Hires', 'All models', 'All stores', 'Payment disputes', 'Staff', 'Roles', 'Activity log', 'Settings'])
         ->and(menuLabels(staffWith('Marketplace moderator')))->toBe(['Dashboard', 'Notifications', 'Model reviews', 'Seller applications', 'Review reports', 'All models', 'All stores'])
         ->and(menuLabels(staffWith('Dispute manager')))->toBe(['Dashboard', 'Notifications', 'Hires', 'Payment disputes'])
         ->and(menuLabels(staffWith('Support')))->toBe(['Dashboard', 'Notifications', 'Members', 'Payment disputes'])

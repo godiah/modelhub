@@ -96,7 +96,7 @@ new class extends Component {
                 </div>
 
                 <p class="text-xs text-tertiary">
-                    {{ __('At least 8 characters, including uppercase and lowercase letters, numbers and a symbol.') }}
+                    {{ \App\Support\Auth\PasswordPolicy::describe() }}
                 </p>
             </div>
 

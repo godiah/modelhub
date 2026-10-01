@@ -20,7 +20,7 @@
             </form>
         </x-panel>
 
-        <x-panel :title="__('Password')" :description="__('At least 12 characters, with letters and numbers.')">
+        <x-panel :title="__('Password')" :description="\App\Support\Auth\PasswordPolicy::describe(staff: true)">
             <form method="POST" action="{{ route('admin.account.password') }}" class="space-y-4">
                 @csrf @method('PUT')
                 <div><label for="current_password" class="mb-1.5 block text-sm font-medium text-neutral-800">{{ __('Current password') }}</label><input id="current_password" type="password" name="current_password" required autocomplete="current-password" class="{{ $field }}">@error('current_password')<p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>@enderror</div>
@@ -29,5 +29,10 @@
                 <x-btn type="submit">{{ __('Change password') }}</x-btn>
             </form>
         </x-panel>
+
+        <x-authenticator-card :account="$staff" prefix="admin.account.authenticator" />
+        @if (\App\Support\Settings\PlatformSettings::bool('security.otp_staff_required'))
+            <p class="rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-700">{{ __('A sign-in code is required for all staff. Without an authenticator app, a code is emailed to you at every sign-in.') }}</p>
+        @endif
     </div>
 </x-staff-layout>

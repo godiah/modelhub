@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\SellerProfile;
 use App\Models\Staff;
+use App\Support\Staff\StaffAccess;
 
 /**
  * The staff portal's navigation: grouped by function, limited to what the signed-in staff member may do, with a live
@@ -29,6 +30,10 @@ final class StaffMenu
 
             foreach ($group['items'] as $item) {
                 if (isset($item['can']) && ! $staff->can($item['can'])) {
+                    continue;
+                }
+
+                if (! empty($item['super']) && ! $staff->hasRole(StaffAccess::SUPER_ADMIN)) {
                     continue;
                 }
 
@@ -109,6 +114,7 @@ final class StaffMenu
                 'label' => 'System',
                 'items' => [
                     ['label' => 'Activity log', 'route' => 'admin.activity.index', 'icon' => 'document-text', 'match' => ['admin.activity.*'], 'can' => 'view audit log'],
+                    ['label' => 'Settings', 'route' => 'admin.settings.security', 'icon' => 'cog-6-tooth', 'match' => ['admin.settings.*'], 'super' => true],
                 ],
             ],
         ];

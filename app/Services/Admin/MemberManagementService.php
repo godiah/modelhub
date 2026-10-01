@@ -7,6 +7,7 @@ use App\Models\Staff;
 use App\Models\User;
 use App\Notifications\AccountReinstatedNotification;
 use App\Notifications\AccountSuspendedNotification;
+use App\Notifications\TwoFactorResetNotification;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -56,6 +57,14 @@ class MemberManagementService
     {
         Password::broker('users')->sendResetLink(['email' => $member->email]);
         StaffAudit::log('member.password-reset-sent', "Sent a password reset link to {$member->name}", $member, staffId: $by->id);
+    }
+
+    /** For a member who lost their phone and recovery codes: removes their authenticator app and tells them by email. */
+    public function resetTwoFactor(User $member, Staff $by): void
+    {
+        $member->resetTwoFactor();
+        $member->notify(new TwoFactorResetNotification(route('profile').'#security'));
+        StaffAudit::log('member.two-factor-reset', "Reset two-step sign-in for {$member->name}", $member, staffId: $by->id);
     }
 
     public function resendVerification(User $member, Staff $by): ?string

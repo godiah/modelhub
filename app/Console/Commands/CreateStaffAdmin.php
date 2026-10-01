@@ -3,11 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Models\Staff;
+use App\Support\Auth\PasswordPolicy;
 use App\Support\Staff\StaffAccess;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Password;
 
 /**
  * Creates the first Super admin on a fresh install (or another one later). There is no built-in account and no
@@ -30,7 +30,7 @@ class CreateStaffAdmin extends Command
 
         $validator = Validator::make(
             ['name' => $name, 'email' => $email, 'password' => $password],
-            ['name' => ['required', 'string', 'min:2', 'max:100'], 'email' => ['required', 'email', 'unique:staff,email'], 'password' => ['required', Password::min(12)->letters()->numbers()]],
+            ['name' => ['required', 'string', 'min:2', 'max:100'], 'email' => ['required', 'email', 'unique:staff,email'], 'password' => ['required', PasswordPolicy::rule(staff: true)]],
         );
 
         if ($validator->fails()) {

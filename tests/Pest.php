@@ -50,6 +50,9 @@ function something()
 }
 
 use App\Models\Staff;
+use App\Models\User;
+use App\Support\Auth\Totp;
+use App\Support\Settings\PlatformSettings;
 use App\Support\Staff\StaffAccess;
 
 /**
@@ -72,4 +75,20 @@ function actingAsStaff(string ...$roles): Staff
     test()->actingAs($staff, 'staff');
 
     return $staff;
+}
+
+/** Change a platform setting the way a Super admin would (logged, cache cleared): setting('security.otp_members_required', true). */
+function setting(string $key, mixed $value): void
+{
+    PlatformSettings::update([$key => $value], staffWith('Super admin'));
+}
+
+/** Give a member or staff member a confirmed authenticator app; returns its secret. */
+function authenticatorFor(User|Staff $account): string
+{
+    $account->startAuthenticatorSetup();
+    $account->confirmAuthenticator(Totp::at($account->two_factor_secret, Totp::step()));
+    $account->forceFill(['two_factor_last_step' => null])->save();
+
+    return $account->two_factor_secret;
 }

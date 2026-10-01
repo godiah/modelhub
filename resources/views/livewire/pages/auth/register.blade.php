@@ -51,7 +51,7 @@ new #[Layout('layouts.guest')] class extends Component {
             placeholder="you@example.com" required autocomplete="username" />
 
         <x-field size="lg" name="password" type="password" :label="__('Password')" wire:model="password"
-            placeholder="{{ __('Create a password') }}" required autocomplete="new-password" />
+            placeholder="{{ __('Create a password') }}" :hint="\App\Support\Auth\PasswordPolicy::describe()" required autocomplete="new-password" />
 
         <x-field size="lg" name="password_confirmation" type="password" :label="__('Confirm password')"
             wire:model="password_confirmation" placeholder="{{ __('Repeat your password') }}" required

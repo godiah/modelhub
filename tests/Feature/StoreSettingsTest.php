@@ -122,7 +122,9 @@ it('allows a rename only once every 30 days', function () {
 
     $this->patch(route('seller.store.update'), storeDetails(['display_name' => 'First New Name']))->assertSessionHasNoErrors();
 
+    // The seller is active throughout, so their session must not time out as the clock jumps
     $this->travel(10)->days();
+    $this->withSession(['session_rules.web.last' => now()->timestamp]);
     $this->patch(route('seller.store.update'), storeDetails(['display_name' => 'Second New Name']))->assertSessionHasErrors('display_name');
     expect($this->store->fresh()->display_name)->toBe('First New Name');
 
@@ -133,6 +135,7 @@ it('allows a rename only once every 30 days', function () {
     $this->get(route('seller.store.edit'))->assertSee('You can change the name again on');
 
     $this->travel(21)->days();
+    $this->withSession(['session_rules.web.last' => now()->timestamp]);
     $this->patch(route('seller.store.update'), storeDetails(['display_name' => 'Second New Name']))->assertSessionHasNoErrors();
     expect($this->store->fresh()->display_name)->toBe('Second New Name');
 });

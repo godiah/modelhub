@@ -25,6 +25,7 @@
             <div class="flex flex-wrap gap-3">
                 @if ($member->is_active)
                     <form method="POST" action="{{ route('admin.staff.invite', $member) }}">@csrf<x-btn type="submit" variant="secondary">{{ __('Send a new password link') }}</x-btn></form>
+                    @if (! $isMe && $member->hasAuthenticator())<form method="POST" action="{{ route('admin.staff.two-factor-reset', $member) }}">@csrf<x-btn type="submit" variant="secondary">{{ __('Reset two-step sign-in') }}</x-btn></form>@endif
                     @unless ($isMe)<x-btn type="button" variant="danger-outline" @click="deactivating = true">{{ __('Deactivate account') }}</x-btn>@endunless
                 @else
                     <form method="POST" action="{{ route('admin.staff.reactivate', $member) }}">@csrf<x-btn type="submit">{{ __('Reactivate account') }}</x-btn></form>

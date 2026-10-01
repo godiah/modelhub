@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Support\Auth\SessionRules;
+use App\Support\Auth\SignInChallenge;
+use App\Support\Settings\PlatformSettings;
 use App\Support\Staff\StaffAccess;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Http\Request;
@@ -24,26 +27,31 @@ class StaffLoginController extends Controller
         $credentials = $request->validate(['email' => ['required', 'string', 'email'], 'password' => ['required', 'string']]);
         $key = Str::transliterate(Str::lower($credentials['email']).'|'.$request->ip());
 
-        if (RateLimiter::tooManyAttempts($key, 5)) {
+        if (RateLimiter::tooManyAttempts($key, PlatformSettings::int('security.signin_max_attempts'))) {
             $seconds = RateLimiter::availableIn($key);
 
             throw ValidationException::withMessages(['email' => "Too many sign-in attempts. Try again in {$seconds} seconds."]);
         }
 
         // A deactivated account fails here like a wrong password, so the form does not reveal which accounts exist
-        if (! Auth::guard(StaffAccess::GUARD)->attempt($credentials + ['is_active' => true], $request->boolean('remember'))) {
-            RateLimiter::hit($key);
+        $staff = SignInChallenge::authenticate(StaffAccess::GUARD, $credentials + ['is_active' => true]);
+
+        if (! $staff) {
+            RateLimiter::hit($key, PlatformSettings::int('security.signin_lockout_minutes') * 60);
             StaffAudit::log('staff.sign-in-failed', "Tried to sign in as {$credentials['email']} and failed");
 
             throw ValidationException::withMessages(['email' => 'These credentials do not match our records.']);
         }
 
         RateLimiter::clear($key);
-        $request->session()->regenerate();
 
-        $staff = Auth::guard(StaffAccess::GUARD)->user();
+        // Staff who need a sign-in code (their own authenticator app, or the platform rule) are signed in after entering it
+        if (! SignInChallenge::attempt(StaffAccess::GUARD, $staff, $request->boolean('remember'))) {
+            return redirect()->route('admin.two-factor.challenge');
+        }
+
         $staff->forceFill(['last_login_at' => now()])->save();
-        StaffAudit::log('staff.signed-in', 'Signed in');
+        StaffAudit::log('staff.signed-in', 'Signed in', staffId: $staff->id);
 
         return redirect()->intended(route('admin.dashboard'));
     }
@@ -52,6 +60,7 @@ class StaffLoginController extends Controller
     {
         // Only the staff guard is signed out: a member session in the same browser stays as it is
         Auth::guard(StaffAccess::GUARD)->logout();
+        SessionRules::forget(StaffAccess::GUARD, $request);
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login');
