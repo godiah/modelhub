@@ -37,6 +37,12 @@
 
                 <ul class="space-y-1">
                     @foreach ($group['items'] as $item)
+                        {{-- A sub-label (or, when the rail is collapsed, a hairline) where a new section starts inside a group --}}
+                        @if ($item['section'] && $item['section'] !== ($group['items'][$loop->index - 1]['section'] ?? null))
+                            <li class="mx-3 mt-3 border-t border-neutral-100 px-0 pb-1 pt-3 text-xs font-medium text-neutral-400 lg:[.sidebar-collapsed_&]:mt-2 lg:[.sidebar-collapsed_&]:border-neutral-200 lg:[.sidebar-collapsed_&]:pt-0">
+                                <span class="lg:[.sidebar-collapsed_&]:hidden">{{ $item['section'] }}</span>
+                            </li>
+                        @endif
                         <li>
                             <a href="{{ route($item['route']) }}" wire:navigate title="{{ $item['label'] }}"
                                 @if ($item['active']) aria-current="page" @endif

@@ -15,7 +15,7 @@ final class SidebarMenu
     /**
      * Groups visible to the given user, each item flagged with whether it matches the current route.
      *
-     * @return array<int, array{label: string, items: array<int, array{label: string, route: string, icon: string, active: bool, badge: int}>}>
+     * @return array<int, array{label: string, items: array<int, array{label: string, route: string, icon: string, section: ?string, active: bool, badge: int}>}>
      */
     public static function for(User $user): array
     {
@@ -25,7 +25,7 @@ final class SidebarMenu
             $items = [];
 
             foreach ($group['items'] as $item) {
-                if (($item['hidden'] ?? false) || (isset($item['can']) && ! $user->can($item['can'])) || (($item['seller'] ?? false) && ! $user->isApprovedSeller())) {
+                if (($item['hidden'] ?? false) || (isset($item['can']) && ! $user->can($item['can'])) || (($item['seller'] ?? false) && ! $user->isApprovedSeller()) || (($item['notSeller'] ?? false) && $user->isApprovedSeller())) {
                     continue;
                 }
 
@@ -33,6 +33,7 @@ final class SidebarMenu
                     'label' => $item['label'],
                     'route' => $item['route'],
                     'icon' => $item['icon'],
+                    'section' => $item['section'] ?? null,
                     'active' => self::isActive($item),
                     'badge' => ($item['badge'] ?? null) === 'unread-notifications'
                         ? $user->unreadNotifications()->count()
@@ -94,33 +95,25 @@ final class SidebarMenu
                     ['label' => 'Notifications', 'route' => 'notifications.index', 'icon' => 'bell', 'match' => ['notifications.*'], 'badge' => 'unread-notifications'],
                 ],
             ],
+            // One group per product, each with its buying and selling sides together. A `section` adds a small
+            // sub-label before the first item that carries it.
             [
-                'label' => 'Find work',
+                'label' => 'Models',
+                'items' => [
+                    ['label' => 'Browse models', 'route' => 'models.index', 'icon' => 'cube', 'match' => ['models.*', 'sellers.*']],
+                    ['label' => 'Wishlist', 'route' => 'wishlist.index', 'icon' => 'heart', 'match' => ['wishlist.*']],
+                    ['label' => 'Sell models', 'route' => 'seller.index', 'icon' => 'banknotes', 'match' => ['seller.index', 'seller.apply'], 'notSeller' => true],
+                    ['label' => 'My models', 'route' => 'seller.models.index', 'icon' => 'archive-box', 'match' => ['seller.models.*'], 'section' => 'Selling', 'seller' => true],
+                    ['label' => 'My store', 'route' => 'seller.store.edit', 'icon' => 'tag', 'match' => ['seller.store.*'], 'section' => 'Selling', 'seller' => true],
+                ],
+            ],
+            [
+                'label' => 'Projects',
                 'items' => [
                     ['label' => 'Browse projects', 'route' => 'jobs.browse', 'icon' => 'magnifying-glass', 'match' => ['jobs.index', 'jobs.browse', 'jobs.apply']],
                     ['label' => 'My applications', 'route' => 'applications.my', 'icon' => 'document-text', 'match' => ['applications.my', 'applications.show', 'applications.archived', 'applications.drafts', 'applications.continue']],
-                ],
-            ],
-            [
-                'label' => 'Hire',
-                'items' => [
                     ['label' => 'Post a project', 'route' => 'jobs.create', 'icon' => 'plus', 'match' => ['jobs.create']],
                     ['label' => 'Posted projects', 'route' => 'my-jobs.index', 'icon' => 'briefcase', 'match' => ['my-jobs.index', 'my-jobs.applications.*', 'my-jobs.archived.*', 'jobs.show', 'jobs.edit']],
-                ],
-            ],
-            [
-                'label' => 'Marketplace',
-                'items' => [
-                    ['label' => 'Browse models', 'route' => 'models.index', 'icon' => 'magnifying-glass', 'match' => ['models.*', 'sellers.*']],
-                    ['label' => 'Wishlist', 'route' => 'wishlist.index', 'icon' => 'heart', 'match' => ['wishlist.*']],
-                    ['label' => 'Sell models', 'route' => 'seller.index', 'icon' => 'cube', 'match' => ['seller.index', 'seller.apply']],
-                    ['label' => 'My models', 'route' => 'seller.models.index', 'icon' => 'squares-2x2', 'match' => ['seller.models.*'], 'seller' => true],
-                    ['label' => 'My store', 'route' => 'seller.store.edit', 'icon' => 'user', 'match' => ['seller.store.*'], 'seller' => true],
-                ],
-            ],
-            [
-                'label' => 'Delivery',
-                'items' => [
                     ['label' => 'Engagements', 'route' => 'engagements.index', 'icon' => 'chat-bubble-left-right', 'match' => ['engagements.*'], 'except' => ['engagements.policy']],
                 ],
             ],
@@ -128,9 +121,9 @@ final class SidebarMenu
                 'label' => 'Administration',
                 'items' => [
                     ['label' => 'Disputed engagements', 'route' => 'admin.disputes.index', 'icon' => 'shield-check', 'match' => ['admin.disputes.*'], 'can' => 'view disputes'],
-                    ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'cube', 'match' => ['admin.models.*'], 'can' => 'review models'],
+                    ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'clipboard-check', 'match' => ['admin.models.*'], 'can' => 'review models'],
                     ['label' => 'Review moderation', 'route' => 'admin.reviews.index', 'icon' => 'flag', 'match' => ['admin.reviews.*'], 'can' => 'moderate reviews'],
-                    ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'cube', 'match' => ['admin.sellers.*'], 'can' => 'review sellers'],
+                    ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'clipboard-list', 'match' => ['admin.sellers.*'], 'can' => 'review sellers'],
                     ['label' => 'Staff roles', 'route' => 'admin.staff.index', 'icon' => 'users', 'match' => ['admin.staff.*'], 'can' => 'manage users'],
                 ],
             ],

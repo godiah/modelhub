@@ -25,6 +25,8 @@ class ProductBrowsingService
         'rigged' => 'is_rigged',
         'low_poly' => 'is_low_poly',
         'print' => 'is_print_ready',
+        'textures' => 'has_textures',
+        'vr' => 'is_vr_ready',
     ];
 
     public function browse(array $filters): LengthAwarePaginator

@@ -83,7 +83,8 @@
                     </div>
 
                     @if ($types->isNotEmpty())
-                        <ul class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))]">
+                        {{-- Up to six types fill one row whatever their number; more wrap into even rows of four --}}
+                        <ul @class(['mt-8 grid grid-cols-2 gap-3', 'sm:grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))]' => $types->count() <= 6, 'sm:grid-cols-3 lg:grid-cols-4' => $types->count() > 6])>
                             @foreach ($types as $type)
                                 <li>
                                     <a href="{{ route('models.index', ['features' => [$type['key']]]) }}" class="group relative block aspect-[4/3] overflow-hidden rounded-xl bg-neutral-800 ring-1 ring-black/5 focus:outline-none focus-visible:ring-4 focus-visible:ring-secondary/60">

@@ -240,6 +240,7 @@ Route::middleware(['auth'])->prefix('chat')->group(function () {
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     Route::middleware(['permission:view disputes'])->group(function () {
         Route::get('/disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
+        Route::get('/disputes/{cancellation}', [AdminDisputeController::class, 'show'])->name('disputes.show');
     });
     Route::middleware(['permission:resolve disputes'])->group(function () {
         Route::post('/disputes/{dispute}/assign', [AdminDisputeController::class, 'assign'])->name('disputes.assign');

@@ -1,5 +1,5 @@
 @php
-    $features = ['free' => __('Free'), 'animated' => __('Animated'), 'pbr' => __('PBR'), 'rigged' => __('Rigged'), 'low_poly' => __('Low-poly'), 'print' => __('3D print')];
+    $features = ['free' => __('Free'), 'animated' => __('Animated'), 'pbr' => __('PBR'), 'rigged' => __('Rigged'), 'low_poly' => __('Low-poly'), 'textures' => __('Textures'), 'vr' => __('VR / AR'), 'print' => __('3D print')];
     $selectedFeatures = (array) ($filters['features'] ?? []);
     $fieldClass = 'block w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 transition-colors hover:border-neutral-400 focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25';
     // No width in the shared base, so the bar's compact controls (w-auto, w-24) are not overridden by w-full

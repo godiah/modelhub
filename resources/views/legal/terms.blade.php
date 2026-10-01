@@ -25,7 +25,7 @@
         'contact' => __('Contact us'),
     ];
 @endphp
-<x-app-layout title="Terms of Service" crumb="Terms of service">
+<x-app-layout title="Terms of Service">
     <x-legal.document :title="__('Terms of Service')" :sections="$sections" :effective="$effective" :updated="$effective"
         :intro="__('These terms are the agreement between you and :entity about using :app. Please read them before you create an account or use the platform.', ['entity' => $entity, 'app' => $app])">
 

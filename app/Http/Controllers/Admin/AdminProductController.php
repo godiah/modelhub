@@ -23,7 +23,7 @@ class AdminProductController extends Controller
             ? $request->query('status')
             : ProductStatus::InReview->value;
 
-        $products = Product::with(['seller.sellerProfile', 'category.parent', 'images', 'files', 'software'])
+        $products = Product::with(['seller.sellerProfile', 'reviewer:id,name', 'category.parent', 'images', 'files', 'software'])
             ->when($status !== 'all', fn ($query) => $query->where('status', $status))
             ->orderByRaw("case status when 'in_review' then 0 else 1 end")
             ->latest('submitted_at')

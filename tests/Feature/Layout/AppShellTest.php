@@ -1,8 +1,10 @@
 <?php
 
+use App\Models\SellerProfile;
 use App\Models\User;
 use App\Support\Navigation\SidebarMenu;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Livewire\Volt\Volt;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -27,7 +29,8 @@ it('renders the sidebar shell for signed-in users on app pages', function () {
         ->assertOk()
         ->assertSee(SIDEBAR_MARKER, false)
         ->assertSee('Post a project')
-        ->assertSee('Find work');
+        ->assertSee('Projects')
+        ->assertSee('Models');
 });
 
 it('renders the same public pages inside the sidebar shell when signed in, and the top navbar for guests', function () {
@@ -77,12 +80,12 @@ it('builds the breadcrumb from the active item, linking it when the page adds a 
     $this->actingAs($user)->get(route('applications.my'));
 
     expect(SidebarMenu::breadcrumb())->toBe([
-        ['label' => 'Find work', 'url' => null],
+        ['label' => 'Projects', 'url' => null],
         ['label' => 'My applications', 'url' => null],
     ]);
 
     expect(SidebarMenu::breadcrumb('Archived'))->toBe([
-        ['label' => 'Find work', 'url' => null],
+        ['label' => 'Projects', 'url' => null],
         ['label' => 'My applications', 'url' => route('applications.my')],
         ['label' => 'Archived', 'url' => null],
     ]);
@@ -133,4 +136,114 @@ it('renders the sidebar expanded by default', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard'))
         ->assertDontSee('class="sidebar-collapsed"', false);
+});
+
+/** ---------------------------------------------------------------- sidebar grouping */
+function sidebarGroups(User $user): array
+{
+    return collect(SidebarMenu::for($user))->mapWithKeys(fn ($group) => [$group['label'] => collect($group['items'])->pluck('label')->all()])->all();
+}
+
+it('groups the sidebar by product: Models and Projects, with Engagements inside Projects', function () {
+    $groups = sidebarGroups(User::factory()->create());
+
+    expect(array_keys($groups))->toBe(['Overview', 'Models', 'Projects'])
+        ->and($groups['Overview'])->toBe(['Dashboard', 'Notifications'])
+        ->and($groups['Models'])->toBe(['Browse models', 'Wishlist', 'Sell models'])
+        ->and($groups['Projects'])->toBe(['Browse projects', 'My applications', 'Post a project', 'Posted projects', 'Engagements']);
+});
+
+it('swaps "Sell models" for My models and My store once a member is an approved seller, under a Selling sub-label', function () {
+    $seller = User::factory()->create();
+    SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
+
+    expect(sidebarGroups($seller)['Models'])->toBe(['Browse models', 'Wishlist', 'My models', 'My store']);
+
+    $items = collect(SidebarMenu::for($seller))->firstWhere('label', 'Models')['items'];
+    expect(collect($items)->pluck('section')->all())->toBe([null, null, 'Selling', 'Selling']);
+
+    $this->actingAs($seller)->get(route('dashboard'))->assertOk()->assertSee('Selling');
+    // Someone who is not a seller sees "Sell models" as a plain item, with no Selling label above it
+    $this->actingAs(User::factory()->create())->get(route('dashboard'))->assertOk()->assertDontSee('My store')->assertDontSee('Selling');
+
+    // Applicants still see the way in, not the seller pages
+    $applicant = User::factory()->create();
+    SellerProfile::factory()->create(['user_id' => $applicant->id]);
+    expect(sidebarGroups($applicant)['Models'])->toBe(['Browse models', 'Wishlist', 'Sell models']);
+});
+
+it('gives every sidebar entry its own icon', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    SellerProfile::factory()->approved()->create(['user_id' => $admin->id]);
+
+    $icons = collect(SidebarMenu::for($admin))->flatMap->items->pluck('icon');
+
+    expect($icons->duplicates()->all())->toBe([]);
+});
+
+it('keeps breadcrumbs working for the seller pages and the moved projects pages', function () {
+    $seller = User::factory()->create();
+    SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
+
+    $this->actingAs($seller)->get(route('seller.models.index'));
+    expect(SidebarMenu::breadcrumb())->toBe([['label' => 'Models', 'url' => null], ['label' => 'My models', 'url' => null]]);
+
+    $this->actingAs($seller)->get(route('jobs.create'));
+    expect(SidebarMenu::breadcrumb())->toBe([['label' => 'Projects', 'url' => null], ['label' => 'Post a project', 'url' => null]]);
+});
+
+/** ---------------------------------------------------------------- account menu */
+it('shows account links, help and log out in the account menu', function () {
+    $user = User::factory()->create(['name' => 'Amina Otieno', 'email' => 'amina@example.test']);
+
+    $this->actingAs($user)->get(route('dashboard'))->assertOk()
+        ->assertSee('Amina Otieno')->assertSee('amina@example.test')
+        ->assertSee(route('profile').'#overview', false)
+        ->assertSee(route('profile').'#profile', false)
+        ->assertSee(route('profile').'#security', false)
+        ->assertSee(route('legal.terms'), false)
+        ->assertSee(route('legal.privacy'), false)
+        ->assertSee(route('engagements.policy'), false)
+        ->assertSee('Log out')
+        ->assertDontSee('Your store')
+        ->assertDontSee('Log Out');
+});
+
+it('adds the store and its public storefront to the account menu for approved sellers only', function () {
+    $seller = User::factory()->create();
+    $store = SellerProfile::factory()->approved()->create(['user_id' => $seller->id, 'display_name' => 'Kevin 3D Studio']);
+
+    $this->actingAs($seller)->get(route('dashboard'))->assertOk()
+        ->assertSee('Your store')->assertSee('Kevin 3D Studio')
+        ->assertSee(route('seller.store.edit'), false)
+        ->assertSee(route('sellers.show', $store->slug), false)
+        ->assertSee('View public storefront');
+
+    $pending = User::factory()->create();
+    SellerProfile::factory()->create(['user_id' => $pending->id]);
+    $this->actingAs($pending)->get(route('dashboard'))->assertOk()->assertDontSee('View public storefront');
+});
+
+it('logs a member out from the account menu', function () {
+    $user = User::factory()->create();
+
+    Volt::actingAs($user)->test('layout.user-menu')->call('logout')->assertRedirect('/');
+
+    $this->assertGuest();
+});
+
+it('does not repeat the page name in the breadcrumb on pages that are menu entries themselves', function () {
+    $admin = User::factory()->create();
+    $admin->assignRole('admin');
+    SellerProfile::factory()->approved()->create(['user_id' => $admin->id]);
+    $this->actingAs($admin);
+
+    foreach (['admin.disputes.index', 'admin.models.index', 'admin.sellers.index', 'admin.reviews.index', 'seller.models.index', 'engagements.policy', 'legal.terms', 'legal.privacy'] as $route) {
+        $html = $this->get(route($route))->assertOk()->getContent();
+        preg_match('/<nav aria-label="Breadcrumb".*?<\/nav>/s', $html, $nav);
+        $labels = collect(preg_split('/\s*\n\s*/', trim(strip_tags($nav[0] ?? ''))))->filter(fn ($l) => $l !== '' && $l !== '/')->values();
+
+        expect($labels->duplicates()->all())->toBe([], "{$route} repeats a breadcrumb label: ".$labels->implode(' > '));
+    }
 });

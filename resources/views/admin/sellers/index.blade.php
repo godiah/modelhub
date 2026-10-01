@@ -2,7 +2,7 @@
 @php
     $pills = ['pending' => __('Pending'), 'approved' => __('Approved'), 'rejected' => __('Not approved'), 'suspended' => __('Suspended'), 'all' => __('All')];
 @endphp
-<x-app-layout title="Seller applications" crumb="Seller applications">
+<x-app-layout title="Seller applications">
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <div class="mb-6">
             <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Seller applications') }}</h1>

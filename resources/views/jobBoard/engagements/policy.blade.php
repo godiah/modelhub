@@ -12,7 +12,7 @@
         'policy-updates' => __('Policy updates'),
     ];
 @endphp
-<x-app-layout title="Cancellation & Payment Policy" crumb="Cancellation policy">
+<x-app-layout title="Cancellation & Payment Policy">
     <x-legal.document :kicker="__('Policy')" :title="$app.' '.__('Cancellation & Payment Policy')" :sections="$sections"
         :intro="__('This policy governs cancellations, payment processing, and dispute resolution for engagements between Clients and Freelancers on :app.', ['app' => $app])"
         :effective="__('May 15, 2025')" :updated="__('May 15, 2025')">
