@@ -12,6 +12,7 @@ namespace App\Helpers\Engagements;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
 use App\Models\JobPaymentDispute;
+use App\Models\Staff;
 use App\Models\User;
 use App\Notifications\DisputeCreatedNotification;
 use App\Notifications\EngagementCancelledNotification;
@@ -46,11 +47,10 @@ class EngagementNotificationHelper
     // Send dispute creation notification to admins
     public static function sendDisputeNotification(JobEngagement $engagement, $cancellation): void
     {
-        // Get all users with admin role
-        $adminUsers = User::role('admin')->get();
+        // Everyone on staff who can see disputes (Super admins hold every permission)
+        $staff = Staff::permission('view disputes')->where('is_active', true)->get();
 
-        // Notify admins about dispute
-        Notification::send($adminUsers, new DisputeCreatedNotification($engagement, $cancellation));
+        Notification::send($staff, new DisputeCreatedNotification($engagement, $cancellation));
     }
 
     // Send review notification to the reviewee

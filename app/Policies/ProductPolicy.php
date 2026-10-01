@@ -18,10 +18,4 @@ class ProductPolicy
     {
         return $this->manage($user, $product) && $product->status->isEditable();
     }
-
-    /** Reviewers can open any listing and its files. */
-    public function review(User $user, Product $product): bool
-    {
-        return $user->can('review models');
-    }
 }

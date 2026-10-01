@@ -11,8 +11,6 @@ use App\Models\JobPartialPayment;
 use App\Models\JobPaymentDispute;
 use App\Models\ModelJob;
 use App\Models\User;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 /*
  * The three pages that finish an engagement's story: responding to an offer, settling a cancelled engagement
@@ -213,12 +211,12 @@ it('shows an open dispute with its reason, payment and who filed it', function (
         ->assertSee('Evidence 1')
         ->assertSee('Payment under dispute')
         ->assertSee('Filed by')
-        ->assertSee('An administrator is reviewing this dispute.')
+        ->assertSee('ModelHub support is reviewing this dispute.')
         ->assertDontSee('Resolve this dispute');
 });
 
 it('shows the outcome of a resolved dispute', function () {
-    $admin = User::factory()->create(['name' => 'Wanjiru Admin']);
+    $admin = staffWith('Dispute manager');
     [$engagement] = stDisputedEngagement($this->me, $this->other, [
         'status' => DisputeStatus::Resolved, 'resolved_at' => now(), 'resolved_by' => $admin->id,
         'resolution_notes' => 'Pay for the two approved deliverables', 'resolution_amount' => 700,
@@ -230,24 +228,18 @@ it('shows the outcome of a resolved dispute', function () {
         ->assertSee('Final resolution amount')
         ->assertSee(config('app.currency_symbol').'700.00')
         ->assertSee('Pay for the two approved deliverables')
-        ->assertSee('by Wanjiru Admin');
+        ->assertSee('by ModelHub support')->assertDontSee($admin->name);
 });
 
-it('gives administrators the resolution form only while the dispute is open', function () {
-    $admin = User::factory()->create();
-    $admin->assignRole(Role::findOrCreate('admin'));
-    $admin->givePermissionTo(Permission::findOrCreate('resolve disputes'), Permission::findOrCreate('view disputes'));
+it('never gives a member the resolution form, only staff can settle a dispute', function () {
     [$engagement, $dispute] = stDisputedEngagement($this->me, $this->other);
 
-    $this->actingAs($admin)->get(route('engagements.show-disputed', $engagement->id))
-        ->assertOk()
-        ->assertSee('Resolve this dispute')
-        ->assertSee(route('admin.disputes.resolve', $dispute->id), false);
+    foreach ([$this->me, $this->other] as $party) {
+        $this->actingAs($party)->get(route('engagements.show-disputed', $engagement->id))->assertOk()
+            ->assertDontSee('Resolve this dispute')->assertDontSee(route('admin.disputes.resolve', $dispute->id), false);
+    }
 
-    $dispute->update(['status' => DisputeStatus::Resolved, 'resolved_at' => now()]);
-    $this->actingAs($admin)->get(route('engagements.show-disputed', $engagement->id))
-        ->assertOk()
-        ->assertDontSee('Resolve this dispute');
+    $this->actingAs($this->me)->post(route('admin.disputes.resolve', $dispute), ['resolution_notes' => 'I decide.'])->assertRedirect(route('admin.login'));
 });
 
 /* --------------------------------------------------------------------- respond */

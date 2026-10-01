@@ -3,7 +3,7 @@
 namespace App\Services\Marketplace;
 
 use App\Models\SellerProfile;
-use App\Models\User;
+use App\Models\Staff;
 use App\Notifications\StoreNameChangedNotification;
 
 /** An approved seller keeping their storefront up to date: name, tagline, text, website and avatar. */
@@ -35,7 +35,7 @@ class SellerStoreService
         $store->save();
 
         if ($renamed) {
-            User::permission('review sellers')->get()->each->notify(new StoreNameChangedNotification($store, $oldName));
+            Staff::permission('review sellers')->where('is_active', true)->get()->each->notify(new StoreNameChangedNotification($store, $oldName));
         }
 
         return $store;

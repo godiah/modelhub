@@ -46,7 +46,7 @@ class DisputeCreatedNotification extends Notification implements ShouldQueue
                 'initiator' => $initiator,
                 'client' => $client,
                 'freelancer' => $freelancer,
-                'actionUrl' => route('engagements.show-disputed', $this->engagement->id),
+                'actionUrl' => route('admin.disputes.show', $this->cancellation->id),
             ]);
     }
 
@@ -66,7 +66,7 @@ class DisputeCreatedNotification extends Notification implements ShouldQueue
             'reason_details' => $this->cancellation->reason_details,
             'initiated_at' => $this->cancellation->created_at,
             'type' => 'dispute',
-            'url' => route('engagements.show-disputed', $this->engagement->id),
+            'url' => route('admin.disputes.show', $this->cancellation->id),
         ];
     }
 
@@ -86,7 +86,7 @@ class DisputeCreatedNotification extends Notification implements ShouldQueue
             'reason_details' => $this->cancellation->reason_details,
             'initiated_at' => $this->cancellation->created_at,
             'type' => 'dispute',
-            'url' => route('engagements.show-disputed', $this->engagement->id),
+            'url' => route('admin.disputes.show', $this->cancellation->id),
         ]);
     }
 

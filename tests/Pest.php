@@ -48,3 +48,28 @@ function something()
 {
     // ..
 }
+
+use App\Models\Staff;
+use App\Support\Staff\StaffAccess;
+
+/**
+ * A staff member holding the given roles (names from StaffAccess, e.g. 'Super admin', 'Support', 'Dispute manager').
+ * Staff are not members: act as one with `$this->actingAs(staffWith('Support'), 'staff')`, or just `actingAsStaff('Support')`.
+ */
+function staffWith(string ...$roles): Staff
+{
+    StaffAccess::sync();
+
+    $staff = Staff::factory()->create();
+    $staff->assignRole($roles);
+
+    return $staff;
+}
+
+function actingAsStaff(string ...$roles): Staff
+{
+    $staff = staffWith(...$roles);
+    test()->actingAs($staff, 'staff');
+
+    return $staff;
+}

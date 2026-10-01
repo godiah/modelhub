@@ -6,6 +6,7 @@ use App\Enums\ProductStatus;
 use App\Models\Product;
 use App\Models\ProductFile;
 use App\Models\ProductImage;
+use App\Models\Staff;
 use App\Models\User;
 use App\Notifications\ProductSubmittedNotification;
 use Illuminate\Http\UploadedFile;
@@ -135,7 +136,7 @@ class ProductService
             'review_notes' => null,
         ]);
 
-        User::permission('review models')->get()->each->notify(new ProductSubmittedNotification($product->loadMissing('seller')));
+        Staff::permission('review models')->where('is_active', true)->get()->each->notify(new ProductSubmittedNotification($product->loadMissing('seller')));
 
         return null;
     }

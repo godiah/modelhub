@@ -113,7 +113,7 @@ class Product extends Model
 
     public function reviewer()
     {
-        return $this->belongsTo(User::class, 'reviewed_by');
+        return $this->belongsTo(Staff::class, 'reviewed_by');
     }
 
     /** Live in the catalogue: published, and the seller is still approved (suspending a seller hides their models). */

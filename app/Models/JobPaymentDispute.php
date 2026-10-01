@@ -52,7 +52,7 @@ class JobPaymentDispute extends Model
      */
     public function assignedAdmin()
     {
-        return $this->belongsTo(User::class, 'admin_assigned');
+        return $this->belongsTo(Staff::class, 'admin_assigned');
     }
 
     /**
@@ -60,7 +60,7 @@ class JobPaymentDispute extends Model
      */
     public function resolvedBy()
     {
-        return $this->belongsTo(User::class, 'resolved_by');
+        return $this->belongsTo(Staff::class, 'resolved_by');
     }
 
     /**

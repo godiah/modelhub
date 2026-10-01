@@ -110,9 +110,7 @@ it('hides a suspended seller\'s models from the catalogue, their page and the pu
 
     // The owner and reviewers can still open it
     $this->actingAs($this->seller)->get(route('models.show', $product))->assertOk()->assertSee('Preview');
-    $reviewer = User::factory()->create();
-    $reviewer->assignRole('admin');
-    $this->actingAs($reviewer)->get(route('models.show', $product))->assertOk();
+    $this->actingAs(staffWith('Marketplace moderator'), 'staff')->get(route('models.show', $product))->assertOk();
 });
 
 /** ---------------------------------------------------------------- wishlist */

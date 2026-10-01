@@ -51,8 +51,7 @@ class EngagementAuthorizationHelper
     // Check if user can process payment
     public static function canProcessPayment(JobEngagement $engagement, User $user): bool
     {
-        return $user->id === $engagement->application->poster_id ||
-               $user->hasRole('admin');
+        return $user->id === $engagement->application->poster_id;
     }
 
     // Check if user can reopen job

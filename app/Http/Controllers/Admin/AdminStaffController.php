@@ -2,35 +2,97 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\FlashAlertHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\UpdateStaffRoleRequest;
-use App\Models\User;
+use App\Models\Staff;
 use App\Services\Admin\StaffManagementService;
+use App\Support\Staff\StaffAccess;
+use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 
+/** Staff accounts: who has one, what roles they hold, and whether it is active. Permission: manage staff. */
 class AdminStaffController extends Controller
 {
-    protected $staffManagementService;
+    public function __construct(protected StaffManagementService $staff) {}
 
-    public function __construct(StaffManagementService $staffManagementService)
+    public function index(Request $request)
     {
-        $this->staffManagementService = $staffManagementService;
+        $status = in_array($request->query('status'), ['active', 'inactive', 'all'], true) ? $request->query('status') : 'active';
+        $term = trim((string) $request->query('q'));
+
+        $members = Staff::with('roles:id,name')
+            ->when($status !== 'all', fn ($query) => $query->where('is_active', $status === 'active'))
+            ->when($term !== '', fn ($query) => $query->where(fn ($q) => $q->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%")))
+            ->orderBy('name')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.staff.index', [
+            'members' => $members, 'status' => $status, 'term' => $term,
+            'counts' => ['active' => Staff::where('is_active', true)->count(), 'inactive' => Staff::where('is_active', false)->count(), 'all' => Staff::count()],
+        ]);
     }
 
-    public function index()
+    public function create()
     {
-        $users = $this->staffManagementService->getStaffAssignableUsers();
-
-        return view('admin.staff.index', compact('users'));
+        return view('admin.staff.create', ['roles' => $this->roles()]);
     }
 
-    public function updateRole(UpdateStaffRoleRequest $request, User $user)
+    public function store(Request $request)
     {
-        try {
-            $this->staffManagementService->updateRole($user, $request->validated('role'));
+        $data = $request->validate([
+            'name' => ['required', 'string', 'min:2', 'max:100'],
+            'email' => ['required', 'email', 'max:255', 'unique:staff,email'],
+            'roles' => ['array'],
+            'roles.*' => ['string'],
+        ], ['email.unique' => 'There is already a staff account with that email address.']);
 
-            return redirect()->back()->with('success', 'Staff role updated successfully.');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+        $member = $this->staff->invite($data['name'], $data['email'], $data['roles'] ?? []);
+
+        return redirect()->route('admin.staff.edit', $member)->with(FlashAlertHelper::success('Invitation sent', "{$member->name} has been emailed a link to set their password."));
+    }
+
+    public function edit(Staff $staff)
+    {
+        return view('admin.staff.edit', ['member' => $staff->load('roles:id,name'), 'roles' => $this->roles()]);
+    }
+
+    public function update(Request $request, Staff $staff)
+    {
+        $data = $request->validate(['roles' => ['array'], 'roles.*' => ['string']]);
+
+        if ($error = $this->staff->updateRoles($staff, $data['roles'] ?? [])) {
+            return back()->with(FlashAlertHelper::error('Cannot change the roles', $error));
         }
+
+        return back()->with(FlashAlertHelper::success('Roles updated'));
+    }
+
+    public function deactivate(Request $request, Staff $staff)
+    {
+        if ($error = $this->staff->deactivate($staff, $request->user())) {
+            return back()->with(FlashAlertHelper::error('Cannot deactivate', $error));
+        }
+
+        return back()->with(FlashAlertHelper::success('Account deactivated', "{$staff->name} can no longer sign in."));
+    }
+
+    public function reactivate(Staff $staff)
+    {
+        $this->staff->reactivate($staff);
+
+        return back()->with(FlashAlertHelper::success('Account reactivated'));
+    }
+
+    public function invite(Staff $staff)
+    {
+        $this->staff->sendInvitation($staff);
+
+        return back()->with(FlashAlertHelper::success('Invitation sent', "A new link to set a password was emailed to {$staff->email}."));
+    }
+
+    private function roles()
+    {
+        return Role::where('guard_name', StaffAccess::GUARD)->orderByRaw('name = ? desc', [StaffAccess::SUPER_ADMIN])->orderBy('name')->get(['id', 'name', 'description']);
     }
 }

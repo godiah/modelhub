@@ -15,6 +15,11 @@ class ReviewReport extends Model
         return $this->belongsTo(ProductReview::class, 'review_id');
     }
 
+    public function resolver()
+    {
+        return $this->belongsTo(Staff::class, 'resolved_by');
+    }
+
     public function reporter()
     {
         return $this->belongsTo(User::class, 'user_id');

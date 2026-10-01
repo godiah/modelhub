@@ -3,7 +3,7 @@
     $tones = ['pending' => 'amber', 'under_review' => 'blue', 'resolved' => 'green'];
     $canResolve = auth()->user()->can('resolve disputes');
 @endphp
-<x-app-layout title="Disputed engagements">
+<x-staff-layout title="Disputed engagements">
     <div class="container mx-auto max-w-5xl px-4 py-8">
         <div class="mb-6">
             <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Disputed engagements') }}</h1>
@@ -46,7 +46,7 @@
                         $mine = $dispute->admin_assigned === auth()->id();
                         $filedAs = $dispute->disputed_by === $application->applicant_id ? __('freelancer') : __('client');
                         $waitingDays = $resolved ? 0 : (int) $dispute->created_at->diffInDays(now());
-                        $openUrl = route('engagements.show-disputed', $engagement->id);
+                        $openUrl = route('admin.disputes.show', $dispute->cancellation_id);
                     @endphp
                     <article class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
                         <div class="flex flex-wrap items-start justify-between gap-3">
@@ -111,4 +111,4 @@
             <x-pager :paginator="$disputes" />
         @endif
     </div>
-</x-app-layout>
+</x-staff-layout>

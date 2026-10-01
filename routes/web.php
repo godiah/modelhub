@@ -1,10 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\AdminDisputeController;
-use App\Http\Controllers\Admin\AdminProductController;
-use App\Http\Controllers\Admin\AdminReviewController;
-use App\Http\Controllers\Admin\AdminSellerController;
-use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\HomeController;
@@ -234,43 +229,6 @@ Route::middleware(['auth'])->prefix('chat')->group(function () {
     Route::get('/engagements/{engagement}/data', [MessageController::class, 'getEngagementData'])->name('engagements.data');
     Route::post('/engagements/{engagement}/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::patch('/engagements/{engagement}/messages/read', [MessageController::class, 'markAsRead'])->name('messages.read');
-});
-
-/**
- * Administrator Routes — permission-gated (not hardcoded to the 'admin' role), so
- * 'support'/'dispute_manager' staff get exactly the access their role's permissions grant.
- */
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::middleware(['permission:view disputes'])->group(function () {
-        Route::get('/disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
-        Route::get('/disputes/{cancellation}', [AdminDisputeController::class, 'show'])->name('disputes.show');
-    });
-    Route::middleware(['permission:resolve disputes'])->group(function () {
-        Route::post('/disputes/{dispute}/assign', [AdminDisputeController::class, 'assign'])->name('disputes.assign');
-        Route::post('/disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
-    });
-    Route::middleware(['permission:review sellers'])->group(function () {
-        Route::get('/sellers', [AdminSellerController::class, 'index'])->name('sellers.index');
-        Route::patch('/sellers/{seller}/{decision}', [AdminSellerController::class, 'review'])->whereIn('decision', ['approve', 'reject', 'suspend'])->name('sellers.review');
-    });
-    Route::middleware(['permission:moderate reviews'])->group(function () {
-        Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
-        Route::post('/reviews/{review}/hide', [AdminReviewController::class, 'hide'])->name('reviews.hide');
-        Route::post('/reviews/{review}/restore', [AdminReviewController::class, 'restore'])->name('reviews.restore');
-        Route::post('/reviews/{review}/dismiss', [AdminReviewController::class, 'dismiss'])->name('reviews.dismiss');
-        Route::delete('/reviews/{review}/reply', [AdminReviewController::class, 'removeReply'])->name('reviews.reply.remove');
-    });
-    Route::middleware(['permission:review models'])->group(function () {
-        Route::get('/models', [AdminProductController::class, 'index'])->name('models.index');
-        Route::patch('/models/{product}/{decision}', [AdminProductController::class, 'review'])->whereIn('decision', ['publish', 'reject', 'takedown'])->name('models.review');
-        Route::get('/models/{product}/files/{file}', [AdminProductController::class, 'download'])->name('models.files.download');
-    });
-    Route::middleware(['permission:view users'])->group(function () {
-        Route::get('/staff', [AdminStaffController::class, 'index'])->name('staff.index');
-    });
-    Route::middleware(['permission:manage users'])->group(function () {
-        Route::patch('/staff/{user}/role', [AdminStaffController::class, 'updateRole'])->name('staff.update-role');
-    });
 });
 
 require __DIR__.'/auth.php';

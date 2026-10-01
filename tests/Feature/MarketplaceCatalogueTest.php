@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Notifications\ProductReviewedNotification;
 use App\Notifications\ProductSubmittedNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
@@ -28,8 +29,7 @@ beforeEach(function () {
 
     $this->seller = User::factory()->create(['name' => 'Kevin Mwangi']);
     SellerProfile::factory()->approved()->create(['user_id' => $this->seller->id, 'display_name' => 'Kevin 3D Studio']);
-    $this->reviewer = User::factory()->create();
-    $this->reviewer->assignRole('admin');
+    $this->reviewer = staffWith('Marketplace moderator');
 
     $this->chair = Category::where('slug', 'furniture-chair')->first();
     $this->sofa = Category::where('slug', 'furniture-sofa')->first();
@@ -53,9 +53,10 @@ function liveModel(array $overrides = [], array $files = ['fbx'], bool $image = 
 
 /** ---------------------------------------------------------------- the reviewer's queue */
 it('keeps the model review queue for staff with the permission', function () {
-    $this->get(route('admin.models.index'))->assertRedirect(route('login'));
-    $this->actingAs($this->seller)->get(route('admin.models.index'))->assertForbidden();
-    $this->actingAs($this->reviewer)->get(route('admin.models.index'))->assertOk();
+    $this->get(route('admin.models.index'))->assertRedirect(route('admin.login'));
+    $this->actingAs($this->seller)->get(route('admin.models.index'))->assertRedirect(route('admin.login'));
+    $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.models.index'))->assertForbidden();
+    $this->actingAs($this->reviewer, 'staff')->get(route('admin.models.index'))->assertOk();
 });
 
 it('lists models waiting for review first, with files and counts', function () {
@@ -63,7 +64,7 @@ it('lists models waiting for review first, with files and counts', function () {
     Product::factory()->create(['user_id' => $this->seller->id, 'category_id' => $this->chair->id, 'title' => 'Private draft model']);
     $live = liveModel(['title' => 'Already live model']);
 
-    $this->actingAs($this->reviewer)->get(route('admin.models.index'))->assertOk()
+    $this->actingAs($this->reviewer, 'staff')->get(route('admin.models.index'))->assertOk()
         ->assertSee('Waiting armchair model')->assertDontSee('Private draft model')->assertDontSee('Already live model')
         ->assertSee('Kevin 3D Studio')
         ->assertSeeInOrder(['All', '3', 'Draft', '1', 'In review', '1', 'Published', '1']);
@@ -75,7 +76,7 @@ it('lists models waiting for review first, with files and counts', function () {
 it('publishes a model in review and tells the seller', function () {
     $product = Product::factory()->inReview()->create(['user_id' => $this->seller->id, 'category_id' => $this->chair->id]);
 
-    $this->actingAs($this->reviewer)->patch(route('admin.models.review', [$product, 'publish']))->assertRedirect();
+    $this->actingAs($this->reviewer, 'staff')->patch(route('admin.models.review', [$product, 'publish']))->assertRedirect();
 
     $product->refresh();
     expect($product->status)->toBe(ProductStatus::Published)->and($product->published_at)->not->toBeNull()
@@ -85,7 +86,7 @@ it('publishes a model in review and tells the seller', function () {
 
 it('asks for changes with a required reason', function () {
     $product = Product::factory()->inReview()->create(['user_id' => $this->seller->id, 'category_id' => $this->chair->id]);
-    $this->actingAs($this->reviewer);
+    $this->actingAs($this->reviewer, 'staff');
 
     $this->patch(route('admin.models.review', [$product, 'reject']))->assertSessionHas('error');
     expect($product->fresh()->status)->toBe(ProductStatus::InReview);
@@ -97,21 +98,21 @@ it('asks for changes with a required reason', function () {
 
 it('takes a live model down with a reason', function () {
     $product = liveModel();
-    $this->actingAs($this->reviewer);
+    $this->actingAs($this->reviewer, 'staff');
 
     $this->patch(route('admin.models.review', [$product, 'takedown']))->assertSessionHas('error');
     $this->patch(route('admin.models.review', [$product, 'takedown']), ['notes' => 'Reported as copied.'])->assertSessionHas('success');
 
     expect($product->fresh()->status)->toBe(ProductStatus::Unpublished);
     $this->get(route('models.show', $product))->assertOk(); // a reviewer can still open it
-    auth()->logout();
+    Auth::guard('staff')->logout();
     $this->get(route('models.show', $product))->assertNotFound();
 });
 
 it('refuses decisions that do not fit the current state', function () {
     $draft = Product::factory()->create(['user_id' => $this->seller->id, 'category_id' => $this->chair->id]);
     $live = liveModel();
-    $this->actingAs($this->reviewer);
+    $this->actingAs($this->reviewer, 'staff');
 
     $this->patch(route('admin.models.review', [$draft, 'publish']))->assertSessionHas('error');
     $this->patch(route('admin.models.review', [$live, 'publish']))->assertSessionHas('error');
@@ -125,12 +126,15 @@ it('lets reviewers download a seller\'s files and nobody else', function () {
     Storage::disk('local')->put('product-files/r/model.fbx', 'FBXDATA');
     $file = ProductFile::create(['product_id' => $product->id, 'disk' => 'local', 'path' => 'product-files/r/model.fbx', 'original_name' => 'Chair.fbx', 'extension' => 'fbx', 'kind' => 'exchange', 'size_bytes' => 7]);
 
-    $this->actingAs($this->reviewer)->get(route('admin.models.files.download', [$product, $file]))->assertOk()->assertDownload('Chair.fbx');
-    $this->actingAs(User::factory()->create())->get(route('admin.models.files.download', [$product, $file]))->assertForbidden();
+    $this->actingAs($this->reviewer, 'staff')->get(route('admin.models.files.download', [$product, $file]))->assertOk()->assertDownload('Chair.fbx');
+    Auth::guard('staff')->forgetUser();
+    $this->actingAs(User::factory()->create())->get(route('admin.models.files.download', [$product, $file]))->assertRedirect(route('admin.login'));
+    $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.models.files.download', [$product, $file]))->assertForbidden();
 });
 
-it('shows reviewers the Model reviews entry only if they hold the permission', function () {
-    $this->actingAs($this->reviewer)->get(route('dashboard'))->assertOk()->assertSee(route('admin.models.index'), false);
+it('shows reviewers the Model reviews entry only if they hold the permission, and never in the member app', function () {
+    $this->actingAs($this->reviewer, 'staff')->get(route('admin.dashboard'))->assertOk()->assertSee(route('admin.models.index'), false);
+    $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.dashboard'))->assertOk()->assertDontSee(route('admin.models.index'), false);
     $this->actingAs($this->seller)->get(route('dashboard'))->assertOk()->assertDontSee(route('admin.models.index'), false);
 });
 
@@ -270,7 +274,7 @@ it('hides unpublished models from the public but lets the owner preview them', f
     $this->actingAs(User::factory()->create())->get(route('models.show', $draft))->assertNotFound();
 
     $this->actingAs($this->seller)->get(route('models.show', $draft))->assertOk()->assertSee('Preview: this model is draft')->assertSee('Back to editing');
-    $this->actingAs($this->reviewer)->get(route('models.show', $draft))->assertOk()->assertSee('Preview');
+    $this->actingAs($this->reviewer, 'staff')->get(route('models.show', $draft))->assertOk()->assertSee('Preview');
 });
 
 it('does not show a deleted model', function () {

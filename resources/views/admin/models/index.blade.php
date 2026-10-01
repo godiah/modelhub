@@ -2,7 +2,7 @@
 @php
     $pills = ['all' => __('All')] + collect(ProductStatus::cases())->mapWithKeys(fn ($case) => [$case->value => __($case->label())])->all();
 @endphp
-<x-app-layout title="Model reviews">
+<x-staff-layout title="Model reviews">
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <div class="mb-6">
             <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Model reviews') }}</h1>
@@ -121,4 +121,4 @@
             <x-pager :paginator="$products" />
         @endif
     </div>
-</x-app-layout>
+</x-staff-layout>

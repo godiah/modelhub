@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Marketplace\ReviewSellerRequest;
 use App\Models\SellerProfile;
 use App\Services\Marketplace\SellerOnboardingService;
+use App\Support\Staff\StaffAudit;
 use Illuminate\Http\Request;
 
 /** The review queue for seller applications. Permission: review sellers (see routes/web.php). */
@@ -40,12 +41,16 @@ class AdminSellerController extends Controller
             return back()->with(FlashAlertHelper::error('Cannot do that', $error));
         }
 
+        StaffAudit::log('seller.'.['approve' => 'approved', 'reject' => 'rejected', 'suspend' => 'suspended'][$decision], match ($decision) {
+            'approve' => "Approved {$seller->display_name}",
+            'reject' => "Rejected the application of {$seller->display_name}",
+            default => "Suspended {$seller->display_name}",
+        }, $seller, array_filter(['notes' => $request->input('notes')]));
+
         return back()->with(FlashAlertHelper::success(match ($decision) {
             'approve' => 'Seller approved',
             'reject' => 'Application rejected',
             default => 'Seller suspended',
         }, 'The seller has been told.'));
     }
-
-    /** Take down an unsuitable logo. The seller keeps their store and can upload another. */
 }

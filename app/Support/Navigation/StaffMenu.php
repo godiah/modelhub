@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Support\Navigation;
+
+use App\Enums\DisputeStatus;
+use App\Enums\ProductStatus;
+use App\Enums\SellerStatus;
+use App\Models\JobPaymentDispute;
+use App\Models\Product;
+use App\Models\ProductReview;
+use App\Models\SellerProfile;
+use App\Models\Staff;
+
+/**
+ * The staff portal's navigation: grouped by function, limited to what the signed-in staff member may do, with a live
+ * count of what is waiting in each queue. The member app's SidebarMenu is separate: staff never see member pages.
+ */
+final class StaffMenu
+{
+    /**
+     * @return list<array{label: string, items: list<array{label: string, route: string, icon: string, active: bool, badge: int}>}>
+     */
+    public static function for(Staff $staff): array
+    {
+        $groups = [];
+
+        foreach (self::definition() as $group) {
+            $items = [];
+
+            foreach ($group['items'] as $item) {
+                if (isset($item['can']) && ! $staff->can($item['can'])) {
+                    continue;
+                }
+
+                $items[] = [
+                    'label' => $item['label'],
+                    'route' => $item['route'],
+                    'icon' => $item['icon'],
+                    'active' => request()->routeIs(...$item['match']),
+                    'badge' => isset($item['badge']) ? self::count($item['badge'], $staff) : 0,
+                ];
+            }
+
+            if ($items !== []) {
+                $groups[] = ['label' => $group['label'], 'items' => $items];
+            }
+        }
+
+        return $groups;
+    }
+
+    /** What is waiting, per queue. Used by the menu badges and the dashboard. */
+    public static function count(string $queue, ?Staff $staff = null): int
+    {
+        return match ($queue) {
+            'models' => Product::where('status', ProductStatus::InReview)->count(),
+            'sellers' => SellerProfile::where('status', SellerStatus::Pending)->count(),
+            'reports' => ProductReview::visible()->whereHas('reports', fn ($reports) => $reports->where('status', 'open'))->count(),
+            'disputes' => JobPaymentDispute::whereIn('status', [DisputeStatus::Pending, DisputeStatus::UnderReview])->count(),
+            'notifications' => $staff?->unreadNotifications()->count() ?? 0,
+            default => 0,
+        };
+    }
+
+    /** @return list<array{label: string, items: list<array<string, mixed>>}> */
+    private static function definition(): array
+    {
+        return [
+            [
+                'label' => 'Overview',
+                'items' => [
+                    ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'squares-2x2', 'match' => ['admin.dashboard']],
+                    ['label' => 'Notifications', 'route' => 'admin.notifications.index', 'icon' => 'bell', 'match' => ['admin.notifications.*'], 'badge' => 'notifications'],
+                ],
+            ],
+            [
+                'label' => 'Moderation',
+                'items' => [
+                    ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'clipboard-check', 'match' => ['admin.models.*'], 'can' => 'review models', 'badge' => 'models'],
+                    ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'clipboard-list', 'match' => ['admin.sellers.*'], 'can' => 'review sellers', 'badge' => 'sellers'],
+                    ['label' => 'Review reports', 'route' => 'admin.reviews.index', 'icon' => 'flag', 'match' => ['admin.reviews.*'], 'can' => 'moderate reviews', 'badge' => 'reports'],
+                ],
+            ],
+            [
+                'label' => 'Payments',
+                'items' => [
+                    ['label' => 'Payment disputes', 'route' => 'admin.disputes.index', 'icon' => 'scale', 'match' => ['admin.disputes.*'], 'can' => 'view disputes', 'badge' => 'disputes'],
+                ],
+            ],
+            [
+                'label' => 'Access',
+                'items' => [
+                    ['label' => 'Staff', 'route' => 'admin.staff.index', 'icon' => 'users', 'match' => ['admin.staff.*'], 'can' => 'manage staff'],
+                    ['label' => 'Roles', 'route' => 'admin.roles.index', 'icon' => 'shield-check', 'match' => ['admin.roles.*'], 'can' => 'manage roles'],
+                ],
+            ],
+            [
+                'label' => 'System',
+                'items' => [
+                    ['label' => 'Activity log', 'route' => 'admin.activity.index', 'icon' => 'document-text', 'match' => ['admin.activity.*'], 'can' => 'view audit log'],
+                ],
+            ],
+        ];
+    }
+}

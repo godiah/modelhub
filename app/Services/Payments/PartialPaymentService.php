@@ -33,9 +33,8 @@ class PartialPaymentService
 
         // Check if user is authorized
         $isClient = $authUser->id === $engagement->application->poster_id;
-        $isAdmin = $authUser->hasRole('admin');
 
-        if (! $isClient && ! $isAdmin) {
+        if (! $isClient) {
             return [
                 'can_process' => false,
                 'message' => 'Payment is currently pending and has not yet been processed.',
@@ -338,11 +337,16 @@ class PartialPaymentService
     }
 
     /**
-     * Resolve a payment dispute (admin/dispute_manager only, via the "resolve disputes" permission)
+     * Resolve a payment dispute (staff only, via the "resolve disputes" permission)
      */
     public function resolveDispute(JobPaymentDispute $dispute, $notes, $finalAmount = null)
     {
-        $authUser = Auth::user();
+        // Only ever staff: members never settle disputes
+        $authUser = Auth::guard('staff')->user();
+
+        if (! $authUser) {
+            throw new \Exception('Only staff can resolve payment disputes.');
+        }
 
         // Ensure user has permission to resolve disputes
         if (! $authUser->can('resolve disputes')) {
@@ -383,7 +387,8 @@ class PartialPaymentService
                     'amount' => $finalAmount ?? $cancellation->partial_payment_amount,
                     'status' => PartialPaymentStatus::Finalized,
                     'notes' => 'Payment after dispute resolution: '.$notes,
-                    'processed_by' => $authUser->id,
+                    // Created by the settlement, not processed by a member: `finalized_by` records which staff member settled it
+                    'processed_by' => null,
                     'processed_at' => now(),
                     'finalized_at' => now(),
                     'finalized_by' => $authUser->id,

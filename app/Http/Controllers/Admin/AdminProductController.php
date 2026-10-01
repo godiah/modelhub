@@ -9,6 +9,7 @@ use App\Http\Requests\Marketplace\ReviewSellerRequest;
 use App\Models\Product;
 use App\Models\ProductFile;
 use App\Services\Marketplace\ProductReviewService;
+use App\Support\Staff\StaffAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -42,6 +43,12 @@ class AdminProductController extends Controller
         if ($error = $this->reviews->review($product, $request->user(), $decision, $request->input('notes'))) {
             return back()->with(FlashAlertHelper::error('Cannot do that', $error));
         }
+
+        StaffAudit::log('model.'.['publish' => 'published', 'reject' => 'sent-back', 'takedown' => 'taken-down'][$decision], match ($decision) {
+            'publish' => "Published \"{$product->title}\"",
+            'reject' => "Asked for changes to \"{$product->title}\"",
+            default => "Took down \"{$product->title}\"",
+        }, $product, array_filter(['notes' => $request->input('notes')]));
 
         return back()->with(FlashAlertHelper::success(match ($decision) {
             'publish' => 'Model published',

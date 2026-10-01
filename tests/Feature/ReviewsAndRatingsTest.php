@@ -15,7 +15,6 @@ use App\Services\Marketplace\ProductRatingService;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
-use Spatie\Permission\Models\Role;
 
 /*
  * Ratings and reviews of models: only verified buyers write one (once), the seller gets one public reply, members
@@ -31,8 +30,7 @@ beforeEach(function () {
     $this->product = Product::factory()->published()->create(['user_id' => $this->seller->id, 'category_id' => Category::where('slug', 'furniture-chair')->value('id'), 'title' => 'Oak armchair']);
     $this->buyer = User::factory()->create(['name' => 'Amina Wanjiku Otieno']);
     Purchase::factory()->create(['user_id' => $this->buyer->id, 'product_id' => $this->product->id]);
-    $this->moderator = User::factory()->create();
-    $this->moderator->assignRole(Role::findByName('admin'));
+    $this->moderator = staffWith('Marketplace moderator');
 });
 
 function reviewBy(User $user, array $overrides = []): ProductReview
@@ -129,7 +127,6 @@ it('stops anyone else editing or deleting a review', function () {
 
     $this->actingAs($this->seller)->patch(route('reviews.update', $review), ['rating' => 1, 'comment' => 'The seller rewriting it.'])->assertForbidden();
     $this->actingAs($this->seller)->delete(route('reviews.destroy', $review))->assertForbidden();
-    $this->actingAs($this->moderator)->delete(route('reviews.destroy', $review))->assertForbidden();
 
     expect($review->fresh()->comment)->not->toBe('The seller rewriting it.');
 });
@@ -205,7 +202,7 @@ it('lets members report a review once, but not their own, and the seller cannot 
     expect(ReviewReport::count())->toBe(1);
 
     $this->actingAs($this->seller)->delete(route('reviews.destroy', $review))->assertForbidden();
-    $this->actingAs($this->seller)->post(route('admin.reviews.hide', $review), ['reason' => 'I do not like it.'])->assertForbidden();
+    $this->actingAs($this->seller)->post(route('admin.reviews.hide', $review), ['reason' => 'I do not like it.'])->assertRedirect(route('admin.login'));
     expect($review->fresh()->isVisible())->toBeTrue();
 });
 
@@ -218,7 +215,7 @@ it('lets a reviewer hide a review with a reason, which drops it from the average
 
     ReviewReport::create(['review_id' => $review->id, 'user_id' => User::factory()->create()->id, 'reason' => 'abusive', 'status' => 'open']);
 
-    $this->actingAs($this->moderator)->post(route('admin.reviews.hide', $review), ['reason' => 'Abusive language towards the seller.'])->assertSessionHas('success');
+    $this->actingAs($this->moderator, 'staff')->post(route('admin.reviews.hide', $review), ['reason' => 'Abusive language towards the seller.'])->assertSessionHas('success');
 
     expect($review->fresh())->status->toBe('hidden')->hidden_reason->toBe('Abusive language towards the seller.');
     expect($this->product->fresh())->rating_count->toBe(1)->rating_avg->toBe(5.0);
@@ -231,31 +228,32 @@ it('lets a reviewer hide a review with a reason, which drops it from the average
 it('requires a reason to hide a review', function () {
     $review = reviewBy($this->buyer);
 
-    $this->actingAs($this->moderator)->post(route('admin.reviews.hide', $review), ['reason' => ''])->assertSessionHasErrors('reason');
-    $this->actingAs($this->moderator)->post(route('admin.reviews.hide', $review), ['reason' => 'no'])->assertSessionHasErrors('reason');
+    $this->actingAs($this->moderator, 'staff')->post(route('admin.reviews.hide', $review), ['reason' => ''])->assertSessionHasErrors('reason');
+    $this->actingAs($this->moderator, 'staff')->post(route('admin.reviews.hide', $review), ['reason' => 'no'])->assertSessionHasErrors('reason');
     expect($review->fresh()->isVisible())->toBeTrue();
 });
 
 it('lets a reviewer restore a hidden review, dismiss reports and remove a seller reply', function () {
     $hidden = reviewBy($this->buyer, ['rating' => 2, 'status' => 'hidden', 'hidden_reason' => 'Mistaken.']);
-    $this->actingAs($this->moderator)->post(route('admin.reviews.restore', $hidden))->assertSessionHas('success');
+    $this->actingAs($this->moderator, 'staff')->post(route('admin.reviews.restore', $hidden))->assertSessionHas('success');
     expect($hidden->fresh()->isVisible())->toBeTrue()->and($this->product->fresh()->rating_count)->toBe(1);
 
     ReviewReport::create(['review_id' => $hidden->id, 'user_id' => User::factory()->create()->id, 'reason' => 'spam', 'status' => 'open']);
-    $this->actingAs($this->moderator)->post(route('admin.reviews.dismiss', $hidden));
+    $this->actingAs($this->moderator, 'staff')->post(route('admin.reviews.dismiss', $hidden));
     expect(ReviewReport::first()->status)->toBe('resolved')->and($hidden->fresh()->isVisible())->toBeTrue();
 
     $hidden->update(['seller_reply' => 'An inappropriate reply.']);
-    $this->actingAs($this->moderator)->delete(route('admin.reviews.reply.remove', $hidden));
+    $this->actingAs($this->moderator, 'staff')->delete(route('admin.reviews.reply.remove', $hidden));
     expect($hidden->fresh()->seller_reply)->toBeNull();
 });
 
 it('keeps moderation to people with the permission', function () {
     $review = reviewBy($this->buyer);
 
-    $this->actingAs($this->buyer)->get(route('admin.reviews.index'))->assertForbidden();
-    $this->actingAs($this->buyer)->post(route('admin.reviews.hide', $review), ['reason' => 'Hiding it myself.'])->assertForbidden();
-    $this->actingAs($this->moderator)->get(route('admin.reviews.index'))->assertOk();
+    $this->actingAs($this->buyer)->get(route('admin.reviews.index'))->assertRedirect(route('admin.login'));
+    $this->actingAs($this->buyer)->post(route('admin.reviews.hide', $review), ['reason' => 'Hiding it myself.'])->assertRedirect(route('admin.login'));
+    $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.reviews.index'))->assertForbidden();
+    $this->actingAs($this->moderator, 'staff')->get(route('admin.reviews.index'))->assertOk();
 });
 
 it('lists reported and hidden reviews for moderators', function () {
@@ -264,12 +262,12 @@ it('lists reported and hidden reviews for moderators', function () {
     reviewBy(User::factory()->create(), ['comment' => 'Perfectly fine review text.']);
     reviewBy(User::factory()->create(), ['comment' => 'Hidden review text here.', 'status' => 'hidden', 'hidden_reason' => 'Spam.', 'hidden_by' => $this->moderator->id, 'hidden_at' => now()]);
 
-    $this->actingAs($this->moderator)->get(route('admin.reviews.index'))->assertOk()
+    $this->actingAs($this->moderator, 'staff')->get(route('admin.reviews.index'))->assertOk()
         ->assertSee('Reported review text here.')->assertSee('Not about this model.')
         ->assertDontSee('Perfectly fine review text.')->assertDontSee('Hidden review text here.');
 
-    $this->actingAs($this->moderator)->get(route('admin.reviews.index', ['status' => 'hidden']))->assertSee('Hidden review text here.')->assertDontSee('Reported review text here.');
-    $this->actingAs($this->moderator)->get(route('admin.reviews.index', ['status' => 'all']))->assertSee('Perfectly fine review text.');
+    $this->actingAs($this->moderator, 'staff')->get(route('admin.reviews.index', ['status' => 'hidden']))->assertSee('Hidden review text here.')->assertDontSee('Reported review text here.');
+    $this->actingAs($this->moderator, 'staff')->get(route('admin.reviews.index', ['status' => 'all']))->assertSee('Perfectly fine review text.');
 });
 
 /** ---------------------------------------------------------------- display */

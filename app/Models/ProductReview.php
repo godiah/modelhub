@@ -46,7 +46,7 @@ class ProductReview extends Model
 
     public function hiddenBy()
     {
-        return $this->belongsTo(User::class, 'hidden_by');
+        return $this->belongsTo(Staff::class, 'hidden_by');
     }
 
     public function reports()
