@@ -28,13 +28,19 @@ class DashboardOverviewService
     /** Rows shown in the attention queue before "+N more". */
     private const ATTENTION_LIMIT = 8;
 
+    public function __construct(protected ModelsDashboardService $models) {}
+
     /**
      * @return array<string, mixed>
      */
     public function overview(User $user): array
     {
         $engagements = $this->openEngagements($user);
-        $attention = $this->attentionItems($user, $engagements);
+        $models = $this->models->for($user);
+
+        // One list of everything waiting on the member, across projects and models, most urgent first
+        $attention = [...$this->attentionItems($user, $engagements), ...$models['attention']];
+        usort($attention, fn (array $a, array $b) => $a['priority'] <=> $b['priority']);
 
         return [
             'summary' => $this->summary($user, $engagements, count($attention)),
@@ -46,6 +52,7 @@ class DashboardOverviewService
             'notifications' => $this->recentNotifications($user),
             'profile' => $this->profileCard($user),
             'reviews' => $this->recentReviews($user),
+            'models' => $models,
         ];
     }
 

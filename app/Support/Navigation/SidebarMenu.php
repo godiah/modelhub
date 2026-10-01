@@ -50,6 +50,50 @@ final class SidebarMenu
     }
 
     /**
+     * The top bar's primary action for the page being viewed, following the sidebar group the page belongs to:
+     * Projects pages offer "Post a project", Models pages offer "Add a model" (or "Sell your models" to someone who
+     * does not sell yet), and everywhere else (dashboard, notifications, profile, admin) a "Create" menu with both.
+     * The action is left out on the page it would lead to.
+     *
+     * @return array{type: 'link', label: string, url: string, icon: string}|array{type: 'menu', label: string, items: list<array{label: string, url: string, icon: string}>}|null
+     */
+    public static function primaryAction(User $user): ?array
+    {
+        $project = ['label' => __('Post a project'), 'url' => route('jobs.create'), 'icon' => 'plus', 'route' => 'jobs.create'];
+        $model = $user->isApprovedSeller()
+            ? ['label' => __('Add a model'), 'url' => route('seller.models.create'), 'icon' => 'plus', 'route' => 'seller.models.create']
+            : ['label' => __('Sell your models'), 'url' => route('seller.index'), 'icon' => 'banknotes', 'route' => 'seller.index'];
+
+        $choices = match (self::activeGroup()) {
+            'Projects' => [$project],
+            'Models' => [$model],
+            default => [$project, $model],
+        };
+
+        $choices = array_values(array_filter($choices, fn (array $choice) => ! request()->routeIs($choice['route'])));
+        $choices = array_map(fn (array $choice) => array_diff_key($choice, ['route' => true]), $choices);
+
+        return match (count($choices)) {
+            0 => null,
+            1 => ['type' => 'link'] + $choices[0],
+            default => ['type' => 'menu', 'label' => __('Create'), 'items' => $choices],
+        };
+    }
+
+    private static function activeGroup(): ?string
+    {
+        foreach (self::definition() as $group) {
+            foreach ($group['items'] as $item) {
+                if (self::isActive($item)) {
+                    return $group['label'];
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Breadcrumb for the top bar: group, the matching menu item (linked when a tail follows) and an optional
      * page-supplied tail (a project title, "Archived", ...). Also resolves pages that are reachable but not
      * listed in the sidebar (Profile, Cancellation policy), which is why it walks the full definition.
