@@ -1,0 +1,195 @@
+{
+  "backgrounds": [
+    "d1fae5",
+    "ccfbf1",
+    "dbeafe",
+    "e0e7ff",
+    "fce7f3",
+    "fef3c7",
+    "ffedd5",
+    "ede9fe"
+  ],
+  "people": {
+    "styles": [
+      {
+        "key": "notionists",
+        "label": "Notionists",
+        "package": "notionists"
+      },
+      {
+        "key": "notionists-neutral",
+        "label": "Notionists Neutral",
+        "package": "notionistsNeutral"
+      },
+      {
+        "key": "lorelei",
+        "label": "Lorelei",
+        "package": "lorelei"
+      },
+      {
+        "key": "lorelei-neutral",
+        "label": "Lorelei Neutral",
+        "package": "loreleiNeutral"
+      },
+      {
+        "key": "open-peeps",
+        "label": "Open Peeps",
+        "package": "openPeeps"
+      },
+      {
+        "key": "avataaars",
+        "label": "Avataaars",
+        "package": "avataaars"
+      },
+      {
+        "key": "avataaars-neutral",
+        "label": "Avataaars Neutral",
+        "package": "avataaarsNeutral"
+      },
+      {
+        "key": "pixel-art",
+        "label": "Pixel Art",
+        "package": "pixelArt"
+      },
+      {
+        "key": "pixel-art-neutral",
+        "label": "Pixel Art Neutral",
+        "package": "pixelArtNeutral"
+      }
+    ],
+    "seeds": [
+      "amara",
+      "kofi",
+      "zuri",
+      "baraka",
+      "imani",
+      "jabari",
+      "nia",
+      "tendai",
+      "sade",
+      "kwame",
+      "asha",
+      "dalila",
+      "mosi",
+      "folake",
+      "chidi",
+      "ayana",
+      "kendi",
+      "tunde",
+      "zola",
+      "juma",
+      "felix",
+      "aneka",
+      "sara",
+      "jasper",
+      "liam",
+      "emma",
+      "noah",
+      "olivia",
+      "william",
+      "sophia",
+      "james",
+      "isabella",
+      "oliver",
+      "mia",
+      "benjamin",
+      "charlotte",
+      "elijah",
+      "amelia",
+      "lucas",
+      "harper",
+      "mason",
+      "evelyn",
+      "logan",
+      "abigail",
+      "owen",
+      "hazel",
+      "nora",
+      "leo"
+    ]
+  },
+  "stores": {
+    "styles": [
+      {
+        "key": "shapes",
+        "label": "Shapes",
+        "package": "shapes"
+      },
+      {
+        "key": "rings",
+        "label": "Rings",
+        "package": "rings"
+      },
+      {
+        "key": "thumbs",
+        "label": "Thumbs",
+        "package": "thumbs"
+      },
+      {
+        "key": "bottts",
+        "label": "Robots",
+        "package": "bottts"
+      },
+      {
+        "key": "bottts-neutral",
+        "label": "Robot Faces",
+        "package": "botttsNeutral"
+      },
+      {
+        "key": "identicon",
+        "label": "Identicons",
+        "package": "identicon"
+      }
+    ],
+    "seeds": [
+      "atlas",
+      "nova",
+      "orbit",
+      "prism",
+      "vertex",
+      "pixel",
+      "forge",
+      "echo",
+      "apex",
+      "lumen",
+      "flux",
+      "nimbus",
+      "quartz",
+      "cobalt",
+      "ember",
+      "zenith",
+      "helix",
+      "onyx",
+      "aurora",
+      "ridge",
+      "mosaic",
+      "vector",
+      "cinder",
+      "tidal",
+      "granite",
+      "kite",
+      "basalt",
+      "cedar",
+      "falcon",
+      "harbor",
+      "indigo",
+      "juniper",
+      "kestrel",
+      "lagoon",
+      "meridian",
+      "nectar",
+      "obsidian",
+      "paragon",
+      "quill",
+      "raven",
+      "summit",
+      "tundra",
+      "umber",
+      "voyager",
+      "willow",
+      "xenon",
+      "yonder",
+      "zephyr"
+    ]
+  }
+}

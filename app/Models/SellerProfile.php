@@ -3,10 +3,10 @@
 namespace App\Models;
 
 use App\Enums\SellerStatus;
+use App\Support\Avatars;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SellerProfile extends Model
@@ -14,7 +14,7 @@ class SellerProfile extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'status', 'display_name', 'slug', 'tagline', 'logo_path', 'website_url', 'name_changed_at', 'bio', 'focus', 'rating_avg', 'rating_count', 'portfolio_url', 'terms_accepted_at',
+        'user_id', 'status', 'display_name', 'slug', 'tagline', 'avatar', 'website_url', 'name_changed_at', 'bio', 'focus', 'rating_avg', 'rating_count', 'portfolio_url', 'terms_accepted_at',
         'submitted_at', 'reviewed_by', 'reviewed_at', 'review_notes',
     ];
 
@@ -32,6 +32,8 @@ class SellerProfile extends Model
     protected static function booted(): void
     {
         static::creating(function (SellerProfile $seller) {
+            $seller->avatar ??= Avatars::random(Avatars::STORES);
+
             if (blank($seller->slug)) {
                 $base = Str::slug($seller->display_name) ?: 'seller';
                 $slug = $base;
@@ -56,15 +58,10 @@ class SellerProfile extends Model
         return $this->rating_avg !== null && $this->rating_count >= config('marketplace.min_store_reviews');
     }
 
-    public function logoUrl(): ?string
+    /** The store's avatar picture; a stable fallback stands in if none is stored. */
+    public function avatarUrl(): string
     {
-        return $this->logo_path ? Storage::disk(config('marketplace.images_disk'))->url($this->logo_path) : null;
-    }
-
-    /** "K3": the first letters of the first two words of the store name that have a letter or digit in them ("Grain & Mesh" is "GM"), for when there is no logo. */
-    public function initials(): string
-    {
-        return collect(preg_split('/\s+/', trim($this->display_name)))->filter(fn ($word) => preg_match('/[\p{L}\p{N}]/u', $word))->take(2)->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))->implode('');
+        return Avatars::url(Avatars::STORES, $this->avatar, $this->id ?? $this->slug ?? 0);
     }
 
     /** When the store name may next be changed, or null if it can be changed now. */

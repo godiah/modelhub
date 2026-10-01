@@ -9,7 +9,6 @@ use App\Models\SellerProfile;
 use App\Models\User;
 use App\Notifications\StoreNameChangedNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
@@ -145,76 +144,47 @@ it('keeps store names unique', function () {
     $this->actingAs($this->seller)->patch(route('seller.store.update'), storeDetails(['display_name' => 'Taken Name']))->assertSessionHasErrors('display_name');
 });
 
-/** ---------------------------------------------------------------- logo */
-it('uploads a logo, shows it on the storefront and model page, and replaces it', function () {
-    $this->actingAs($this->seller);
+/** ---------------------------------------------------------------- avatar */
+it('lets the seller pick a store avatar from the catalogue and shows it on the storefront and model page', function () {
+    $this->actingAs($this->seller)->patch(route('seller.store.update'), storeDetails(['avatar' => 'bottts/forge']))->assertSessionHasNoErrors();
 
-    $this->patch(route('seller.store.update'), storeDetails() + ['logo' => UploadedFile::fake()->image('logo.png', 400, 400)])->assertSessionHasNoErrors();
-    $first = $this->store->fresh()->logo_path;
-    expect($first)->toStartWith("seller-logos/{$this->store->id}/");
-    Storage::disk('public')->assertExists($first);
+    expect($this->store->fresh()->avatar)->toBe('bottts/forge');
+    $url = asset('images/avatars/stores/bottts/forge.svg');
 
-    $this->get(route('sellers.show', $this->store->slug))->assertOk()->assertSee($this->store->fresh()->logoUrl(), false);
+    $this->get(route('sellers.show', $this->store->slug))->assertOk()->assertSee($url, false);
 
     $product = Product::factory()->published()->create(['user_id' => $this->seller->id, 'category_id' => Category::where('slug', 'furniture-chair')->value('id')]);
     ProductImage::create(['product_id' => $product->id, 'disk' => 'public', 'path' => 'product-images/x/c.jpg', 'position' => 1]);
-    $this->get(route('models.show', $product))->assertOk()->assertSee($this->store->fresh()->logoUrl(), false);
-
-    $this->patch(route('seller.store.update'), storeDetails() + ['logo' => UploadedFile::fake()->image('new.jpg', 300, 300)]);
-    $second = $this->store->fresh()->logo_path;
-    expect($second)->not->toBe($first);
-    Storage::disk('public')->assertMissing($first);
-    Storage::disk('public')->assertExists($second);
+    $this->get(route('models.show', $product))->assertOk()->assertSee($url, false);
 });
 
-it('removes a logo on request', function () {
-    $this->actingAs($this->seller)->patch(route('seller.store.update'), storeDetails() + ['logo' => UploadedFile::fake()->image('logo.png', 400, 400)]);
-    $path = $this->store->fresh()->logo_path;
-
-    $this->patch(route('seller.store.update'), storeDetails() + ['remove_logo' => '1'])->assertSessionHasNoErrors();
-
-    expect($this->store->fresh()->logo_path)->toBeNull();
-    Storage::disk('public')->assertMissing($path);
-});
-
-it('refuses unsuitable logos', function () {
+it('keeps the current avatar when none is sent, and refuses anything outside the store catalogue', function () {
+    $this->store->update(['avatar' => 'shapes/atlas']);
     $this->actingAs($this->seller);
 
-    $this->patch(route('seller.store.update'), storeDetails() + ['logo' => UploadedFile::fake()->image('tiny.png', 100, 100)])->assertSessionHasErrors('logo');
-    $this->patch(route('seller.store.update'), storeDetails() + ['logo' => UploadedFile::fake()->create('logo.pdf', 20)])->assertSessionHasErrors('logo');
-    $this->patch(route('seller.store.update'), storeDetails() + ['logo' => UploadedFile::fake()->image('huge.png', 600, 600)->size(config('marketplace.max_logo_mb') * 1024 + 10)])->assertSessionHasErrors('logo');
+    $this->patch(route('seller.store.update'), storeDetails(['tagline' => 'Changed tagline']))->assertSessionHasNoErrors();
+    expect($this->store->fresh())->avatar->toBe('shapes/atlas')->tagline->toBe('Changed tagline');
 
-    expect($this->store->fresh()->logo_path)->toBeNull();
+    foreach (['notionists/felix', 'bottts/not-a-seed', 'nonsense', '../../etc/passwd', 'bottts/forge/extra'] as $bad) {
+        $this->patch(route('seller.store.update'), storeDetails(['avatar' => $bad]))->assertSessionHasErrors('avatar');
+    }
+    expect($this->store->fresh()->avatar)->toBe('shapes/atlas');
 });
 
-it('never uses the member\'s personal profile photo as the store logo', function () {
-    $this->seller->profile()->create(['avatar' => 'avatars/personal-photo.jpg']);
-    Storage::disk('public')->put('avatars/personal-photo.jpg', 'x');
-
-    $this->get(route('sellers.show', $this->store->slug))->assertOk()->assertDontSee('personal-photo')->assertSee($this->store->initials());
+it('shows the picker, with no file upload, on the store settings page', function () {
+    $this->actingAs($this->seller)->get(route('seller.store.edit'))->assertOk()
+        ->assertSee('Store avatar')->assertSee('Choose an avatar')->assertSee('Surprise me')
+        ->assertDontSee('type="file"', false)->assertDontSee('Remove my logo')->assertDontSee('multipart');
 });
 
-/** ---------------------------------------------------------------- reviewers */
-it('lets a reviewer remove an unsuitable logo', function () {
-    $this->actingAs($this->seller)->patch(route('seller.store.update'), storeDetails() + ['logo' => UploadedFile::fake()->image('logo.png', 400, 400)]);
-    $path = $this->store->fresh()->logo_path;
+it('has no logo upload or logo removal for reviewers any more', function () {
+    $this->actingAs($this->reviewer)->get(route('admin.sellers.index', ['status' => 'approved']))->assertOk()
+        ->assertSee('Kevin 3D Studio')->assertSee($this->store->avatarUrl(), false)->assertDontSee('Remove logo');
 
-    $this->actingAs($this->reviewer)->get(route('admin.sellers.index', ['status' => 'approved']))->assertOk()->assertSee('Remove logo')->assertSee('Clean topology, honest scale');
-    $this->delete(route('admin.sellers.remove-logo', $this->store))->assertRedirect()->assertSessionHas('success');
-
-    expect($this->store->fresh()->logo_path)->toBeNull();
-    Storage::disk('public')->assertMissing($path);
-
-    $this->actingAs($this->seller)->delete(route('admin.sellers.remove-logo', $this->store))->assertForbidden();
+    expect(Route::has('admin.sellers.remove-logo'))->toBeFalse();
 });
 
 it('files the rename notification under Marketplace and presents it', function () {
     expect(NotificationCategory::forType(StoreNameChangedNotification::class))->toBe(NotificationCategory::Marketplace)
         ->and(StoreNameChangedNotification::present(['old_name' => 'A', 'new_name' => 'B'])['content'])->toBe('"A" is now "B"');
-});
-
-it('makes store initials from the first two words that have letters in them', function () {
-    expect((new SellerProfile(['display_name' => 'Grain & Mesh']))->initials())->toBe('GM')
-        ->and((new SellerProfile(['display_name' => 'Kevin 3D Studio']))->initials())->toBe('K3')
-        ->and((new SellerProfile(['display_name' => 'Atelier']))->initials())->toBe('A');
 });

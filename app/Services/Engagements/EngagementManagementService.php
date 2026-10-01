@@ -91,11 +91,11 @@ class EngagementManagementService
     {
         $engagement->load([
             'application.job',
-            'application.poster:id,name,email',
-            'application.applicant:id,name,email',
+            'application.poster:id,name,email,avatar',
+            'application.applicant:id,name,email,avatar',
             'deliverables',
             'cancellation.initiator:id,name',
-            'cancellation.dispute.disputedBy:id,name',
+            'cancellation.dispute.disputedBy:id,name,avatar',
             'cancellation.dispute.assignedAdmin:id,name',
             'cancellation.dispute.resolvedBy:id,name',
             'partialPayments.processor:id,name',

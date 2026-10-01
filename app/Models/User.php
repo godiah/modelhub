@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\SellerStatus;
 use App\Mail\TwoFactorCode;
+use App\Support\Avatars;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -20,6 +21,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'avatar',
         'two_factor_enabled',
         'two_factor_code',
         'two_factor_expires_at',
@@ -46,27 +48,24 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(ModelJob::class);
     }
 
-    // Get User Initials
-    public function getInitials()
+    /** The member's avatar picture; a stable fallback stands in if none is stored. */
+    public function avatarUrl(): string
     {
-        $name = $this->name;
-        if (empty($name)) {
-            return '';
+        // A query that selected a few columns but not `avatar` would quietly show the fallback avatar instead of the
+        // member's own. Outside production that is an error, like lazy loading, so it is caught in development.
+        if ($this->exists && ! array_key_exists('avatar', $this->attributes) && ! app()->isProduction()) {
+            throw new \LogicException('The avatar column was not selected for this user. Add it to the query that loaded the user.');
         }
 
-        // Split name into words
-        $words = explode(' ', $name);
-        $initials = '';
+        return Avatars::url(Avatars::PEOPLE, $this->avatar, $this->id ?? $this->email ?? 0);
+    }
 
-        // Take first letter of each word
-        foreach ($words as $word) {
-            if (! empty(trim($word))) {
-                $initials .= strtoupper($word[0]);
-            }
-        }
-
-        // Limit to 2-3 initials for display
-        return substr($initials, 0, 3);
+    protected static function booted(): void
+    {
+        // Everyone starts with a random avatar, so no one ever shows as a blank picture
+        static::creating(function (User $user) {
+            $user->avatar ??= Avatars::random(Avatars::PEOPLE);
+        });
     }
 
     /**

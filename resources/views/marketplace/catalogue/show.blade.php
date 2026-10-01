@@ -78,11 +78,7 @@
                     <h1 class="font-tertiary text-xl font-semibold leading-snug text-neutral-900">{{ $product->title }}</h1>
                     @if ($product->sellerProfile?->slug)
                         <a href="{{ route('sellers.show', $product->sellerProfile->slug) }}" class="mt-3 flex items-center gap-3 rounded-xl border border-neutral-200 p-2.5 transition-colors hover:border-neutral-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
-                            @if ($logo = $product->sellerProfile->logoUrl())
-                                <img src="{{ $logo }}" alt="" class="h-10 w-10 shrink-0 rounded-lg border border-neutral-200 object-cover">
-                            @else
-                                <span aria-hidden="true" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-teal-700/15 bg-teal-50 text-sm font-bold text-teal-800">{{ $product->sellerProfile->initials() }}</span>
-                            @endif
+                            <x-store-avatar :store="$product->sellerProfile" size="h-10 w-10" rounded="rounded-lg" />
                             <span class="min-w-0">
                                 <span class="block truncate text-sm font-medium text-neutral-900">{{ $product->sellerProfile->display_name }}</span>
                                 @if ($product->sellerProfile->hasPublicRating())

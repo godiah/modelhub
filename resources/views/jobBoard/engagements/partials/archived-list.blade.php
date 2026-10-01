@@ -58,12 +58,7 @@
                                                 ? $engagement->application->applicant
                                                 : $engagement->application->poster;
                                     @endphp
-                                    <div
-                                        class="w-10 h-10 rounded-full ring-2 ring-neutral-200 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                                        <span class="text-white font-semibold font-main text-sm">
-                                            {{ $user->getInitials() }}
-                                        </span>
-                                    </div>
+                                    <x-user-avatar :user="$user" size="h-10 w-10" class="ring-2 ring-neutral-200" />
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-medium font-secondary text-neutral-900">

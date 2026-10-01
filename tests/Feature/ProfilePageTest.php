@@ -90,7 +90,7 @@ it('summarises everything the user has shared', function () {
         ->assertSee('Blender')
         ->assertSee('LinkedIn')
         ->assertSee('https://linkedin.com/in/amina', false)
-        ->assertSee('83%');
+        ->assertSee('100%');
 });
 
 it('hides private links and links on inactive networks', function () {
@@ -157,11 +157,11 @@ it("never shows another user's profile data", function () {
         ->assertDontSee('Someone Else');
 });
 
-it('computes completeness from photo, bio, location, phone, skills and software', function () {
-    expect(ProfileCompleteness::for($this->user))->toMatchArray(['percent' => 0, 'next_step' => 'Add a profile photo']);
+it('computes completeness from bio, location, phone, skills and software', function () {
+    expect(ProfileCompleteness::for($this->user))->toMatchArray(['percent' => 0, 'next_step' => 'Describe your professional background']);
 
     $this->user->getOrCreateProfile()->update([
-        'avatar' => 'avatars/me.png', 'professional_info' => 'Bio', 'location' => 'Nairobi', 'telephone_number' => '0712',
+        'professional_info' => 'Bio', 'location' => 'Nairobi', 'telephone_number' => '0712',
     ]);
     $this->user->skills()->attach(Skill::create(['name' => 'Modelling', 'is_active' => true]));
     $this->user->software()->attach(Software::create(['name' => 'Blender', 'is_active' => true]));

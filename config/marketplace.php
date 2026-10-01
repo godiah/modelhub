@@ -44,9 +44,8 @@ return [
     // A store's rating is shown once its models have this many visible reviews between them
     'min_store_reviews' => 3,
 
-    // A seller may rename their store this often (days), and upload a logo up to this size (MB)
+    // A seller may rename their store this often (days)
     'name_change_days' => 30,
-    'max_logo_mb' => 2,
 
     // Allowed preview image types
     'image_extensions' => ['jpg', 'jpeg', 'png', 'webp'],
