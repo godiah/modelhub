@@ -45,6 +45,11 @@ class SellerProfile extends Model
         });
     }
 
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'user_id', 'user_id');
+    }
+
     /** A store's rating is shown only once enough buyers have reviewed its models for the number to mean something. */
     public function hasPublicRating(): bool
     {
@@ -56,10 +61,10 @@ class SellerProfile extends Model
         return $this->logo_path ? Storage::disk(config('marketplace.images_disk'))->url($this->logo_path) : null;
     }
 
-    /** "K3S": the first letters of the first two words of the store name, for when there is no logo. */
+    /** "K3": the first letters of the first two words of the store name that have a letter or digit in them ("Grain & Mesh" is "GM"), for when there is no logo. */
     public function initials(): string
     {
-        return collect(preg_split('/\s+/', trim($this->display_name)))->filter()->take(2)->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))->implode('');
+        return collect(preg_split('/\s+/', trim($this->display_name)))->filter(fn ($word) => preg_match('/[\p{L}\p{N}]/u', $word))->take(2)->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))->implode('');
     }
 
     /** When the store name may next be changed, or null if it can be changed now. */

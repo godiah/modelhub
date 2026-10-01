@@ -6,10 +6,10 @@
 --}}
 @php
     $links = [
+        ['label' => __('Models'), 'url' => route('models.index'), 'spy' => null, 'routes' => ['models.index', 'models.show', 'sellers.show'], 'soon' => false],
         ['label' => __('Hire talent'), 'url' => route('home').'#hire', 'spy' => '#hire', 'routes' => [], 'soon' => false],
         ['label' => __('Find work'), 'url' => route('jobs.browse'), 'spy' => '#work', 'routes' => ['jobs.browse', 'jobs.apply'], 'soon' => false],
         ['label' => __('How it works'), 'url' => route('jobs.index'), 'spy' => null, 'routes' => ['jobs.index'], 'soon' => false],
-        ['label' => __('Models'), 'url' => route('home').'#models', 'spy' => '#models', 'routes' => [], 'soon' => true],
     ];
     $linkClass = 'relative inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 '
         .'after:absolute after:inset-x-3 after:-bottom-[14px] after:h-0.5 after:rounded-full after:bg-teal-600 after:opacity-0 after:transition-opacity '
