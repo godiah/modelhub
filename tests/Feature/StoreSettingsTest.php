@@ -212,3 +212,9 @@ it('files the rename notification under Marketplace and presents it', function (
     expect(NotificationCategory::forType(StoreNameChangedNotification::class))->toBe(NotificationCategory::Marketplace)
         ->and(StoreNameChangedNotification::present(['old_name' => 'A', 'new_name' => 'B'])['content'])->toBe('"A" is now "B"');
 });
+
+it('makes store initials from the first two words that have letters in them', function () {
+    expect((new SellerProfile(['display_name' => 'Grain & Mesh']))->initials())->toBe('GM')
+        ->and((new SellerProfile(['display_name' => 'Kevin 3D Studio']))->initials())->toBe('K3')
+        ->and((new SellerProfile(['display_name' => 'Atelier']))->initials())->toBe('A');
+});
