@@ -2,18 +2,13 @@
     $selected = $filters['category'] ?? null;
     $chipUrl = fn (?string $slug) => route('sellers.show', array_filter(array_merge(['seller' => $seller->slug], request()->except(['category', 'page']), ['category' => $slug])));
     $since = ($seller->reviewed_at ?? $seller->created_at)->format('F Y');
-    $logo = $seller->logoUrl();
 @endphp
 <x-app-layout :title="$seller->display_name.' · 3D models'" :crumb="$seller->display_name">
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <!-- Store header -->
         <x-card class="mb-6 rounded-2xl">
             <div class="flex flex-col gap-5 p-6 sm:flex-row sm:items-start sm:p-8">
-                @if ($logo)
-                    <img src="{{ $logo }}" alt="{{ $seller->display_name }}" class="h-20 w-20 shrink-0 rounded-2xl border border-neutral-200 object-cover">
-                @else
-                    <span aria-hidden="true" class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-teal-700/15 bg-teal-50 font-tertiary text-2xl font-bold text-teal-800">{{ $seller->initials() }}</span>
-                @endif
+                <x-store-avatar :store="$seller" size="h-20 w-20" rounded="rounded-2xl" />
                 <div class="min-w-0 flex-1">
                     <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Seller') }}</p>
                     <h1 class="mt-1 font-tertiary text-2xl font-semibold text-neutral-900 sm:text-3xl">{{ $seller->display_name }}</h1>

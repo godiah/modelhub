@@ -18,7 +18,6 @@ final class ProfileCompleteness
         $profile = $user->profile;
 
         $items = [
-            __('Add a profile photo') => (bool) $profile?->avatar,
             __('Describe your professional background') => (bool) $profile?->professional_info,
             __('Add your location') => (bool) $profile?->location,
             __('Add a phone number') => (bool) $profile?->telephone_number,

@@ -3,22 +3,14 @@
 use App\Models\Skill;
 use App\Models\Software;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Volt\Component;
-use Livewire\WithFileUploads;
 
 new class extends Component {
-    use WithFileUploads;
-
-    public $avatar;
     public string $professional_info = '';
     public string $location = '';
     public string $telephone_number = '';
     public array $selected_skills = [];
     public array $selected_software = [];
-
-    public $avatar_preview;
-    public $current_avatar;
 
     /**
      * Mount the component with existing profile data.
@@ -31,7 +23,6 @@ new class extends Component {
             $this->professional_info = $profile->professional_info ?? '';
             $this->location = $profile->location ?? '';
             $this->telephone_number = $profile->telephone_number ?? '';
-            $this->current_avatar = $profile->avatar;
         }
 
         // Load user's existing skills and software
@@ -56,24 +47,11 @@ new class extends Component {
     }
 
     /**
-     * Handle avatar upload and preview.
-     */
-    public function updatedAvatar()
-    {
-        $this->validate([
-            'avatar' => 'image|max:1024',
-        ]);
-
-        $this->avatar_preview = $this->avatar->temporaryUrl();
-    }
-
-    /**
      * Update the user profile.
      */
     public function updateProfile(): void
     {
         $validated = $this->validate([
-            'avatar' => 'nullable|image|max:1024',
             'professional_info' => 'nullable|string|max:1000',
             'location' => 'nullable|string|max:255',
             'telephone_number' => 'nullable|string|max:20',
@@ -86,20 +64,8 @@ new class extends Component {
         $user = Auth::user();
         $profile = $user->getOrCreateProfile();
 
-        // Handle avatar upload
-        $avatarPath = $profile->avatar;
-        if ($this->avatar) {
-            // Delete old avatar if exists
-            if ($avatarPath && Storage::disk('public')->exists($avatarPath)) {
-                Storage::disk('public')->delete($avatarPath);
-            }
-
-            $avatarPath = $this->avatar->store('avatars', 'public');
-        }
-
         // Update profile
         $profile->update([
-            'avatar' => $avatarPath,
             'professional_info' => $validated['professional_info'],
             'location' => $validated['location'],
             'telephone_number' => $validated['telephone_number'],
@@ -109,84 +75,18 @@ new class extends Component {
         $user->skills()->sync($validated['selected_skills']);
         $user->software()->sync($validated['selected_software']);
 
-        // Reset avatar upload
-        $this->reset('avatar', 'avatar_preview');
-        $this->current_avatar = $avatarPath;
-
         $this->dispatch('profile-details-updated');
     }
 
-    /**
-     * Remove current avatar.
-     */
-    public function removeAvatar(): void
-    {
-        $profile = Auth::user()->profile;
-
-        if ($profile && $profile->avatar) {
-            if (Storage::disk('public')->exists($profile->avatar)) {
-                Storage::disk('public')->delete($profile->avatar);
-            }
-
-            $profile->update(['avatar' => null]);
-            $this->current_avatar = null;
-        }
-    }
 }; ?>
 
-<div>
+<div class="space-y-6">
+    <!-- Avatar: its own form, saved at once, so it sits outside the profile form below -->
+    <x-panel :title="__('Avatar')" :description="__('This is how you appear across ModelHub. Everyone starts with a random one, so change it to whichever you like.')">
+        <x-avatar-picker kind="people" :current="auth()->user()->avatar" :fallback="auth()->id()" :action="route('profile.avatar.update')" />
+    </x-panel>
+
     <form wire:submit="updateProfile" class="space-y-6">
-        <!-- Photo -->
-        <x-panel :title="__('Profile photo')" :description="__('This is how you appear across ModelHub.')">
-            <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
-                <div class="relative shrink-0">
-                    @if ($avatar_preview)
-                        <img src="{{ $avatar_preview }}" alt="{{ __('Avatar preview') }}"
-                            class="h-24 w-24 rounded-full border-2 border-secondary object-cover">
-                        <span
-                            class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-secondary text-white ring-2 ring-white">
-                            <x-icon name="check" class="h-3.5 w-3.5" />
-                        </span>
-                    @elseif ($current_avatar)
-                        <img src="{{ asset('storage/' . $current_avatar) }}" alt="{{ __('Current avatar') }}"
-                            class="h-24 w-24 rounded-full border border-neutral-200 object-cover">
-                    @else
-                        <x-user-avatar :user="auth()->user()" size="h-24 w-24" class="!text-2xl" />
-                    @endif
-                </div>
-
-                <div class="min-w-0">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <input type="file" wire:model="avatar" accept="image/*" id="avatar-upload" class="peer sr-only">
-                        <label for="avatar-upload"
-                            class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-300 bg-white px-4 py-2 font-secondary text-sm font-semibold text-neutral-700 transition-colors duration-200 hover:bg-neutral-50 peer-focus-visible:ring-4 peer-focus-visible:ring-neutral-200">
-                            <x-icon name="cloud-arrow-up" class="h-4 w-4" />
-                            {{ __('Upload new') }}
-                        </label>
-
-                        @if ($current_avatar && !$avatar_preview)
-                            <x-btn variant="ghost" type="button" wire:click="removeAvatar" wire:target="removeAvatar"
-                                class="!text-red-600 hover:!bg-red-50">
-                                <x-icon name="trash" class="h-4 w-4" />
-                                {{ __('Remove') }}
-                            </x-btn>
-                        @endif
-                    </div>
-                    <p class="mt-2 text-xs text-tertiary">
-                        <span wire:loading wire:target="avatar">{{ __('Uploading…') }}</span>
-                        <span wire:loading.remove wire:target="avatar">
-                            @if ($avatar_preview)
-                                {{ __('Preview only. Save changes to apply this photo.') }}
-                            @else
-                                {{ __('PNG or JPG, up to 1 MB. Square images look best.') }}
-                            @endif
-                        </span>
-                    </p>
-                    <x-input-error :messages="$errors->get('avatar')" class="mt-1.5" />
-                </div>
-            </div>
-        </x-panel>
-
         <!-- About -->
         <x-panel :title="__('About you')" :description="__('A short summary of your background and what you do best.')">
             <div x-data="{

@@ -33,7 +33,6 @@ class MessagingService
                 'id' => $engagement->id,
                 'job_title' => $engagement->application->job->title ?? 'Untitled Job',
                 'other_user_name' => $otherUser->name ?? ($isPoster ? 'Freelancer' : 'Client'),
-                'other_user_initials' => $otherUser?->getInitials() ?? '??',
                 'status' => $engagement->status,
             ],
             'messages' => MessageResource::collection($messages)->resolve(),

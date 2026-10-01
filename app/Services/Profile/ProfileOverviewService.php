@@ -129,8 +129,7 @@ class ProfileOverviewService
     private function recentReviews(User $user): Collection
     {
         return JobReview::with([
-            'reviewer' => fn ($query) => $query->select('id', 'name'),
-            'reviewer.profile' => fn ($query) => $query->select('user_id', 'avatar'),
+            'reviewer' => fn ($query) => $query->select('id', 'name', 'avatar'),
             'engagement' => fn ($query) => $query->select('id', 'application_id', 'created_at'),
             'engagement.job' => fn ($query) => $query->select('model_jobs.id', 'model_jobs.title'),
         ])

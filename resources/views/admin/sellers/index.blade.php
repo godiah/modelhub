@@ -33,12 +33,10 @@
         @else
             <div class="space-y-4">
                 @foreach ($sellers as $seller)
-                    <article x-data="{ approving: false, rejecting: false, suspending: false, removingLogo: false }" class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+                    <article x-data="{ approving: false, rejecting: false, suspending: false }" class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="flex min-w-0 items-start gap-3">
-                                @if ($logo = $seller->logoUrl())
-                                    <img src="{{ $logo }}" alt="" class="h-12 w-12 shrink-0 rounded-xl border border-neutral-200 object-cover">
-                                @endif
+                                <x-store-avatar :store="$seller" size="h-12 w-12" />
                                 <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <h2 class="font-tertiary text-lg font-semibold text-neutral-900">{{ $seller->display_name }}</h2>
@@ -64,9 +62,6 @@
                                 @endif
                                 @if ($seller->status === SellerStatus::Approved)
                                     <x-btn size="sm" variant="secondary" href="{{ route('sellers.show', $seller->slug) }}" target="_blank">{{ __('Storefront') }}</x-btn>
-                                    @if ($seller->logo_path)
-                                        <x-btn size="sm" variant="secondary" type="button" @click="removingLogo = true">{{ __('Remove logo') }}</x-btn>
-                                    @endif
                                     <x-btn size="sm" variant="danger-outline" type="button" @click="suspending = true">{{ __('Suspend') }}</x-btn>
                                 @endif
                             </div>
@@ -98,10 +93,6 @@
                             </p>
                         @endif
 
-                        @if ($seller->logo_path)
-                            <x-confirm-dialog bind="removingLogo" title="Remove this logo" confirm-label="Remove" method="DELETE" :action="route('admin.sellers.remove-logo', $seller)"
-                                message="The logo disappears from their storefront and models. They can upload another." />
-                        @endif
                         <x-confirm-dialog bind="approving" :title="$seller->status === SellerStatus::Suspended ? 'Reinstate seller' : 'Approve seller'" icon="check" tone="success" confirm-label="Approve" method="PATCH"
                             :action="route('admin.sellers.review', [$seller, 'approve'])"
                             :message="'This lets '.$seller->display_name.' list models once the marketplace opens, and tells them.'" />

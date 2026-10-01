@@ -7,7 +7,7 @@ use App\Http\Requests\Marketplace\UpdateStoreRequest;
 use App\Models\SellerProfile;
 use App\Services\Marketplace\SellerStoreService;
 
-/** An approved seller's store settings: the details and logo buyers see on their storefront. */
+/** An approved seller's store settings: the details and avatar buyers see on their storefront. */
 class SellerStoreController extends Controller
 {
     public function __construct(protected SellerStoreService $stores) {}
@@ -19,7 +19,7 @@ class SellerStoreController extends Controller
 
     public function update(UpdateStoreRequest $request)
     {
-        $this->stores->update($request->store(), $request->validated(), $request->file('logo'), $request->boolean('remove_logo'));
+        $this->stores->update($request->store(), $request->validated());
 
         return redirect()->route('seller.store.edit')->with(FlashAlertHelper::success('Store updated', 'Your storefront now shows the new details.'));
     }

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\AdminStaffController;
+use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JobApplicationController;
@@ -34,6 +35,8 @@ Route::get('/', HomeController::class)->middleware('guest')->name('home');
 Route::get('dashboard', [DashBoardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::patch('profile/avatar', [AvatarController::class, 'update'])->middleware('auth')->name('profile.avatar.update');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
@@ -248,7 +251,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     });
     Route::middleware(['permission:review sellers'])->group(function () {
         Route::get('/sellers', [AdminSellerController::class, 'index'])->name('sellers.index');
-        Route::delete('/sellers/{seller}/logo', [AdminSellerController::class, 'removeLogo'])->name('sellers.remove-logo');
         Route::patch('/sellers/{seller}/{decision}', [AdminSellerController::class, 'review'])->whereIn('decision', ['approve', 'reject', 'suspend'])->name('sellers.review');
     });
     Route::middleware(['permission:moderate reviews'])->group(function () {

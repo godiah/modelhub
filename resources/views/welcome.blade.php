@@ -145,11 +145,7 @@
                         @foreach ($stores as $store)
                             <li>
                                 <a href="{{ route('sellers.show', $store->slug) }}" class="flex h-full items-center gap-4 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
-                                    @if ($logo = $store->logoUrl())
-                                        <img src="{{ $logo }}" alt="" loading="lazy" class="h-14 w-14 shrink-0 rounded-xl border border-neutral-200 object-cover">
-                                    @else
-                                        <span aria-hidden="true" class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-teal-700/15 bg-teal-50 font-tertiary text-lg font-bold text-teal-800">{{ $store->initials() }}</span>
-                                    @endif
+                                    <x-store-avatar :store="$store" size="h-14 w-14" />
                                     <span class="min-w-0">
                                         <span class="block truncate font-tertiary text-base font-semibold text-neutral-900">{{ $store->display_name }}</span>
                                         <x-models.stars :rating="$store->rating_avg" :count="$store->rating_count" showNumber class="mt-0.5" />

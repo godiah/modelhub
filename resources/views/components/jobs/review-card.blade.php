@@ -5,10 +5,7 @@
         <!-- Header -->
         <div class="flex justify-between items-start">
             <div class="flex items-center">
-                <div
-                    class="h-10 w-10 rounded-full bg-teal-50 text-teal-800 flex items-center justify-center border border-teal-700/15 text-sm font-semibold mr-3">
-                    {{ $review->reviewer->getInitials() }}
-                </div>
+                <x-user-avatar :user="$review->reviewer" size="h-10 w-10" class="mr-3" />
                 <div>
                     <h4 class="font-medium text-neutral-800">{{ $review->reviewer->name }}</h4>
                     <p class="text-xs text-neutral-500"><x-date :date="$review->created_at" format="M d, Y" /></p>

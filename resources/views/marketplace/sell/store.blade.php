@@ -14,42 +14,21 @@
             <x-btn variant="secondary" href="{{ route('sellers.show', $store->slug) }}" class="shrink-0"><x-icon name="eye" class="h-4 w-4" />{{ __('View storefront') }}</x-btn>
         </div>
 
-        <form action="{{ route('seller.store.update') }}" method="POST" enctype="multipart/form-data"
+        <form action="{{ route('seller.store.update') }}" method="POST"
             x-data="{
                 name: @js(old('display_name', $store->display_name)),
                 tagline: @js(old('tagline', $store->tagline ?? '')),
-                logo: @js($store->logoUrl()),
-                removeLogo: false,
-                pick(event) {
-                    const file = event.target.files[0];
-                    if (! file) return;
-                    this.removeLogo = false;
-                    this.logo = URL.createObjectURL(file);
-                },
-                get initials() { return this.name.trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0).toUpperCase()).join(''); },
+                avatar: @js($store->avatarUrl()),
             }">
             @csrf
             @method('PATCH')
 
             <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
                 <div class="space-y-6">
-                    <x-panel :title="__('Logo')" :description="__('A square image works best: at least 200 × 200 px, JPG, PNG or WebP, up to :mb MB.', ['mb' => config('marketplace.max_logo_mb')])">
-                        <div class="flex items-center gap-5">
-                            <template x-if="logo && ! removeLogo"><img :src="logo" alt="" class="h-20 w-20 shrink-0 rounded-2xl border border-neutral-200 object-cover"></template>
-                            <template x-if="! logo || removeLogo"><span aria-hidden="true" class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-teal-700/15 bg-teal-50 font-tertiary text-2xl font-bold text-teal-800" x-text="initials"></span></template>
-                            <div class="min-w-0">
-                                <label class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-800 hover:border-neutral-400 focus-within:ring-2 focus-within:ring-secondary/40">
-                                    <x-icon name="photo" class="h-4 w-4" />{{ __('Choose a logo') }}
-                                    <input type="file" name="logo" accept=".jpg,.jpeg,.png,.webp" class="sr-only" @change="pick($event)">
-                                </label>
-                                @if ($store->logo_path)
-                                    <label class="mt-3 flex items-center gap-2 text-sm text-neutral-700">
-                                        <input type="checkbox" name="remove_logo" value="1" x-model="removeLogo" class="h-4 w-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-600/30">
-                                        {{ __('Remove my logo') }}
-                                    </label>
-                                @endif
-                                @error('logo')<p class="mt-2 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
-                            </div>
+                    <x-panel :title="__('Store avatar')" :description="__('Your store\'s picture on your storefront and next to every model. Everyone starts with a random one. It is saved with the rest of your store details.')">
+                        <div x-on:avatar-chosen.window="avatar = $event.detail.url">
+                            <x-avatar-picker kind="stores" :current="$store->avatar" :fallback="$store->id" :title="__('Choose your store avatar')" shape="rounded-2xl" />
+                            @error('avatar')<p class="mt-2 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
                         </div>
                     </x-panel>
 
@@ -110,8 +89,7 @@
                 <aside class="space-y-6 lg:sticky lg:top-24">
                     <x-panel :title="__('How buyers see you')">
                         <div class="flex items-center gap-4">
-                            <template x-if="logo && ! removeLogo"><img :src="logo" alt="" class="h-14 w-14 shrink-0 rounded-xl border border-neutral-200 object-cover"></template>
-                            <template x-if="! logo || removeLogo"><span aria-hidden="true" class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-teal-700/15 bg-teal-50 font-tertiary text-lg font-bold text-teal-800" x-text="initials"></span></template>
+                            <img :src="avatar" alt="" class="h-14 w-14 shrink-0 rounded-xl border border-neutral-200 bg-white object-cover">
                             <div class="min-w-0">
                                 <p class="truncate font-tertiary text-base font-semibold text-neutral-900" x-text="name || @js(__('Your store name'))"></p>
                                 <p class="truncate text-sm text-tertiary" x-text="tagline" x-show="tagline"></p>
