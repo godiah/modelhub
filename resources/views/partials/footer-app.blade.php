@@ -1,4 +1,4 @@
-<!-- Slim footer for the signed-in app shell (guests get partials.footer-public) -->
+{{-- Slim footer for the signed-in app shell (guests get the site footer component) --}}
 <footer class="border-t border-neutral-200/70 px-4 py-5 sm:px-6 lg:px-8">
     <div
         class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 text-xs text-tertiary sm:flex-row">

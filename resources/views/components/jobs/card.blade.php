@@ -1,10 +1,12 @@
-@props(['job', 'status' => null, 'poster' => true, 'compact' => false])
+@props(['job', 'status' => null, 'poster' => true, 'compact' => false, 'public' => false])
 @use('App\Enums\ApplicationStatus')
 
 {{--
     One project in a list: who posted it, the title, a short plain-text excerpt, skills/software tags, the
     budget and the right call to action for the viewer (Apply, Continue draft, their application's status,
     or "Your project"). `poster` needs job.user.profile loaded (lazy loading is blocked outside production).
+    `public` is the privacy-safe version for the landing page: no client name, post time or applicant count; it
+    shows the deadline with the days remaining instead.
 --}}
 @php
     $isOwner = auth()->id() === $job->user_id;
@@ -22,6 +24,7 @@
     $moreTags = (count($skills) - count($shownSkills)) + (count($software) - count($shownSoftware));
 
     $deadlineSoon = $job->deadlineIsSoon();
+    $daysLeft = ($job->no_deadline || ! $job->deadline) ? null : max(0, (int) today()->diffInDays($job->deadline, false));
     $statusTone = [
         ApplicationStatus::Submitted->value => 'blue',
         ApplicationStatus::Reviewed->value => 'amber',
@@ -44,19 +47,21 @@
     @endif
 
     <div class="flex flex-1 flex-col p-5">
-    <div class="flex items-start justify-between gap-3 text-xs text-tertiary">
-        @if ($poster && $job->user)
-            <span class="flex min-w-0 items-center gap-2">
-                <x-user-avatar :user="$job->user" size="h-6 w-6" class="!text-[10px]" />
-                <span class="truncate font-medium text-neutral-700">{{ $job->user->name }}</span>
-            </span>
-        @else
-            <span></span>
-        @endif
-        <time class="shrink-0" datetime="{{ $job->created_at->toIso8601String() }}">{{ $job->created_at->diffForHumans() }}</time>
-    </div>
+    @unless ($public)
+        <div class="flex items-start justify-between gap-3 text-xs text-tertiary">
+            @if ($poster && $job->user)
+                <span class="flex min-w-0 items-center gap-2">
+                    <x-user-avatar :user="$job->user" size="h-6 w-6" class="!text-[10px]" />
+                    <span class="truncate font-medium text-neutral-700">{{ $job->user->name }}</span>
+                </span>
+            @else
+                <span></span>
+            @endif
+            <time class="shrink-0" datetime="{{ $job->created_at->toIso8601String() }}">{{ $job->created_at->diffForHumans() }}</time>
+        </div>
+    @endunless
 
-    <div class="mt-3 flex items-start gap-4">
+    <div @class(['flex items-start gap-4', 'mt-3' => ! $public])>
         <div class="min-w-0 flex-1">
             <h3 class="font-tertiary text-base font-semibold leading-snug text-neutral-900">
                 <a href="{{ route('jobs.apply', $job->slug) }}" class="rounded transition-colors hover:text-teal-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">{{ $job->title }}</a>
@@ -65,12 +70,20 @@
             <p class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-tertiary">
                 <span @class(['inline-flex items-center gap-1', 'font-medium text-amber-700' => $deadlineSoon])>
                     <x-icon name="calendar" class="h-3.5 w-3.5" />
-                    {{ $job->no_deadline ? __('No deadline') : __('Due :date', ['date' => $job->deadline->format('M j')]) }}
+                    @if ($job->no_deadline)
+                        {{ __('No deadline') }}
+                    @elseif ($public)
+                        {{ __('Due :date', ['date' => $job->deadline->format('M j')]) }} · {{ $daysLeft === 0 ? __('today') : trans_choice(':count day left|:count days left', $daysLeft, ['count' => $daysLeft]) }}
+                    @else
+                        {{ __('Due :date', ['date' => $job->deadline->format('M j')]) }}
+                    @endif
                 </span>
-                <span class="inline-flex items-center gap-1">
-                    <x-icon name="users" class="h-3.5 w-3.5" />
-                    {{ trans_choice(':count applicant|:count applicants', (int) $job->applicants_count, ['count' => (int) $job->applicants_count]) }}
-                </span>
+                @unless ($public)
+                    <span class="inline-flex items-center gap-1">
+                        <x-icon name="users" class="h-3.5 w-3.5" />
+                        {{ trans_choice(':count applicant|:count applicants', (int) $job->applicants_count, ['count' => (int) $job->applicants_count]) }}
+                    </span>
+                @endunless
             </p>
         </div>
 

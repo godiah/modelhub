@@ -14,7 +14,6 @@
 <x-app-layout title="Browse projects">
     {{-- The filters are a real GET form, so the page works without JS; Alpine then swaps the results in place. --}}
     <div class="container mx-auto max-w-7xl px-4 py-8" x-data="{
-        filtersOpen: false,
         loading: false,
         failed: false,
         view: 'grid',
@@ -113,96 +112,77 @@
             this.apply();
         },
     }">
-        <!-- Header + search -->
-        <x-card class="mb-6 rounded-2xl" x-ref="top">
-            <div class="p-6">
-                <h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ __('Browse projects') }}</h1>
-                <p class="mt-1 text-sm text-tertiary">{{ __('Find 3D modelling and visualisation projects that match your skills.') }}</p>
-
-                <form id="browse-form" x-ref="form" method="GET" action="{{ route('jobs.browse') }}" role="search" @submit.prevent="apply()" class="mt-5">
-                    <div class="flex gap-3">
-                        <div class="relative min-w-0 flex-1">
-                            <x-icon name="magnifying-glass" class="pointer-events-none absolute left-3.5 top-3 h-5 w-5 text-neutral-400" />
-                            <label for="search" class="sr-only">{{ __('Search projects') }}</label>
-                            <input type="search" id="search" name="search" value="{{ $filters['search'] ?? '' }}" maxlength="255" autocomplete="off"
-                                placeholder="{{ __('Search projects…') }}" @input="schedule()"
-                                class="{{ $fieldClass }} py-2.5 pl-11 text-base">
-                        </div>
-                        <x-btn type="submit" size="lg" class="shrink-0">{{ __('Search') }}</x-btn>
-                    </div>
-                </form>
+        <!-- Header -->
+        <div class="mb-6 flex flex-wrap items-start justify-between gap-4" x-ref="top">
+            <div>
+                <h1 class="font-tertiary text-3xl font-semibold tracking-tight text-neutral-900">{{ __('3D projects') }}</h1>
+                <p class="mt-2"><a href="{{ route('jobs.index', ['for' => 'work']) }}" class="text-sm font-medium text-teal-700 underline underline-offset-4 hover:text-teal-800">{{ __('Learn more how it works') }}</a></p>
             </div>
-        </x-card>
+            <x-btn size="lg" href="{{ route('jobs.create') }}">{{ __('Start a project') }}</x-btn>
+        </div>
 
-        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
-            <!-- Filter rail -->
-            <aside :class="filtersOpen ? 'block' : 'hidden lg:block'" aria-label="{{ __('Filters') }}" class="space-y-6 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm lg:sticky lg:top-24">
-                <div class="flex items-center justify-between">
-                    <h2 class="font-tertiary text-base font-semibold text-neutral-900">{{ __('Filters') }}</h2>
-                    <button type="button" @click="clear()" x-show="chips.length" x-cloak class="text-sm font-medium text-teal-700 hover:text-teal-800 focus:outline-none focus-visible:underline">{{ __('Reset') }}</button>
-                </div>
+        <!-- Filter bar: a real GET form, so the page works without JS; Alpine then swaps the results in place. -->
+        <form id="browse-form" x-ref="form" method="GET" action="{{ route('jobs.browse') }}" role="search" @submit.prevent="apply()" class="mb-5 flex flex-wrap items-center gap-3">
+            <div class="relative min-w-[16rem] flex-1">
+                <x-icon name="magnifying-glass" class="pointer-events-none absolute left-3.5 top-3 h-5 w-5 text-neutral-400" />
+                <label for="search" class="sr-only">{{ __('Search projects') }}</label>
+                <input type="search" id="search" name="search" value="{{ $filters['search'] ?? '' }}" maxlength="255" autocomplete="off"
+                    placeholder="{{ __('Search projects…') }}" @input="schedule()" class="{{ $fieldClass }} h-11 pl-11">
+            </div>
 
-                @foreach ([
-                    'skills' => [__('Skills'), $skills, $selectedSkills],
-                    'software' => [__('Software'), $software, $selectedSoftware],
-                ] as $name => [$label, $options, $selected])
-                    <div x-data="{ q: '' }" role="group" aria-labelledby="group-{{ $name }}" class="border-t border-neutral-100 pt-5">
-                        <h3 id="group-{{ $name }}" class="mb-3 text-sm font-semibold text-neutral-900">{{ $label }}</h3>
-                        @if ($options->count() > 8)
-                            <label class="sr-only" for="filter-{{ $name }}">{{ __('Filter :what', ['what' => strtolower($label)]) }}</label>
-                            <input type="search" id="filter-{{ $name }}" x-model="q" placeholder="{{ __('Filter :what…', ['what' => strtolower($label)]) }}" class="{{ $fieldClass }} mb-3 py-1.5">
-                        @endif
-                        <ul class="max-h-52 space-y-2.5 overflow-y-auto pr-1">
-                            @forelse ($options as $option)
-                                <li x-show="!q || @js(strtolower($option->name)).includes(q.toLowerCase())">
+            <x-browse.multi-filter name="software" :label="__('3D software')" :options="$software" :selected="$selectedSoftware" />
+            <x-browse.multi-filter name="skills" :label="__('3D skills')" :options="$skills" :selected="$selectedSkills" />
+
+            <!-- Budget and posted -->
+            <div x-data="{ open: false }" @keydown.escape.window="open = false" @click.outside="open = false" class="relative">
+                <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-haspopup="true"
+                    class="inline-flex h-11 items-center gap-2 rounded-xl border border-neutral-300 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-neutral-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"
+                    :class="chips.some(c => c.key === 'budget' || c.key === 'posted') && 'border-teal-600'">
+                    {{ __('Budget & date') }}
+                    <x-icon name="chevron-down" class="h-4 w-4 text-neutral-500" />
+                </button>
+                <div x-show="open" x-cloak x-transition.opacity.duration.100ms class="absolute left-0 z-30 mt-2 w-72 space-y-5 rounded-2xl border border-neutral-200 bg-white p-4 shadow-lg">
+                    <div role="group" aria-labelledby="group-budget">
+                        <h3 id="group-budget" class="mb-2 text-sm font-semibold text-neutral-900">{{ __('Budget') }} <span class="font-normal text-tertiary">({{ config('app.currency_symbol') }})</span></h3>
+                        <div class="flex items-center gap-2">
+                            <label class="sr-only" for="budget_min">{{ __('Minimum budget') }}</label>
+                            <input type="number" id="budget_min" name="budget_min" min="0" step="1" inputmode="numeric" placeholder="{{ __('Min') }}" value="{{ $filters['budget_min'] ?? '' }}" @input="schedule()" class="{{ $fieldClass }} py-1.5">
+                            <span class="text-tertiary" aria-hidden="true">–</span>
+                            <label class="sr-only" for="budget_max">{{ __('Maximum budget') }}</label>
+                            <input type="number" id="budget_max" name="budget_max" min="0" step="1" inputmode="numeric" placeholder="{{ __('Max') }}" value="{{ $filters['budget_max'] ?? '' }}" @input="schedule()" class="{{ $fieldClass }} py-1.5">
+                        </div>
+                    </div>
+                    <div role="group" aria-labelledby="group-posted">
+                        <h3 id="group-posted" class="mb-2 text-sm font-semibold text-neutral-900">{{ __('Posted') }}</h3>
+                        <ul class="space-y-2">
+                            @foreach ($postedOptions as $value => $label)
+                                <li>
                                     <label class="flex cursor-pointer items-center gap-2.5 text-sm text-neutral-700">
-                                        <input type="checkbox" name="{{ $name }}[]" value="{{ $option->id }}" form="browse-form" @checked(in_array($option->id, $selected, true)) @change="schedule()" class="{{ $checkboxClass }}">
-                                        <span>{{ $option->name }}</span>
+                                        <input type="radio" name="posted" value="{{ $value }}" @checked(($filters['posted'] ?? '') === $value) @change="apply()" class="border-neutral-300 text-teal-600 focus:ring-teal-600/30">
+                                        <span>{{ $label }}</span>
                                     </label>
                                 </li>
-                            @empty
-                                <li class="text-sm text-tertiary">{{ __('Nothing to filter by yet.') }}</li>
-                            @endforelse
+                            @endforeach
                         </ul>
                     </div>
-                @endforeach
-
-                <div role="group" aria-labelledby="group-budget" class="border-t border-neutral-100 pt-5">
-                    <h3 id="group-budget" class="mb-3 text-sm font-semibold text-neutral-900">{{ __('Budget') }} <span class="font-normal text-tertiary">({{ config('app.currency_symbol') }})</span></h3>
-                    <div class="flex items-center gap-2">
-                        <label class="sr-only" for="budget_min">{{ __('Minimum budget') }}</label>
-                        <input type="number" id="budget_min" name="budget_min" form="browse-form" min="0" step="1" inputmode="numeric" placeholder="{{ __('Min') }}" value="{{ $filters['budget_min'] ?? '' }}" @input="schedule()" class="{{ $fieldClass }} py-1.5">
-                        <span class="text-tertiary" aria-hidden="true">–</span>
-                        <label class="sr-only" for="budget_max">{{ __('Maximum budget') }}</label>
-                        <input type="number" id="budget_max" name="budget_max" form="browse-form" min="0" step="1" inputmode="numeric" placeholder="{{ __('Max') }}" value="{{ $filters['budget_max'] ?? '' }}" @input="schedule()" class="{{ $fieldClass }} py-1.5">
-                    </div>
                 </div>
+            </div>
 
-                <div role="group" aria-labelledby="group-posted" class="border-t border-neutral-100 pt-5">
-                    <h3 id="group-posted" class="mb-3 text-sm font-semibold text-neutral-900">{{ __('Posted') }}</h3>
-                    <ul class="space-y-2.5">
-                        @foreach ($postedOptions as $value => $label)
-                            <li>
-                                <label class="flex cursor-pointer items-center gap-2.5 text-sm text-neutral-700">
-                                    <input type="radio" name="posted" value="{{ $value }}" form="browse-form" @checked(($filters['posted'] ?? '') === $value) @change="apply()" class="border-neutral-300 text-teal-600 focus:ring-teal-600/30">
-                                    <span>{{ $label }}</span>
-                                </label>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            </aside>
+            <label class="flex items-center gap-2 whitespace-nowrap text-sm text-tertiary">
+                <span class="sr-only">{{ __('Sort by') }}</span>
+                <select name="sort" @change="apply()" class="{{ $fieldClass }} h-11 w-auto pr-8 font-medium">
+                    @foreach ($sortOptions as $value => $label)
+                        <option value="{{ $value }}" @selected(($filters['sort'] ?? 'newest') === $value)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
+        </form>
 
+        <div>
             <!-- Results -->
             <section aria-label="{{ __('Results') }}" class="min-w-0">
                 <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
-                        <button type="button" @click="filtersOpen = !filtersOpen" :aria-expanded="filtersOpen.toString()"
-                            class="inline-flex items-center gap-2 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 lg:hidden">
-                            <x-icon name="funnel" class="h-4 w-4" />
-                            {{ __('Filters') }}
-                            <span x-show="chips.length" x-cloak x-text="chips.length" class="rounded-full bg-teal-600 px-1.5 text-xs font-semibold text-white"></span>
-                        </button>
                         <p class="text-sm text-neutral-700" aria-live="polite">
                             <span class="font-semibold tabular-nums text-neutral-900" x-text="count">{{ $jobs->total() }}</span>
                             <span x-text="count === 1 ? @js(__('project')) : @js(__('projects'))">{{ trans_choice('project|projects', $jobs->total()) }}</span>
@@ -210,15 +190,6 @@
                     </div>
 
                     <div class="flex items-center gap-3">
-                        <label class="flex items-center gap-2 whitespace-nowrap text-sm text-tertiary">
-                            <span class="hidden sm:inline">{{ __('Sort by') }}</span>
-                            <select name="sort" form="browse-form" @change="apply()" class="{{ $fieldClass }} w-auto py-1.5 pr-8 font-medium">
-                                @foreach ($sortOptions as $value => $label)
-                                    <option value="{{ $value }}" @selected(($filters['sort'] ?? 'newest') === $value)>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                        </label>
-
                         <div class="hidden rounded-xl border border-neutral-200 bg-white p-0.5 sm:inline-flex" role="group" aria-label="{{ __('Layout') }}">
                             <button type="button" @click="setView('list')" :aria-pressed="(view === 'list').toString()" aria-label="{{ __('List view') }}"
                                 :class="view === 'list' ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-400 hover:text-neutral-700'"

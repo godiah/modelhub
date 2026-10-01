@@ -43,7 +43,6 @@ it('renders menu pages inside the shell with their breadcrumb', function (string
     'notifications' => ['notifications.index', ['Overview', 'Notifications']],
     'profile' => ['profile', ['Account', 'Profile']],
     'browse' => ['jobs.browse', ['Find work', 'Browse projects']],
-    'job board home' => ['jobs.index', ['Find work', 'Browse projects']],
     'my applications' => ['applications.my', ['Find work', 'My applications']],
     'archived applications' => ['applications.archived', ['My applications', 'Archived']],
     'drafts' => ['applications.drafts', ['Find work', 'My applications', 'Drafts']],
@@ -139,7 +138,7 @@ it('keeps a back link on the pages whose parent is not a menu item', function ()
 });
 
 it('shows the job board tabs and archive shortcuts in the page toolbar', function () {
-    $this->get(route('jobs.index'))->assertOk()->assertSee('Post a Project')->assertSee('Find a Project');
+    $this->get(route('jobs.index'))->assertOk()->assertSee('How it works');
     $this->get(route('applications.my'))->assertOk()->assertSee(route('applications.archived'), false);
     $this->get(route('my-jobs.index'))->assertOk()->assertSee(route('my-jobs.archived.posted-jobs'), false)->assertSee('Archived');
 });

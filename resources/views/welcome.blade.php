@@ -1,333 +1,177 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>ModelHub</title>
-    @include('partials.favicon')
-
-    @include('partials.fonts')
-
-    <!-- Styles -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-
-<body class="bg-gray-100">
-    <!-- Navbar -->
-    <livewire:layout.navigation />
-
-    <!-- Hero Section -->
-    <section class="relative min-h-[80vh] flex items-center mt-16">
-        <!-- Background gradient with pattern overlay -->
-        <div class="absolute inset-0 bg-gradient-to-br from-primary/90 to-secondary/90 z-0">
-            <!-- SVG Pattern Overlay -->
-            <svg class="absolute inset-0 h-full w-full opacity-10" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <pattern id="model-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <path d="M0 10h20v1H0v-1zm10-10v20h1V0h-1z" fill="#FFFFFF" />
-                    </pattern>
-                </defs>
-                <rect x="0" y="0" width="100%" height="100%" fill="url(#model-pattern)" />
-            </svg>
-        </div>
-
-        <!-- Hero Content -->
-        <div class="container mx-auto px-4 py-16 z-20 relative">
-            <div class="max-w-3xl mx-auto text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 font-tertiary">Find the Perfect 3D Models for
-                    Your Projects</h1>
-                <p class="text-white/90 text-lg mb-8 font-secondary">Access over 2 million high-quality 3D models for
-                    games, VR/AR, architecture, and more</p>
-
-                <!-- Search Bar -->
-                <div class="bg-white rounded-2xl shadow-xl p-2 mb-8">
-                    <div class="relative flex items-center">
-                        <div class="pl-4 pr-2">
-                            <x-icon name="magnifying-glass" class="h-5 w-5 text-neutral-400" />
-                        </div>
-                        <input type="text" placeholder="Search in more than 2 million 3D models"
-                            class="w-full py-3 px-2 border-none focus:ring-0 font-secondary text-neutral-700">
-                        <button
-                            class="bg-secondary hover:bg-secondary/90 text-white px-8 py-3 rounded-xl ml-2 font-main font-medium transition-colors duration-300">
-                            Search
-                        </button>
-                    </div>
+@php
+    $hire = [
+        ['undraw_people.svg', __('Compare offers, not guesses'), __('Every applicant sends a price and a proposal with portfolio samples. Line them up side by side and message your shortlist with ready-made templates.')],
+        ['undraw_quality_work.svg', __('Track every deliverable'), __('Break the job into deliverables with due dates. The freelancer submits each one, and nothing is final until you approve it.')],
+        ['undraw_secure_payment.svg', __('Settle fairly if plans change'), __('If a project stops part way, completed work can be settled with a partial payment, and an administrator steps in if you cannot agree.')],
+    ];
+    $work = [
+        ['undraw_savings.svg', __('Know what you will earn'), __('Set your own price. Before you send it, you see exactly what you would receive after the service fee.')],
+        ['undraw_slider.svg', __('Filter down to what fits'), __('Browse open 3D projects by skill, software and budget, and save a draft until your proposal is ready.')],
+        ['undraw_completing.svg', __('Deliver and build your name'), __('Work against agreed deliverables, get approved, and collect reviews that follow you to your profile.')],
+    ];
+    $steps = [
+        [__('Post or find a project'), __('Describe the brief and budget, or browse projects that fit your skills.')],
+        [__('Offer and hire'), __('Freelancers send an offer and proposal. The client compares and hires one.')],
+        [__('Deliver in stages'), __('Agree the deliverables up front. Each one is submitted for review.')],
+        [__('Approve and review'), __('The client approves the work, both sides review, and the project closes.')],
+    ];
+@endphp
+<x-site-layout :description="__('Post a 3D project or find one. Compare offers, track every deliverable to sign-off, and build a reputation with reviews.')">
+    <!-- Hero -->
+    <section class="overflow-hidden bg-white">
+        <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-12 pt-12 sm:px-6 sm:pt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-6 lg:px-8 lg:pb-20 lg:pt-20">
+            <div class="relative z-10">
+                <h1 class="font-tertiary text-5xl font-bold leading-[1.05] tracking-tight text-neutral-900 sm:text-6xl">
+                    {{ __('Meet the best') }} <span class="text-teal-600">{{ __('3D talent') }}</span>.<br class="hidden sm:block">
+                    {{ __('Or become it.') }}
+                </h1>
+                <p class="mt-6 max-w-xl text-xl leading-relaxed text-neutral-600">
+                    {{ __('Post a 3D project and hire from the offers that come in, or browse open briefs and send yours. Deliverables, messages and reviews all live in one place.') }}
+                </p>
+                <div class="mt-9 flex flex-wrap items-center gap-3">
+                    <x-btn size="lg" href="{{ route('jobs.create') }}">
+                        {{ __('Post a project') }}
+                    </x-btn>
+                    <x-btn size="lg" variant="secondary" href="{{ route('jobs.browse') }}">
+                        {{ __('Find 3D work') }}
+                        <x-icon name="arrow-right" class="h-5 w-5" />
+                    </x-btn>
                 </div>
-
-                <!-- Quick Categories -->
-                <div class="flex flex-wrap gap-3">
-                    <a href="#"
-                        class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-white font-secondary text-sm transition-colors duration-300">Character
-                        Models</a>
-                    <a href="#"
-                        class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-white font-secondary text-sm transition-colors duration-300">Architecture</a>
-                    <a href="#"
-                        class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-white font-secondary text-sm transition-colors duration-300">Vehicle
-                        Models</a>
-                    <a href="#"
-                        class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-full text-white font-secondary text-sm transition-colors duration-300">Game
-                        Assets</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Category Section -->
-    <section class="py-12 bg-gradient-to-r from-primary/5 to-secondary/5">
-        <div class="container mx-auto px-4 max-w-7xl">
-            <div class="mb-8">
-                <h2 class="text-2xl font-bold font-main text-primary">Browse Categories</h2>
-                <p class="text-tertiary font-secondary">Discover thousands of high-quality 3D models</p>
+                <p class="mt-4 flex items-center gap-2 text-sm text-tertiary">
+                    <x-icon name="user" class="h-4 w-4" />
+                    {{ __('Posting a project or applying needs a free account. You will be asked to sign in or join first.') }}
+                </p>
             </div>
 
             <div class="relative">
-                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 w-full">
-                    <!-- Category Items with custom styling -->
-                    <a href="#"
-                        class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <x-icon name="calculator" class="w-7 h-7" />
-                        </div>
-                        <span
-                            class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Discounts</span>
-                        <span class="text-xs text-neutral-400 mt-1 group-hover:text-secondary">Special offers</span>
-                    </a>
-
-                    <a href="#"
-                        class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                            </svg>
-                        </div>
-                        <span
-                            class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Aircraft</span>
-                        <span class="text-xs text-neutral-400 mt-1 group-hover:text-secondary">1,240+ models</span>
-                    </a>
-
-                    <a href="#"
-                        class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                        </div>
-                        <span
-                            class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Animals</span>
-                        <span class="text-xs text-neutral-400 mt-1 group-hover:text-secondary">3,560+ models</span>
-                    </a>
-
-                    <a href="#"
-                        class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                        </div>
-                        <span
-                            class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Architectural</span>
-                        <span class="text-xs text-neutral-400 mt-1 group-hover:text-secondary">5,320+ models</span>
-                    </a>
-
-                    <a href="#"
-                        class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                        </div>
-                        <span
-                            class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Exterior</span>
-                        <span class="text-xs text-neutral-400 mt-1 group-hover:text-secondary">2,140+ models</span>
-                    </a>
-
-                    <a href="#"
-                        class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <x-icon name="clock" class="w-7 h-7" />
-                        </div>
-                        <span
-                            class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Interior</span>
-                        <span class="text-xs text-neutral-400 mt-1 group-hover:text-secondary">4,780+ models</span>
-                    </a>
-
-                    <a href="#"
-                        class="flex flex-col items-center group transition-all duration-300 p-4 rounded-xl hover:bg-white hover:shadow-lg">
-                        <div
-                            class="w-16 h-16 rounded-full bg-gradient-to-br from-secondary/20 to-secondary/30 flex items-center justify-center text-secondary group-hover:from-secondary/30 group-hover:to-secondary group-hover:text-white transition-all duration-300">
-                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </div>
-                        <span
-                            class="mt-3 text-sm font-medium font-secondary text-neutral-700 group-hover:text-primary">Car</span>
-                        <span class="text-xs text-neutral-400 mt-1 group-hover:text-secondary">3,920+ models</span>
-                    </a>
-                </div>
-
-                <!-- Navigation Controls -->
-
+                <img src="{{ asset('images/jobs/hero-post-job.webp') }}" width="1200" height="720" alt="{{ __('A 3D architectural visualisation of a modern glass house') }}"
+                    class="mx-auto w-full max-w-2xl select-none lg:max-w-none lg:scale-110" fetchpriority="high">
             </div>
         </div>
     </section>
 
-    <!-- About Us Section with modern design -->
-    <section class="py-16 relative overflow-hidden">
-        <!-- Background decoration -->
-        <div
-            class="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 w-96 h-96 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl">
-        </div>
-        <div
-            class="absolute bottom-0 left-0 translate-y-1/4 -translate-x-1/4 w-96 h-96 bg-gradient-to-tr from-accent/10 to-secondary/10 rounded-full blur-3xl">
-        </div>
-
-        <div class="container mx-auto max-w-7xl px-4 py-8 relative">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-12">
-                <!-- Content Section -->
-                <div class="max-w-lg">
-                    <!-- Logo with enhanced styling -->
-                    <div class="flex items-center mb-2 group">
-                        <div class="relative">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur-sm opacity-50 group-hover:opacity-70 transition-opacity duration-300">
-                            </div>
-                            {{-- <div
-                                class="relative h-12 w-12 bg-white rounded-lg shadow-md flex items-center justify-center">
-                                <svg class="h-8 w-8 text-primary" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 2L2 7v10l10 5 10-5V7L12 2z" />
-                                </svg>
-                            </div> --}}
+    <!-- Hire talent -->
+    <section id="hire" class="scroll-mt-16 bg-paper">
+        <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+            <div class="mx-auto max-w-2xl text-center">
+                <p class="text-sm font-semibold uppercase tracking-wide text-teal-700">{{ __('Hire talent') }}</p>
+                <h2 class="mt-3 font-tertiary text-4xl font-bold tracking-tight text-neutral-900">{{ __('Get your 3D project delivered') }}</h2>
+                <p class="mt-4 text-lg text-neutral-600">{{ __('For studios, developers and anyone with a 3D brief.') }}</p>
+            </div>
+            <div class="mt-14 grid gap-10 md:grid-cols-3">
+                @foreach ($hire as [$image, $title, $text])
+                    <div class="text-center">
+                        <div class="flex h-48 items-center justify-center rounded-3xl bg-white px-6 py-4 ring-1 ring-neutral-200/70">
+                            <img src="{{ asset('images/jobs/'.$image) }}" alt="" loading="lazy" class="max-h-full w-auto">
                         </div>
-                        <span
-                            class="ml-3 text-2xl font-bold font-tertiary bg-gradient-to-r from-primary to-secondary text-transparent bg-clip-text">ModelHub</span>
+                        <h3 class="mt-6 font-tertiary text-xl font-semibold text-neutral-900">{{ $title }}</h3>
+                        <p class="mt-2 leading-relaxed text-neutral-600">{{ $text }}</p>
                     </div>
-
-                    <!-- Heading with enhanced typography -->
-                    <h1 class="text-4xl lg:text-5xl font-bold font-main text-neutral-800 leading-tight mb-6">
-                        Explore <span class="text-primary">ModelHub</span>,<br>
-                        <span class="text-neutral-600">where AI meets 3D models.</span>
-                    </h1>
-
-                    <!-- Description with better readability -->
-                    <p class="text-lg text-neutral-600 font-secondary mb-8 leading-relaxed">
-                        ModelHub is a cutting-edge application that leverages the power of generative AI and 3D models
-                        to produce stunning 2D images.
-                        <span class="font-semibold text-primary block mt-2">Your creative journey starts now.</span>
-                    </p>
-
-                    <!-- CTA Buttons with better styling -->
-                    <div class="flex flex-wrap gap-4">
-                        <a href="{{ route('register') }}"
-                            class="inline-flex items-center bg-gradient-to-r from-secondary to-secondary/80 hover:from-primary hover:to-primary/80 text-white font-medium px-6 py-3 rounded-lg transition duration-300 shadow-md hover:shadow-lg">
-                            <span>Get started for Free!</span>
-                            <x-icon name="arrow-right" class="w-5 h-5 ml-2" />
-                        </a>
-                        <a href="#"
-                            class="inline-flex items-center bg-white border border-neutral-200 hover:border-secondary/50 text-neutral-700 hover:text-secondary font-medium px-6 py-3 rounded-lg transition duration-300 shadow-sm hover:shadow">
-                            <span>Learn more</span>
-                        </a>
-                    </div>
-
-                    <!-- Trust indicators -->
-                    <div class="mt-10 flex items-center text-neutral-500 text-sm">
-                        <div class="flex -space-x-2 mr-3">
-                            <div
-                                class="h-8 w-8 rounded-full bg-neutral-200 border-2 border-white flex items-center justify-center text-xs font-bold">
-                                JD</div>
-                            <div
-                                class="h-8 w-8 rounded-full bg-neutral-300 border-2 border-white flex items-center justify-center text-xs font-bold">
-                                KM</div>
-                            <div
-                                class="h-8 w-8 rounded-full bg-neutral-400 border-2 border-white flex items-center justify-center text-xs font-bold">
-                                TW</div>
-                        </div>
-                        <span>Join <b>10,000+</b> 3D artists already using ModelHub</span>
-                    </div>
-                </div>
-
-                <!-- Image grid with enhanced styling -->
-                <div class="lg:flex-1">
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-4 relative">
-                        <!-- Main featured image -->
-                        <div
-                            class="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-2xl overflow-hidden shadow-md lg:col-span-2 lg:row-span-2 relative group">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
-                            </div>
-                            <img src="{{ asset('images/home/astronaut.jpg') }}" alt="3D Astronaut Model"
-                                class="w-full h-full object-cover">
-                            <div
-                                class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-neutral-900/80 to-transparent p-4 text-white z-20">
-                                <span class="text-xs font-semibold bg-secondary/80 px-2 py-1 rounded">Featured</span>
-                                <h3 class="font-semibold mt-2">Space Explorer Series</h3>
-                            </div>
-                        </div>
-
-                        <!-- Smaller images -->
-                        <div
-                            class="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-xl overflow-hidden shadow-md group relative">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            </div>
-                            <img src="{{ asset('images/home/mars.jpg') }}" alt="Astronaut on Earth"
-                                class="w-full h-full object-cover">
-                        </div>
-
-                        <div
-                            class="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-xl overflow-hidden shadow-md group relative">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            </div>
-                            <img src="{{ asset('images/home/city.jpg') }}" alt="Astronaut in Space"
-                                class="w-full h-full object-cover">
-                        </div>
-
-                        <div
-                            class="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-xl overflow-hidden shadow-md hidden xl:block group relative">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            </div>
-                            <img src="{{ asset('images/home/ai.jpg') }}" alt="Astronaut with Ship"
-                                class="w-full h-full object-cover">
-                        </div>
-
-                        <div
-                            class="bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-xl overflow-hidden shadow-md hidden xl:block group relative">
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            </div>
-                            <img src="{{ asset('images/home/space-vehicle.jpg') }}" alt="Space Vehicle"
-                                class="w-full h-full object-cover">
-                        </div>
-                    </div>
-                </div>
+                @endforeach
+            </div>
+            <div class="mt-12 text-center">
+                <x-btn size="lg" href="{{ route('jobs.create') }}">{{ __('Post a project') }}</x-btn>
+                <p class="mt-3 text-sm text-tertiary">{{ __('Free account required. It takes a minute to set up.') }}</p>
             </div>
         </div>
     </section>
 
+    <!-- Find work -->
+    <section id="work" class="scroll-mt-16 bg-white">
+        <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+            <div class="mx-auto max-w-2xl text-center">
+                <p class="text-sm font-semibold uppercase tracking-wide text-teal-700">{{ __('Find work') }}</p>
+                <h2 class="mt-3 font-tertiary text-4xl font-bold tracking-tight text-neutral-900">{{ __('Turn your skills into steady work') }}</h2>
+                <p class="mt-4 text-lg text-neutral-600">{{ __('For 3D artists, modellers and animators.') }}</p>
+            </div>
+            <div class="mt-14 grid gap-10 md:grid-cols-3">
+                @foreach ($work as [$image, $title, $text])
+                    <div class="text-center">
+                        <div class="flex h-48 items-center justify-center rounded-3xl bg-paper px-6 py-4">
+                            <img src="{{ asset('images/jobs/'.$image) }}" alt="" loading="lazy" class="max-h-full w-auto">
+                        </div>
+                        <h3 class="mt-6 font-tertiary text-xl font-semibold text-neutral-900">{{ $title }}</h3>
+                        <p class="mt-2 leading-relaxed text-neutral-600">{{ $text }}</p>
+                    </div>
+                @endforeach
+            </div>
+            <div class="mt-12 text-center">
+                <x-btn size="lg" variant="secondary" href="{{ route('jobs.browse') }}">{{ __('Browse projects') }}<x-icon name="arrow-right" class="h-5 w-5" /></x-btn>
+                <p class="mt-3 text-sm text-tertiary">{{ __('You can look around freely. A free account is needed to apply.') }}</p>
+            </div>
+        </div>
+    </section>
 
-    @include('partials.footer-public')
+    <!-- Open projects (no client names or applicant numbers) -->
+    @if ($projects->isNotEmpty())
+        <section class="bg-paper">
+            <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-2xl text-center">
+                    <h2 class="font-tertiary text-4xl font-bold tracking-tight text-neutral-900">{{ __('Open projects right now') }}</h2>
+                    <p class="mt-4 text-lg text-neutral-600">{{ __('The newest briefs looking for a freelancer.') }}</p>
+                </div>
+                <div class="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    @foreach ($projects as $project)
+                        <x-jobs.card :job="$project" :compact="true" :public="true" />
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 
-    <!-- Floating Chat Button -->
-    <div class="fixed bottom-6 right-6">
-        <button
-            class="w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-lg hover:bg-teal-600">
-            <x-icon name="chat-bubble-dots" class="w-6 h-6" />
-        </button>
-    </div>
-</body>
+    <!-- How it works -->
+    <section id="how" class="scroll-mt-16 bg-white">
+        <div class="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+            <div class="mx-auto max-w-2xl text-center">
+                <h2 class="font-tertiary text-4xl font-bold tracking-tight text-neutral-900">{{ __('From brief to sign-off in four steps') }}</h2>
+            </div>
+            <ol class="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
+                @foreach ($steps as [$title, $text])
+                    <li class="relative text-center">
+                        <div class="flex items-center justify-center">
+                            <span class="relative z-10 flex h-12 w-12 items-center justify-center rounded-full bg-teal-600 font-secondary text-lg font-bold text-white">{{ $loop->iteration }}</span>
+                        </div>
+                        @unless ($loop->last)
+                            {{-- Connector to the next step: only when the four steps sit in one row --}}
+                            <span aria-hidden="true" class="absolute left-[calc(50%+2rem)] top-6 hidden h-0.5 w-[calc(100%-2.5rem)] bg-teal-200 lg:block"></span>
+                        @endunless
+                        <h3 class="mt-5 font-tertiary text-lg font-semibold text-neutral-900">{{ $title }}</h3>
+                        <p class="mt-2 text-sm leading-relaxed text-neutral-600">{{ $text }}</p>
+                    </li>
+                @endforeach
+            </ol>
+            <p class="mt-12 text-center"><a href="{{ route('jobs.index') }}" class="font-medium text-teal-700 underline-offset-4 hover:underline">{{ __('Learn more about how it works') }}<span aria-hidden="true"> →</span></a></p>
+        </div>
+    </section>
 
-</html>
+    <!-- Models marketplace teaser -->
+    <section id="models" class="scroll-mt-16 bg-paper">
+        <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:px-8 lg:py-24">
+            <div class="max-w-2xl">
+                <p class="inline-flex items-center rounded-full bg-teal-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-teal-800">{{ __('Coming soon') }}</p>
+                <h2 class="mt-4 font-tertiary text-4xl font-bold tracking-tight text-neutral-900">{{ __('A marketplace for 3D models') }}</h2>
+                <p class="mt-4 text-lg leading-relaxed text-neutral-600">
+                    {{ __('Soon you will be able to sell your own 3D models and buy ready-made assets, with licensed downloads and payouts, all on the account you already use for projects. Members hear first.') }}
+                </p>
+                <div class="mt-7"><x-btn variant="secondary" href="{{ route('register') }}">{{ __('Create your account') }}</x-btn></div>
+            </div>
+            <ul class="flex flex-wrap gap-2 lg:max-w-[16rem] lg:justify-end" aria-label="{{ __('Model formats') }}">
+                @foreach (['FBX', 'OBJ', 'GLB', 'BLEND', 'MAX', 'USDZ'] as $format)
+                    <li class="rounded-lg border border-neutral-200 bg-white px-3.5 py-2 font-mono text-sm font-semibold text-neutral-600">{{ $format }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </section>
+
+    <!-- Final call to action -->
+    <section class="bg-white">
+        <div class="mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:py-24">
+            <h2 class="font-tertiary text-4xl font-bold tracking-tight text-neutral-900">{{ __('Ready to get started?') }}</h2>
+            <p class="mx-auto mt-4 max-w-xl text-lg text-neutral-600">{{ __('Create a free account, then post your first project or send your first offer.') }}</p>
+            <div class="mt-9 flex flex-wrap justify-center gap-3">
+                <x-btn size="lg" href="{{ route('register') }}">{{ __('Join free') }}</x-btn>
+                <x-btn size="lg" variant="secondary" href="{{ route('login') }}">{{ __('Sign in') }}</x-btn>
+            </div>
+        </div>
+    </section>
+</x-site-layout>
