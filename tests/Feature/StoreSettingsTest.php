@@ -23,8 +23,7 @@ beforeEach(function () {
 
     $this->seller = User::factory()->create(['name' => 'Kevin Mwangi', 'email' => 'kevin.private@example.test']);
     $this->store = SellerProfile::factory()->approved()->create(['user_id' => $this->seller->id, 'display_name' => 'Kevin 3D Studio']);
-    $this->reviewer = User::factory()->create();
-    $this->reviewer->assignRole('admin');
+    $this->reviewer = staffWith('Marketplace moderator');
 });
 
 function storeDetails(array $overrides = []): array
@@ -178,7 +177,7 @@ it('shows the picker, with no file upload, on the store settings page', function
 });
 
 it('has no logo upload or logo removal for reviewers any more', function () {
-    $this->actingAs($this->reviewer)->get(route('admin.sellers.index', ['status' => 'approved']))->assertOk()
+    $this->actingAs($this->reviewer, 'staff')->get(route('admin.sellers.index', ['status' => 'approved']))->assertOk()
         ->assertSee('Kevin 3D Studio')->assertSee($this->store->avatarUrl(), false)->assertDontSee('Remove logo');
 
     expect(Route::has('admin.sellers.remove-logo'))->toBeFalse();

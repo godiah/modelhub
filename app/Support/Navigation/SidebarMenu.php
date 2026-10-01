@@ -25,7 +25,7 @@ final class SidebarMenu
             $items = [];
 
             foreach ($group['items'] as $item) {
-                if (($item['hidden'] ?? false) || (isset($item['can']) && ! $user->can($item['can'])) || (($item['seller'] ?? false) && ! $user->isApprovedSeller()) || (($item['notSeller'] ?? false) && $user->isApprovedSeller())) {
+                if (($item['hidden'] ?? false) || (($item['seller'] ?? false) && ! $user->isApprovedSeller()) || (($item['notSeller'] ?? false) && $user->isApprovedSeller())) {
                     continue;
                 }
 
@@ -159,16 +159,6 @@ final class SidebarMenu
                     ['label' => 'Post a project', 'route' => 'jobs.create', 'icon' => 'plus', 'match' => ['jobs.create']],
                     ['label' => 'Posted projects', 'route' => 'my-jobs.index', 'icon' => 'briefcase', 'match' => ['my-jobs.index', 'my-jobs.applications.*', 'my-jobs.archived.*', 'jobs.show', 'jobs.edit']],
                     ['label' => 'Engagements', 'route' => 'engagements.index', 'icon' => 'chat-bubble-left-right', 'match' => ['engagements.*'], 'except' => ['engagements.policy']],
-                ],
-            ],
-            [
-                'label' => 'Administration',
-                'items' => [
-                    ['label' => 'Disputed engagements', 'route' => 'admin.disputes.index', 'icon' => 'shield-check', 'match' => ['admin.disputes.*'], 'can' => 'view disputes'],
-                    ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'clipboard-check', 'match' => ['admin.models.*'], 'can' => 'review models'],
-                    ['label' => 'Review moderation', 'route' => 'admin.reviews.index', 'icon' => 'flag', 'match' => ['admin.reviews.*'], 'can' => 'moderate reviews'],
-                    ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'clipboard-list', 'match' => ['admin.sellers.*'], 'can' => 'review sellers'],
-                    ['label' => 'Staff roles', 'route' => 'admin.staff.index', 'icon' => 'users', 'match' => ['admin.staff.*'], 'can' => 'manage users'],
                 ],
             ],
             // Reachable pages that are not sidebar entries (profile lives in the user menu, the policy in the

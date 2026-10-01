@@ -42,24 +42,16 @@ it('renders the same public pages inside the sidebar shell when signed in, and t
         ->assertSee(SIDEBAR_MARKER, false);
 });
 
-it('hides the administration group from regular users', function () {
+it('never shows staff tools in the member app, whoever the member is', function () {
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertDontSee('Administration')
-        ->assertDontSee('Staff roles');
-});
+        ->assertDontSee('Administration')->assertDontSee('Staff roles')->assertDontSee('Disputed engagements')->assertDontSee('/admin');
 
-it('shows the administration group to staff according to their permissions', function () {
-    $support = User::factory()->create();
-    $support->assignRole('support');
-
-    $admin = User::factory()->create();
-    $admin->assignRole('admin');
-
-    $this->actingAs($support)->get(route('dashboard'))->assertOk()->assertSee('Administration')->assertSee('Disputed engagements');
-
-    $this->actingAs($admin)->get(route('dashboard'))->assertOk()->assertSee('Administration')->assertSee('Staff roles');
+    // A member who is also staff has two accounts: the staff one does not appear in the member app
+    $staff = staffWith('Super admin');
+    $member = User::factory()->create(['email' => $staff->email]);
+    $this->actingAs($member)->get(route('dashboard'))->assertOk()->assertDontSee('Administration')->assertDontSee(route('admin.dashboard'), false);
 });
 
 it('marks exactly the matching sidebar item active; unlisted pages light up nothing', function () {
@@ -173,11 +165,10 @@ it('swaps "Sell models" for My models and My store once a member is an approved 
 });
 
 it('gives every sidebar entry its own icon', function () {
-    $admin = User::factory()->create();
-    $admin->assignRole('admin');
-    SellerProfile::factory()->approved()->create(['user_id' => $admin->id]);
+    $seller = User::factory()->create();
+    SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
 
-    $icons = collect(SidebarMenu::for($admin))->flatMap->items->pluck('icon');
+    $icons = collect(SidebarMenu::for($seller))->flatMap->items->pluck('icon');
 
     expect($icons->duplicates()->all())->toBe([]);
 });
@@ -234,12 +225,11 @@ it('logs a member out from the account menu', function () {
 });
 
 it('does not repeat the page name in the breadcrumb on pages that are menu entries themselves', function () {
-    $admin = User::factory()->create();
-    $admin->assignRole('admin');
-    SellerProfile::factory()->approved()->create(['user_id' => $admin->id]);
-    $this->actingAs($admin);
+    $seller = User::factory()->create();
+    SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
+    $this->actingAs($seller);
 
-    foreach (['admin.disputes.index', 'admin.models.index', 'admin.sellers.index', 'admin.reviews.index', 'seller.models.index', 'engagements.policy', 'legal.terms', 'legal.privacy'] as $route) {
+    foreach (['seller.models.index', 'engagements.policy', 'legal.terms', 'legal.privacy'] as $route) {
         $html = $this->get(route($route))->assertOk()->getContent();
         preg_match('/<nav aria-label="Breadcrumb".*?<\/nav>/s', $html, $nav);
         $labels = collect(preg_split('/\s*\n\s*/', trim(strip_tags($nav[0] ?? ''))))->filter(fn ($l) => $l !== '' && $l !== '/')->values();

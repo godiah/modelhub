@@ -144,7 +144,9 @@ it('marks everything read', function () {
 
 it('assigns every notification class to a real category, not Other', function () {
     $classes = collect(glob(app_path('Notifications/*.php')))
-        ->map(fn ($path) => 'App\\Notifications\\'.basename($path, '.php'));
+        ->map(fn ($path) => 'App\\Notifications\\'.basename($path, '.php'))
+        // Only notifications that are stored and shown in the app have a presenter; mail-only ones (staff password links) are not listed here
+        ->filter(fn ($class) => method_exists($class, 'present'));
 
     expect($classes)->not->toBeEmpty();
 

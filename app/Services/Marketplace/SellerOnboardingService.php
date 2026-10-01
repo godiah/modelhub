@@ -4,6 +4,7 @@ namespace App\Services\Marketplace;
 
 use App\Enums\SellerStatus;
 use App\Models\SellerProfile;
+use App\Models\Staff;
 use App\Models\User;
 use App\Notifications\SellerApplicationSubmittedNotification;
 use App\Notifications\SellerReviewedNotification;
@@ -49,7 +50,7 @@ class SellerOnboardingService
         $profile = $existing ? tap($existing)->update($fields) : $user->sellerProfile()->create($fields);
 
         $profile->load('user');
-        User::permission('review sellers')->get()->each->notify(new SellerApplicationSubmittedNotification($profile));
+        Staff::permission('review sellers')->where('is_active', true)->get()->each->notify(new SellerApplicationSubmittedNotification($profile));
 
         return null;
     }
@@ -58,7 +59,7 @@ class SellerOnboardingService
      * Record a reviewer's decision. Returns why it is not allowed, or null once done.
      * approve: from pending, rejected or suspended (reinstating); reject: from pending; suspend: from approved.
      */
-    public function review(SellerProfile $seller, User $reviewer, string $decision, ?string $notes): ?string
+    public function review(SellerProfile $seller, Staff $reviewer, string $decision, ?string $notes): ?string
     {
         $outcome = null;
 

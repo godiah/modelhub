@@ -4,7 +4,7 @@ namespace App\Services\Marketplace;
 
 use App\Enums\ProductStatus;
 use App\Models\Product;
-use App\Models\User;
+use App\Models\Staff;
 use App\Notifications\ProductReviewedNotification;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +15,7 @@ class ProductReviewService
      * publish: from in review; reject: from in review (asks for changes); takedown: from published.
      * Returns why it is not allowed, or null once done.
      */
-    public function review(Product $product, User $reviewer, string $decision, ?string $notes): ?string
+    public function review(Product $product, Staff $reviewer, string $decision, ?string $notes): ?string
     {
         $outcome = null;
 

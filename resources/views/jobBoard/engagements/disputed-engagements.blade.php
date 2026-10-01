@@ -17,14 +17,6 @@
     $paymentTone = ['pending' => 'amber', 'accepted' => 'green', 'disputed' => 'red', 'finalized' => 'blue'];
 @endphp
 <x-app-layout :crumb="__('Dispute') . ' · ' . $job->title">
-    <x-slot name="toolbar">
-        @can('view disputes')
-            <x-btn variant="secondary" size="sm" href="{{ route('admin.disputes.index') }}">
-                <x-icon name="scale" class="h-4 w-4" />
-                {{ __('Disputed engagements') }}
-            </x-btn>
-        @endcan
-    </x-slot>
 
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <!-- Header -->
@@ -112,28 +104,6 @@
                             </dl>
                         </x-panel>
                     @endif
-
-                    <!-- Admin resolution -->
-                    @can('resolve disputes')
-                        @unless ($resolved)
-                            <x-panel :title="__('Resolve this dispute')" :description="__('Only administrators see this. The decision is final and notifies both parties.')">
-                                <form action="{{ route('admin.disputes.resolve', $dispute->id) }}" method="POST" class="space-y-5">
-                                    @csrf
-                                    <x-field type="textarea" name="resolution_notes" error="resolution_notes" rows="4" required
-                                        :label="__('Resolution notes')"
-                                        :hint="__('Explain the decision and any actions taken.')">{{ old('resolution_notes') }}</x-field>
-                                    <x-field type="number" name="resolution_amount" error="resolution_amount" step="0.01" min="0"
-                                        :label="__('Final resolution amount (:currency, optional)', ['currency' => config('app.currency_symbol')])"
-                                        :hint="__('Leave blank if no monetary resolution is required.')"
-                                        value="{{ old('resolution_amount') }}" />
-                                    <x-btn type="submit">
-                                        <x-icon name="check-circle" class="h-4 w-4" />
-                                        {{ __('Finalise resolution') }}
-                                    </x-btn>
-                                </form>
-                            </x-panel>
-                        @endunless
-                    @endcan
                 </div>
 
                 <div class="space-y-6">
@@ -158,7 +128,7 @@
                                     <p class="border-t border-neutral-100 pt-3 text-xs text-tertiary">
                                         {{ __('Resolved :date', ['date' => $dispute->resolved_at->format('M j, Y · g:i A')]) }}
                                         @if ($dispute->resolvedBy)
-                                            {{ __('by :name', ['name' => $dispute->resolvedBy->name]) }}
+                                            {{ __('by ModelHub support') }}
                                         @endif
                                     </p>
                                 @endif
@@ -166,7 +136,7 @@
                         @else
                             <div class="flex items-start gap-3 text-sm text-neutral-700">
                                 <span class="mt-1.5 h-2 w-2 shrink-0 animate-pulse rounded-full bg-amber-500" aria-hidden="true"></span>
-                                <p>{{ __('An administrator is reviewing this dispute. The engagement is frozen and the disputed amount stays in escrow until a decision is made.') }}</p>
+                                <p>{{ __('ModelHub support is reviewing this dispute. The engagement is frozen and the disputed amount stays in escrow until a decision is made.') }}</p>
                             </div>
                         @endif
                     </x-panel>

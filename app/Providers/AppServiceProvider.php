@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Helpers\EmailCssInlinerHelper;
 use App\Models\JobApplication;
+use App\Models\Staff;
 use App\Observers\JobApplicationObserver;
 use App\Support\Mail\BrandedMail;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -13,6 +14,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -31,6 +33,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         JobApplication::observe(JobApplicationObserver::class);
+
+        // Super admins pass every permission check, including permissions added after the role was last synced
+        Gate::before(fn ($user) => $user instanceof Staff && $user->isSuperAdmin() ? true : null);
 
         // No API Resource in this app wraps intentionally in a "data" envelope -
         // keep JSON responses flat to match what existing frontend JS (e.g.

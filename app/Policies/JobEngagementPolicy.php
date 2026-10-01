@@ -21,10 +21,9 @@ class JobEngagementPolicy
 
     public function view(User $user, JobEngagement $engagement)
     {
-        // User can view if they are the poster or applicant, or staff reviewing disputes
+        // Only the two people on the engagement. Staff work disputes in the staff portal, not through member pages.
         return $user->id === $engagement->application->poster_id ||
-            $user->id === $engagement->application->applicant_id ||
-            $user->can('view disputes');
+            $user->id === $engagement->application->applicant_id;
     }
 
     /**

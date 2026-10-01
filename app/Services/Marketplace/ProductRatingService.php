@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\ReviewReport;
 use App\Models\SellerProfile;
+use App\Models\Staff;
 use App\Models\User;
 use App\Notifications\ModelReviewedNotification;
 use App\Notifications\ModelReviewHiddenNotification;
@@ -105,7 +106,7 @@ class ProductRatingService
     }
 
     /** A reviewer hides a review (it drops out of the rating) with a reason the author is shown. */
-    public function hide(ProductReview $review, User $moderator, string $reason): ?string
+    public function hide(ProductReview $review, Staff $moderator, string $reason): ?string
     {
         if (! $review->isVisible()) {
             return 'That review is already hidden.';
@@ -135,12 +136,12 @@ class ProductRatingService
     }
 
     /** Close the open reports on a review without hiding it. */
-    public function dismissReports(ProductReview $review, User $moderator): void
+    public function dismissReports(ProductReview $review, Staff $moderator): void
     {
         $this->resolveReports($review, $moderator);
     }
 
-    private function resolveReports(ProductReview $review, User $moderator): void
+    private function resolveReports(ProductReview $review, Staff $moderator): void
     {
         $review->reports()->where('status', 'open')->update(['status' => 'resolved', 'resolved_by' => $moderator->id, 'resolved_at' => now()]);
     }

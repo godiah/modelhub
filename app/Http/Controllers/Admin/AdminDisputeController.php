@@ -9,8 +9,10 @@ use App\Http\Requests\Dispute\ResolveDisputeRequest;
 use App\Models\JobCancellation;
 use App\Models\JobPaymentDispute;
 use App\Services\Payments\PartialPaymentService;
+use App\Support\Staff\StaffAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 /** The queue of payment disputes between clients and freelancers. Permissions: view disputes, resolve disputes (see routes/web.php). */
 class AdminDisputeController extends Controller
@@ -50,13 +52,33 @@ class AdminDisputeController extends Controller
         ]);
     }
 
-    /**
-     * Notifications sent before the dispute page had its own address linked to /admin/disputes/{cancellation id}.
-     * Keep those links working by sending staff to the dispute itself.
-     */
+    /** One dispute, with everything staff need to decide it. Linked from the queue and from new-dispute notifications. */
     public function show(JobCancellation $cancellation)
     {
-        return redirect()->route('engagements.show-disputed', $cancellation->engagement_id);
+        $dispute = $cancellation->dispute()->with([
+            'disputedBy:id,name,email,avatar',
+            'assignedAdmin:id,name',
+            'resolvedBy:id,name',
+            'cancellation.initiator:id,name,email,avatar',
+            'cancellation.engagement.application.job:id,title,slug',
+            'cancellation.engagement.application.poster:id,name,email,avatar',
+            'cancellation.engagement.application.applicant:id,name,email,avatar',
+            'cancellation.engagement.deliverables:id,engagement_id,status',
+            'partialPayment.processor:id,name',
+            'partialPayment.finalizer:id,name',
+        ])->firstOrFail();
+
+        return view('admin.disputes.show', ['dispute' => $dispute]);
+    }
+
+    /** Staff open the files the filing party attached. Private disk: never a public URL. */
+    public function evidence(JobPaymentDispute $dispute, int $index)
+    {
+        $path = $dispute->supporting_evidence[$index] ?? null;
+
+        abort_unless($path && Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->download($path);
     }
 
     public function assign(JobPaymentDispute $dispute)
@@ -66,6 +88,7 @@ class AdminDisputeController extends Controller
         }
 
         $dispute->assignAdmin(Auth::id());
+        StaffAudit::log('dispute.assigned', 'Took on dispute #'.$dispute->id, $dispute);
 
         return back()->with(FlashAlertHelper::success('Dispute assigned to you', 'It is now under review.'));
     }
@@ -78,6 +101,7 @@ class AdminDisputeController extends Controller
                 $request->input('resolution_notes'),
                 $request->input('resolution_amount')
             );
+            StaffAudit::log('dispute.resolved', 'Resolved dispute #'.$dispute->id, $dispute, ['amount' => $request->input('resolution_amount')]);
 
             return back()->with(FlashAlertHelper::success('Dispute resolved'));
         } catch (\Exception $e) {

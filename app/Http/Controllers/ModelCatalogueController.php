@@ -43,7 +43,8 @@ class ModelCatalogueController extends Controller
     {
         // Only published models are public; the owner and reviewers can preview their own state.
         $viewer = $request->user();
-        $canPreview = $viewer && ($viewer->id === $product->user_id || $viewer->can('review models'));
+        // The owner, and staff who review models (signed in to the staff portal), can see a model before it is published
+        $canPreview = ($viewer && $viewer->id === $product->user_id) || auth('staff')->user()?->can('review models');
         $isLive = Product::published()->whereKey($product->id)->exists();
         abort_unless($isLive || $canPreview, 404);
 

@@ -7,7 +7,7 @@
     $user = auth()->user();
     $isPoster = $user->id === $application->poster_id;
     $isApplicant = $user->id === $application->applicant_id;
-    $canProcessAsClient = $isPoster || $user->hasRole('admin');
+    $canProcessAsClient = $isPoster;
     $toReview = $engagement->deliverables->where('status', 'submitted');
     $approved = $engagement->getCompletedDeliverablesCount();
     $total = $engagement->getTotalDeliverablesCount();

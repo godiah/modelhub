@@ -28,8 +28,7 @@ beforeEach(function () {
     $this->seller = User::factory()->create(['name' => 'Kevin Mwangi']);
     SellerProfile::factory()->approved()->create(['user_id' => $this->seller->id, 'display_name' => 'Kevin 3D Studio']);
 
-    $this->reviewer = User::factory()->create();
-    $this->reviewer->assignRole('admin');
+    $this->reviewer = staffWith('Marketplace moderator');
 
     $this->leaf = Category::where('slug', 'furniture-chair')->first();
     $this->actingAs($this->seller);

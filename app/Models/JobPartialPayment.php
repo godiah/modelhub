@@ -54,7 +54,7 @@ class JobPartialPayment extends Model
      */
     public function finalizer()
     {
-        return $this->belongsTo(User::class, 'finalized_by');
+        return $this->belongsTo(Staff::class, 'finalized_by');
     }
 
     /**

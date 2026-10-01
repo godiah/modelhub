@@ -79,7 +79,7 @@ class SellerProfile extends Model
 
     public function reviewer()
     {
-        return $this->belongsTo(User::class, 'reviewed_by');
+        return $this->belongsTo(Staff::class, 'reviewed_by');
     }
 
     public function isApproved(): bool

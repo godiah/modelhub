@@ -19,8 +19,8 @@ beforeEach(function () {
     Notification::fake();
 
     $this->member = User::factory()->create(['name' => 'Kevin Mwangi']);
-    $this->admin = User::factory()->create(['name' => 'Rita Reviewer']);
-    $this->admin->assignRole('admin');
+    $this->admin = staffWith('Marketplace moderator');
+    $this->admin->update(['name' => 'Rita Reviewer']);
 });
 
 function sellerApplication(array $overrides = []): array
@@ -138,9 +138,10 @@ it('adds Sell models to the sidebar', function () {
 
 /** ---------------------------------------------------------------- the reviewer's side */
 it('keeps the review queue for staff with the permission', function () {
-    $this->get(route('admin.sellers.index'))->assertRedirect(route('login'));
-    $this->actingAs($this->member)->get(route('admin.sellers.index'))->assertForbidden();
-    $this->actingAs($this->admin)->get(route('admin.sellers.index'))->assertOk();
+    $this->get(route('admin.sellers.index'))->assertRedirect(route('admin.login'));
+    $this->actingAs($this->member)->get(route('admin.sellers.index'))->assertRedirect(route('admin.login'));
+    $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.sellers.index'))->assertForbidden();
+    $this->actingAs($this->admin, 'staff')->get(route('admin.sellers.index'))->assertOk();
 });
 
 it('lists applications with status counts, pending first, and filters them', function () {
@@ -148,7 +149,7 @@ it('lists applications with status counts, pending first, and filters them', fun
     SellerProfile::factory()->approved()->create(['display_name' => 'Approved Studio']);
     SellerProfile::factory()->rejected()->create(['display_name' => 'Rejected Studio']);
 
-    $this->actingAs($this->admin)->get(route('admin.sellers.index'))
+    $this->actingAs($this->admin, 'staff')->get(route('admin.sellers.index'))
         ->assertOk()
         ->assertSee('Pending Studio')
         ->assertSee('Bio of the pending studio')
@@ -163,7 +164,7 @@ it('lists applications with status counts, pending first, and filters them', fun
 it('approves a pending application and tells the member', function () {
     $seller = SellerProfile::factory()->create(['user_id' => $this->member->id]);
 
-    $this->actingAs($this->admin)->patch(route('admin.sellers.review', [$seller, 'approve']))->assertRedirect();
+    $this->actingAs($this->admin, 'staff')->patch(route('admin.sellers.review', [$seller, 'approve']))->assertRedirect();
 
     $seller->refresh();
     expect($seller->status)->toBe(SellerStatus::Approved)
@@ -174,7 +175,7 @@ it('approves a pending application and tells the member', function () {
 
 it('rejects with a required reason that the member can read', function () {
     $seller = SellerProfile::factory()->create(['user_id' => $this->member->id]);
-    $this->actingAs($this->admin);
+    $this->actingAs($this->admin, 'staff');
 
     $this->patch(route('admin.sellers.review', [$seller, 'reject']))->assertRedirect()->assertSessionHas('error');
     expect($seller->fresh()->status)->toBe(SellerStatus::Pending);
@@ -186,7 +187,7 @@ it('rejects with a required reason that the member can read', function () {
 
 it('suspends an approved seller with a reason and can reinstate them', function () {
     $seller = SellerProfile::factory()->approved()->create(['user_id' => $this->member->id]);
-    $this->actingAs($this->admin);
+    $this->actingAs($this->admin, 'staff');
 
     $this->patch(route('admin.sellers.review', [$seller, 'suspend']))->assertSessionHas('error');
     expect($seller->fresh()->status)->toBe(SellerStatus::Approved);
@@ -201,7 +202,7 @@ it('suspends an approved seller with a reason and can reinstate them', function 
 
 it('refuses decisions that do not fit the current state', function () {
     $approved = SellerProfile::factory()->approved()->create();
-    $this->actingAs($this->admin);
+    $this->actingAs($this->admin, 'staff');
 
     $this->patch(route('admin.sellers.review', [$approved, 'reject']), ['notes' => 'Changed my mind'])->assertSessionHas('error');
     $this->patch(route('admin.sellers.review', [$approved, 'approve']))->assertSessionHas('error');
@@ -213,13 +214,15 @@ it('refuses decisions that do not fit the current state', function () {
 it('does not let ordinary members review sellers', function () {
     $seller = SellerProfile::factory()->create();
 
-    $this->actingAs($this->member)->patch(route('admin.sellers.review', [$seller, 'approve']))->assertForbidden();
+    $this->actingAs($this->member)->patch(route('admin.sellers.review', [$seller, 'approve']))->assertRedirect(route('admin.login'));
+    $this->actingAs(staffWith('Support'), 'staff')->patch(route('admin.sellers.review', [$seller, 'approve']))->assertForbidden();
 
     expect($seller->fresh()->status)->toBe(SellerStatus::Pending);
 });
 
-it('shows reviewers the Seller applications entry only if they hold the permission', function () {
-    $this->actingAs($this->admin)->get(route('dashboard'))->assertOk()->assertSee(route('admin.sellers.index'), false);
+it('shows reviewers the Seller applications entry only if they hold the permission, and never in the member app', function () {
+    $this->actingAs($this->admin, 'staff')->get(route('admin.dashboard'))->assertOk()->assertSee(route('admin.sellers.index'), false);
+    $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.dashboard'))->assertOk()->assertDontSee(route('admin.sellers.index'), false);
     $this->actingAs($this->member)->get(route('dashboard'))->assertOk()->assertDontSee(route('admin.sellers.index'), false);
 });
 
