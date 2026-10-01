@@ -1,6 +1,20 @@
 <?php
 
+use App\Enums\DisputeStatus;
+use App\Enums\EngagementStatus;
+use App\Models\JobApplication;
+use App\Models\JobCancellation;
+use App\Models\JobEngagement;
+use App\Models\JobPaymentDispute;
+use App\Models\ProductReview;
+use App\Models\ReviewReport;
+use App\Models\Staff;
+use App\Models\User;
+use App\Support\Auth\Totp;
+use App\Support\Settings\PlatformSettings;
+use App\Support\Staff\StaffAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Tests\TestCase;
 
 /*
@@ -49,12 +63,6 @@ function something()
     // ..
 }
 
-use App\Models\Staff;
-use App\Models\User;
-use App\Support\Auth\Totp;
-use App\Support\Settings\PlatformSettings;
-use App\Support\Staff\StaffAccess;
-
 /**
  * A staff member holding the given roles (names from StaffAccess, e.g. 'Super admin', 'Support', 'Dispute manager').
  * Staff are not members: act as one with `$this->actingAs(staffWith('Support'), 'staff')`, or just `actingAsStaff('Support')`.
@@ -91,4 +99,51 @@ function authenticatorFor(User|Staff $account): string
     $account->forceFill(['two_factor_last_step' => null])->save();
 
     return $account->two_factor_secret;
+}
+
+function openReport(?ProductReview $review = null, ?Carbon $at = null): ProductReview
+{
+    $review ??= ProductReview::factory()->create();
+    $report = ReviewReport::create(['review_id' => $review->id, 'user_id' => User::factory()->create()->id, 'reason' => 'spam', 'status' => 'open']);
+    if ($at) {
+        $report->forceFill(['created_at' => $at])->save();
+    }
+
+    return $review;
+}
+
+function makeDisputedEngagement(float $netAmount = 1000): array
+{
+    $application = JobApplication::factory()->hired()->create(['net_amount' => $netAmount]);
+
+    $engagement = JobEngagement::create([
+        'application_id' => $application->id,
+        'status' => EngagementStatus::Disputed,
+        'agreed_amount' => $application->offer_amount,
+        'service_fee' => $application->service_fee,
+        'net_amount' => $netAmount,
+    ]);
+
+    // A real dispute is always preceded by a processed partial payment, which already set
+    // partial_payment_amount on the cancellation — mirror that here so resolveDispute()'s
+    // null-$finalAmount fallback (partial_payment_amount) has a real value to fall back to.
+    $cancellation = JobCancellation::create([
+        'engagement_id' => $engagement->id,
+        'initiator_id' => $application->applicant_id,
+        'cancellation_type' => 'dispute',
+        'reason_category' => 'other',
+        'reason_details' => 'test reason',
+        'partial_payment_amount' => $netAmount * 0.5,
+        'is_dispute' => true,
+    ]);
+
+    $dispute = JobPaymentDispute::create([
+        'cancellation_id' => $cancellation->id,
+        'disputed_by' => $application->applicant_id,
+        'dispute_reason' => 'incorrect_amount',
+        'dispute_details' => 'test details',
+        'status' => DisputeStatus::Pending,
+    ]);
+
+    return compact('application', 'engagement', 'cancellation', 'dispute');
 }

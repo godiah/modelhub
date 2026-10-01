@@ -3,6 +3,11 @@
     $tones = ['pending' => 'amber', 'under_review' => 'blue', 'resolved' => 'green'];
     $canResolve = auth()->user()->can('resolve disputes');
 @endphp
+@php
+    $eligible = $disputes->filter(fn ($d) => ! $d->isResolved() && ! $d->admin_assigned);
+    $actions = $eligible->isNotEmpty() ? \App\Support\Staff\BulkActions::forPage('disputes', auth()->user()) : [];
+    $bulkIds = $eligible->pluck('id')->all();
+@endphp
 <x-staff-layout title="Disputed engagements">
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <x-staff.header :title="__('Disputed engagements')">{{ __('Freelancers dispute a payment decision after a project is cancelled. Take one on, read both sides and the evidence, then settle it with a final amount. The dispute that has waited longest is at the top.') }}</x-staff.header>
@@ -34,6 +39,8 @@
                 default => __('No payment disputes have been filed.'),
             }" />
         @else
+            <x-staff.bulk :actions="$actions" :ids="$bulkIds">
+            @if ($actions)<x-staff.bulk-selectall />@endif
             <div class="space-y-4">
                 @foreach ($disputes as $dispute)
                     @php
@@ -45,7 +52,9 @@
                         $waitingDays = $resolved ? 0 : (int) $dispute->created_at->diffInDays(now());
                         $openUrl = route('admin.disputes.show', $dispute->cancellation_id);
                     @endphp
-                    <article class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+                    <div class="flex items-start gap-3">
+                    @if ($actions && ! $resolved && ! $dispute->admin_assigned)<div class="pt-6"><x-staff.bulk-check :value="$dispute->id" :label="__('Select dispute #:id', ['id' => $dispute->id])" /></div>@elseif ($actions)<div class="w-4 shrink-0"></div>@endif
+                    <article class="min-w-0 flex-1 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
@@ -103,8 +112,10 @@
                             @endif
                         </p>
                     </article>
+                    </div>
                 @endforeach
             </div>
+            </x-staff.bulk>
             <x-pager :paginator="$disputes" />
         @endif
     </div>

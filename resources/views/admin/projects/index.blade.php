@@ -10,6 +10,7 @@
         ['key' => 'deadline', 'label' => 'Deadline', 'sort' => 'deadline', 'class' => 'hidden md:table-cell'],
         ['key' => 'posted', 'label' => 'Posted', 'sort' => 'posted', 'first' => 'desc', 'align' => 'right', 'class' => 'hidden lg:table-cell'],
     ];
+    $actions = \App\Support\Staff\BulkActions::forPage('projects', auth()->user());
 @endphp
 <x-staff-layout :title="__('Projects')">
     <div class="container mx-auto max-w-7xl px-4 py-8">
@@ -22,10 +23,11 @@
                 @if ($filtered)<x-btn variant="secondary" :href="route('admin.projects.index')" wire:navigate>{{ __('Clear filters') }}</x-btn>@endif
             </x-empty-state>
         @else
-            <x-staff.table :columns="$columns" :sort="$sort" :dir="$dir" :paginator="$projects" :summary="trans_choice(':count project|:count projects', $projects->total(), ['count' => number_format($projects->total())])">
+            <x-staff.bulk :actions="$actions" :ids="$projects->pluck('id')->all()">
+            <x-staff.table :selectable="$actions !== []" :columns="$columns" :sort="$sort" :dir="$dir" :paginator="$projects" :summary="trans_choice(':count project|:count projects', $projects->total(), ['count' => number_format($projects->total())])">
                 @foreach ($projects as $project)
                     @php [$stateLabel, $stateTone] = ProjectDirectoryService::state($project); @endphp
-                    <x-staff.row :href="route('admin.projects.show', $project)">
+                    <x-staff.row :href="route('admin.projects.show', $project)" :select="$actions ? $project->id : null">
                         <td class="px-4">
                             <a href="{{ route('admin.projects.show', $project) }}" wire:navigate class="block focus:outline-none focus-visible:underline">
                                 <span class="flex flex-wrap items-center gap-2 font-semibold text-neutral-900">{{ $project->title }}<x-badge :tone="$stateTone" class="px-2 py-0.5 text-xs font-medium">{{ __($stateLabel) }}</x-badge></span>
@@ -39,6 +41,7 @@
                     </x-staff.row>
                 @endforeach
             </x-staff.table>
+            </x-staff.bulk>
         @endif
     </div>
 </x-staff-layout>

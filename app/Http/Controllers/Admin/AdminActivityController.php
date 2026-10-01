@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class AdminActivityController extends Controller
 {
     /** The areas the log can be narrowed to: the part of an action before its dot. */
-    public const AREAS = ['model' => 'Models', 'seller' => 'Sellers', 'review' => 'Reviews', 'dispute' => 'Disputes', 'staff' => 'Staff accounts', 'role' => 'Roles', 'settings' => 'Settings'];
+    public const AREAS = ['model' => 'Models', 'seller' => 'Sellers', 'review' => 'Reviews', 'dispute' => 'Disputes', 'staff' => 'Staff accounts', 'role' => 'Roles', 'settings' => 'Settings', 'bulk' => 'Bulk actions'];
 
     public function index(Request $request)
     {

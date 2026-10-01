@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminAccountController;
 use App\Http\Controllers\Admin\AdminActivityController;
+use App\Http\Controllers\Admin\AdminBulkController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminDisputeController;
 use App\Http\Controllers\Admin\AdminEngagementController;
@@ -64,6 +65,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('recovery-codes', [AuthenticatorController::class, 'recoveryCodes'])->middleware('throttle:10,1')->name('recovery');
             Route::delete('/', [AuthenticatorController::class, 'destroy'])->middleware('throttle:10,1')->name('destroy');
         });
+        // Bulk actions from the lists; the permission for each action is checked inside
+        Route::post('bulk/{action}', AdminBulkController::class)->where('action', '[a-z]+\.[a-z]+')->middleware('throttle:30,1')->name('bulk');
         Route::get('search', AdminSearchController::class)->middleware('throttle:60,1')->name('search');
         Route::get('notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('notifications/read', [AdminNotificationController::class, 'readAll'])->name('notifications.read-all');

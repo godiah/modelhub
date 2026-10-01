@@ -12,7 +12,6 @@ use App\Models\User;
 use App\Models\WishlistItem;
 use App\Services\Admin\StaffDashboardService;
 use App\Support\Staff\StaffAudit;
-use Illuminate\Support\Carbon;
 
 /*
  * The staff dashboard: what needs the person, their own work, then the platform, each block built only from the permissions
@@ -22,17 +21,6 @@ use Illuminate\Support\Carbon;
 function dashboardFor(Staff $staff)
 {
     return test()->actingAs($staff, 'staff')->get(route('admin.dashboard'))->assertOk();
-}
-
-function openReport(?ProductReview $review = null, ?Carbon $at = null): ProductReview
-{
-    $review ??= ProductReview::factory()->create();
-    $report = ReviewReport::create(['review_id' => $review->id, 'user_id' => User::factory()->create()->id, 'reason' => 'spam', 'status' => 'open']);
-    if ($at) {
-        $report->forceFill(['created_at' => $at])->save();
-    }
-
-    return $review;
 }
 
 function publishedByApprovedSeller(array $overrides = []): Product

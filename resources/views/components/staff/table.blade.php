@@ -1,10 +1,11 @@
-@props(['columns', 'sort' => null, 'dir' => 'desc', 'summary' => null, 'paginator' => null])
+@props(['columns', 'sort' => null, 'dir' => 'desc', 'summary' => null, 'paginator' => null, 'selectable' => false])
 
 {{--
     The one staff list table: sticky header, sortable column headings, right-aligned numbers, hover rows, a density switch that
     is remembered, and the pager as its footer.
       columns — list of ['key', 'label', 'sort' => key|null, 'first' => asc|desc (direction of the first click), 'align' => left|right|center, 'class' => extra classes (e.g. 'hidden md:table-cell')]
       summary — a short line shown above the rows ("21 members")
+      selectable — adds a tick column (inside <x-staff.bulk>); rows give their id to <x-staff.row :select>
     Rows are <x-staff.row> in the slot.
 --}}
 <div x-data="{ density: 'comfortable', init() { try { this.density = localStorage.getItem('staff.density') || 'comfortable' } catch (e) {} }, set(d) { this.density = d; try { localStorage.setItem('staff.density', d) } catch (e) {} } }">
@@ -21,6 +22,11 @@
             <table class="min-w-full text-sm" :class="density === 'compact' ? '[&_td]:py-2' : '[&_td]:py-3.5'">
                 <thead class="md:sticky md:top-16 md:z-10 bg-neutral-50 text-xs uppercase tracking-wider text-neutral-500">
                     <tr>
+                        @if ($selectable)
+                            <th scope="col" class="w-10 border-b border-neutral-200 px-4 py-2.5 first:rounded-tl-xl">
+                                <input type="checkbox" :checked="all" x-effect="$el.indeterminate = some" @change="toggleAll()" aria-label="{{ __('Select all on this page') }}" class="h-4 w-4 cursor-pointer rounded border-neutral-300 text-teal-600 focus:ring-teal-600/30">
+                            </th>
+                        @endif
                         @foreach ($columns as $column)
                             @php
                                 $align = $column['align'] ?? 'left';
@@ -29,7 +35,7 @@
                                 $next = $active ? ($dir === 'asc' ? 'desc' : 'asc') : ($column['first'] ?? 'asc');
                             @endphp
                             <th scope="col" @if ($active) aria-sort="{{ $dir === 'asc' ? 'ascending' : 'descending' }}" @endif
-                                @class(['border-b border-neutral-200 px-4 py-2.5 font-semibold', 'text-left' => $align === 'left', 'text-right' => $align === 'right', 'text-center' => $align === 'center', $column['class'] ?? '', 'first:rounded-tl-xl last:rounded-tr-xl'])>
+                                @class(['border-b border-neutral-200 px-4 py-2.5 font-semibold', 'text-left' => $align === 'left', 'text-right' => $align === 'right', 'text-center' => $align === 'center', $column['class'] ?? '', 'last:rounded-tr-xl', 'first:rounded-tl-xl' => ! $selectable])>
                                 @if ($sortKey)
                                     <a href="{{ request()->fullUrlWithQuery(['sort' => $sortKey, 'dir' => $next, 'page' => null]) }}" wire:navigate class="inline-flex items-center gap-1 rounded transition-colors hover:text-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40 {{ $active ? 'text-neutral-900' : '' }}">
                                         {{ __($column['label']) }}
