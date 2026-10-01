@@ -2,6 +2,7 @@
 
 use App\Console\Commands\DeactivateExpiredJobs;
 use App\Http\Middleware\EnsureApprovedSeller;
+use App\Http\Middleware\EnsureMemberActive;
 use App\Http\Middleware\EnsureStaffActive;
 use App\Http\Middleware\ResetDefaultGuard;
 use App\Http\Middleware\VerifyJobEngagementOwnership;
@@ -25,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Set from JS by the sidebar collapse toggle; read server-side so the shell renders in the right state.
         $middleware->encryptCookies(except: ['modelhub_sidebar']);
 
-        $middleware->web(prepend: [ResetDefaultGuard::class]);
+        $middleware->web(prepend: [ResetDefaultGuard::class], append: [EnsureMemberActive::class]);
 
         $middleware->alias([
             'verify-engagement-ownership' => VerifyJobEngagementOwnership::class,

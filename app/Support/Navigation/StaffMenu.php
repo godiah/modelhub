@@ -70,6 +70,7 @@ final class StaffMenu
                 'label' => 'Overview',
                 'items' => [
                     ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'squares-2x2', 'match' => ['admin.dashboard']],
+                    ['label' => 'Platform overview', 'route' => 'admin.overview', 'icon' => 'chart-bar', 'match' => ['admin.overview'], 'can' => 'view platform overview'],
                     ['label' => 'Notifications', 'route' => 'admin.notifications.index', 'icon' => 'bell', 'match' => ['admin.notifications.*'], 'badge' => 'notifications'],
                 ],
             ],
@@ -79,6 +80,16 @@ final class StaffMenu
                     ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'clipboard-check', 'match' => ['admin.models.*'], 'can' => 'review models', 'badge' => 'models'],
                     ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'clipboard-list', 'match' => ['admin.sellers.*'], 'can' => 'review sellers', 'badge' => 'sellers'],
                     ['label' => 'Review reports', 'route' => 'admin.reviews.index', 'icon' => 'flag', 'match' => ['admin.reviews.*'], 'can' => 'moderate reviews', 'badge' => 'reports'],
+                ],
+            ],
+            [
+                'label' => 'Platform',
+                'items' => [
+                    ['label' => 'Members', 'route' => 'admin.members.index', 'icon' => 'user-group', 'match' => ['admin.members.*'], 'can' => 'view members'],
+                    ['label' => 'Projects', 'route' => 'admin.projects.index', 'icon' => 'briefcase', 'match' => ['admin.projects.*'], 'can' => 'view projects'],
+                    ['label' => 'Hires', 'route' => 'admin.engagements.index', 'icon' => 'chat-bubble-left-right', 'match' => ['admin.engagements.*'], 'can' => 'view engagements'],
+                    ['label' => 'All models', 'route' => 'admin.catalogue.index', 'icon' => 'cube', 'match' => ['admin.catalogue.*'], 'can' => 'view models'],
+                    ['label' => 'All stores', 'route' => 'admin.stores.index', 'icon' => 'tag', 'match' => ['admin.stores.*'], 'can' => 'view sellers'],
                 ],
             ],
             [

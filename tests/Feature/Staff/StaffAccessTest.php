@@ -20,19 +20,26 @@ it('creates every permission and the four default roles, with Super admin holdin
     StaffAccess::sync();
 
     expect(Permission::where('guard_name', 'staff')->pluck('name')->sort()->values()->all())->toBe(collect(StaffAccess::permissions())->sort()->values()->all());
-    expect(Role::where('guard_name', 'staff')->pluck('name')->sort()->values()->all())->toBe(['Dispute manager', 'Marketplace moderator', 'Super admin', 'Support']);
+    expect(Role::where('guard_name', 'staff')->pluck('name')->sort()->values()->all())->toBe(['Auditor', 'Dispute manager', 'Marketplace moderator', 'Platform manager', 'Super admin', 'Support']);
 
     $super = Role::findByName('Super admin', 'staff');
     expect($super->permissions)->toHaveCount(count(StaffAccess::permissions()))->and($super->description)->not->toBeEmpty();
-    expect(Role::findByName('Support', 'staff')->permissions->pluck('name')->all())->toBe(['view disputes']);
+    expect(Role::findByName('Support', 'staff')->permissions->pluck('name')->sort()->values()->all())->toBe(['view contact details', 'view disputes', 'view members']);
+    expect(Role::findByName('Auditor', 'staff')->permissions->pluck('name')->contains('manage members'))->toBeFalse()
+        ->and(Role::findByName('Auditor', 'staff')->permissions->pluck('name')->contains('view contact details'))->toBeFalse();
 });
 
 it('only lists permissions that something in the app actually checks', function () {
-    // Every permission is gated by a route or a check, so a role can never be given one that does nothing
+    // Enforced by a route (`can:`), or checked in code (`->can('x')` / `@can('x')` in a controller, service or view)
     $routes = collect(app('router')->getRoutes()->getRoutes())->flatMap(fn ($route) => $route->gatherMiddleware())->filter(fn ($m) => is_string($m) && str_starts_with($m, 'can:'))->map(fn ($m) => substr($m, 4))->unique();
+    $source = collect([app_path(), resource_path('views')])
+        ->flatMap(fn ($dir) => collect(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS))))
+        ->filter(fn ($file) => $file->isFile() && ! str_contains($file->getPathname(), 'Support/Staff/StaffAccess'))
+        ->map(fn ($file) => file_get_contents($file->getPathname()))->implode("\n");
 
     foreach (StaffAccess::permissions() as $permission) {
-        expect($routes->contains($permission))->toBeTrue("{$permission} is not enforced by any route");
+        $checked = $routes->contains($permission) || str_contains($source, "can('{$permission}')") || str_contains($source, "permission('{$permission}')");
+        expect($checked)->toBeTrue("{$permission} is not enforced anywhere");
     }
 });
 
@@ -53,7 +60,7 @@ it('does not overwrite a default role that was edited', function () {
 
     StaffAccess::sync();
 
-    expect(Role::findByName('Support', 'staff')->permissions->pluck('name')->sort()->values()->all())->toBe(['review models', 'view disputes']);
+    expect(Role::findByName('Support', 'staff')->permissions->pluck('name')->sort()->values()->all())->toBe(['review models', 'view contact details', 'view disputes', 'view members']);
 });
 
 it('gives a person the combined permissions of all their roles', function () {

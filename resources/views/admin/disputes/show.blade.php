@@ -75,6 +75,17 @@
                     </x-panel>
                 @endif
 
+                @if ($messages !== null)
+                    <x-panel :title="__('Conversation')" :description="__('The messages between the two people on this hire. Private: you can read them because of this dispute, and that is recorded in the activity log.')">
+                        @forelse ($messages as $message)
+                            <div class="flex items-start gap-3 border-b border-neutral-100 py-3 last:border-0">
+                                @if ($message->sender)<x-user-avatar :user="$message->sender" size="h-8 w-8" />@endif
+                                <div class="min-w-0"><p class="text-xs text-tertiary"><span class="font-medium text-neutral-900">{{ $message->sender?->name ?? __('Deleted account') }}</span> · {{ $message->created_at->format('M j, g:i A') }}</p><p class="mt-0.5 whitespace-pre-line break-words text-sm text-neutral-800">{{ $message->content }}</p></div>
+                            </div>
+                        @empty<p class="text-sm text-tertiary">{{ __('They never exchanged a message.') }}</p>@endforelse
+                    </x-panel>
+                @endif
+
                 @if ($canResolve && ! $resolved)
                     <x-panel :title="__('Resolve this dispute')" :description="__('The decision is final and notifies both parties.')">
                         <form action="{{ route('admin.disputes.resolve', $dispute) }}" method="POST" class="space-y-5">

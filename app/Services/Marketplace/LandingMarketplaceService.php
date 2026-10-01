@@ -114,6 +114,7 @@ class LandingMarketplaceService
     public function stores(int $limit = 4): Collection
     {
         return SellerProfile::where('status', SellerStatus::Approved)
+            ->whereHas('user', fn ($member) => $member->whereNull('suspended_at'))
             ->where('rating_count', '>=', config('marketplace.min_store_reviews'))
             ->whereNotNull('rating_avg')
             ->withCount(['products as models_count' => fn ($query) => $query->published()])

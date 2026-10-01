@@ -8,10 +8,12 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Dispute\ResolveDisputeRequest;
 use App\Models\JobCancellation;
 use App\Models\JobPaymentDispute;
+use App\Models\Message;
 use App\Services\Payments\PartialPaymentService;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 /** The queue of payment disputes between clients and freelancers. Permissions: view disputes, resolve disputes (see routes/web.php). */
@@ -68,7 +70,19 @@ class AdminDisputeController extends Controller
             'partialPayment.finalizer:id,name',
         ])->firstOrFail();
 
-        return view('admin.disputes.show', ['dispute' => $dispute]);
+        // The conversation between the two people is private. It can be read here, by staff who hold the permission, and each reading is logged.
+        $messages = null;
+        $staff = auth()->user();
+
+        if ($staff->can('read dispute messages')) {
+            $messages = Message::with('sender:id,name,avatar')->where('engagement_id', $dispute->cancellation->engagement_id)->oldest()->get();
+
+            if (Cache::add("staff.dispute-messages-read.{$staff->id}.{$dispute->id}", true, 3600)) {
+                StaffAudit::log('dispute.messages-read', 'Read the conversation in dispute #'.$dispute->id, $dispute);
+            }
+        }
+
+        return view('admin.disputes.show', ['dispute' => $dispute, 'messages' => $messages]);
     }
 
     /** Staff open the files the filing party attached. Private disk: never a public URL. */

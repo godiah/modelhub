@@ -4,12 +4,18 @@ use App\Http\Controllers\Admin\AdminAccountController;
 use App\Http\Controllers\Admin\AdminActivityController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminDisputeController;
+use App\Http\Controllers\Admin\AdminEngagementController;
+use App\Http\Controllers\Admin\AdminMemberController;
+use App\Http\Controllers\Admin\AdminModelDirectoryController;
 use App\Http\Controllers\Admin\AdminNotificationController;
+use App\Http\Controllers\Admin\AdminOverviewController;
 use App\Http\Controllers\Admin\AdminProductController;
+use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\AdminStaffController;
+use App\Http\Controllers\Admin\AdminStoreController;
 use App\Http\Controllers\Admin\Auth\StaffLoginController;
 use App\Http\Controllers\Admin\Auth\StaffPasswordController;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +52,44 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('notifications/read', [AdminNotificationController::class, 'readAll'])->name('notifications.read-all');
         Route::get('notifications/{id}', [AdminNotificationController::class, 'open'])->name('notifications.open');
+
+        Route::middleware('can:view platform overview')->get('overview', AdminOverviewController::class)->name('overview');
+
+        Route::middleware('can:view members')->group(function () {
+            Route::get('members', [AdminMemberController::class, 'index'])->name('members.index');
+            Route::get('members/{member}', [AdminMemberController::class, 'show'])->name('members.show');
+        });
+        Route::middleware('can:manage members')->group(function () {
+            Route::post('members/{member}/suspend', [AdminMemberController::class, 'suspend'])->name('members.suspend');
+            Route::post('members/{member}/reinstate', [AdminMemberController::class, 'reinstate'])->name('members.reinstate');
+            Route::post('members/{member}/notes', [AdminMemberController::class, 'note'])->name('members.notes.store');
+            Route::post('members/{member}/password-reset', [AdminMemberController::class, 'passwordReset'])->middleware('throttle:6,1')->name('members.password-reset');
+            Route::post('members/{member}/verification', [AdminMemberController::class, 'verification'])->middleware('throttle:6,1')->name('members.verification');
+        });
+
+        Route::middleware('can:view projects')->group(function () {
+            Route::get('projects', [AdminProjectController::class, 'index'])->name('projects.index');
+            Route::get('projects/{job}', [AdminProjectController::class, 'show'])->name('projects.show');
+        });
+        Route::middleware('can:moderate projects')->group(function () {
+            Route::post('projects/{job}/take-down', [AdminProjectController::class, 'takeDown'])->name('projects.take-down');
+            Route::post('projects/{job}/restore', [AdminProjectController::class, 'restore'])->name('projects.restore');
+        });
+
+        Route::middleware('can:view engagements')->group(function () {
+            Route::get('engagements', [AdminEngagementController::class, 'index'])->name('engagements.index');
+            Route::get('engagements/{engagement}', [AdminEngagementController::class, 'show'])->name('engagements.show');
+        });
+
+        Route::middleware('can:view models')->group(function () {
+            Route::get('catalogue', [AdminModelDirectoryController::class, 'index'])->name('catalogue.index');
+            Route::get('catalogue/{product}', [AdminModelDirectoryController::class, 'show'])->name('catalogue.show');
+        });
+
+        Route::middleware('can:view sellers')->group(function () {
+            Route::get('stores', [AdminStoreController::class, 'index'])->name('stores.index');
+            Route::get('stores/{seller}', [AdminStoreController::class, 'show'])->name('stores.show');
+        });
 
         Route::middleware('can:view disputes')->group(function () {
             Route::get('disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');

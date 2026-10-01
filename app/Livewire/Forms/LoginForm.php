@@ -30,8 +30,15 @@ class LoginForm extends Form
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only(['email', 'password']), $this->remember)) {
+        // A suspended account fails like a wrong password; only someone who knows the password is told it is suspended
+        if (! Auth::attempt($this->only(['email', 'password']) + ['suspended_at' => null], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
+
+            if (Auth::validate($this->only(['email', 'password']))) {
+                throw ValidationException::withMessages([
+                    'form.email' => 'This account has been suspended. If you think that is a mistake, contact support.',
+                ]);
+            }
 
             throw ValidationException::withMessages([
                 'form.email' => trans('auth.failed'),

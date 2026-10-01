@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SellerProfile;
+use App\Models\User;
 use App\Services\Marketplace\ProductBrowsingService;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,7 @@ class SellerStorefrontController extends Controller
 
     public function show(Request $request, SellerProfile $seller)
     {
-        abort_unless($seller->isApproved(), 404);
+        abort_unless($seller->isApproved() && User::whereKey($seller->user_id)->whereNull('suspended_at')->exists(), 404);
 
         $filters = $request->validate([
             'category' => ['nullable', 'string', 'max:100'],

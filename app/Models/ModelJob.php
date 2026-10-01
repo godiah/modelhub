@@ -25,6 +25,9 @@ class ModelJob extends Model
         'budget',
         'is_active',
         'is_archived',
+        'taken_down_at',
+        'taken_down_reason',
+        'taken_down_by',
         'applicants_count',
     ];
 
@@ -34,6 +37,7 @@ class ModelJob extends Model
         'no_deadline' => 'boolean',
         'is_active' => 'boolean',
         'is_archived' => 'boolean',
+        'taken_down_at' => 'datetime',
         'deadline' => 'date',
     ];
 
@@ -127,6 +131,7 @@ class ModelJob extends Model
         }
 
         return match (true) {
+            $this->isTakenDown() => [__('Taken down'), 'red'],
             $this->is_archived => [__('Archived'), 'neutral'],
             $this->isOpenForApplications() => [__('Open'), 'green'],
             $this->is_active => [__('Expired'), 'neutral'],
@@ -167,6 +172,9 @@ class ModelJob extends Model
     {
         return $query->where('is_active', true)
             ->where('is_archived', false)
+            ->whereNull('taken_down_at')
+            // A suspended member's projects are off the board until they are reinstated
+            ->whereNotExists(fn ($poster) => $poster->selectRaw('1')->from('users')->whereColumn('users.id', 'model_jobs.user_id')->whereNotNull('users.suspended_at'))
             ->where(function ($q) {
                 $q->where('no_deadline', true)
                     ->orWhereNull('deadline')
@@ -182,6 +190,8 @@ class ModelJob extends Model
         return $query->where(function ($q) {
             $q->where('is_active', false)
                 ->orWhere('is_archived', true)
+                ->orWhereNotNull('taken_down_at')
+                ->orWhereExists(fn ($poster) => $poster->selectRaw('1')->from('users')->whereColumn('users.id', 'model_jobs.user_id')->whereNotNull('users.suspended_at'))
                 ->orWhere(function ($expired) {
                     $expired->where('no_deadline', false)->whereNotNull('deadline')->where('deadline', '<', today());
                 });
@@ -195,6 +205,7 @@ class ModelJob extends Model
     {
         return $this->is_active
             && ! $this->is_archived
+            && $this->taken_down_at === null
             && ($this->no_deadline || $this->deadline === null || ! $this->deadline->isBefore(today()));
     }
 
@@ -220,6 +231,17 @@ class ModelJob extends Model
     public function isArchived()
     {
         return $this->is_archived;
+    }
+
+    /** Staff took this project down: it is off the board and the poster cannot reopen it. */
+    public function isTakenDown(): bool
+    {
+        return $this->taken_down_at !== null;
+    }
+
+    public function takenDownBy()
+    {
+        return $this->belongsTo(Staff::class, 'taken_down_by');
     }
 
     /**
