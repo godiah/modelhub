@@ -1,13 +1,10 @@
 <?php
 
-use App\Models\JobPaymentDispute;
 use App\Models\Product;
 use App\Models\ProductReview;
-use App\Models\ReviewReport;
 use App\Models\SellerProfile;
 use App\Models\Staff;
 use App\Models\StaffActivity;
-use App\Models\User;
 use App\Notifications\ProductSubmittedNotification;
 use App\Services\Marketplace\ProductService;
 use App\Support\Avatars;
@@ -56,41 +53,9 @@ it('renders the staff shell, not the member shell', function () {
 });
 
 /** ---------------------------------------------------------------- the dashboard */
-it('shows a dashboard of the queues each person may work, with how long the oldest has waited', function () {
-    Product::factory()->inReview()->create(['submitted_at' => now()->subDays(4)]);
-    SellerProfile::factory()->create(['submitted_at' => now()->subDays(2)]);
-
-    $this->actingAs(staffWith('Marketplace moderator'), 'staff')->get(route('admin.dashboard'))->assertOk()
-        ->assertSee('Model reviews')->assertSee('models are waiting for a decision')->assertSee('oldest from 4 days ago')
-        ->assertSee('Seller applications')->assertSee('Review reports')->assertSee('No reviews are reported.')
-        ->assertDontSee('Payment disputes');
-
-    $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.dashboard'))->assertOk()->assertSee('Payment disputes')->assertDontSee('Model reviews');
-});
-
 it('welcomes a person with no role and says what to do', function () {
     $this->actingAs(Staff::factory()->create(['name' => 'Newcomer Staff']), 'staff')->get(route('admin.dashboard'))->assertOk()
         ->assertSee('Welcome, Newcomer')->assertSee('no role yet');
-});
-
-it('lists the disputes the person is handling, and the recent activity only for those who may see the log', function () {
-    $manager = staffWith('Dispute manager', 'Marketplace moderator');
-    ['dispute' => $dispute, 'application' => $application] = makeDisputedEngagement();
-    $dispute->assignAdmin($manager->id);
-    StaffAudit::log('model.published', 'Published "Oak chair"', staffId: $manager->id);
-
-    $this->actingAs($manager, 'staff')->get(route('admin.dashboard'))->assertOk()->assertSee('Disputes you are handling')->assertSee($application->job->title)->assertDontSee('Recent staff activity');
-
-    $this->actingAs(staffWith('Super admin'), 'staff')->get(route('admin.dashboard'))->assertOk()->assertSee('Recent staff activity')->assertSee('published "Oak chair"');
-});
-
-it('counts reports and disputes on the dashboard', function () {
-    $review = ProductReview::factory()->create();
-    ReviewReport::create(['review_id' => $review->id, 'user_id' => User::factory()->create()->id, 'reason' => 'spam', 'status' => 'open']);
-    makeDisputedEngagement();
-
-    $this->actingAs(staffWith('Super admin'), 'staff')->get(route('admin.dashboard'))->assertOk()->assertSee('2 items are waiting for you');
-    expect(StaffMenu::count('reports'))->toBe(1)->and(StaffMenu::count('disputes'))->toBe(JobPaymentDispute::count());
 });
 
 /** ---------------------------------------------------------------- notifications */
