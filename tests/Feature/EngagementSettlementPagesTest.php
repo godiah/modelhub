@@ -357,8 +357,8 @@ it('renders the cancellation policy with its table of contents and every section
         ->assertSee(config('app.name').' reserves the right to');
 });
 
-it('keeps the policy behind sign-in', function () {
+it('lets guests read the policy: the terms they agree to refer to it', function () {
     auth()->logout();
 
-    $this->get(route('engagements.policy'))->assertRedirect(route('login'));
+    $this->get(route('engagements.policy'))->assertOk()->assertSee('Cancellation & Payment Policy');
 });

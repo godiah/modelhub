@@ -8,6 +8,7 @@ use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobDeliverableController;
 use App\Http\Controllers\JobEngagementController;
+use App\Http\Controllers\LegalController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\NotificationController;
@@ -155,10 +156,12 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     Route::get('/{engagement}/cancel', [JobEngagementController::class, 'showCancellationForm'])->name('cancel.form');
     Route::post('/{engagement}/cancel', [JobEngagementController::class, 'cancelEngagement'])->name('cancel');
     Route::post('/{engagement}/reopen-job', [JobEngagementController::class, 'reopenJob'])->name('reopen-job');
-
-    // Policy routes
-    Route::get('/policies/cancellation', [PolicyManagementController::class, 'index'])->name('policy');
 });
+
+// Public documents: readable by guests and signed-in users alike
+Route::get('/engagements/policies/cancellation', [PolicyManagementController::class, 'index'])->name('engagements.policy');
+Route::get('/terms', [LegalController::class, 'terms'])->name('legal.terms');
+Route::get('/privacy', [LegalController::class, 'privacy'])->name('legal.privacy');
 
 // Client - Freelancer Messaging
 Route::middleware(['auth'])->prefix('chat')->group(function () {

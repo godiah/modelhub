@@ -102,7 +102,7 @@ it('resolves breadcrumbs for pages that are not sidebar entries', function () {
 });
 
 it('gives signed-in users the slim app footer and guests the marketing footer', function () {
-    $this->get(route('jobs.browse'))->assertOk()->assertSee('Join free')->assertDontSee('Cancellation &amp; payment policy', false);
+    $this->get(route('jobs.browse'))->assertOk()->assertSee('Join free')->assertSee(route('legal.terms'), false);
 
     $this->actingAs(User::factory()->create())
         ->get(route('dashboard'))
