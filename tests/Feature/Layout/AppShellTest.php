@@ -247,3 +247,56 @@ it('does not repeat the page name in the breadcrumb on pages that are menu entri
         expect($labels->duplicates()->all())->toBe([], "{$route} repeats a breadcrumb label: ".$labels->implode(' > '));
     }
 });
+
+/** ---------------------------------------------------------------- the top bar's primary action */
+function actionOn(string $route, User $user, array $params = []): ?array
+{
+    test()->actingAs($user)->get(route($route, $params))->assertOk();
+
+    return SidebarMenu::primaryAction($user);
+}
+
+it('offers "Post a project" on Projects pages, but not on the page it leads to', function () {
+    $user = User::factory()->create();
+
+    expect(actionOn('jobs.browse', $user))->toBe(['type' => 'link', 'label' => 'Post a project', 'url' => route('jobs.create'), 'icon' => 'plus'])
+        ->and(actionOn('engagements.index', $user)['label'])->toBe('Post a project')
+        ->and(actionOn('applications.my', $user)['label'])->toBe('Post a project')
+        ->and(actionOn('jobs.create', $user))->toBeNull();
+});
+
+it('offers "Sell your models" to a non-seller and "Add a model" to an approved seller on Models pages', function () {
+    $member = User::factory()->create();
+    $seller = User::factory()->create();
+    SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
+
+    expect(actionOn('models.index', $member))->toBe(['type' => 'link', 'label' => 'Sell your models', 'url' => route('seller.index'), 'icon' => 'banknotes'])
+        ->and(actionOn('wishlist.index', $member)['label'])->toBe('Sell your models')
+        ->and(actionOn('seller.index', $member))->toBeNull();
+
+    expect(actionOn('models.index', $seller))->toBe(['type' => 'link', 'label' => 'Add a model', 'url' => route('seller.models.create'), 'icon' => 'plus'])
+        ->and(actionOn('seller.models.index', $seller)['label'])->toBe('Add a model')
+        ->and(actionOn('seller.store.edit', $seller)['label'])->toBe('Add a model')
+        ->and(actionOn('seller.models.create', $seller))->toBeNull();
+});
+
+it('offers a Create menu with both choices on the dashboard and other pages outside the two areas', function () {
+    $member = User::factory()->create();
+    $seller = User::factory()->create();
+    SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
+
+    foreach (['dashboard', 'notifications.index', 'profile'] as $route) {
+        $menu = actionOn($route, $member);
+        expect($menu['type'])->toBe('menu')->and($menu['label'])->toBe('Create')
+            ->and(collect($menu['items'])->pluck('label')->all())->toBe(['Post a project', 'Sell your models']);
+    }
+
+    expect(collect(actionOn('dashboard', $seller)['items'])->pluck('label')->all())->toBe(['Post a project', 'Add a model']);
+
+    $this->actingAs($seller)->get(route('dashboard'))->assertOk()->assertSee('aria-label="Create"', false)->assertSee(route('seller.models.create'), false);
+});
+
+it('renders a single button, not a menu, inside a product area', function () {
+    $this->actingAs(User::factory()->create())->get(route('jobs.browse'))->assertOk()->assertDontSee('aria-label="Create"', false);
+    $this->actingAs(User::factory()->create())->get(route('models.index'))->assertOk()->assertDontSee('aria-label="Create"', false)->assertSee('Sell your models');
+});

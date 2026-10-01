@@ -42,11 +42,34 @@
     @endif
 
     <div class="ml-auto flex items-center gap-2 sm:gap-3">
-        <x-btn href="{{ route('jobs.create') }}" wire:navigate>
-            <x-icon name="plus" class="h-4 w-4" />
-            <span class="hidden sm:inline">{{ __('Post a project') }}</span>
-            <span class="sr-only sm:hidden">{{ __('Post a project') }}</span>
-        </x-btn>
+        @php($action = \App\Support\Navigation\SidebarMenu::primaryAction(auth()->user()))
+        @if (($action['type'] ?? null) === 'link')
+            <x-btn href="{{ $action['url'] }}" wire:navigate>
+                <x-icon :name="$action['icon']" class="h-4 w-4" />
+                <span class="hidden sm:inline">{{ $action['label'] }}</span>
+                <span class="sr-only sm:hidden">{{ $action['label'] }}</span>
+            </x-btn>
+        @elseif (($action['type'] ?? null) === 'menu')
+            <x-dropdown align="right" width="w-56">
+                <x-slot name="trigger">
+                    <x-btn type="button" x-bind:aria-expanded="open.toString()">
+                        <x-icon name="plus" class="h-4 w-4" />
+                        <span class="hidden sm:inline">{{ $action['label'] }}</span>
+                        <span class="sr-only sm:hidden">{{ $action['label'] }}</span>
+                        <x-icon name="chevron-down" class="hidden h-4 w-4 sm:block" />
+                    </x-btn>
+                </x-slot>
+                <x-slot name="content">
+                    <nav aria-label="{{ $action['label'] }}" class="py-2">
+                        @foreach ($action['items'] as $choice)
+                            <a href="{{ $choice['url'] }}" wire:navigate class="flex w-full items-center gap-3 px-4 py-2.5 text-start font-main text-sm text-neutral-700 transition-colors duration-150 hover:bg-neutral-50 hover:text-neutral-900 focus:bg-neutral-50 focus:outline-none">
+                                <x-icon :name="$choice['icon']" class="h-4 w-4 shrink-0 text-neutral-400" />{{ $choice['label'] }}
+                            </a>
+                        @endforeach
+                    </nav>
+                </x-slot>
+            </x-dropdown>
+        @endif
 
         @php($unread = auth()->user()->unreadNotifications()->count())
         <a href="{{ route('notifications.index') }}" wire:navigate
