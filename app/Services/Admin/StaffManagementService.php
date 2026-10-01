@@ -4,6 +4,7 @@ namespace App\Services\Admin;
 
 use App\Models\Staff;
 use App\Notifications\StaffPasswordNotification;
+use App\Notifications\TwoFactorResetNotification;
 use App\Support\Staff\StaffAccess;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,14 @@ use Spatie\Permission\Models\Role;
 class StaffManagementService
 {
     /** A new account: a random password nobody knows, and an email inviting them to set their own. */
+    /** For a colleague who lost their phone and recovery codes: removes their authenticator app and tells them by email. */
+    public function resetTwoFactor(Staff $staff, Staff $by): void
+    {
+        $staff->resetTwoFactor();
+        $staff->notify(new TwoFactorResetNotification(route('admin.account.edit')));
+        StaffAudit::log('staff.two-factor-reset', "Reset two-step sign-in for {$staff->name}", $staff, staffId: $by->id);
+    }
+
     public function invite(string $name, string $email, array $roles): Staff
     {
         $staff = Staff::create(['name' => trim($name), 'email' => strtolower(trim($email)), 'password' => Hash::make(Str::random(64))]);

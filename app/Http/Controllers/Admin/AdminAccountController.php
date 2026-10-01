@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Helpers\FlashAlertHelper;
 use App\Http\Controllers\Controller;
+use App\Support\Auth\PasswordPolicy;
 use App\Support\Avatars;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rules\Password;
 
 /** A staff member's own account: their name, avatar and password. */
 class AdminAccountController extends Controller
@@ -37,7 +37,7 @@ class AdminAccountController extends Controller
     {
         $request->validate([
             'current_password' => ['required', 'current_password:staff'],
-            'password' => ['required', 'confirmed', Password::min(12)->letters()->numbers(), 'different:current_password'],
+            'password' => ['required', 'confirmed', PasswordPolicy::rule(staff: true), 'different:current_password'],
         ]);
 
         $request->user()->update(['password' => $request->input('password')]);

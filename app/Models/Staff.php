@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTwoFactor;
 use App\Notifications\StaffPasswordNotification;
 use App\Support\Avatars;
+use App\Support\Settings\PlatformSettings;
 use App\Support\Staff\StaffAccess;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -16,7 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class Staff extends Authenticatable
 {
-    use HasFactory, HasRoles, Notifiable;
+    use HasFactory, HasRoles, HasTwoFactor, Notifiable;
 
     protected $table = 'staff';
 
@@ -40,6 +42,11 @@ class Staff extends Authenticatable
         static::creating(function (Staff $staff) {
             $staff->avatar ??= Avatars::random(Avatars::PEOPLE);
         });
+    }
+
+    protected function platformRequiresSecondFactor(): bool
+    {
+        return PlatformSettings::bool('security.otp_staff_required');
     }
 
     public function isSuperAdmin(): bool

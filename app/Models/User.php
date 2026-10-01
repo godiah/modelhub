@@ -3,18 +3,17 @@
 namespace App\Models;
 
 use App\Enums\SellerStatus;
-use App\Mail\TwoFactorCode;
+use App\Models\Concerns\HasTwoFactor;
 use App\Support\Avatars;
+use App\Support\Settings\PlatformSettings;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasFactory, Notifiable;
+    use HasFactory, HasTwoFactor, Notifiable;
 
     protected $fillable = [
         'name',
@@ -91,72 +90,12 @@ class User extends Authenticatable implements MustVerifyEmail
         });
     }
 
-    /**
-     * Generate and send a two-factor authentication code.
-     */
-    public function generateTwoFactorCode(): void
+    protected function platformRequiresSecondFactor(): bool
     {
-        $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-
-        $this->update([
-            'two_factor_code' => Hash::make($code),
-            'two_factor_expires_at' => now()->addMinutes(5),
-        ]);
-
-        Mail::to($this->email)->queue(new TwoFactorCode($code));
+        return PlatformSettings::bool('security.otp_members_required');
     }
 
-    /**
-     * Verify the two-factor authentication code.
-     */
-    public function verifyTwoFactorCode(string $code): bool
-    {
-        if (! $this->two_factor_code || ! $this->two_factor_expires_at) {
-            return false;
-        }
-
-        if ($this->two_factor_expires_at->isPast()) {
-            $this->clearTwoFactorCode();
-
-            return false;
-        }
-
-        return Hash::check($code, $this->two_factor_code);
-    }
-
-    /**
-     * Clear the two-factor authentication code.
-     */
-    public function clearTwoFactorCode(): void
-    {
-        $this->update([
-            'two_factor_code' => null,
-            'two_factor_expires_at' => null,
-        ]);
-    }
-
-    /**
-     * Enable two-factor authentication.
-     */
-    public function enableTwoFactor(): void
-    {
-        $this->update(['two_factor_enabled' => true]);
-        $this->clearTwoFactorCode();
-    }
-
-    /**
-     * Disable two-factor authentication.
-     */
-    public function disableTwoFactor(): void
-    {
-        $this->update(['two_factor_enabled' => false]);
-        $this->clearTwoFactorCode();
-    }
-
-    /**
-     * Check if two-factor authentication is enabled.
-     */
-    public function hasTwoFactorEnabled(): bool
+    protected function emailCodesOptedIn(): bool
     {
         return (bool) $this->two_factor_enabled;
     }

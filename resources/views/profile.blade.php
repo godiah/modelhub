@@ -70,6 +70,7 @@
             class="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
             <livewire:profile.update-password-form />
             <livewire:profile.two-factor-form />
+            <x-authenticator-card :account="auth()->user()" prefix="authenticator" />
         </div>
 
         <!-- Account -->

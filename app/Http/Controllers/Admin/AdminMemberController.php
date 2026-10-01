@@ -103,6 +103,13 @@ class AdminMemberController extends Controller
         return back()->with(FlashAlertHelper::success('Password reset link sent', 'The member chooses their own new password.'));
     }
 
+    public function twoFactorReset(Request $request, User $member)
+    {
+        $this->members->resetTwoFactor($member, $request->user());
+
+        return back()->with(FlashAlertHelper::success('Two-step sign-in reset', 'The member was emailed, and can set up a new authenticator app.'));
+    }
+
     public function verification(Request $request, User $member)
     {
         return $this->done($this->members->resendVerification($member, $request->user()), 'Verification email sent');

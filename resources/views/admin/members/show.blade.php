@@ -103,9 +103,10 @@
                     <x-panel :title="__('Help this member')">
                         <div class="space-y-2">
                             <form method="POST" action="{{ route('admin.members.password-reset', $member) }}">@csrf<x-btn type="submit" variant="secondary" block>{{ __('Send a password reset link') }}</x-btn></form>
+                            @if ($member->hasAuthenticator() || $member->hasTwoFactorEnabled())<form method="POST" action="{{ route('admin.members.two-factor-reset', $member) }}">@csrf<x-btn type="submit" variant="secondary" block>{{ __('Reset two-step sign-in') }}</x-btn></form>@endif
                             @unless ($member->email_verified_at)<form method="POST" action="{{ route('admin.members.verification', $member) }}">@csrf<x-btn type="submit" variant="secondary" block>{{ __('Resend the verification email') }}</x-btn></form>@endunless
                         </div>
-                        <p class="mt-3 text-xs text-tertiary">{{ __('The member chooses their own password. Staff never see or set one.') }}</p>
+                        <p class="mt-3 text-xs text-tertiary">{{ __('The member chooses their own password. Staff never see or set one. Resetting two-step sign-in removes their authenticator app and emails them.') }}</p>
                     </x-panel>
                 @endif
 

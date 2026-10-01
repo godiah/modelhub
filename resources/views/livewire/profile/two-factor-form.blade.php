@@ -183,6 +183,10 @@ new class extends Component {
                 </div>
             @endif
 
+            @if (\App\Support\Settings\PlatformSettings::bool('security.otp_members_required'))
+                <p class="rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-700">{{ __('A sign-in code is required for every member, so you will be asked for one at each sign-in whether or not this is on.') }}</p>
+            @endif
+
             <!-- Status -->
             <div class="flex flex-col gap-4 rounded-xl border border-neutral-200 p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-4">

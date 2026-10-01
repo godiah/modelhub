@@ -2,6 +2,8 @@
     <h1 class="font-tertiary text-xl font-semibold text-neutral-900">{{ __('Staff sign in') }}</h1>
     <p class="mt-1 text-sm text-tertiary">{{ __('Use your staff account. It is separate from any member account you may have.') }}</p>
 
+    @if ($errors->has('code'))<p class="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">{{ $errors->first('code') }}</p>@endif
+
     @if (session('status'))<p class="mt-4 rounded-xl bg-teal-50 px-4 py-3 text-sm text-teal-900" role="status">{{ session('status') }}</p>@endif
 
     <form method="POST" action="{{ route('admin.login.store') }}" class="mt-6 space-y-4">

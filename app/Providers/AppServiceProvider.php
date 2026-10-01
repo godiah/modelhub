@@ -6,6 +6,7 @@ use App\Helpers\EmailCssInlinerHelper;
 use App\Models\JobApplication;
 use App\Models\Staff;
 use App\Observers\JobApplicationObserver;
+use App\Support\Auth\PasswordPolicy;
 use App\Support\Mail\BrandedMail;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -17,6 +18,7 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -77,6 +79,9 @@ class AppServiceProvider extends ServiceProvider
         // Inline each email's <style> block into style="" attributes for clients that strip <head><style> (Laravel
         // only does this on the markdown path, so this closes the gap for every outgoing email).
         // When a member last signed in, shown in the staff member directory
+        // The password rules new passwords have to meet come from the platform's security settings
+        Password::defaults(fn () => PasswordPolicy::rule());
+
         Event::listen(function (Login $event) {
             if ($event->guard === 'web') {
                 $event->user->forceFill(['last_login_at' => now()])->saveQuietly();

@@ -4,12 +4,12 @@ namespace App\Http\Controllers\Admin\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
+use App\Support\Auth\PasswordPolicy;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password as PasswordRule;
 
 /** Forgotten passwords and invitations: the same "set your password" link, sent to a staff email address. */
 class StaffPasswordController extends Controller
@@ -39,7 +39,7 @@ class StaffPasswordController extends Controller
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'confirmed', PasswordRule::min(12)->letters()->numbers()],
+            'password' => ['required', 'confirmed', PasswordPolicy::rule(staff: true)],
         ]);
 
         $status = Password::broker('staff')->reset(

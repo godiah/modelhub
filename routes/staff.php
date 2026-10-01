@@ -14,10 +14,13 @@ use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\Admin\AdminRoleController;
 use App\Http\Controllers\Admin\AdminSellerController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\AdminStoreController;
 use App\Http\Controllers\Admin\Auth\StaffLoginController;
 use App\Http\Controllers\Admin\Auth\StaffPasswordController;
+use App\Http\Controllers\Auth\AuthenticatorController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -34,6 +37,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('guest:staff')->group(function () {
         Route::get('login', [StaffLoginController::class, 'create'])->name('login');
         Route::post('login', [StaffLoginController::class, 'store'])->middleware('throttle:20,1')->name('login.store');
+        Route::get('two-factor', [TwoFactorChallengeController::class, 'show'])->name('two-factor.challenge');
+        Route::post('two-factor', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:20,1')->name('two-factor.verify');
+        Route::post('two-factor/resend', [TwoFactorChallengeController::class, 'resend'])->middleware('throttle:6,1')->name('two-factor.resend');
+        Route::post('two-factor/cancel', [TwoFactorChallengeController::class, 'cancel'])->name('two-factor.cancel');
         Route::get('forgot-password', [StaffPasswordController::class, 'request'])->name('password.request');
         Route::post('forgot-password', [StaffPasswordController::class, 'email'])->middleware('throttle:6,1')->name('password.email');
         Route::get('reset-password/{token}', [StaffPasswordController::class, 'reset'])->name('password.reset');
@@ -49,6 +56,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('account', [AdminAccountController::class, 'update'])->name('account.update');
         Route::patch('account/avatar', [AdminAccountController::class, 'avatar'])->name('account.avatar');
         Route::put('account/password', [AdminAccountController::class, 'password'])->name('account.password');
+        Route::prefix('account/authenticator')->name('account.authenticator.')->group(function () {
+            Route::post('/', [AuthenticatorController::class, 'start'])->middleware('throttle:10,1')->name('start');
+            Route::post('confirm', [AuthenticatorController::class, 'confirm'])->middleware('throttle:10,1')->name('confirm');
+            Route::delete('setup', [AuthenticatorController::class, 'cancel'])->name('cancel');
+            Route::post('recovery-codes', [AuthenticatorController::class, 'recoveryCodes'])->middleware('throttle:10,1')->name('recovery');
+            Route::delete('/', [AuthenticatorController::class, 'destroy'])->middleware('throttle:10,1')->name('destroy');
+        });
         Route::get('notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');
         Route::post('notifications/read', [AdminNotificationController::class, 'readAll'])->name('notifications.read-all');
         Route::get('notifications/{id}', [AdminNotificationController::class, 'open'])->name('notifications.open');
@@ -64,6 +78,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('members/{member}/reinstate', [AdminMemberController::class, 'reinstate'])->name('members.reinstate');
             Route::post('members/{member}/notes', [AdminMemberController::class, 'note'])->name('members.notes.store');
             Route::post('members/{member}/password-reset', [AdminMemberController::class, 'passwordReset'])->middleware('throttle:6,1')->name('members.password-reset');
+            Route::post('members/{member}/two-factor-reset', [AdminMemberController::class, 'twoFactorReset'])->middleware('throttle:6,1')->name('members.two-factor-reset');
             Route::post('members/{member}/verification', [AdminMemberController::class, 'verification'])->middleware('throttle:6,1')->name('members.verification');
         });
 
@@ -128,7 +143,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::patch('staff/{staff}', [AdminStaffController::class, 'update'])->name('staff.update');
             Route::post('staff/{staff}/deactivate', [AdminStaffController::class, 'deactivate'])->name('staff.deactivate');
             Route::post('staff/{staff}/reactivate', [AdminStaffController::class, 'reactivate'])->name('staff.reactivate');
+            Route::post('staff/{staff}/two-factor-reset', [AdminStaffController::class, 'twoFactorReset'])->middleware('throttle:6,1')->name('staff.two-factor-reset');
             Route::post('staff/{staff}/invite', [AdminStaffController::class, 'invite'])->middleware('throttle:6,1')->name('staff.invite');
+        });
+
+        // Platform settings: Super admins only (no permission to hand out)
+        Route::middleware('super-admin')->prefix('settings')->name('settings.')->group(function () {
+            Route::redirect('/', '/admin/settings/security')->name('index');
+            Route::get('security', [AdminSettingsController::class, 'security'])->name('security');
+            Route::patch('security', [AdminSettingsController::class, 'updateSecurity'])->name('security.update');
         });
 
         Route::middleware('can:manage roles')->group(function () {
