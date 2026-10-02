@@ -5,7 +5,7 @@
     by the layout's head script and toggled here). Below lg: off-canvas drawer driven by the shell's `mobileOpen`.
 --}}
 <aside id="app-sidebar" aria-label="{{ $label ?? __('Main navigation') }}"
-    class="fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-neutral-200/70 bg-white transition-[transform,width] duration-200 ease-out lg:z-30 lg:w-64 lg:translate-x-0 lg:[.sidebar-collapsed_&]:w-[72px]"
+    class="fixed inset-y-0 left-0 z-50 flex w-72 print:hidden -translate-x-full flex-col border-r border-neutral-200/70 bg-white transition-[transform,width] duration-200 ease-out lg:z-30 lg:w-64 lg:translate-x-0 lg:[.sidebar-collapsed_&]:w-[72px]"
     :class="{ '!translate-x-0 shadow-2xl': mobileOpen }" x-trap.noscroll="mobileOpen">
 
     <!-- Brand -->

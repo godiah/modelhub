@@ -23,7 +23,6 @@ class ProductFactory extends Factory
             'status' => ProductStatus::Draft,
             'price_minor' => fake()->numberBetween(5, 500) * 10000,
             'currency' => 'KES',
-            'license' => 'standard',
             'geometry_type' => 'polygon_mesh',
             'polygons' => fake()->numberBetween(1000, 200000),
             'vertices' => fake()->numberBetween(1000, 200000),

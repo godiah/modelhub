@@ -22,7 +22,8 @@ Already decided earlier: D1 KES only, D2 M-Pesa first (via `~/laravel-common`), 
 ## 2. Core product work, in order
 
 1. **Money core and M-Pesa** (the biggest piece)
-   - Foundations: ~~fee from settings instead of a constant~~ DONE 2026-10-02 (`FeePolicy`, Fees and payments page, per-seller override, minimum price). Marketplace storage disks are already configurable; the job side (images, dispute evidence, deliverables) still hard-codes `public`/`local` and belongs to the file-pipeline step. Still to do: a licence record (Standard/Extended) in place of the unused `products.license` placeholder.
+   - Foundations: ~~fee from settings instead of a constant~~ DONE 2026-10-02 (`FeePolicy`, Fees and payments page, per-seller override, minimum price). Marketplace storage disks are already configurable; the job side (images, dispute evidence, deliverables) still hard-codes `public`/`local` and belongs to the file-pipeline step. 
+   - ~~Licence record~~ DONE 2026-10-02 (`LicenceTier`, `issued_licences`, `LicenceService`, My licences + certificate, Extended price on listings). Still to do for licences: staff view/revoke of a member's licences (with the refund flow), and lawyer review of the wording.
    - A ledger, an M-Pesa gateway adapter, a payout model; move engagement escrow and partial payments onto the ledger.
    - Model checkout, licensed downloads, seller earnings and withdrawals.
    - Done when an engagement can really be paid and released, and a freelancer can withdraw.

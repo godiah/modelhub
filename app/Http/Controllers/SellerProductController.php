@@ -80,6 +80,7 @@ class SellerProductController extends Controller
         $this->products->updateDetails($product, array_merge($request->validated(), [
             'tags' => $request->tagList(),
             'price_minor' => $request->priceMinor(),
+            'extended_price_minor' => $request->extendedPriceMinor(),
         ]));
 
         // "Save and send for review" saves first, then submits what was saved.

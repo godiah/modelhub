@@ -141,7 +141,7 @@ it('groups the sidebar by product: Models and Projects, with Engagements inside 
 
     expect(array_keys($groups))->toBe(['Overview', 'Models', 'Projects'])
         ->and($groups['Overview'])->toBe(['Dashboard', 'Notifications'])
-        ->and($groups['Models'])->toBe(['Browse models', 'Wishlist', 'Sell models'])
+        ->and($groups['Models'])->toBe(['Browse models', 'Wishlist', 'My licences', 'Sell models'])
         ->and($groups['Projects'])->toBe(['Browse projects', 'My applications', 'Post a project', 'Posted projects', 'Engagements']);
 });
 
@@ -149,10 +149,10 @@ it('swaps "Sell models" for My models and My store once a member is an approved 
     $seller = User::factory()->create();
     SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
 
-    expect(sidebarGroups($seller)['Models'])->toBe(['Browse models', 'Wishlist', 'My models', 'My store']);
+    expect(sidebarGroups($seller)['Models'])->toBe(['Browse models', 'Wishlist', 'My licences', 'My models', 'My store']);
 
     $items = collect(SidebarMenu::for($seller))->firstWhere('label', 'Models')['items'];
-    expect(collect($items)->pluck('section')->all())->toBe([null, null, 'Selling', 'Selling']);
+    expect(collect($items)->pluck('section')->all())->toBe([null, null, null, 'Selling', 'Selling']);
 
     $this->actingAs($seller)->get(route('dashboard'))->assertOk()->assertSee('Selling');
     // Someone who is not a seller sees "Sell models" as a plain item, with no Selling label above it
@@ -161,7 +161,7 @@ it('swaps "Sell models" for My models and My store once a member is an approved 
     // Applicants still see the way in, not the seller pages
     $applicant = User::factory()->create();
     SellerProfile::factory()->create(['user_id' => $applicant->id]);
-    expect(sidebarGroups($applicant)['Models'])->toBe(['Browse models', 'Wishlist', 'Sell models']);
+    expect(sidebarGroups($applicant)['Models'])->toBe(['Browse models', 'Wishlist', 'My licences', 'Sell models']);
 });
 
 it('gives every sidebar entry its own icon', function () {

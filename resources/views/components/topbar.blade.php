@@ -2,7 +2,7 @@
 
 <!-- Sticky top bar -->
 <div
-    class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-neutral-200/70 bg-paper/90 px-4 backdrop-blur sm:px-6 lg:px-8">
+    class="sticky top-0 z-20 flex h-16 print:hidden items-center gap-3 border-b border-neutral-200/70 bg-paper/90 px-4 backdrop-blur sm:px-6 lg:px-8">
     <!-- Open drawer (below lg) -->
     <button type="button" @click="mobileOpen = true" aria-label="{{ __('Open menu') }}" aria-controls="app-sidebar"
         class="-ml-1 rounded-lg p-2 text-neutral-600 hover:bg-neutral-200/60 hover:text-neutral-900 lg:hidden">

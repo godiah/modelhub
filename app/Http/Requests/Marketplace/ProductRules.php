@@ -38,6 +38,38 @@ trait ProductRules
         }];
     }
 
+    /**
+     * The optional Extended licence price in whole KES: empty means only Standard is sold. It must meet the platform minimum and cost more
+     * than Standard, and a free model cannot have one.
+     */
+    protected function extendedPriceRule(): array
+    {
+        return ['nullable', 'numeric', 'min:0', 'max:1000000', function (string $attribute, mixed $value, Closure $fail) {
+            if ($value === null || $value === '' || (float) $value <= 0) {
+                return;
+            }
+
+            $standard = (float) $this->input('price', 0);
+            $minimum = FeePolicy::minModelPriceMinor() / 100;
+
+            if ($standard <= 0) {
+                $fail('A free model cannot also be sold with an Extended licence.');
+            } elseif ((float) $value < $minimum) {
+                $fail('The Extended licence must cost at least KES '.number_format($minimum).'.');
+            } elseif ((float) $value <= $standard) {
+                $fail('The Extended licence must cost more than the Standard one.');
+            }
+        }];
+    }
+
+    /** The Extended licence price in minor units, or null when it is not sold (blank, zero, or the model is free). */
+    public function extendedPriceMinor(): ?int
+    {
+        $price = (float) $this->input('extended_price', 0);
+
+        return $price > 0 && $this->priceMinor() > 0 ? (int) round($price * 100) : null;
+    }
+
     /** The price field in minor units. */
     public function priceMinor(): int
     {

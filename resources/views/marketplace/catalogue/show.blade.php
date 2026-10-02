@@ -93,7 +93,15 @@
                         <a href="#reviews" class="mt-3 inline-flex rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40"><x-models.stars :rating="$product->rating_avg" :count="$product->rating_count" showNumber /></a>
                     @endif
                     <p class="mt-4 font-tertiary text-3xl font-bold tabular-nums text-neutral-900">{{ $product->isFree() ? __('Free') : \App\Support\Money::formatMinor($product->price_minor) }}</p>
-                    <p class="mt-1 text-xs text-tertiary">{{ __('Standard licence') }}</p>
+                    <p class="mt-1 text-xs text-tertiary">{{ __('Standard licence') }}: {{ __(\App\Enums\LicenceTier::Standard->summary()) }}</p>
+
+                    @if ($product->extended_price_minor)
+                        <div class="mt-4 rounded-xl border border-neutral-200 bg-neutral-50/60 px-3.5 py-3">
+                            <p class="flex items-baseline justify-between gap-3 text-sm"><span class="font-semibold text-neutral-900">{{ __('Extended licence') }}</span><span class="font-semibold tabular-nums text-neutral-900">{{ \App\Support\Money::formatMinor($product->extended_price_minor) }}</span></p>
+                            <p class="mt-0.5 text-xs text-tertiary">{{ __(\App\Enums\LicenceTier::Extended->summary()) }}</p>
+                        </div>
+                    @endif
+                    <p class="mt-3 text-xs"><a href="{{ route('legal.licences') }}" class="font-medium text-teal-700 hover:underline">{{ __('Compare the licences') }}</a></p>
 
                     @unless ($preview)
                         <x-models.wishlist-button :product="$product" :saved="in_array($product->id, $savedIds)" :count="$saves" variant="button" class="mt-5" />

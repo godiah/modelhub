@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\LicenceTier;
 use App\Enums\ProductStatus;
 use App\Models\Category;
 use App\Models\Product;
@@ -403,4 +404,40 @@ it('shows the seller their own commission when they have a special rate', functi
     $this->seller->sellerProfile->forceFill(['commission_percent' => 8])->save();
 
     $this->get(route('seller.models.create'))->assertSee('keeps 8% of each sale');
+});
+
+/** ---------------------------------------------------------------- the Extended licence price */
+it('lets a seller add an Extended licence price above the Standard one, and remove it again', function () {
+    $product = draftModel(['price_minor' => 50000]);
+    $save = fn (array $extra) => $this->patch(route('seller.models.update', $product), ['title' => 'Priced armchair', 'category_id' => $this->leaf->id, 'price' => '500'] + $extra);
+
+    $save(['extended_price' => '1800'])->assertSessionHasNoErrors();
+    $product->refresh();
+    expect($product->extended_price_minor)->toBe(180000)->and($product->offeredLicences())->toBe([LicenceTier::Standard, LicenceTier::Extended])
+        ->and($product->priceFor(LicenceTier::Extended))->toBe(180000)->and($product->priceFor(LicenceTier::Standard))->toBe(50000);
+
+    $this->get(route('seller.models.edit', $product))->assertSee('Extended licence price')->assertSee('1800');
+
+    $save(['extended_price' => ''])->assertSessionHasNoErrors();
+    expect($product->fresh()->extended_price_minor)->toBeNull()->and($product->fresh()->offeredLicences())->toBe([LicenceTier::Standard]);
+});
+
+it('keeps the Extended price above Standard and above the minimum, and never on a free model', function () {
+    $product = draftModel(['price_minor' => 50000]);
+    $save = fn (string $price, string $extended) => $this->patch(route('seller.models.update', $product), ['title' => 'Priced armchair', 'category_id' => $this->leaf->id, 'price' => $price, 'extended_price' => $extended]);
+
+    $save('500', '500')->assertSessionHasErrors(['extended_price' => 'The Extended licence must cost more than the Standard one.']);
+    $save('500', '300')->assertSessionHasErrors('extended_price');
+    $save('0', '900')->assertSessionHasErrors(['extended_price' => 'A free model cannot also be sold with an Extended licence.']);
+    $save('100', '50')->assertSessionHasErrors(['extended_price' => 'The Extended licence must cost at least KES 100.']);
+    $save('500', 'abc')->assertSessionHasErrors('extended_price');
+    expect($product->fresh()->extended_price_minor)->toBeNull();
+});
+
+it('drops the Extended price when a model is made free', function () {
+    $product = draftModel(['price_minor' => 50000, 'extended_price_minor' => 180000]);
+
+    $this->patch(route('seller.models.update', $product), ['title' => 'Now free armchair', 'category_id' => $this->leaf->id, 'price' => '0', 'extended_price' => '']);
+
+    expect($product->fresh()->extended_price_minor)->toBeNull()->and($product->fresh()->isFree())->toBeTrue();
 });

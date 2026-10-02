@@ -9,6 +9,7 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobDeliverableController;
 use App\Http\Controllers\JobEngagementController;
 use App\Http\Controllers\LegalController;
+use App\Http\Controllers\LicenceController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\ModelCatalogueController;
@@ -232,6 +233,13 @@ Route::middleware(['auth', 'seller'])->prefix('sell/models')->name('seller.model
 Route::get('/engagements/policies/cancellation', [PolicyManagementController::class, 'index'])->name('engagements.policy');
 Route::get('/terms', [LegalController::class, 'terms'])->name('legal.terms');
 Route::get('/privacy', [LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/licence-terms', [LegalController::class, 'licences'])->name('legal.licences');
+
+// The licences a member holds after buying models, and the certificate for each
+Route::middleware('auth')->group(function () {
+    Route::get('my-licences', [LicenceController::class, 'index'])->name('licences.index');
+    Route::get('my-licences/{licence:key}', [LicenceController::class, 'show'])->name('licences.show');
+});
 
 // Client - Freelancer Messaging
 Route::middleware(['auth'])->prefix('chat')->group(function () {
