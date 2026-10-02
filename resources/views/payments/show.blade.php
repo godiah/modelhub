@@ -22,9 +22,9 @@
             init() { if (this.pending) { this.timer = setInterval(() => this.tick(), 1000); this.poll = setInterval(() => this.check(), 3000); } },
         }">
         <x-card class="p-6 text-center sm:p-8">
-            <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ __('Pay for') }}</p>
-            <h1 class="mt-1 font-tertiary text-xl font-semibold text-neutral-900">{{ $payment->product?->title ?? __('A model') }}</h1>
-            <p class="mt-1 text-sm text-tertiary">{{ __(':tier licence', ['tier' => $tier->label()]) }} · <span class="font-semibold tabular-nums text-neutral-900">{{ Money::formatMinor($payment->amount_minor) }}</span></p>
+            <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ $payment->isEscrow() ? __('Fund the job') : __('Pay for') }}</p>
+            <h1 class="mt-1 font-tertiary text-xl font-semibold text-neutral-900">{{ $payment->isEscrow() ? $payment->engagement?->application?->job?->title : ($payment->product?->title ?? __('A model')) }}</h1>
+            <p class="mt-1 text-sm text-tertiary">@if ($payment->isEscrow()){{ __('Held in escrow until you approve the work') }}@else{{ __(':tier licence', ['tier' => $tier->label()]) }}@endif · <span class="font-semibold tabular-nums text-neutral-900">{{ Money::formatMinor($payment->amount_minor) }}</span></p>
 
             {{-- Waiting for the PIN --}}
             <div x-show="pending" @unless ($payment->isPending()) x-cloak @endunless class="mt-8" role="status" aria-live="polite">
@@ -39,7 +39,7 @@
                 <span class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600"><x-icon name="x-circle-solid" class="h-7 w-7" /></span>
                 <p class="mt-5 font-semibold text-neutral-900">{{ __('The payment did not go through') }}</p>
                 <p class="mt-1 text-sm text-tertiary" x-text="message || @js(__('Nothing was charged.'))">{{ $payment->failure_reason ?? __('Nothing was charged.') }}</p>
-                @if ($payment->product)<x-btn class="mt-6" :href="route('models.show', $payment->product)">{{ __('Try again') }}</x-btn>@endif
+                @if ($payment->isEscrow())<x-btn class="mt-6" :href="route('engagements.show', $payment->engagement_id)">{{ __('Try again') }}</x-btn>@elseif ($payment->product)<x-btn class="mt-6" :href="route('models.show', $payment->product)">{{ __('Try again') }}</x-btn>@endif
             </div>
 
             {{-- Money arrived but needs a person to look at it --}}

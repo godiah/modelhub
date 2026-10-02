@@ -10,6 +10,7 @@ use App\Models\JobCancellation;
 use App\Models\JobEngagement;
 use App\Models\JobPartialPayment;
 use App\Models\JobPaymentDispute;
+use App\Support\Money;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -50,8 +51,27 @@ class PartialPaymentService
             ];
         }
 
-        // Check if there are approved deliverables
-        if ($engagement->getCompletedDeliverablesCount() === 0) {
+        // A funded job's approved work has already been paid out of escrow as it was approved, so what can still be paid here is only extra, for work
+        // that was never approved, and only while what is left in escrow has not yet become the client's to have back.
+        $escrow = app(EscrowService::class);
+        $funded = $engagement->escrow_minor > 0;
+
+        if ($funded) {
+            if (! $escrow->reviewWindowOpen($engagement)) {
+                return [
+                    'can_process' => false,
+                    'message' => 'The review window has ended. What is left in escrow goes back to the client.',
+                ];
+            }
+
+            if ($escrow->remainingNetMinor($engagement) <= 0) {
+                return [
+                    'can_process' => false,
+                    'message' => 'Nothing is left in escrow to pay for.',
+                ];
+            }
+        } elseif ($engagement->getCompletedDeliverablesCount() === 0) {
+            // Check if there are approved deliverables
             return [
                 'can_process' => false,
                 'message' => 'No approved deliverables found for partial payment.',
@@ -69,8 +89,10 @@ class PartialPaymentService
 
         return [
             'can_process' => true,
-            'message' => 'You may proceed with processing the payment.',
-            'calculated_amount' => $engagement->calculatePartialPaymentAmount(),
+            'message' => $funded
+                ? 'The approved work has already been paid from escrow. You can pay extra for work that was not approved, up to '.Money::formatMinor($escrow->remainingNetMinor($engagement)).'. Leave the amount blank to pay nothing more and have the rest of the escrow returned to you.'
+                : 'You may proceed with processing the payment.',
+            'calculated_amount' => $funded ? 0 : $engagement->calculatePartialPaymentAmount(),
         ];
     }
 
@@ -79,6 +101,11 @@ class PartialPaymentService
      */
     public function calculatePartialPayment(JobEngagement $engagement)
     {
+        // Funded: approved work was paid as it was approved, so nothing more is owed by default
+        if ($engagement->escrow_minor > 0) {
+            return 0;
+        }
+
         $totalDeliverables = $engagement->getTotalDeliverablesCount();
         $approvedDeliverables = $engagement->getCompletedDeliverablesCount();
 
@@ -126,11 +153,18 @@ class PartialPaymentService
             // Calculate payment amount — manual amount overrides the auto-calculated one
             $amount = $manualAmount ?? $this->calculatePartialPayment($engagement);
 
-            if ($amount <= 0) {
+            $escrow = app(EscrowService::class);
+            $funded = $engagement->escrow_minor > 0;
+
+            if ($amount < 0 || ($amount == 0 && ! $funded)) {
                 throw new \Exception('Cannot process a payment amount that is zero or negative.');
             }
 
-            if ($amount > $engagement->net_amount) {
+            if ($funded) {
+                if ((int) round($amount * 100) > $escrow->remainingNetMinor($engagement)) {
+                    throw new \Exception('Payment amount cannot exceed what is left in escrow for the freelancer ('.Money::formatMinor($escrow->remainingNetMinor($engagement)).').');
+                }
+            } elseif ($amount > $engagement->net_amount) {
                 throw new \Exception('Payment amount cannot exceed the engagement\'s net amount.');
             }
 
@@ -163,6 +197,9 @@ class PartialPaymentService
                     'partial_payment_processed' => false,
                 ]);
             }
+
+            // What is left in escrow stays put until the freelancer has answered
+            $escrow->freeze($engagement);
 
             // Notify the freelancer about the payment
             EngagementNotificationHelper::sendPaymentNotification($engagement, $partialPayment);
@@ -222,11 +259,12 @@ class PartialPaymentService
                 ]);
             }
 
+            // A funded job pays the accepted amount out of escrow, and what is left becomes the client's to have back
+            $this->payFromEscrow($engagement, $payment, (float) $payment->amount, "partial:{$payment->id}");
+
             // Mark engagement as settled
             $engagement->markAsSettled();
-
-            // Here you would integrate with your payment gateway to process the actual payment
-            // For example: $this->paymentGateway->transferFunds($payment->amount, $engagement->applicant);
+            app(EscrowService::class)->closeOut($engagement);
 
             // Notify the client about acceptance
             EngagementNotificationHelper::sendPaymentAcceptedNotification($engagement, $payment);
@@ -367,6 +405,11 @@ class PartialPaymentService
             throw new \Exception('Resolution amount cannot exceed the engagement\'s net amount.');
         }
 
+        // For a funded job the amount is paid out of what is left in escrow, so it cannot be more than that
+        if ($finalAmount !== null && $engagement->escrow_minor > 0 && (int) round($finalAmount * 100) > app(EscrowService::class)->remainingNetMinor($engagement)) {
+            throw new \Exception('Resolution amount cannot exceed what is left in escrow for the freelancer ('.Money::formatMinor(app(EscrowService::class)->remainingNetMinor($engagement)).').');
+        }
+
         DB::beginTransaction();
         try {
             $payment = JobPartialPayment::where('dispute_id', $dispute->id)->first();
@@ -396,11 +439,12 @@ class PartialPaymentService
                 ]);
             }
 
+            // A funded job pays the decided amount out of escrow, and what is left becomes the client's to have back
+            $this->payFromEscrow($engagement, $dispute, (float) ($finalAmount ?? $cancellation->partial_payment_amount ?? 0), "dispute:{$dispute->id}", $authUser);
+
             // Mark engagement as settled
             $engagement->markAsSettled();
-
-            // Here you would integrate with your payment gateway to process the actual payment
-            // For example: $this->paymentGateway->transferFunds($finalAmount, $engagement->applicant);
+            app(EscrowService::class)->closeOut($engagement);
 
             // Notify involved parties: $engagement->poster and $engagement->applicant are already
             // User models (hasOneThrough) — no ->user needed when wiring up notifications here.
@@ -428,5 +472,17 @@ class PartialPaymentService
             ]);
             throw $e;
         }
+    }
+
+    /** Pay the freelancer out of the job's escrow, if it was funded (an unfunded engagement moves no money, as before). */
+    private function payFromEscrow(JobEngagement $engagement, $reference, float $amount, string $key, $by = null): void
+    {
+        if ($engagement->escrow_minor <= 0 || $amount <= 0) {
+            return;
+        }
+
+        $engagement->loadMissing('application.job');
+
+        app(EscrowService::class)->payExtra($engagement, (int) round($amount * 100), $key, 'Payment settled for "'.$engagement->application->job->title.'"', $reference, $by);
     }
 }

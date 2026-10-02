@@ -28,11 +28,11 @@ class AdminPaymentController extends Controller
         $term = trim((string) $request->query('q'));
         [$sort, $dir] = ListSort::resolve($request, array_keys(self::SORTS), default: 'date', descFirst: ['date', 'amount']);
 
-        $payments = Payment::with(['buyer:id,name,avatar', 'product:id,slug,title,deleted_at'])
+        $payments = Payment::with(['buyer:id,name,avatar', 'product:id,slug,title,deleted_at', 'engagement.application.job:id,title'])
             ->when($tab === 'failed', fn ($q) => $q->whereIn('status', [PaymentStatus::Failed, PaymentStatus::Cancelled, PaymentStatus::Expired]))
             ->when(! in_array($tab, ['all', 'failed'], true), fn ($q) => $q->where('status', $tab))
             ->when($term !== '', fn ($q) => $q->where(fn ($w) => $w->where('reference', 'like', "%{$term}%")->orWhere('receipt', 'like', "%{$term}%")
-                ->orWhereHas('buyer', fn ($b) => $b->where('name', 'like', "%{$term}%"))->orWhereHas('product', fn ($p) => $p->where('title', 'like', "%{$term}%"))))
+                ->orWhereHas('buyer', fn ($b) => $b->where('name', 'like', "%{$term}%"))->orWhereHas('product', fn ($p) => $p->where('title', 'like', "%{$term}%"))->orWhereHas('engagement.application.job', fn ($j) => $j->where('title', 'like', "%{$term}%"))))
             ->tap(fn ($q) => ListSort::apply($q, $sort, $dir, self::SORTS))
             ->paginate(15)->withQueryString();
 
@@ -51,7 +51,7 @@ class AdminPaymentController extends Controller
 
     public function show(Request $request, Payment $payment)
     {
-        $payment->load(['buyer:id,name,email,avatar', 'seller:id,name,avatar', 'product:id,slug,title,deleted_at', 'refunder:id,name', 'purchase.licence']);
+        $payment->load(['buyer:id,name,email,avatar', 'seller:id,name,avatar', 'product:id,slug,title,deleted_at', 'engagement.application.job:id,title', 'refunder:id,name', 'purchase.licence']);
         $licence = $payment->purchase?->licence;
 
         return view('admin.payments.show', [

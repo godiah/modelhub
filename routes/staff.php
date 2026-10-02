@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminBulkController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminDisputeController;
 use App\Http\Controllers\Admin\AdminEngagementController;
+use App\Http\Controllers\Admin\AdminEscrowRefundController;
 use App\Http\Controllers\Admin\AdminLedgerController;
 use App\Http\Controllers\Admin\AdminMemberController;
 use App\Http\Controllers\Admin\AdminModelDirectoryController;
@@ -129,7 +130,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:view payments')->group(function () {
             Route::get('payments', [AdminPaymentController::class, 'index'])->name('payments.index');
             Route::get('payments/{payment:reference}', [AdminPaymentController::class, 'show'])->name('payments.show');
+            Route::get('escrow-refunds', [AdminEscrowRefundController::class, 'index'])->name('escrow-refunds.index');
         });
+        Route::middleware('can:refund payments')->post('escrow-refunds/{engagement}', [AdminEscrowRefundController::class, 'refund'])->whereNumber('engagement')->middleware('throttle:20,1')->name('escrow-refunds.refund');
         Route::middleware('can:refund payments')->post('payments/{payment:reference}/refund', [AdminPaymentController::class, 'refund'])->middleware('throttle:20,1')->name('payments.refund');
         Route::middleware('can:view ledger')->group(function () {
             Route::get('ledger', [AdminLedgerController::class, 'index'])->name('ledger.index');

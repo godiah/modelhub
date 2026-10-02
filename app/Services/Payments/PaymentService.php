@@ -6,9 +6,12 @@ use App\Contracts\PaymentGateway;
 use App\Enums\GatewayState;
 use App\Enums\LicenceTier;
 use App\Enums\PaymentStatus;
+use App\Models\JobEngagement;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\User;
+use App\Notifications\JobFundedNotification;
+use App\Notifications\JobFundedReceiptNotification;
 use App\Notifications\ModelPurchasedNotification;
 use App\Notifications\ModelSoldNotification;
 use App\Services\Ledger\LedgerService;
@@ -32,7 +35,10 @@ use Throwable;
  */
 class PaymentService
 {
-    public function __construct(protected PaymentGateway $gateway, protected LicenceService $licences, protected LedgerService $ledger) {}
+    /** What the notifications sent after a payment settles read, loaded up front. */
+    private const AFTER = ['buyer', 'seller', 'product', 'engagement.application.job'];
+
+    public function __construct(protected PaymentGateway $gateway, protected LicenceService $licences, protected LedgerService $ledger, protected EscrowService $escrow) {}
 
     /** Start paying for a licence on a model. Returns the payment (pending, or failed if the prompt could not be sent), or the reason it cannot start. */
     public function start(User $buyer, Product $product, LicenceTier $tier, string $phone): Payment|string
@@ -77,6 +83,49 @@ class PaymentService
             'expires_at' => now()->addMinutes(config('payments.pending_minutes')),
         ]);
 
+        return $this->dispatch($payment, $msisdn, $amount);
+    }
+
+    /**
+     * Start a client paying a job's escrow: the agreed amount, by M-Pesa, once the freelancer has accepted. Returns the payment (pending, or failed
+     * if the prompt could not be sent), or the reason it cannot start.
+     */
+    public function startEscrow(User $client, JobEngagement $engagement, string $phone): Payment|string
+    {
+        if (! $msisdn = Phone::msisdn($phone)) {
+            return 'Enter a valid Safaricom number, for example 0712 345 678.';
+        }
+
+        $engagement->loadMissing('application.job');
+
+        if ($error = $this->escrow->cannotFund($engagement, $client)) {
+            return $error;
+        }
+
+        $amount = $this->escrow->agreedMinor($engagement);
+
+        // Pressing "pay" twice must not send two prompts
+        $waiting = Payment::where('user_id', $client->id)->where('engagement_id', $engagement->id)->where('status', PaymentStatus::Pending)->where('expires_at', '>', now())->latest('id')->first();
+
+        if ($waiting) {
+            return $waiting;
+        }
+
+        $fee = $this->escrow->feeMinor($engagement);
+
+        $payment = Payment::create([
+            'reference' => Payment::newReference(), 'purpose' => Payment::PURPOSE_ESCROW, 'user_id' => $client->id, 'seller_id' => $engagement->application->applicant_id, 'engagement_id' => $engagement->id,
+            'amount_minor' => $amount, 'currency' => config('marketplace.currency'), 'msisdn' => $msisdn, 'status' => PaymentStatus::Pending, 'gateway' => $this->gateway->name(),
+            'commission_rate' => $amount > 0 ? round($fee / $amount, 4) : 0, 'commission_minor' => $fee, 'seller_share_minor' => $amount - $fee, 'hold_days' => 0,
+            'expires_at' => now()->addMinutes(config('payments.pending_minutes')),
+        ]);
+
+        return $this->dispatch($payment, $msisdn, $amount);
+    }
+
+    /** Ask the gateway to prompt the phone, and record its answer on the payment. */
+    private function dispatch(Payment $payment, string $msisdn, int $amount): Payment
+    {
         try {
             $response = $this->gateway->requestPayment(new PaymentRequest($payment->reference, $msisdn, $amount, Str::limit(config('app.name'), 13, '')));
         } catch (Throwable $e) {
@@ -135,7 +184,7 @@ class PaymentService
         $licence = null;
 
         $payment = DB::transaction(function () use ($payment, $outcome, &$licence) {
-            $payment = Payment::with(['product', 'buyer'])->whereKey($payment->id)->lockForUpdate()->firstOrFail();
+            $payment = Payment::with(['product', 'buyer', 'engagement.application.job'])->whereKey($payment->id)->lockForUpdate()->firstOrFail();
 
             if (in_array($payment->status, [PaymentStatus::Succeeded, PaymentStatus::Review], true)) {
                 // A payment settled by a status query has no receipt: the callback that follows supplies it
@@ -149,7 +198,7 @@ class PaymentService
             if ($outcome->state === GatewayState::Succeeded) {
                 $licence = $this->settle($payment, $outcome);
 
-                return $payment->fresh();
+                return $payment->fresh(self::AFTER);
             }
 
             // A failure only ends a payment that was still waiting; it never undoes anything
@@ -166,12 +215,18 @@ class PaymentService
                 }
             }
 
-            return $payment->fresh();
+            return $payment->fresh(self::AFTER);
         });
 
         if ($licence && $payment->status === PaymentStatus::Succeeded) {
-            $payment->buyer->notify(new ModelPurchasedNotification($payment, $licence));
-            $payment->seller->notify(new ModelSoldNotification($payment, $payment->product));
+            if ($payment->isEscrow()) {
+                $title = $payment->engagement->application->job->title;
+                $payment->buyer->notify(new JobFundedReceiptNotification($payment->engagement, $title, $payment->amount_minor, $payment->receipt));
+                $payment->seller->notify(new JobFundedNotification($payment->engagement, $title, $payment->amount_minor));
+            } else {
+                $payment->buyer->notify(new ModelPurchasedNotification($payment, $licence));
+                $payment->seller->notify(new ModelSoldNotification($payment, $payment->product));
+            }
         }
 
         return $payment;
@@ -186,6 +241,10 @@ class PaymentService
             $this->review($payment, $outcome, $paid, 'Paid '.Money::formatMinor($paid).' but '.Money::formatMinor($payment->amount_minor).' was expected.');
 
             return null;
+        }
+
+        if ($payment->isEscrow()) {
+            return $this->settleEscrow($payment, $outcome, $paid);
         }
 
         $licence = $this->licences->grantPaid($payment);
@@ -214,6 +273,20 @@ class PaymentService
         ]);
 
         return $licence;
+    }
+
+    /** Money for a job has arrived: hold it in escrow and open the job for work. Returns true when it did, so the caller knows to tell both sides. */
+    private function settleEscrow(Payment $payment, PaymentOutcome $outcome, int $paid): ?bool
+    {
+        if ($reason = $this->escrow->fund($payment)) {
+            $this->review($payment, $outcome, $paid, $reason);
+
+            return null;
+        }
+
+        $payment->update(['status' => PaymentStatus::Succeeded, 'received_minor' => $paid, 'receipt' => $outcome->receipt, 'completed_at' => now(), 'failure_reason' => null]);
+
+        return true;
     }
 
     /** Money is in but cannot become a licence: park it as unallocated and flag the payment for staff, rather than lose track of it. */

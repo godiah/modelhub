@@ -24,6 +24,11 @@ class JobEngagement extends Model
         'net_amount',
         'payment_escrowed_at',
         'payment_released_at',
+        'escrow_minor',
+        'released_net_minor',
+        'released_fee_minor',
+        'refunded_minor',
+        'escrow_refund_due_at',
         'is_archived_by_applicant',
         'is_archived_by_poster',
     ];
@@ -39,6 +44,11 @@ class JobEngagement extends Model
         'agreed_amount' => 'decimal:2',
         'service_fee' => 'decimal:2',
         'net_amount' => 'decimal:2',
+        'escrow_minor' => 'integer',
+        'released_net_minor' => 'integer',
+        'released_fee_minor' => 'integer',
+        'refunded_minor' => 'integer',
+        'escrow_refund_due_at' => 'datetime',
         'is_archived_by_applicant' => 'boolean',
         'is_archived_by_poster' => 'boolean',
     ];
@@ -82,6 +92,54 @@ class JobEngagement extends Model
     /**
      * Get the messages for the engagement.
      */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'engagement_id');
+    }
+
+    /** Accepted by the freelancer, waiting for the client to put the money into escrow. */
+    public function isAwaitingFunding(): bool
+    {
+        return $this->status === EngagementStatus::ApplicantAccepted;
+    }
+
+    public function escrowRefunds()
+    {
+        return $this->hasMany(EscrowRefund::class, 'engagement_id');
+    }
+
+    /** What is still in escrow for this job, in minor units (funded less released and returned). */
+    public function escrowRemainingMinor(): int
+    {
+        return max(0, $this->escrow_minor - $this->released_net_minor - $this->released_fee_minor - $this->refunded_minor);
+    }
+
+    /** Where the job's money stands, in a few words, for lists. An engagement from before job escrow keeps what its old bookkeeping flags said. */
+    public function escrowLabel(): string
+    {
+        if ($this->escrow_minor <= 0) {
+            return match (true) {
+                $this->isAwaitingFunding() => __('Awaiting funding'),
+                $this->payment_released_at !== null => __('Paid out'),
+                $this->payment_escrowed_at !== null => __('In escrow'),
+                default => __('Not funded'),
+            };
+        }
+
+        if ($this->escrowRemainingMinor() > 0) {
+            return $this->escrow_refund_due_at?->isPast() ? __('Refund due') : __('In escrow');
+        }
+
+        return $this->refunded_minor > 0 ? ($this->released_net_minor > 0 ? __('Part paid, rest returned') : __('Returned to client')) : __('Paid out');
+    }
+
+    /** Jobs with money in escrow that is now the client's to have back, waiting for staff to record the refund. */
+    public function scopeEscrowRefundDue($query)
+    {
+        return $query->where('escrow_minor', '>', 0)->whereNotNull('escrow_refund_due_at')->where('escrow_refund_due_at', '<=', now())
+            ->whereRaw('escrow_minor - released_net_minor - released_fee_minor - refunded_minor > 0');
+    }
+
     public function messages()
     {
         return $this->hasMany(Message::class, 'engagement_id');

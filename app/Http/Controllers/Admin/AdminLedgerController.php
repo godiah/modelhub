@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\JobEngagement;
 use App\Models\LedgerTransaction;
 use App\Models\Payment;
 use App\Models\Payout;
@@ -20,6 +21,7 @@ class AdminLedgerController extends Controller
         'releases' => ['Releases', ['release']],
         'payouts' => ['Withdrawals', ['payout_requested', 'payout_paid', 'payout_returned']],
         'refunds' => ['Refunds', ['refund', 'refund_unallocated']],
+        'escrow' => ['Job escrow', ['escrow_funded', 'escrow_released', 'escrow_extra', 'escrow_refund']],
     ];
 
     public function index(Request $request, LedgerReport $report)
@@ -53,6 +55,10 @@ class AdminLedgerController extends Controller
 
         if ($transaction->reference_type === Payout::class && ($reference = Payout::whereKey($transaction->reference_id)->value('reference'))) {
             return ['label' => 'Withdrawal '.$reference, 'url' => route('admin.payouts.index', ['status' => 'all'])];
+        }
+
+        if ($transaction->reference_type === JobEngagement::class && $transaction->reference_id) {
+            return ['label' => 'Job engagement #'.$transaction->reference_id, 'url' => route('admin.engagements.show', $transaction->reference_id)];
         }
 
         return null;

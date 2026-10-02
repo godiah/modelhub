@@ -27,7 +27,7 @@
 
         <section aria-label="{{ __('Where the money is') }}" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <x-stat-tile :label="__('Held at the gateway')" :value="Money::formatMinor($summary['gateway'])" :hint="__('All the money we hold')" icon="banknotes" />
-            <x-stat-tile :label="__('Owed to members')" :value="Money::formatMinor($summary['owed'])" :hint="__(':held in hold · :avail available', ['held' => Money::formatMinor($summary['pending'], 0), 'avail' => Money::formatMinor($summary['available'], 0)])" icon="user-group" tone="amber" />
+            <x-stat-tile :label="__('Owed to members')" :value="Money::formatMinor($summary['owed'])" :hint="__(':held in hold · :avail available · :esc in job escrow', ['esc' => Money::formatMinor($summary['escrow'], 0), 'held' => Money::formatMinor($summary['pending'], 0), 'avail' => Money::formatMinor($summary['available'], 0)])" icon="user-group" tone="amber" />
             <x-stat-tile :label="__('Earned by the platform')" :value="Money::formatMinor($summary['earned'])" :hint="__(':c commission · :f fees', ['c' => Money::formatMinor($summary['commission'], 0), 'f' => Money::formatMinor($summary['fees'], 0)])" icon="cash" />
             <x-stat-tile :label="__('Needs sorting out')" :value="Money::formatMinor($summary['unallocated'] + $summary['in_payouts'])" :hint="__(':u unallocated · :p in withdrawals', ['u' => Money::formatMinor($summary['unallocated'], 0), 'p' => Money::formatMinor($summary['in_payouts'], 0)])" icon="exclamation-triangle" :tone="$summary['unallocated'] > 0 ? 'red' : 'teal'" />
         </section>

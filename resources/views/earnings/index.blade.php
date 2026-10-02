@@ -14,18 +14,19 @@
     <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8">
         <div>
             <h1 class="font-tertiary text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl">{{ __('Earnings') }}</h1>
-            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ __('What your models have earned, after the platform commission. A sale\'s share is held for a few days before you can withdraw it.') }}</p>
+            <p class="mt-1 max-w-2xl text-sm text-tertiary">{{ $showSales ? __('What your models and your jobs have earned, after the platform\'s commission and service fee. A sale\'s share is held for a few days before you can withdraw it; what a job pays you is yours as soon as the client approves the work.') : __('What your jobs have paid you, after the platform\'s service fee. It is yours to withdraw as soon as the client approves the work.') }}</p>
         </div>
 
         <section aria-label="{{ __('Balances') }}" class="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <x-stat-tile :label="__('Available to withdraw')" :value="Money::formatMinor($summary['available'])" :hint="__('Past the hold period')" icon="banknotes" />
+            <x-stat-tile :label="__('Available to withdraw')" :value="Money::formatMinor($summary['available'])" :hint="__('Ready to take out')" icon="banknotes" />
             <x-stat-tile :label="__('In the hold period')" :value="Money::formatMinor($summary['pending'])" :hint="__('Becomes available soon')" icon="clock" tone="amber" />
             <x-stat-tile :label="__('Withdrawn')" :value="Money::formatMinor($summary['withdrawn'])" :hint="$summary['in_progress'] > 0 ? __(':amount on its way', ['amount' => Money::formatMinor($summary['in_progress'])]) : __('Sent to your M-Pesa')" icon="cloud-arrow-up" />
-            <x-stat-tile :label="__('Earned in total')" :value="Money::formatMinor($summary['earned'])" :hint="__('Your share of every sale')" icon="cash" />
+            <x-stat-tile :label="__('Earned in total')" :value="Money::formatMinor($summary['earned'])" :hint="__('Your share of every sale and job')" icon="cash" />
         </section>
 
         <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
             <div class="space-y-6 lg:col-span-2">
+                @if ($showSales)
                 <x-panel :title="__('Your sales')" flush>
                     @if ($sales->isEmpty())
                         <x-empty-state icon="banknotes" :title="__('No sales yet')" :description="__('When someone buys one of your models, your share appears here.')" />
@@ -45,6 +46,29 @@
                             @endforeach
                         </ul>
                         <x-pager :paginator="$sales" footer />
+                    @endif
+                </x-panel>
+                @endif
+
+                <x-panel :title="__('Job payments')" :description="__('Paid into your balance when a client approves your work.')" flush>
+                    @if ($jobPayments->isEmpty())
+                        <x-empty-state icon="briefcase" :title="__('No job payments yet')" :description="__('When a client approves a deliverable on a funded job, your share appears here.')" />
+                    @else
+                        <ul class="divide-y divide-neutral-100">
+                            @foreach ($jobPayments as $row)
+                                <li class="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3.5">
+                                    <div class="min-w-0 flex-1">
+                                        <p class="truncate text-sm font-semibold text-neutral-900">@if ($row->engagement_id)<a href="{{ route('engagements.show', $row->engagement_id) }}" class="hover:text-teal-700 hover:underline">{{ $row->title }}</a>@else{{ $row->title }}@endif</p>
+                                        <p class="text-xs text-tertiary">{{ $row->kind === 'settlement' ? __('Settlement of a cancelled job') : (isset($row->meta['approved']) ? __(':approved of :total deliverables approved', ['approved' => $row->meta['approved'], 'total' => $row->meta['total']]) : __('Deliverable approved')) }} · {{ $row->at->format('M j, Y') }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-sm font-semibold tabular-nums text-neutral-900">{{ Money::formatMinor($row->amount) }}</p>
+                                        <p class="text-xs text-green-700">{{ __('Available') }}</p>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                        <x-pager :paginator="$jobPayments" footer />
                     @endif
                 </x-panel>
 

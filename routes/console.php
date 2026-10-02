@@ -4,6 +4,7 @@ use App\Console\Commands\CheckPayouts;
 use App\Console\Commands\DeactivateExpiredJobs;
 use App\Console\Commands\ExpirePayments;
 use App\Console\Commands\ReleaseEarnings;
+use App\Console\Commands\ReleaseEscrow;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\ClosureCommand;
 use Illuminate\Foundation\Inspiring;
@@ -23,4 +24,7 @@ return function (Schedule $schedule) {
     // Sale earnings leave the hold and become withdrawable; withdrawals being sent are checked with the gateway
     $schedule->command(ReleaseEarnings::class)->hourly()->withoutOverlapping();
     $schedule->command(CheckPayouts::class)->everyFiveMinutes()->withoutOverlapping();
+
+    // A safety net for job escrow: anything approved but not yet released is released
+    $schedule->command(ReleaseEscrow::class)->hourly()->withoutOverlapping();
 };

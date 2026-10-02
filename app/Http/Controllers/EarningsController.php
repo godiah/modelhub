@@ -22,9 +22,13 @@ class EarningsController extends Controller
     {
         $user = $request->user();
 
+        $sales = Payment::with('product:id,slug,title,deleted_at')->where('seller_id', $user->id)->where('status', PaymentStatus::Succeeded)->where('purpose', Payment::PURPOSE_SALE)->latest('completed_at')->latest('id')->paginate(10, ['*'], 'sales');
+
         return view('earnings.index', [
             'summary' => $this->earnings->summary($user),
-            'sales' => Payment::with('product:id,slug,title,deleted_at')->where('seller_id', $user->id)->where('status', PaymentStatus::Succeeded)->latest('completed_at')->latest('id')->paginate(10),
+            'sales' => $sales,
+            'jobPayments' => $this->earnings->jobPayments($user),
+            'showSales' => $user->isApprovedSeller() || $sales->total() > 0,
             'payouts' => Payout::where('user_id', $user->id)->latest('id')->limit(10)->get(),
             'open' => Payout::where('user_id', $user->id)->whereIn('status', [PayoutStatus::Requested, PayoutStatus::Processing])->latest('id')->first(),
         ]);

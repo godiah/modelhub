@@ -25,6 +25,10 @@ return [
     // Checkout is not built yet: until it is, product pages show "Purchases open soon" instead of a buy button.
     'purchases_enabled' => (bool) env('MARKETPLACE_PURCHASES_ENABLED', false),
 
+    // Job escrow: when on, a freelancer's accepted offer waits for the client to fund it by M-Pesa before work starts, and approved deliverables
+    // release money to the freelancer. Off, engagements work as they always did (nothing is paid through the platform).
+    'jobs_escrow_enabled' => (bool) env('JOBS_ESCROW_ENABLED', false),
+
     // Money is stored in minor units with its currency; KES only at launch.
     'currency' => 'KES',
 

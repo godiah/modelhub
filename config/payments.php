@@ -34,6 +34,10 @@ return [
     // A withdrawal still "being sent" this long after approval has not been confirmed by M-Pesa: staff are told, and settle it by hand
     'payout_stale_hours' => (int) env('PAYMENTS_PAYOUT_STALE_HOURS', 6),
 
+    // A job cancelled by the client (or by agreement) keeps what is left in escrow for this many days, so the client can still pay for work done;
+    // after that it is the client's to have back. A freelancer who cancels forfeits it at once.
+    'escrow_cancel_window_days' => (int) env('PAYMENTS_ESCROW_CANCEL_WINDOW_DAYS', 7),
+
     // The fake gateway: how long a simulated payment stays pending before it resolves
     'fake' => [
         'delay_seconds' => (int) env('PAYMENTS_FAKE_DELAY', 3),

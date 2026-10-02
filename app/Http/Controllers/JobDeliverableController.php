@@ -13,6 +13,7 @@ use App\Http\Requests\Deliverable\UpdateDeliverableRequest;
 use App\Mail\DeliverableSubmitted;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
+use App\Services\Payments\EscrowService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -156,6 +157,15 @@ class JobDeliverableController extends Controller
             );
         }
 
+        // With job escrow on, nothing is submitted until the client has funded the job
+        if ($deliverable->engagement->isAwaitingFunding()) {
+            return $this->respondWithError(
+                'This job is waiting to be funded.',
+                'Waiting for funding',
+                'You can submit work once the client has put the money into escrow.'
+            );
+        }
+
         // Prevent submission if approved
         if ($deliverable->approved_at) {
             return redirect()->back()->withErrors(['message' => 'Approved deliverables cannot be modified.']);
@@ -277,6 +287,8 @@ class JobDeliverableController extends Controller
 
             DB::commit();
 
+            $this->releaseEscrow($engagement);
+
             return $this->respondWithSuccess(
                 'Deliverable has been approved.',
                 'Deliverable Approved',
@@ -331,6 +343,19 @@ class JobDeliverableController extends Controller
             'Deliverable has been rejected. The freelancer will be notified.',
             'Deliverable has been rejected. The freelancer will be notified.'
         );
+    }
+
+    /**
+     * Release what the approved work has earned out of escrow, once the approval is safely saved. If this fails the approval stands and the
+     * hourly escrow:release sweep makes the release, so the freelancer is never left unpaid for work the client approved.
+     */
+    private function releaseEscrow(JobEngagement $engagement): void
+    {
+        try {
+            app(EscrowService::class)->releaseApproved($engagement);
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**

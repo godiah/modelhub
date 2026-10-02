@@ -6,7 +6,12 @@ use App\Notifications\ApplicationWithdrawnNotification;
 use App\Notifications\DisputeCreatedNotification;
 use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
+use App\Notifications\EscrowRefundedNotification;
 use App\Notifications\HiredNotification;
+use App\Notifications\JobAwaitingFundingNotification;
+use App\Notifications\JobEarningReleasedNotification;
+use App\Notifications\JobFundedNotification;
+use App\Notifications\JobFundedReceiptNotification;
 use App\Notifications\JobPostedNotification;
 use App\Notifications\ModelPurchasedNotification;
 use App\Notifications\ModelReviewedNotification;
@@ -88,7 +93,7 @@ enum NotificationCategory: string
             self::Payments => [PartialPaymentProcessedNotification::class, PaymentAcceptedNotification::class, PaymentDisputedNotification::class],
             self::Disputes => [DisputeCreatedNotification::class],
             self::Reviews => [ReviewSubmittedNotification::class],
-            self::Projects => [JobPostedNotification::class, ProjectTakenDownNotification::class, ProjectRestoredNotification::class],
+            self::Projects => [JobPostedNotification::class, JobAwaitingFundingNotification::class, JobFundedNotification::class, JobFundedReceiptNotification::class, JobEarningReleasedNotification::class, EscrowRefundedNotification::class, ProjectTakenDownNotification::class, ProjectRestoredNotification::class],
             self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class, ModelReviewedNotification::class, ModelReviewReplyNotification::class, ModelReviewHiddenNotification::class, ModelPurchasedNotification::class, ModelSoldNotification::class, PayoutPaidNotification::class, PayoutNotSentNotification::class, PayoutRequestedNotification::class, PayoutNotConfirmedNotification::class, PaymentRefundedNotification::class, SaleRefundedNotification::class],
             self::Other => [],
         };

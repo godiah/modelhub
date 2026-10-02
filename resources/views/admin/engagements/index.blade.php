@@ -31,7 +31,7 @@
                             </a>
                         </td>
                         <td class="whitespace-nowrap px-4 text-right font-medium tabular-nums text-neutral-900"><x-money :amount="$engagement->agreed_amount" :decimals="0" /></td>
-                        <td class="hidden whitespace-nowrap px-4 text-neutral-600 md:table-cell">{{ $engagement->payment_released_at ? __('Paid out') : ($engagement->payment_escrowed_at ? __('In escrow') : __('Not funded')) }}</td>
+                        <td class="hidden whitespace-nowrap px-4 text-neutral-600 md:table-cell">{{ $engagement->escrowLabel() }}</td>
                         <td class="whitespace-nowrap px-4 text-right text-neutral-600">{{ ($engagement->started_at ?? $engagement->created_at)->format('M j, Y') }}</td>
                     </x-staff.row>
                 @endforeach

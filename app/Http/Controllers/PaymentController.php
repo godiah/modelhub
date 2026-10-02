@@ -18,10 +18,10 @@ class PaymentController extends Controller
         $payment = $this->payments->refresh($payment);
 
         if ($payment->status === PaymentStatus::Succeeded) {
-            return redirect()->route('licences.show', $payment->purchase->licence)->with('status', 'Payment received. Your licence is ready.');
+            return $this->afterSuccess($payment)->with('status', $payment->isEscrow() ? 'Payment received. The job is funded and work can start.' : 'Payment received. Your licence is ready.');
         }
 
-        return view('payments.show', ['payment' => $payment->load('product')]);
+        return view('payments.show', ['payment' => $payment->load('product', 'engagement.application.job')]);
     }
 
     /** JSON for the waiting page: where the payment has got to, and where to go next. */
@@ -33,8 +33,16 @@ class PaymentController extends Controller
             'status' => $payment->status->value,
             'final' => $payment->status->isFinal(),
             'message' => $payment->failure_reason,
-            'redirect' => $payment->status === PaymentStatus::Succeeded ? route('licences.show', $payment->purchase->licence) : null,
+            'redirect' => $payment->status === PaymentStatus::Succeeded ? $this->afterSuccess($payment)->getTargetUrl() : null,
         ]);
+    }
+
+    /** Where a paid payment leads: the licence for a model, the workspace for a funded job. */
+    private function afterSuccess(Payment $payment)
+    {
+        return $payment->isEscrow()
+            ? redirect()->route('engagements.show', $payment->engagement_id)
+            : redirect()->route('licences.show', $payment->purchase->licence);
     }
 
     private function mine(Request $request, Payment $payment): Payment

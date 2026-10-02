@@ -14,9 +14,9 @@
     <div class="container mx-auto max-w-7xl space-y-6 px-4 py-8" x-data="{ refunding: false, reason: '' }">
         <a href="{{ route('admin.payments.index') }}" wire:navigate class="inline-flex items-center gap-1.5 text-sm font-medium text-teal-700 hover:underline"><x-icon name="arrow-left" class="h-4 w-4" />{{ __('All payments') }}</a>
 
-        <x-staff.header class="!mb-0" :title="$payment->product?->title ?? __('A deleted model')">
+        <x-staff.header class="!mb-0" :title="$payment->subjectTitle()">
             <x-slot:badges><x-badge :tone="$payment->status->tone()" class="px-2.5 py-0.5 text-xs font-medium tracking-normal">{{ __($payment->status->label()) }}</x-badge></x-slot:badges>
-            <span class="font-mono">{{ $payment->reference }}</span> · {{ __(':tier licence', ['tier' => $payment->tier->label()]) }} · {{ $payment->created_at->format('F j, Y · g:i A') }}
+            <span class="font-mono">{{ $payment->reference }}</span> · {{ $payment->subjectKind() }} · {{ $payment->created_at->format('F j, Y · g:i A') }}
         </x-staff.header>
 
         @if ($isReview)

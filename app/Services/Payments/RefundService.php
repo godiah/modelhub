@@ -32,6 +32,10 @@ class RefundService
     /** Why this payment cannot be refunded, or null when it can. */
     public function cannotRefund(Payment $payment): ?string
     {
+        if ($payment->isEscrow() && $payment->status === PaymentStatus::Succeeded) {
+            return 'This money is held in the job\'s escrow. It is paid out or returned from the job, not refunded here.';
+        }
+
         return match ($payment->status) {
             PaymentStatus::Succeeded, PaymentStatus::Review => null,
             PaymentStatus::Refunded => 'This payment has already been refunded.',

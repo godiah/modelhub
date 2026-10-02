@@ -16,7 +16,7 @@ enum EngagementStatus: string
     {
         return match ($this) {
             self::EmployerAccepted => 'Pending',
-            self::ApplicantAccepted => 'Accepted',
+            self::ApplicantAccepted => 'Awaiting funding',
             self::Active => 'Active',
             self::Completed => 'Completed',
             self::Cancelled => 'Withdrawn',
