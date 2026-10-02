@@ -8,6 +8,7 @@ use App\Enums\PayoutStatus;
 use App\Models\Payout;
 use App\Models\Staff;
 use App\Models\User;
+use App\Notifications\PayoutNotConfirmedNotification;
 use App\Notifications\PayoutNotSentNotification;
 use App\Notifications\PayoutPaidNotification;
 use App\Notifications\PayoutRequestedNotification;
@@ -21,6 +22,7 @@ use App\Support\Payments\PayoutRequest;
 use App\Support\Phone;
 use App\Support\Settings\FeePolicy;
 use App\Support\Staff\StaffAudit;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -139,8 +141,10 @@ class PayoutService
         try {
             $response = $this->gateway->sendPayout(new PayoutRequest($payout->reference, $payout->msisdn, $payout->net_minor, 'Withdrawal'));
         } catch (Throwable $e) {
+            // We cannot tell whether the gateway took it. Giving the money back now could pay the member twice, so the withdrawal stays "being
+            // sent" under our own reference, for the gateway's result or for staff to settle once they have checked.
             report($e);
-            $response = new GatewayResponse(false, null, 'The transfer service is not available right now. Try again in a moment.');
+            $response = new GatewayResponse(true, $payout->reference, 'Sent; waiting for confirmation.');
         }
 
         if (! $response->accepted) {
@@ -170,17 +174,67 @@ class PayoutService
         return $this->applyOutcome($payout, $outcome);
     }
 
-    /** Check every payout still being sent. */
+    /** Check every payout still being sent, and tell staff about any that M-Pesa has not confirmed after too long. */
     public function checkProcessing(): int
     {
         $count = 0;
 
         Payout::where('status', PayoutStatus::Processing)->whereNotNull('gateway_reference')->each(function (Payout $payout) use (&$count) {
-            $this->refresh($payout);
+            $payout = $this->refresh($payout);
             $count++;
+
+            if ($payout->status === PayoutStatus::Processing && $payout->approved_at?->lt(now()->subHours((int) config('payments.payout_stale_hours')))) {
+                $this->flagNotConfirmed($payout);
+            }
         });
 
         return $count;
+    }
+
+    /** Tell the approvers once a day while a withdrawal stays unconfirmed. */
+    private function flagNotConfirmed(Payout $payout): void
+    {
+        if (! Cache::add("payout-not-confirmed.{$payout->id}", true, now()->addDay())) {
+            return;
+        }
+
+        Staff::permission('approve payouts')->where('is_active', true)->get()->each->notify(new PayoutNotConfirmedNotification($payout));
+    }
+
+    /**
+     * Staff settle a withdrawal M-Pesa never confirmed, after checking the M-Pesa portal: it was sent (the receipt is recorded and the books
+     * close as if the result had come), or it was not (the money goes back to the member). Only a withdrawal still "being sent" can be settled.
+     */
+    public function settleByHand(Payout $payout, Staff $by, bool $sent, string $note, ?string $receipt = null): Payout|string
+    {
+        $note = trim($note);
+        $receipt = $receipt !== null ? strtoupper(trim($receipt)) : null;
+
+        if ($sent && blank($receipt)) {
+            return 'Enter the M-Pesa receipt from the portal to record it as sent.';
+        }
+
+        $result = DB::transaction(function () use ($payout, $sent, $note, $receipt) {
+            $locked = Payout::with('user')->whereKey($payout->id)->lockForUpdate()->firstOrFail();
+
+            if ($locked->status !== PayoutStatus::Processing) {
+                return null;
+            }
+
+            return $sent
+                ? $this->markPaid($locked, new PaymentOutcome($locked->gateway_reference ?? $locked->reference, GatewayState::Succeeded, $receipt, $locked->net_minor))
+                : $this->returnFunds($locked, PayoutStatus::Failed, $note !== '' ? $note : 'Staff confirmed the transfer was not sent.', false);
+        });
+
+        if (! $result) {
+            return 'This withdrawal is no longer being sent.';
+        }
+
+        StaffAudit::log($sent ? 'payout.settled_sent' : 'payout.settled_not_sent', ($sent ? 'Marked as sent' : 'Marked as not sent').": withdrawal {$result->reference} of ".Money::formatMinor($result->net_minor, 0).' to '.$result->user->name, $result, ['receipt' => $receipt, 'note' => $note], $by->id);
+
+        $result->user->notify($sent ? new PayoutPaidNotification($result) : new PayoutNotSentNotification($result));
+
+        return $result;
     }
 
     /** Act on what the gateway says about a payout being sent. Idempotent: anything no longer being sent is left alone. */

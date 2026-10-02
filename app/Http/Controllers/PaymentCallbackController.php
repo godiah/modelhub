@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Contracts\PaymentGateway;
+use App\Contracts\VerifiesCallbacks;
 use App\Models\Payment;
 use App\Services\Payments\PaymentService;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class PaymentCallbackController extends Controller
     public function __invoke(Request $request, PaymentService $payments, PaymentGateway $gateway, string $name)
     {
         abort_unless($gateway->name() === $name, 404);
+        abort_if($gateway instanceof VerifiesCallbacks && ! $gateway->verifiesCallback($request), 403);
 
         $outcome = $gateway->parseCallback($request->all());
         $payment = $outcome ? Payment::where('gateway', $name)->where('gateway_reference', $outcome->gatewayReference)->first() : null;

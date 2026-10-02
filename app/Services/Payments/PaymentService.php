@@ -138,6 +138,11 @@ class PaymentService
             $payment = Payment::with(['product', 'buyer'])->whereKey($payment->id)->lockForUpdate()->firstOrFail();
 
             if (in_array($payment->status, [PaymentStatus::Succeeded, PaymentStatus::Review], true)) {
+                // A payment settled by a status query has no receipt: the callback that follows supplies it
+                if ($outcome->state === GatewayState::Succeeded && $outcome->receipt && ! $payment->receipt) {
+                    $payment->update(['receipt' => $outcome->receipt]);
+                }
+
                 return $payment;
             }
 

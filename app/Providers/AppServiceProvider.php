@@ -8,10 +8,13 @@ use App\Helpers\EmailCssInlinerHelper;
 use App\Models\JobApplication;
 use App\Models\Staff;
 use App\Observers\JobApplicationObserver;
+use App\Services\Payments\DarajaGateway;
+use App\Services\Payments\DarajaPayoutGateway;
 use App\Services\Payments\FakeGateway;
 use App\Services\Payments\FakePayoutGateway;
 use App\Support\Auth\PasswordPolicy;
 use App\Support\Mail\BrandedMail;
+use Godiah\Common\Mpesa\MpesaClient;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
@@ -37,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
                 'fake' => $this->app->environment('production') && ! config('payments.allow_fake_in_production')
                     ? throw new \RuntimeException('The fake payment gateway cannot run in production. Set PAYMENTS_GATEWAY to a real gateway.')
                     : new FakeGateway,
+                'daraja' => new DarajaGateway($this->app->make(MpesaClient::class)),
                 default => throw new \RuntimeException('Unknown payment gateway ['.config('payments.gateway').'].'),
             };
         });
@@ -47,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
                 'fake' => $this->app->environment('production') && ! config('payments.allow_fake_in_production')
                     ? throw new \RuntimeException('The fake payout gateway cannot run in production. Set PAYMENTS_PAYOUT_GATEWAY to a real gateway.')
                     : new FakePayoutGateway,
+                'daraja' => new DarajaPayoutGateway($this->app->make(MpesaClient::class)),
                 default => throw new \RuntimeException('Unknown payout gateway ['.config('payments.payout_gateway').'].'),
             };
         });

@@ -8,12 +8,14 @@
     "require": {
         "php": "^8.2",
         "bacon/bacon-qr-code": "^3.1",
+        "godiah/laravel-common": "^3.1",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/livewire": "^3.4",
         "livewire/volt": "^1.7.0",
         "pusher/pusher-php-server": "^7.2",
-        "spatie/laravel-permission": "^6.18"
+        "spatie/laravel-permission": "^6.18",
+        "symfony/yaml": "^7.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -85,8 +87,16 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "abandoned": "report"
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "repositories": [{
+        "name": "laravel-common",
+        "type": "vcs",
+        "url": "git@github.com:godiah/laravel-common.git"
+    }]
 }

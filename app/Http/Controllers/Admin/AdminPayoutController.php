@@ -70,4 +70,25 @@ class AdminPayoutController extends Controller
             ? back()->with(FlashAlertHelper::error('Cannot turn this down', $result))
             : back()->with(FlashAlertHelper::success('Withdrawal turned down', "The money is back in {$result->user->name}'s balance and they have been told why."));
     }
+
+    /** Settle a withdrawal M-Pesa never confirmed, after the M-Pesa portal has been checked. */
+    public function settle(Request $request, Payout $payout)
+    {
+        $data = $request->validate([
+            'outcome' => ['required', 'in:sent,not_sent'],
+            'receipt' => ['nullable', 'required_if:outcome,sent', 'string', 'min:8', 'max:30', 'regex:/^[A-Za-z0-9]+$/'],
+            'note' => ['nullable', 'required_if:outcome,not_sent', 'string', 'min:5', 'max:255'],
+        ]);
+
+        $sent = $data['outcome'] === 'sent';
+        $result = $this->payouts->settleByHand($payout, $request->user(), $sent, $data['note'] ?? '', $data['receipt'] ?? null);
+
+        if (is_string($result)) {
+            return back()->with(FlashAlertHelper::error('Cannot settle this', $result));
+        }
+
+        return back()->with(FlashAlertHelper::success($sent ? 'Recorded as sent' : 'Recorded as not sent', $sent
+            ? "The withdrawal to {$result->user->name} is closed as paid, and they have been told."
+            : "The money is back in {$result->user->name}'s balance and they have been told."));
+    }
 }
