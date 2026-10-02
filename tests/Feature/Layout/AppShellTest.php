@@ -149,10 +149,10 @@ it('swaps "Sell models" for My models and My store once a member is an approved 
     $seller = User::factory()->create();
     SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
 
-    expect(sidebarGroups($seller)['Models'])->toBe(['Browse models', 'Wishlist', 'My licences', 'My models', 'My store']);
+    expect(sidebarGroups($seller)['Models'])->toBe(['Browse models', 'Wishlist', 'My licences', 'My models', 'Earnings', 'My store']);
 
     $items = collect(SidebarMenu::for($seller))->firstWhere('label', 'Models')['items'];
-    expect(collect($items)->pluck('section')->all())->toBe([null, null, null, 'Selling', 'Selling']);
+    expect(collect($items)->pluck('section')->all())->toBe([null, null, null, 'Selling', 'Selling', 'Selling']);
 
     $this->actingAs($seller)->get(route('dashboard'))->assertOk()->assertSee('Selling');
     // Someone who is not a seller sees "Sell models" as a plain item, with no Selling label above it

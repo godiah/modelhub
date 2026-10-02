@@ -29,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Set from JS by the sidebar collapse toggle; read server-side so the shell renders in the right state.
         $middleware->encryptCookies(except: ['modelhub_sidebar']);
 
+        // The payment gateway posts to us without a session, so its callback carries no CSRF token
+        $middleware->validateCsrfTokens(except: ['webhooks/*']);
+
         $middleware->web(prepend: [ResetDefaultGuard::class, ApplySessionSettings::class], append: [EnforceSessionRules::class, EnsureMemberActive::class]);
 
         $middleware->alias([

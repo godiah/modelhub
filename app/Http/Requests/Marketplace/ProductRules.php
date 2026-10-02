@@ -26,13 +26,15 @@ trait ProductRules
         }];
     }
 
-    /** Price in whole KES; 0 means free (the form sends 0 when "free" is ticked, so a blank price is a mistake). */
+    /** Price in whole KES (M-Pesa takes no cents); 0 means free (the form sends 0 when "free" is ticked, so a blank price is a mistake). */
     protected function priceRule(): array
     {
         return ['required', 'numeric', 'min:0', 'max:1000000', function (string $attribute, mixed $value, Closure $fail) {
             $minimum = FeePolicy::minModelPriceMinor() / 100;
 
-            if ((float) $value > 0 && (float) $value < $minimum) {
+            if ((float) $value != floor((float) $value)) {
+                $fail('Prices are in whole shillings, because M-Pesa cannot take cents.');
+            } elseif ((float) $value > 0 && (float) $value < $minimum) {
                 $fail('A paid model must cost at least KES '.number_format($minimum).', or be free.');
             }
         }];
@@ -52,7 +54,9 @@ trait ProductRules
             $standard = (float) $this->input('price', 0);
             $minimum = FeePolicy::minModelPriceMinor() / 100;
 
-            if ($standard <= 0) {
+            if ((float) $value != floor((float) $value)) {
+                $fail('Prices are in whole shillings, because M-Pesa cannot take cents.');
+            } elseif ($standard <= 0) {
                 $fail('A free model cannot also be sold with an Extended licence.');
             } elseif ((float) $value < $minimum) {
                 $fail('The Extended licence must cost at least KES '.number_format($minimum).'.');

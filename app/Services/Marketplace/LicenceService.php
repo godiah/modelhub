@@ -4,6 +4,7 @@ namespace App\Services\Marketplace;
 
 use App\Enums\LicenceTier;
 use App\Models\IssuedLicence;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\User;
@@ -28,21 +29,26 @@ class LicenceService
             return $error;
         }
 
-        return DB::transaction(function () use ($buyer, $product, $tier) {
-            $price = $product->priceFor($tier);
+        return $this->issue($buyer, $product, $tier, $product->priceFor($tier));
+    }
 
-            $purchase = Purchase::create([
-                'user_id' => $buyer->id, 'product_id' => $product->id, 'tier' => $tier, 'price_minor' => $price,
-                'currency' => $product->currency, 'status' => 'completed', 'purchased_at' => now(),
-            ]);
+    /**
+     * Give a buyer the licence they have paid for. The sale checks (is it still published, is the tier still offered) are skipped, because
+     * the money has already arrived: the price is what they paid, not what the listing says now. Only holding the same licence already stops it.
+     */
+    public function grantPaid(Payment $payment): IssuedLicence|string
+    {
+        $product = $payment->product;
 
-            return IssuedLicence::create([
-                'key' => $this->newKey(), 'purchase_id' => $purchase->id, 'user_id' => $buyer->id, 'product_id' => $product->id, 'tier' => $tier,
-                'terms_version' => LicenceTier::TERMS_VERSION, 'terms' => $tier->terms(), 'licensee_name' => $buyer->name, 'product_title' => $product->title,
-                'seller_name' => $product->sellerProfile?->display_name ?? $product->seller?->name ?? '', 'price_minor' => $price,
-                'currency' => $product->currency, 'issued_at' => now(),
-            ]);
-        });
+        if (! $product) {
+            return 'The model this payment was for no longer exists.';
+        }
+
+        if ($error = $this->alreadyHolds($payment->buyer, $product, $payment->tier)) {
+            return $error;
+        }
+
+        return $this->issue($payment->buyer, $product, $payment->tier, $payment->amount_minor);
     }
 
     /** Why this buyer cannot buy this licence right now, or null when they can. */
@@ -60,6 +66,12 @@ class LicenceService
             return "This model is not sold with an {$tier->label()} licence.";
         }
 
+        return $this->alreadyHolds($buyer, $product, $tier);
+    }
+
+    /** The buyer already has this licence (or an Extended one, which covers Standard). */
+    public function alreadyHolds(User $buyer, Product $product, LicenceTier $tier): ?string
+    {
         $held = $buyer->issuedLicences()->active()->where('product_id', $product->id)->pluck('tier');
 
         if ($held->contains($tier)) {
@@ -71,6 +83,24 @@ class LicenceService
         }
 
         return null;
+    }
+
+    /** Record the purchase and issue the licence, together, at the given price. */
+    private function issue(User $buyer, Product $product, LicenceTier $tier, int $priceMinor): IssuedLicence
+    {
+        return DB::transaction(function () use ($buyer, $product, $tier, $priceMinor) {
+            $purchase = Purchase::create([
+                'user_id' => $buyer->id, 'product_id' => $product->id, 'tier' => $tier, 'price_minor' => $priceMinor,
+                'currency' => $product->currency, 'status' => 'completed', 'purchased_at' => now(),
+            ]);
+
+            return IssuedLicence::create([
+                'key' => $this->newKey(), 'purchase_id' => $purchase->id, 'user_id' => $buyer->id, 'product_id' => $product->id, 'tier' => $tier,
+                'terms_version' => LicenceTier::TERMS_VERSION, 'terms' => $tier->terms(), 'licensee_name' => $buyer->name, 'product_title' => $product->title,
+                'seller_name' => $product->sellerProfile?->display_name ?? $product->seller?->name ?? '', 'price_minor' => $priceMinor,
+                'currency' => $product->currency, 'issued_at' => now(),
+            ]);
+        });
     }
 
     /** End a licence (a refunded purchase), keeping the record and saying why. */

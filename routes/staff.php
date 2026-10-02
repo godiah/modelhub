@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\AdminMemberController;
 use App\Http\Controllers\Admin\AdminModelDirectoryController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminOverviewController;
+use App\Http\Controllers\Admin\AdminPayoutController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Admin\AdminReviewController;
@@ -121,6 +122,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:resolve disputes')->group(function () {
             Route::post('disputes/{dispute}/assign', [AdminDisputeController::class, 'assign'])->name('disputes.assign');
             Route::post('disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+        });
+
+        Route::middleware('can:view payouts')->get('payouts', [AdminPayoutController::class, 'index'])->name('payouts.index');
+        Route::middleware('can:approve payouts')->group(function () {
+            Route::post('payouts/{payout:reference}/approve', [AdminPayoutController::class, 'approve'])->middleware('throttle:30,1')->name('payouts.approve');
+            Route::post('payouts/{payout:reference}/reject', [AdminPayoutController::class, 'reject'])->name('payouts.reject');
         });
 
         Route::middleware('can:review sellers')->group(function () {

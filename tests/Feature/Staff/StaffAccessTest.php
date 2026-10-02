@@ -16,11 +16,11 @@ use Spatie\Permission\Models\Role;
  * the staff and roles pages. Staff accounts are separate from members, so nothing here touches the members' users.
  */
 
-it('creates every permission and the four default roles, with Super admin holding everything', function () {
+it('creates every permission and the default roles, with Super admin holding everything', function () {
     StaffAccess::sync();
 
     expect(Permission::where('guard_name', 'staff')->pluck('name')->sort()->values()->all())->toBe(collect(StaffAccess::permissions())->sort()->values()->all());
-    expect(Role::where('guard_name', 'staff')->pluck('name')->sort()->values()->all())->toBe(['Auditor', 'Dispute manager', 'Marketplace moderator', 'Platform manager', 'Super admin', 'Support']);
+    expect(Role::where('guard_name', 'staff')->pluck('name')->sort()->values()->all())->toBe(['Auditor', 'Dispute manager', 'Finance', 'Marketplace moderator', 'Platform manager', 'Super admin', 'Support']);
 
     $super = Role::findByName('Super admin', 'staff');
     expect($super->permissions)->toHaveCount(count(StaffAccess::permissions()))->and($super->description)->not->toBeEmpty();

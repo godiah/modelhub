@@ -148,7 +148,7 @@
                                     <label for="price" class="mb-1.5 block text-sm font-medium text-neutral-800">{{ __('Price') }}</label>
                                     <div class="relative">
                                         <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-sm text-neutral-500">{{ config('app.currency_symbol') }}</span>
-                                        <input type="number" id="price" name="price" value="{{ $isFree ? '' : $priceValue }}" min="0" max="1000000" step="0.01" inputmode="decimal" :disabled="free" placeholder="0.00"
+                                        <input type="number" id="price" name="price" value="{{ $isFree ? '' : $priceValue }}" min="0" max="1000000" step="1" inputmode="numeric" :disabled="free" placeholder="0.00"
                                             class="{{ $fieldClass }} {{ $errors->has('price') ? $badField : $okField }} pl-14 tabular-nums disabled:bg-neutral-50 disabled:text-neutral-400">
                                         <input type="hidden" name="price" value="0" x-bind:disabled="!free">
                                     </div>
@@ -164,7 +164,7 @@
                                     <label for="extended_price" class="mb-1.5 block text-sm font-medium text-neutral-800">{{ __('Extended licence price') }} <span class="font-normal text-tertiary">({{ __('optional') }})</span></label>
                                     <div class="relative">
                                         <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-sm text-neutral-500">{{ config('app.currency_symbol') }}</span>
-                                        <input type="number" id="extended_price" name="extended_price" value="{{ $extendedValue }}" min="0" max="1000000" step="0.01" inputmode="decimal" :disabled="free" placeholder="{{ __('Not offered') }}"
+                                        <input type="number" id="extended_price" name="extended_price" value="{{ $extendedValue }}" min="0" max="1000000" step="1" inputmode="numeric" :disabled="free" placeholder="{{ __('Not offered') }}"
                                             class="{{ $fieldClass }} {{ $errors->has('extended_price') ? $badField : $okField }} pl-14 tabular-nums disabled:bg-neutral-50 disabled:text-neutral-400">
                                     </div>
                                     @error('extended_price')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror

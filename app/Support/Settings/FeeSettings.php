@@ -15,6 +15,8 @@ final class FeeSettings
             'fees.jobs_percent' => ['type' => 'float', 'default' => 10.0, 'min' => 0, 'max' => 50, 'label' => 'Commission on jobs', 'help' => 'Taken from the agreed amount when a client hires a freelancer. Each hire keeps the rate it was made at, so changing this only affects new offers.', 'unit' => '%'],
             'fees.models_percent' => ['type' => 'float', 'default' => 15.0, 'min' => 0, 'max' => 50, 'label' => 'Commission on model sales', 'help' => 'Taken from each model sale. A seller can have their own rate (set on their store page); every sale keeps the rate it was made at.', 'unit' => '%'],
             'fees.min_model_price' => ['type' => 'int', 'default' => 100, 'min' => 0, 'max' => 100000, 'label' => 'Lowest price for a paid model', 'help' => 'Stops prices so low that payment charges swallow the sale. Free models are always allowed.', 'unit' => 'KES'],
+            'fees.min_payout' => ['type' => 'int', 'default' => 500, 'min' => 0, 'max' => 150000, 'label' => 'Smallest withdrawal', 'help' => 'A seller cannot withdraw less than this at once, so tiny payouts do not each cost a transfer fee.', 'unit' => 'KES'],
+            'fees.payout_fee' => ['type' => 'int', 'default' => 30, 'min' => 0, 'max' => 1000, 'label' => 'Withdrawal fee', 'help' => 'Taken from each withdrawal and shown to the seller before they confirm. This is a placeholder: set it to what an M-Pesa B2C transfer actually costs you.', 'unit' => 'KES'],
             'fees.sale_hold_days' => ['type' => 'int', 'default' => 7, 'min' => 0, 'max' => 60, 'label' => 'Hold sale earnings for', 'help' => 'Earnings from a model sale become withdrawable after this many days, which is also the window in which a broken or misdescribed file can be refunded. 0 means no hold.', 'unit' => 'days'],
         ];
     }
@@ -25,6 +27,7 @@ final class FeeSettings
         return [
             ['title' => 'Commission', 'description' => 'What the platform keeps from each transaction.', 'keys' => ['fees.jobs_percent', 'fees.models_percent']],
             ['title' => 'Model sales', 'description' => 'How low a model can be priced, and when sellers can withdraw what they earn.', 'keys' => ['fees.min_model_price', 'fees.sale_hold_days']],
+            ['title' => 'Withdrawals', 'description' => 'What it takes to move earnings out to M-Pesa.', 'keys' => ['fees.min_payout', 'fees.payout_fee']],
         ];
     }
 }

@@ -8,13 +8,18 @@ use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
 use App\Notifications\HiredNotification;
 use App\Notifications\JobPostedNotification;
+use App\Notifications\ModelPurchasedNotification;
 use App\Notifications\ModelReviewedNotification;
 use App\Notifications\ModelReviewHiddenNotification;
 use App\Notifications\ModelReviewReplyNotification;
+use App\Notifications\ModelSoldNotification;
 use App\Notifications\NewApplicationMessage;
 use App\Notifications\PartialPaymentProcessedNotification;
 use App\Notifications\PaymentAcceptedNotification;
 use App\Notifications\PaymentDisputedNotification;
+use App\Notifications\PayoutNotSentNotification;
+use App\Notifications\PayoutPaidNotification;
+use App\Notifications\PayoutRequestedNotification;
 use App\Notifications\ProductReviewedNotification;
 use App\Notifications\ProductSubmittedNotification;
 use App\Notifications\ProjectRestoredNotification;
@@ -81,7 +86,7 @@ enum NotificationCategory: string
             self::Disputes => [DisputeCreatedNotification::class],
             self::Reviews => [ReviewSubmittedNotification::class],
             self::Projects => [JobPostedNotification::class, ProjectTakenDownNotification::class, ProjectRestoredNotification::class],
-            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class, ModelReviewedNotification::class, ModelReviewReplyNotification::class, ModelReviewHiddenNotification::class],
+            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class, ModelReviewedNotification::class, ModelReviewReplyNotification::class, ModelReviewHiddenNotification::class, ModelPurchasedNotification::class, ModelSoldNotification::class, PayoutPaidNotification::class, PayoutNotSentNotification::class, PayoutRequestedNotification::class],
             self::Other => [],
         };
     }

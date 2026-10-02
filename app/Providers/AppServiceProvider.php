@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Contracts\PaymentGateway;
+use App\Contracts\PayoutGateway;
 use App\Helpers\EmailCssInlinerHelper;
 use App\Models\JobApplication;
 use App\Models\Staff;
 use App\Observers\JobApplicationObserver;
+use App\Services\Payments\FakeGateway;
+use App\Services\Payments\FakePayoutGateway;
 use App\Support\Auth\PasswordPolicy;
 use App\Support\Mail\BrandedMail;
 use Illuminate\Auth\Events\Login;
@@ -27,7 +31,25 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Money comes in through one gateway, chosen in config/payments.php
+        $this->app->singleton(PaymentGateway::class, function () {
+            return match (config('payments.gateway')) {
+                'fake' => $this->app->environment('production') && ! config('payments.allow_fake_in_production')
+                    ? throw new \RuntimeException('The fake payment gateway cannot run in production. Set PAYMENTS_GATEWAY to a real gateway.')
+                    : new FakeGateway,
+                default => throw new \RuntimeException('Unknown payment gateway ['.config('payments.gateway').'].'),
+            };
+        });
+
+        // Money goes out through one gateway too
+        $this->app->singleton(PayoutGateway::class, function () {
+            return match (config('payments.payout_gateway')) {
+                'fake' => $this->app->environment('production') && ! config('payments.allow_fake_in_production')
+                    ? throw new \RuntimeException('The fake payout gateway cannot run in production. Set PAYMENTS_PAYOUT_GATEWAY to a real gateway.')
+                    : new FakePayoutGateway,
+                default => throw new \RuntimeException('Unknown payout gateway ['.config('payments.payout_gateway').'].'),
+            };
+        });
     }
 
     /**

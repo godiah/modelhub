@@ -12,7 +12,7 @@ use App\Support\Settings\PlatformSettings;
 
 function feesForm(array $overrides = []): array
 {
-    return ['settings' => $overrides + ['jobs_percent' => '10', 'models_percent' => '15', 'min_model_price' => '100', 'sale_hold_days' => '7']];
+    return ['settings' => $overrides + ['jobs_percent' => '10', 'models_percent' => '15', 'min_model_price' => '100', 'sale_hold_days' => '7', 'min_payout' => '500', 'payout_fee' => '30']];
 }
 
 it('starts at the decided launch values', function () {

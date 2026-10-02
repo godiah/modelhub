@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Auth\AuthenticatorController;
 use App\Http\Controllers\AvatarController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashBoardController;
+use App\Http\Controllers\EarningsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
@@ -10,11 +12,15 @@ use App\Http\Controllers\JobDeliverableController;
 use App\Http\Controllers\JobEngagementController;
 use App\Http\Controllers\LegalController;
 use App\Http\Controllers\LicenceController;
+use App\Http\Controllers\LicenceDownloadController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\MessageTemplateController;
 use App\Http\Controllers\ModelCatalogueController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
+use App\Http\Controllers\PaymentCallbackController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PayoutCallbackController;
 use App\Http\Controllers\PolicyManagementController;
 use App\Http\Controllers\PostedJobApplicationController;
 use App\Http\Controllers\ProductReviewController;
@@ -239,7 +245,23 @@ Route::get('/licence-terms', [LegalController::class, 'licences'])->name('legal.
 Route::middleware('auth')->group(function () {
     Route::get('my-licences', [LicenceController::class, 'index'])->name('licences.index');
     Route::get('my-licences/{licence:key}', [LicenceController::class, 'show'])->name('licences.show');
+    Route::get('my-licences/{licence:key}/files/{file}', LicenceDownloadController::class)->middleware('throttle:60,1')->name('licences.download');
+
+    // A member's earnings and withdrawals
+    Route::get('earnings', [EarningsController::class, 'index'])->name('earnings.index');
+    Route::post('earnings/withdraw', [EarningsController::class, 'withdraw'])->middleware('throttle:10,1')->name('earnings.withdraw');
+    Route::delete('earnings/withdrawals/{payout:reference}', [EarningsController::class, 'cancel'])->name('earnings.cancel');
+
+    // Buying a model: start the M-Pesa payment (or take a free licence), then wait on the payment page
+    Route::post('models/{product}/checkout', [CheckoutController::class, 'start'])->middleware('throttle:6,1')->name('checkout.start');
+    Route::post('models/{product}/get-free', [CheckoutController::class, 'free'])->middleware('throttle:10,1')->name('checkout.free');
+    Route::get('payments/{payment:reference}', [PaymentController::class, 'show'])->name('payments.show');
+    Route::get('payments/{payment:reference}/status', [PaymentController::class, 'status'])->middleware('throttle:60,1')->name('payments.status');
 });
+
+// The payment gateway calls this when a payment is paid, declined or cancelled (no sign-in, no CSRF token)
+Route::post('webhooks/payments/{name}', PaymentCallbackController::class)->middleware('throttle:120,1')->name('webhooks.payments');
+Route::post('webhooks/payouts/{name}', PayoutCallbackController::class)->middleware('throttle:120,1')->name('webhooks.payouts');
 
 // Client - Freelancer Messaging
 Route::middleware(['auth'])->prefix('chat')->group(function () {

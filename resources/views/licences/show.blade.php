@@ -14,6 +14,26 @@
             </div>
         @endunless
 
+        {{-- The files this licence is for: private, so this is the only way to reach them --}}
+        @if ($licence->isActive())
+            <section class="mb-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm print:hidden" aria-labelledby="files-heading">
+                <h2 id="files-heading" class="font-tertiary text-base font-semibold text-neutral-900">{{ __('Your files') }}</h2>
+                @if ($licence->product && $licence->product->files->isNotEmpty())
+                    <ul class="mt-3 divide-y divide-neutral-100">
+                        @foreach ($licence->product->files as $file)
+                            <li class="flex items-center gap-3 py-2.5">
+                                <span class="min-w-0 flex-1"><span class="block truncate text-sm font-medium text-neutral-900">{{ $file->original_name }}</span><span class="text-xs text-tertiary">{{ strtoupper($file->extension) }} · {{ \Illuminate\Support\Number::fileSize($file->size_bytes) }}</span></span>
+                                <x-btn size="sm" variant="secondary" :href="route('licences.download', [$licence, $file])">{{ __('Download') }}</x-btn>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="mt-3 text-xs text-tertiary">{{ __('Digital files cannot be returned, so a purchase is not refunded once you have downloaded it, unless a file is broken or not as described.') }}</p>
+                @else
+                    <p class="mt-2 text-sm text-tertiary">{{ __('The files for this model are no longer available. Write to us and we will help.') }}</p>
+                @endif
+            </section>
+        @endif
+
         <article class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8 print:border-0 print:p-0 print:shadow-none">
             <header class="border-b border-neutral-200 pb-5">
                 <p class="text-xs font-medium uppercase tracking-wide text-tertiary">{{ config('app.name') }} · {{ __('Model licence') }}</p>
