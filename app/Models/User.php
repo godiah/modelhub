@@ -147,6 +147,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Product::class);
     }
 
+    /** Whether the member has been paid for a job through the platform, as a freelancer: it is what shows them an Earnings page when they do not sell models. */
+    public function hasJobEarnings(): bool
+    {
+        return JobEngagement::forApplicant($this->id)->where('escrow_minor', '>', 0)->exists();
+    }
+
     /** Read from the database each time (one small query), so a decision made a moment ago is never missed. */
     public function isApprovedSeller(): bool
     {

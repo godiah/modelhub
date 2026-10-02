@@ -122,7 +122,8 @@ class JobApplication extends Model
         if ($engagement) {
             [$label, $tone, $hint, $finished] = match ($engagement->status) {
                 EngagementStatus::EmployerAccepted => [__('Offer received'), 'amber', __('The client wants to hire you. Review the offer and accept or decline it.'), false],
-                EngagementStatus::ApplicantAccepted, EngagementStatus::Active => [__('In progress'), 'blue', __('You are working on this project.'), false],
+                EngagementStatus::ApplicantAccepted => [__('Awaiting funding'), 'amber', __('The client has been asked to fund this project. You can start once they have.'), false],
+                EngagementStatus::Active => [__('In progress'), 'blue', __('You are working on this project.'), false],
                 EngagementStatus::Disputed => [__('In dispute'), 'red', __('There is a payment dispute on this project.'), false],
                 EngagementStatus::Completed => [__('Completed'), 'green', __('The project is complete.'), true],
                 EngagementStatus::Settled => [__('Settled'), 'neutral', __('The project was settled.'), true],

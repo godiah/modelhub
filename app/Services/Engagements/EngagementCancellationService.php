@@ -15,6 +15,7 @@ use App\Helpers\Engagements\EngagementNotificationHelper;
 use App\Helpers\FlashAlertHelper;
 use App\Models\JobEngagement;
 use App\Models\User;
+use App\Services\Payments\EscrowService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -60,6 +61,9 @@ class EngagementCancellationService
                 'cancelled_at' => now(),
                 'notes' => $cancellationData['cancellation_reason'],
             ]);
+
+            // Money held in escrow for the job is now the client's to have back (after their review window, unless the freelancer walked away)
+            app(EscrowService::class)->onCancelled($engagement, $cancellationData['cancellation_type']);
 
             // Handle dispute notifications
             if ($cancellationData['cancellation_type'] === 'dispute') {

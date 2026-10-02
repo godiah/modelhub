@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\EngagementStatus;
 use App\Http\Controllers\Controller;
 use App\Models\JobEngagement;
+use App\Models\LedgerTransaction;
+use App\Models\Payment;
+use App\Services\Payments\EscrowService;
 use App\Support\Staff\ListSort;
 use Illuminate\Http\Request;
 
@@ -38,8 +41,15 @@ class AdminEngagementController extends Controller
 
     public function show(JobEngagement $engagement)
     {
-        $engagement->load(['application.job:id,title,slug,budget', 'application.poster:id,name,avatar', 'application.applicant:id,name,avatar', 'deliverables', 'cancellation.dispute', 'partialPayments']);
+        $engagement->load(['application.job:id,title,slug,budget', 'application.poster:id,name,avatar', 'application.applicant:id,name,avatar', 'deliverables', 'cancellation.dispute', 'partialPayments', 'escrowRefunds.staff:id,name']);
 
-        return view('admin.engagements.show', ['engagement' => $engagement]);
+        // The funding payments, and every posting this job's money made (funding is posted against the payment, the rest against the job)
+        $payments = Payment::where('engagement_id', $engagement->id)->where('purpose', Payment::PURPOSE_ESCROW)->orderBy('id')->get();
+        $postings = LedgerTransaction::with('entries.account')
+            ->where(fn ($q) => $q->where(fn ($j) => $j->where('reference_type', $engagement->getMorphClass())->where('reference_id', $engagement->id))
+                ->orWhere(fn ($p) => $p->where('reference_type', (new Payment)->getMorphClass())->whereIn('reference_id', $payments->pluck('id'))))
+            ->orderBy('id')->get();
+
+        return view('admin.engagements.show', ['engagement' => $engagement, 'escrow' => app(EscrowService::class)->summary($engagement), 'fundingPayments' => $payments, 'postings' => $postings, 'canRefund' => request()->user()->can('refund payments')]);
     }
 }

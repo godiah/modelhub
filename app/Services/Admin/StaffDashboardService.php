@@ -147,6 +147,16 @@ class StaffDashboardService
                 ->each(fn (Payment $payment) => $items->push($this->item('exclamation-triangle', 'Payment to review', $payment->product?->title ?? $payment->reference, ($payment->buyer?->name ?? __('A buyer')).' · '.Str::limit((string) $payment->failure_reason, 70), $payment->completed_at, route('admin.payments.show', $payment))));
         }
 
+        if ($staff->can('refund payments')) {
+            $count = StaffMenu::count('escrow');
+            $late = JobEngagement::escrowRefundDue()->where('escrow_refund_due_at', '<=', $limit)->count();
+            $queues[] = ['key' => 'escrow', 'label' => 'Escrow refunds', 'title' => 'Escrow to return to clients', 'icon' => 'arrow-uturn-down', 'count' => $count, 'late' => $late, 'oldest' => $this->oldest(JobEngagement::escrowRefundDue()->min('escrow_refund_due_at')), 'url' => route('admin.escrow-refunds.index')];
+            $overdue += $late;
+
+            JobEngagement::escrowRefundDue()->with(['application.job:id,title', 'application.poster:id,name'])->orderBy('escrow_refund_due_at')->limit(self::PER_QUEUE)->get()
+                ->each(fn (JobEngagement $engagement) => $items->push($this->item('arrow-uturn-down', 'Escrow to return', $engagement->application->job->title, ($engagement->application->poster->name ?? __('A client')).' · '.Money::formatMinor($engagement->escrowRemainingMinor(), 0), $engagement->escrow_refund_due_at, route('admin.escrow-refunds.index'))));
+        }
+
         if ($staff->can('approve payouts')) {
             $count = StaffMenu::count('payouts');
             $late = Payout::where('status', PayoutStatus::Requested)->where('created_at', '<=', $limit)->count();

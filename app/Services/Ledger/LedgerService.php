@@ -3,6 +3,7 @@
 namespace App\Services\Ledger;
 
 use App\Enums\LedgerAccountKind;
+use App\Models\JobEngagement;
 use App\Models\LedgerAccount;
 use App\Models\LedgerEntry;
 use App\Models\LedgerTransaction;
@@ -51,6 +52,12 @@ class LedgerService
         $name = self::USER_ACCOUNTS[$which] ?? throw new LedgerException("There is no member account [{$which}].");
 
         return LedgerAccount::firstOrCreate(['code' => "user.{$user->id}.{$which}"], ['name' => $name, 'kind' => LedgerAccountKind::Liability, 'user_id' => $user->id, 'currency' => $this->currency(), 'allow_negative' => false]);
+    }
+
+    /** What the client has put into a job and not yet released or returned: one account per engagement, so what is held for each job can be read straight from the ledger. */
+    public function escrowAccount(JobEngagement $engagement): LedgerAccount
+    {
+        return LedgerAccount::firstOrCreate(['code' => "engagement.{$engagement->id}.escrow"], ['name' => "Escrow for job engagement #{$engagement->id}", 'kind' => LedgerAccountKind::Liability, 'currency' => $this->currency(), 'allow_negative' => false]);
     }
 
     /**

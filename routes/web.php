@@ -5,6 +5,7 @@ use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashBoardController;
 use App\Http\Controllers\EarningsController;
+use App\Http\Controllers\EngagementFundingController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
@@ -139,6 +140,7 @@ Route::middleware(['auth'])->prefix('engagements')->name('engagements.')->group(
     // The engagement workspace (deliverables, messages, activity). Numeric only, so it never shadows the
     // static segments below (archive, deliverables, policies, disputed, ...).
     Route::get('/{engagement}', [JobEngagementController::class, 'show'])->whereNumber('engagement')->name('show');
+    Route::post('/{engagement}/fund', [EngagementFundingController::class, 'store'])->whereNumber('engagement')->middleware('throttle:10,1')->name('fund');
     Route::get('/{id}/cancelled', [JobEngagementController::class, 'showCancelledEngagement'])->whereNumber('id')->name('show-cancelled');
     Route::get('/disputed/{id}', [JobEngagementController::class, 'showDisputedEngagement'])->name('show-disputed');
     Route::middleware(['throttle:10,1'])->group(function () {

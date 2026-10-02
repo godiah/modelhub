@@ -1,4 +1,5 @@
 @use('App\Enums\EngagementStatus')
+@use('App\Support\Money')
 <x-app-layout :crumb="$job->title">
     @php
         $status = $engagement->status;
@@ -12,7 +13,8 @@
             unset($tabs['messages']);
         }
 
-        $escrowed = $engagement->isPaymentEscrowed();
+        // An offer still waiting for funding is not escrowed, whatever an older bookkeeping flag says
+        $escrowed = $engagement->escrow_minor > 0 || (! $engagement->isAwaitingFunding() && $engagement->isPaymentEscrowed());
         $released = $engagement->payment_released_at !== null;
     @endphp
 
@@ -57,7 +59,7 @@
                         @if ($summary['counterpart'])
                             · {{ __('with :name', ['name' => $summary['counterpart']]) }}
                         @endif
-                        @if ($engagement->started_at)
+                        @if ($engagement->started_at && ! $engagement->isAwaitingFunding())
                             · {{ __('Started :date', ['date' => $engagement->started_at->format('M j, Y')]) }}
                         @endif
                     </p>
@@ -99,12 +101,43 @@
                         @elseif ($escrowed)
                             <x-badge tone="blue" class="px-2.5 py-0.5 text-xs font-medium">{{ __('Held in escrow') }}</x-badge>
                         @else
-                            <x-badge tone="neutral" class="px-2.5 py-0.5 text-xs font-medium">{{ __('Not yet escrowed') }}</x-badge>
+                            <x-badge tone="neutral" class="px-2.5 py-0.5 text-xs font-medium">{{ $engagement->isAwaitingFunding() ? __('Awaiting funding') : __('Not yet escrowed') }}</x-badge>
                         @endif
                     </dd>
+                    @if ($engagement->escrow_minor > 0)
+                        <p class="mt-1.5 text-xs text-tertiary">{{ __(':released released · :held in escrow', ['released' => Money::formatMinor($engagement->released_net_minor + $engagement->released_fee_minor, 0), 'held' => Money::formatMinor(max(0, $engagement->escrow_minor - $engagement->released_net_minor - $engagement->released_fee_minor - $engagement->refunded_minor), 0)]) }}</p>
+                    @endif
                 </div>
             </dl>
         </x-card>
+
+        <!-- Funding: work starts once the client has put the money into escrow -->
+        @if ($engagement->isAwaitingFunding())
+            @if ($actions['is_poster'])
+                <x-card class="mb-6 rounded-2xl border-amber-200 bg-amber-50/60" aria-labelledby="fund-title">
+                    <form method="POST" action="{{ route('engagements.fund', $engagement) }}" class="flex flex-col gap-5 p-6 lg:flex-row lg:items-end lg:justify-between" x-data="{ loading: false }" x-on:submit="loading = true">
+                        @csrf
+                        <div class="min-w-0 max-w-xl">
+                            <h2 id="fund-title" class="font-tertiary text-lg font-semibold text-neutral-900">{{ __('Fund this job to start work') }}</h2>
+                            <p class="mt-1 text-sm text-neutral-700">{{ __(':freelancer accepted your offer. Pay :amount by M-Pesa to start. It is held in escrow and released to them only as you approve each deliverable.', ['freelancer' => $summary['counterpart'], 'amount' => Money::format($engagement->agreed_amount)]) }}</p>
+                        </div>
+                        <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-end lg:w-auto">
+                            <div class="sm:w-60">
+                                <label for="fund-phone" class="mb-1 block text-xs font-medium text-neutral-700">{{ __('Your M-Pesa number') }}</label>
+                                <input id="fund-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required value="{{ old('phone') }}" placeholder="0712 345 678" class="block w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25 @error('phone') border-red-400 @enderror">
+                                @error('phone')<p class="mt-1 text-xs text-red-600">{{ $message }}</p>@enderror
+                            </div>
+                            <x-btn type="submit" x-bind:disabled="loading">{{ __('Pay :amount', ['amount' => Money::format($engagement->agreed_amount)]) }}</x-btn>
+                        </div>
+                    </form>
+                </x-card>
+            @else
+                <div class="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="status">
+                    <x-icon name="clock" class="mt-0.5 h-5 w-5 shrink-0" />
+                    <p>{{ __('Waiting for the client to put :amount into escrow. You can start work as soon as they have, and we will tell you.', ['amount' => Money::format($engagement->agreed_amount)]) }}</p>
+                </div>
+            @endif
+        @endif
 
         <!-- What is waiting on you -->
         @if ($summary['to_review'] > 0)

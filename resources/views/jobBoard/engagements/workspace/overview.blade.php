@@ -83,6 +83,8 @@
             </dl>
         </x-panel>
 
+        <x-engagement.escrow-panel :engagement="$engagement" />
+
         <x-panel :title="__('People')">
             <ul class="space-y-4">
                 @foreach ($people as $person)

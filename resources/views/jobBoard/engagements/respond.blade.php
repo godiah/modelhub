@@ -104,7 +104,7 @@
                                     @checked($accepted) @disabled(! $pending)>
                                 <span>
                                     <span class="block text-sm font-medium text-neutral-900">{{ __('Accept offer') }}</span>
-                                    <span class="block text-xs text-tertiary">{{ __('Start work on the agreed terms.') }}</span>
+                                    <span class="block text-xs text-tertiary">{{ config('marketplace.jobs_escrow_enabled') ? __('Work starts once the client has funded the job.') : __('Start work on the agreed terms.') }}</span>
                                 </span>
                             </label>
 

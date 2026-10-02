@@ -73,6 +73,8 @@
 
         <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <div class="space-y-6">
+                <x-engagement.escrow-panel :engagement="$engagement" />
+
                 <!-- Payment -->
                 <x-panel :title="__('Payment')" :description="__('Payment for the work approved before the engagement ended.')">
                     <dl class="divide-y divide-neutral-100 text-sm">
@@ -84,10 +86,17 @@
                             <dt class="text-tertiary">{{ __('Approved deliverables') }}</dt>
                             <dd class="font-medium text-neutral-900">{{ __(':approved of :total', ['approved' => $approved, 'total' => $total]) }}</dd>
                         </div>
-                        <div class="flex items-center justify-between gap-4 py-2.5 last:pb-0">
-                            <dt class="text-tertiary">{{ __('Calculated payable amount') }}</dt>
-                            <dd class="font-tertiary text-lg font-semibold tabular-nums text-neutral-900"><x-money :amount="$engagement->calculatePartialPaymentAmount()" /></dd>
-                        </div>
+                        @if ($engagement->escrow_minor > 0)
+                            <div class="flex items-center justify-between gap-4 py-2.5 last:pb-0">
+                                <dt class="text-tertiary">{{ __('Already paid out for approved work') }}</dt>
+                                <dd class="font-tertiary text-lg font-semibold tabular-nums text-neutral-900">{{ \App\Support\Money::formatMinor($engagement->released_net_minor) }}</dd>
+                            </div>
+                        @else
+                            <div class="flex items-center justify-between gap-4 py-2.5 last:pb-0">
+                                <dt class="text-tertiary">{{ __('Calculated payable amount') }}</dt>
+                                <dd class="font-tertiary text-lg font-semibold tabular-nums text-neutral-900"><x-money :amount="$engagement->calculatePartialPaymentAmount()" /></dd>
+                            </div>
+                        @endif
                     </dl>
 
                     <div class="mt-6 border-t border-neutral-100 pt-6">
@@ -151,11 +160,11 @@
                                 @csrf
                                 <x-field name="payment_amount" error="payment_amount" type="number" step="0.01" min="0.01"
                                     :label="__('Payment amount (:currency)', ['currency' => config('app.currency_symbol')])"
-                                    :hint="__('Leave blank to pay the calculated amount of :amount.', ['amount' => \App\Support\Money::format($engagement->calculatePartialPaymentAmount())])"
+                                    :hint="$engagement->escrow_minor > 0 ? __('Leave blank to pay nothing more. Up to :max can be paid.', ['max' => \App\Support\Money::formatMinor(app(\App\Services\Payments\EscrowService::class)->remainingNetMinor($engagement))]) : __('Leave blank to pay the calculated amount of :amount.', ['amount' => \App\Support\Money::format($engagement->calculatePartialPaymentAmount())])"
                                     value="{{ old('payment_amount') }}" />
                                 <x-btn type="submit">
                                     <x-icon name="banknotes" class="h-4 w-4" />
-                                    {{ __('Process payment') }}
+                                    {{ $engagement->escrow_minor > 0 ? __('Settle and return the rest') : __('Process payment') }}
                                 </x-btn>
                             </form>
                         @elseif ($canProcess && $isApplicant)

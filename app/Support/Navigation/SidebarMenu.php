@@ -25,7 +25,7 @@ final class SidebarMenu
             $items = [];
 
             foreach ($group['items'] as $item) {
-                if (($item['hidden'] ?? false) || (($item['seller'] ?? false) && ! $user->isApprovedSeller()) || (($item['notSeller'] ?? false) && $user->isApprovedSeller())) {
+                if (($item['hidden'] ?? false) || (($item['seller'] ?? false) && ! $user->isApprovedSeller()) || (($item['notSeller'] ?? false) && $user->isApprovedSeller()) || (($item['earner'] ?? false) && ! $user->hasJobEarnings())) {
                     continue;
                 }
 
@@ -84,7 +84,7 @@ final class SidebarMenu
     {
         foreach (self::definition() as $group) {
             foreach ($group['items'] as $item) {
-                if (self::isActive($item)) {
+                if (self::appliesToCurrentUser($item) && self::isActive($item)) {
                     return $group['label'];
                 }
             }
@@ -106,7 +106,7 @@ final class SidebarMenu
 
         foreach (self::definition() as $group) {
             foreach ($group['items'] as $item) {
-                if (! self::isActive($item)) {
+                if (! self::appliesToCurrentUser($item) || ! self::isActive($item)) {
                     continue;
                 }
 
@@ -124,6 +124,18 @@ final class SidebarMenu
         }
 
         return $crumbs;
+    }
+
+    /** A page listed in two places (Earnings, under Models for sellers and under Projects for the rest) belongs to the one that is the current member's. */
+    private static function appliesToCurrentUser(array $item): bool
+    {
+        $for = $item['crumbFor'] ?? null;
+
+        if ($for === null || ! ($user = auth()->user())) {
+            return true;
+        }
+
+        return ($for === 'sellers') === $user->isApprovedSeller();
     }
 
     /**
@@ -150,7 +162,7 @@ final class SidebarMenu
                     ['label' => 'Sell models', 'route' => 'seller.index', 'icon' => 'banknotes', 'match' => ['seller.index', 'seller.apply'], 'notSeller' => true],
                     ['label' => 'My store', 'route' => 'seller.store.edit', 'icon' => 'tag', 'match' => ['seller.store.*'], 'section' => 'Selling', 'seller' => true],
                     ['label' => 'My models', 'route' => 'seller.models.index', 'icon' => 'archive-box', 'match' => ['seller.models.*'], 'section' => 'Selling', 'seller' => true],
-                    ['label' => 'Earnings', 'route' => 'earnings.index', 'icon' => 'cash', 'match' => ['earnings.*'], 'section' => 'Selling', 'seller' => true],
+                    ['label' => 'Earnings', 'route' => 'earnings.index', 'icon' => 'cash', 'match' => ['earnings.*'], 'section' => 'Selling', 'seller' => true, 'crumbFor' => 'sellers'],
                 ],
             ],
             [
@@ -161,6 +173,8 @@ final class SidebarMenu
                     ['label' => 'Post a project', 'route' => 'jobs.create', 'icon' => 'plus', 'match' => ['jobs.create']],
                     ['label' => 'Posted projects', 'route' => 'my-jobs.index', 'icon' => 'briefcase', 'match' => ['my-jobs.index', 'my-jobs.applications.*', 'my-jobs.archived.*', 'jobs.show', 'jobs.edit']],
                     ['label' => 'Engagements', 'route' => 'engagements.index', 'icon' => 'chat-bubble-left-right', 'match' => ['engagements.*'], 'except' => ['engagements.policy']],
+                    // Freelancers who have been paid for a job, and are not sellers, find their earnings here
+                    ['label' => 'Earnings', 'route' => 'earnings.index', 'icon' => 'cash', 'match' => ['earnings.*'], 'notSeller' => true, 'earner' => true, 'crumbFor' => 'others'],
                 ],
             ],
             // Reachable pages that are not sidebar entries (profile lives in the user menu, the policy in the

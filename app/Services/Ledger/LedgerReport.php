@@ -14,7 +14,7 @@ class LedgerReport
 
     /**
      * @return array{
-     *     gateway: int, pending: int, available: int, in_payouts: int, unallocated: int, commission: int, fees: int,
+     *     gateway: int, pending: int, available: int, in_payouts: int, unallocated: int, escrow: int, commission: int, fees: int,
      *     owed: int, earned: int, expected: int, difference: int, reconciled: bool, trial: array{debits: int, credits: int, balanced: bool}
      * }
      */
@@ -27,6 +27,7 @@ class LedgerReport
         $held = fn (object $row) => $row->kind === 'asset' ? (int) $row->net : -(int) $row->net;
 
         $platform = fn (string $key) => $net->where('code', "platform.{$key}")->map($held)->sum();
+        $escrow = $net->filter(fn ($row) => str_starts_with($row->code, 'engagement.') && str_ends_with($row->code, '.escrow'))->map($held)->sum();
         $members = fn (string $which) => $net->filter(fn ($row) => str_starts_with($row->code, 'user.') && str_ends_with($row->code, ".{$which}"))->map($held)->sum();
 
         $gateway = (int) $platform('gateway');
@@ -37,12 +38,14 @@ class LedgerReport
         $commission = (int) $platform('revenue');
         $fees = (int) $platform('payout_fees');
 
-        $owed = $pending + $available + $inPayouts + $unallocated;
+        $inEscrow = (int) $escrow;
+
+        $owed = $pending + $available + $inPayouts + $unallocated + $inEscrow;
         $earned = $commission + $fees;
         $expected = $owed + $earned;
 
         return [
-            'gateway' => $gateway, 'pending' => $pending, 'available' => $available, 'in_payouts' => $inPayouts, 'unallocated' => $unallocated,
+            'gateway' => $gateway, 'pending' => $pending, 'available' => $available, 'in_payouts' => $inPayouts, 'unallocated' => $unallocated, 'escrow' => $inEscrow,
             'commission' => $commission, 'fees' => $fees, 'owed' => $owed, 'earned' => $earned, 'expected' => $expected,
             'difference' => $gateway - $expected, 'reconciled' => $gateway === $expected, 'trial' => $this->ledger->trialBalance(),
         ];

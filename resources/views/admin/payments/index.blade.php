@@ -25,8 +25,8 @@
                     <x-staff.row :href="route('admin.payments.show', $payment)">
                         <td class="px-4">
                             <a href="{{ route('admin.payments.show', $payment) }}" wire:navigate class="block focus:outline-none focus-visible:underline">
-                                <span class="block truncate font-semibold text-neutral-900">{{ $payment->product?->title ?? __('A deleted model') }}</span>
-                                <span class="block text-xs font-normal text-tertiary"><span class="font-mono">{{ $payment->reference }}</span> · {{ __(':tier licence', ['tier' => $payment->tier->label()]) }}</span>
+                                <span class="block truncate font-semibold text-neutral-900">{{ $payment->subjectTitle() }}</span>
+                                <span class="block text-xs font-normal text-tertiary"><span class="font-mono">{{ $payment->reference }}</span> · {{ $payment->subjectKind() }}</span>
                             </a>
                         </td>
                         <td class="hidden px-4 md:table-cell"><span class="flex items-center gap-2"><x-user-avatar :user="$payment->buyer" size="h-7 w-7" /><span class="truncate text-neutral-700">{{ $payment->buyer?->name }}</span></span></td>

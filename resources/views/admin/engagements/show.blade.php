@@ -46,6 +46,39 @@
                         <div class="flex justify-between gap-4"><dt class="text-tertiary">{{ __('Released') }}</dt><dd class="text-neutral-900">{{ $engagement->payment_released_at?->format('M j, Y') ?? '—' }}</dd></div>
                     </dl>
                 </x-panel>
+                @if ($escrow['funded'] || $fundingPayments->isNotEmpty())
+                    <x-panel :title="__('Escrow')" :description="__('What the client paid in, and where it has gone.')">
+                        <dl class="space-y-3 text-sm">
+                            <div class="flex justify-between gap-4"><dt class="text-tertiary">{{ __('Paid in') }}</dt><dd class="font-medium tabular-nums text-neutral-900">{{ \App\Support\Money::formatMinor($escrow['amount']) }}</dd></div>
+                            <div class="flex justify-between gap-4"><dt class="text-tertiary">{{ __('Released to the freelancer') }}</dt><dd class="tabular-nums text-neutral-900">{{ \App\Support\Money::formatMinor($escrow['released_net']) }}</dd></div>
+                            <div class="flex justify-between gap-4"><dt class="text-tertiary">{{ __('Service fee taken') }}</dt><dd class="tabular-nums text-neutral-900">{{ \App\Support\Money::formatMinor($escrow['released_fee']) }}</dd></div>
+                            <div class="flex justify-between gap-4"><dt class="text-tertiary">{{ __('Returned to the client') }}</dt><dd class="tabular-nums text-neutral-900">{{ \App\Support\Money::formatMinor($escrow['refunded']) }}</dd></div>
+                            <div class="flex justify-between gap-4 border-t border-neutral-100 pt-3"><dt class="font-medium text-neutral-800">{{ __('Still in escrow') }}</dt><dd class="font-semibold tabular-nums text-neutral-900">{{ \App\Support\Money::formatMinor($escrow['remaining']) }}</dd></div>
+                        </dl>
+                        @if ($escrow['state'] === 'due')
+                            <p class="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{{ __('This is now the client\'s to have back.') }} @if ($canRefund)<a href="{{ route('admin.escrow-refunds.index') }}" wire:navigate class="font-medium underline">{{ __('Record the return') }}</a>@endif</p>
+                        @elseif ($escrow['state'] === 'waiting')
+                            <p class="mt-4 rounded-lg bg-neutral-50 px-3 py-2 text-sm text-neutral-700">{{ __('The client can still pay for work done until :date. After that it goes back to them.', ['date' => $escrow['refund_due_at']->format('M j, Y')]) }}</p>
+                        @elseif ($escrow['state'] === 'held' && in_array($engagement->status->value, ['cancelled', 'disputed'], true))
+                            <p class="mt-4 rounded-lg bg-neutral-50 px-3 py-2 text-sm text-neutral-700">{{ __('A payment or dispute is open, so the rest stays in escrow.') }}</p>
+                        @endif
+                        @foreach ($fundingPayments as $funding)
+                            <p class="mt-4 text-xs text-tertiary">{{ __('Funded by payment') }} <a href="{{ route('admin.payments.show', $funding) }}" wire:navigate class="font-mono font-medium text-teal-700 hover:underline">{{ $funding->reference }}</a> · {{ __($funding->status->label()) }}@if ($funding->receipt) · {{ $funding->receipt }}@endif</p>
+                        @endforeach
+                        @foreach ($engagement->escrowRefunds as $refund)
+                            <p class="mt-2 text-xs text-tertiary">{{ __('Returned :amount on :date by :name', ['amount' => \App\Support\Money::formatMinor($refund->amount_minor), 'date' => $refund->created_at->format('M j, Y'), 'name' => $refund->staff?->name ?? '—']) }}</p>
+                        @endforeach
+                    </x-panel>
+                    @if ($postings->isNotEmpty())
+                        <x-panel :title="__('In the ledger')" flush>
+                            @foreach ($postings as $posting)
+                                <div class="border-b border-neutral-100 px-6 py-3 last:border-b-0">
+                                    <p class="flex flex-wrap items-baseline justify-between gap-2 text-sm"><a href="{{ route('admin.ledger.show', $posting) }}" wire:navigate class="font-semibold text-neutral-900 hover:text-teal-700 hover:underline">{{ $posting->description }}</a><span class="text-xs text-tertiary">{{ $posting->created_at->format('M j, g:i A') }}</span></p>
+                                </div>
+                            @endforeach
+                        </x-panel>
+                    @endif
+                @endif
                 <x-panel :title="__('The two sides')">
                     <ul class="space-y-4">
                         @foreach ([[__('Client'), $application->poster], [__('Freelancer'), $application->applicant]] as [$role, $person])
