@@ -21,6 +21,7 @@ use App\Http\Controllers\PartialPaymentController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PayoutCallbackController;
+use App\Http\Controllers\PayoutTimeoutController;
 use App\Http\Controllers\PolicyManagementController;
 use App\Http\Controllers\PostedJobApplicationController;
 use App\Http\Controllers\ProductReviewController;
@@ -262,6 +263,7 @@ Route::middleware('auth')->group(function () {
 // The payment gateway calls this when a payment is paid, declined or cancelled (no sign-in, no CSRF token)
 Route::post('webhooks/payments/{name}', PaymentCallbackController::class)->middleware('throttle:120,1')->name('webhooks.payments');
 Route::post('webhooks/payouts/{name}', PayoutCallbackController::class)->middleware('throttle:120,1')->name('webhooks.payouts');
+Route::post('webhooks/payouts/{name}/timeout', PayoutTimeoutController::class)->middleware('throttle:120,1')->name('webhooks.payouts.timeout');
 
 // Client - Freelancer Messaging
 Route::middleware(['auth'])->prefix('chat')->group(function () {

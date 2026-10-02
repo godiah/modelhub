@@ -18,6 +18,7 @@ use App\Notifications\PartialPaymentProcessedNotification;
 use App\Notifications\PaymentAcceptedNotification;
 use App\Notifications\PaymentDisputedNotification;
 use App\Notifications\PaymentRefundedNotification;
+use App\Notifications\PayoutNotConfirmedNotification;
 use App\Notifications\PayoutNotSentNotification;
 use App\Notifications\PayoutPaidNotification;
 use App\Notifications\PayoutRequestedNotification;
@@ -88,7 +89,7 @@ enum NotificationCategory: string
             self::Disputes => [DisputeCreatedNotification::class],
             self::Reviews => [ReviewSubmittedNotification::class],
             self::Projects => [JobPostedNotification::class, ProjectTakenDownNotification::class, ProjectRestoredNotification::class],
-            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class, ModelReviewedNotification::class, ModelReviewReplyNotification::class, ModelReviewHiddenNotification::class, ModelPurchasedNotification::class, ModelSoldNotification::class, PayoutPaidNotification::class, PayoutNotSentNotification::class, PayoutRequestedNotification::class, PaymentRefundedNotification::class, SaleRefundedNotification::class],
+            self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class, ModelReviewedNotification::class, ModelReviewReplyNotification::class, ModelReviewHiddenNotification::class, ModelPurchasedNotification::class, ModelSoldNotification::class, PayoutPaidNotification::class, PayoutNotSentNotification::class, PayoutRequestedNotification::class, PayoutNotConfirmedNotification::class, PaymentRefundedNotification::class, SaleRefundedNotification::class],
             self::Other => [],
         };
     }

@@ -140,6 +140,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:approve payouts')->group(function () {
             Route::post('payouts/{payout:reference}/approve', [AdminPayoutController::class, 'approve'])->middleware('throttle:30,1')->name('payouts.approve');
             Route::post('payouts/{payout:reference}/reject', [AdminPayoutController::class, 'reject'])->name('payouts.reject');
+            Route::post('payouts/{payout:reference}/settle', [AdminPayoutController::class, 'settle'])->middleware('throttle:30,1')->name('payouts.settle');
         });
 
         Route::middleware('can:review sellers')->group(function () {

@@ -9,7 +9,10 @@ COPY composer.json composer.lock ./
 
 # --ignore-platform-reqs: composer image lacks the PHP extensions.
 # They are already installed in the shared base image (Stage 3).
-RUN composer install \
+# The github_token build secret lets composer fetch the private godiah/laravel-common package over HTTPS.
+RUN --mount=type=secret,id=github_token \
+    composer config --global github-oauth.github.com "$(cat /run/secrets/github_token)" && \
+    composer install \
     --no-dev \
     --no-interaction \
     --no-scripts \
