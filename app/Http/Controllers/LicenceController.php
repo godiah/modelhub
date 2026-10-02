@@ -20,6 +20,6 @@ class LicenceController extends Controller
         // Somebody else's licence is a 404, not a 403: its key is not confirmed to exist
         abort_unless($licence->user_id === $request->user()->id, 404);
 
-        return view('licences.show', ['licence' => $licence->load('product:id,slug,title,deleted_at')]);
+        return view('licences.show', ['licence' => $licence->load('product.files')]);
     }
 }

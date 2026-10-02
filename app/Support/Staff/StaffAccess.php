@@ -52,6 +52,10 @@ final class StaffAccess
                 'read dispute messages' => ['label' => 'Read dispute conversations', 'description' => 'Read the messages between the two people in a disputed hire. Each time is recorded in the activity log.'],
                 'resolve disputes' => ['label' => 'Resolve disputes', 'description' => 'Take a dispute on and settle it with a final amount.'],
             ],
+            'Payments' => [
+                'view payouts' => ['label' => 'View withdrawals', 'description' => 'See every withdrawal members have asked for and where each one has got to. Phone numbers stay masked.'],
+                'approve payouts' => ['label' => 'Approve withdrawals', 'description' => 'Approve a withdrawal (which sends the money to the member\'s M-Pesa) or turn it down with a reason. Sees the full phone number.'],
+            ],
             'Access' => [
                 'manage staff' => ['label' => 'Manage staff', 'description' => 'Invite staff, give them roles and deactivate their accounts.'],
                 'manage roles' => ['label' => 'Manage roles', 'description' => 'Create and edit roles and what each one allows.'],
@@ -84,6 +88,7 @@ final class StaffAccess
             ]],
             'Marketplace moderator' => ['description' => 'Reviews models and seller applications and moderates reviews.', 'permissions' => ['view models', 'review models', 'view sellers', 'review sellers', 'moderate reviews']],
             'Dispute manager' => ['description' => 'Takes on payment disputes, reads the conversation and resolves them.', 'permissions' => ['view disputes', 'read dispute messages', 'resolve disputes', 'view engagements']],
+            'Finance' => ['description' => 'Approves members\' withdrawals and sees where the money went. Cannot change members, models or staff.', 'permissions' => ['view payouts', 'approve payouts', 'view members', 'view audit log']],
             'Support' => ['description' => 'Helps members: sees them and their contact details, and can see payment disputes. Read-only.', 'permissions' => ['view members', 'view contact details', 'view disputes']],
         ];
     }

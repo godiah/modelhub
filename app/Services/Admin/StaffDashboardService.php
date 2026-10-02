@@ -4,11 +4,13 @@ namespace App\Services\Admin;
 
 use App\Enums\DisputeStatus;
 use App\Enums\EngagementStatus;
+use App\Enums\PayoutStatus;
 use App\Enums\ProductStatus;
 use App\Enums\SellerStatus;
 use App\Models\JobEngagement;
 use App\Models\JobPaymentDispute;
 use App\Models\ModelJob;
+use App\Models\Payout;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\ReviewReport;
@@ -131,6 +133,16 @@ class StaffDashboardService
 
                     $items->push($this->item('scale', 'Payment dispute', $dispute->cancellation->engagement->application->job->title, $handler.($amount !== null ? ' · '.Money::format($amount, 0) : ''), $dispute->created_at, route('admin.disputes.show', $dispute->cancellation_id), $dispute->assignedAdmin ? null : 'Unassigned'));
                 });
+        }
+
+        if ($staff->can('approve payouts')) {
+            $count = StaffMenu::count('payouts');
+            $late = Payout::where('status', PayoutStatus::Requested)->where('created_at', '<=', $limit)->count();
+            $queues[] = ['key' => 'payouts', 'label' => 'Payouts', 'title' => 'Withdrawals to approve', 'icon' => 'cash', 'count' => $count, 'late' => $late, 'oldest' => $this->oldest(Payout::where('status', PayoutStatus::Requested)->min('created_at')), 'url' => route('admin.payouts.index')];
+            $overdue += $late;
+
+            Payout::with('user:id,name')->where('status', PayoutStatus::Requested)->orderBy('created_at')->limit(self::PER_QUEUE)->get()
+                ->each(fn (Payout $payout) => $items->push($this->item('cash', 'Withdrawal', $payout->user?->name ?? __('A member'), Money::formatMinor($payout->amount_minor, 0).' to M-Pesa', $payout->created_at, route('admin.payouts.index'))));
         }
 
         return [

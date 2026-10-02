@@ -2,6 +2,7 @@
 
 use App\Enums\DisputeStatus;
 use App\Enums\EngagementStatus;
+use App\Enums\LicenceTier;
 use App\Enums\PartialPaymentStatus;
 use App\Helpers\EmailCssInlinerHelper;
 use App\Mail\DeliverableSubmitted;
@@ -15,6 +16,7 @@ use App\Models\JobPartialPayment;
 use App\Models\JobPaymentDispute;
 use App\Models\JobReview;
 use App\Models\ModelJob;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\SellerProfile;
@@ -25,14 +27,17 @@ use App\Notifications\EngagementCancelledNotification;
 use App\Notifications\EngagementResponseNotification;
 use App\Notifications\HiredNotification;
 use App\Notifications\JobPostedNotification;
+use App\Notifications\ModelPurchasedNotification;
 use App\Notifications\ModelReviewedNotification;
 use App\Notifications\ModelReviewHiddenNotification;
 use App\Notifications\ModelReviewReplyNotification;
+use App\Notifications\ModelSoldNotification;
 use App\Notifications\NewApplicationMessage;
 use App\Notifications\PartialPaymentProcessedNotification;
 use App\Notifications\PaymentAcceptedNotification;
 use App\Notifications\PaymentDisputedNotification;
 use App\Notifications\ReviewSubmittedNotification;
+use App\Services\Marketplace\LicenceService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Support\Facades\File;
@@ -111,12 +116,27 @@ function allEmails(): array
         'job posted' => fn () => $t->client->notify(new JobPostedNotification($t->job)),
         'model reviewed' => fn () => $t->modelSeller->notify(new ModelReviewedNotification($t->modelReview, $t->modelListing)),
         'model review reply' => fn () => $t->client->notify(new ModelReviewReplyNotification($t->modelReview)),
+        'model purchased (receipt)' => fn () => $t->client->notify(new ModelPurchasedNotification(...paidSale($t))),
+        'model sold' => fn () => $t->modelSeller->notify(new ModelSoldNotification(...array_slice(paidSale($t), 0, 1), ...[$t->modelListing])),
         'model review hidden' => fn () => $t->client->notify(new ModelReviewHiddenNotification($t->modelReview)),
         'deliverable submitted' => fn () => Mail::to($t->client)->send(new DeliverableSubmitted($t->deliverable)),
         'two-factor code' => fn () => Mail::to($t->client)->send(new TwoFactorCode('482913')),
         'password reset' => fn () => $t->client->notify(new ResetPassword('reset-token')),
         'email verification' => fn () => $t->client->notify(new VerifyEmail),
     ];
+}
+
+/** A paid sale of the seller's model to the client, as [payment, licence]. */
+function paidSale($t): array
+{
+    $licence = app(LicenceService::class)->grant($t->client, $t->modelListing, LicenceTier::Standard);
+    $payment = Payment::create([
+        'reference' => Payment::newReference(), 'user_id' => $t->client->id, 'seller_id' => $t->modelSeller->id, 'product_id' => $t->modelListing->id, 'tier' => 'standard', 'amount_minor' => 120000, 'currency' => 'KES',
+        'msisdn' => '254712345671', 'status' => 'succeeded', 'gateway' => 'fake', 'receipt' => 'FAKEABC123', 'commission_rate' => 0.15, 'commission_minor' => 18000,
+        'seller_share_minor' => 102000, 'hold_days' => 7, 'purchase_id' => $licence->purchase_id, 'expires_at' => now(), 'completed_at' => now(),
+    ]);
+
+    return [$payment, $licence];
 }
 
 function sentEmails(): array

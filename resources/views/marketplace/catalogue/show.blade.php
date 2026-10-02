@@ -107,12 +107,7 @@
                         <x-models.wishlist-button :product="$product" :saved="in_array($product->id, $savedIds)" :count="$saves" variant="button" class="mt-5" />
                     @endunless
 
-                    @if (config('marketplace.purchases_enabled'))
-                        <x-btn block size="lg" class="mt-3" type="button" disabled>{{ $product->isFree() ? __('Download') : __('Add to cart') }}</x-btn>
-                    @else
-                        <x-btn block size="lg" class="mt-3" type="button" disabled>{{ __('Purchases open soon') }}</x-btn>
-                        <p class="mt-2 text-center text-xs text-tertiary">{{ __('Checkout is not open yet. Models are visible so sellers can see how their listings look.') }}</p>
-                    @endif
+                    @include('marketplace.catalogue.partials.buy')
                 </x-panel>
 
                 <x-panel :title="__('Files')">

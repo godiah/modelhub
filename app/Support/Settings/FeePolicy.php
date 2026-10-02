@@ -28,6 +28,18 @@ final class FeePolicy
         return PlatformSettings::int('fees.min_model_price') * 100;
     }
 
+    /** The smallest withdrawal, in minor units. */
+    public static function minPayoutMinor(): int
+    {
+        return PlatformSettings::int('fees.min_payout') * 100;
+    }
+
+    /** The fee taken from each withdrawal, in minor units. */
+    public static function payoutFeeMinor(): int
+    {
+        return PlatformSettings::int('fees.payout_fee') * 100;
+    }
+
     public static function saleHoldDays(): int
     {
         return PlatformSettings::int('fees.sale_hold_days');

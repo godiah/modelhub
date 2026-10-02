@@ -63,13 +63,13 @@ it('offers the categories as top-level choices with their sub-categories', funct
 });
 
 it('creates a draft with the price stored in minor units and its currency', function () {
-    $this->post(route('seller.models.store'), ['title' => 'Oak armchair', 'category_id' => $this->leaf->id, 'price' => '1250.50'])
+    $this->post(route('seller.models.store'), ['title' => 'Oak armchair', 'category_id' => $this->leaf->id, 'price' => '1250'])
         ->assertRedirect();
 
     $product = Product::first();
     expect($product->status)->toBe(ProductStatus::Draft)
         ->and($product->user_id)->toBe($this->seller->id)
-        ->and($product->price_minor)->toBe(125050)
+        ->and($product->price_minor)->toBe(125000)
         ->and($product->currency)->toBe('KES')
         ->and($product->slug)->toStartWith('oak-armchair-');
 
@@ -440,4 +440,12 @@ it('drops the Extended price when a model is made free', function () {
     $this->patch(route('seller.models.update', $product), ['title' => 'Now free armchair', 'category_id' => $this->leaf->id, 'price' => '0', 'extended_price' => '']);
 
     expect($product->fresh()->extended_price_minor)->toBeNull()->and($product->fresh()->isFree())->toBeTrue();
+});
+
+it('takes whole shillings only, because M-Pesa cannot take cents', function () {
+    $product = draftModel(['price_minor' => 50000]);
+
+    $this->post(route('seller.models.store'), ['title' => 'Priced chair', 'category_id' => $this->leaf->id, 'price' => '1250.50'])->assertSessionHasErrors(['price' => 'Prices are in whole shillings, because M-Pesa cannot take cents.']);
+    $this->patch(route('seller.models.update', $product), ['title' => 'Priced armchair', 'category_id' => $this->leaf->id, 'price' => '500', 'extended_price' => '900.50'])
+        ->assertSessionHasErrors(['extended_price' => 'Prices are in whole shillings, because M-Pesa cannot take cents.']);
 });

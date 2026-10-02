@@ -149,6 +149,7 @@ final class SidebarMenu
                     ['label' => 'My licences', 'route' => 'licences.index', 'icon' => 'clipboard-document', 'match' => ['licences.*']],
                     ['label' => 'Sell models', 'route' => 'seller.index', 'icon' => 'banknotes', 'match' => ['seller.index', 'seller.apply'], 'notSeller' => true],
                     ['label' => 'My models', 'route' => 'seller.models.index', 'icon' => 'archive-box', 'match' => ['seller.models.*'], 'section' => 'Selling', 'seller' => true],
+                    ['label' => 'Earnings', 'route' => 'earnings.index', 'icon' => 'coins', 'match' => ['earnings.*'], 'section' => 'Selling', 'seller' => true],
                     ['label' => 'My store', 'route' => 'seller.store.edit', 'icon' => 'tag', 'match' => ['seller.store.*'], 'section' => 'Selling', 'seller' => true],
                 ],
             ],
