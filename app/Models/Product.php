@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\GeometryType;
+use App\Enums\LicenceTier;
 use App\Enums\ProductStatus;
 use App\Enums\UvLayout;
 use App\Services\Marketplace\ProductRatingService;
@@ -21,7 +22,7 @@ class Product extends Model
 
     protected $fillable = [
         'user_id', 'category_id', 'title', 'slug', 'description', 'tags', 'status',
-        'price_minor', 'currency', 'license',
+        'price_minor', 'extended_price_minor', 'currency',
         'geometry_type', 'polygons', 'vertices', 'uv_layout', 'render_engine',
         'is_rigged', 'is_animated', 'is_low_poly', 'is_pbr', 'has_textures', 'has_materials', 'is_uv_mapped', 'is_print_ready', 'is_vr_ready',
         'rating_avg', 'rating_count', 'submitted_at', 'reviewed_by', 'reviewed_at', 'review_notes', 'published_at',
@@ -33,6 +34,7 @@ class Product extends Model
         'geometry_type' => GeometryType::class,
         'uv_layout' => UvLayout::class,
         'price_minor' => 'integer',
+        'extended_price_minor' => 'integer',
         'is_rigged' => 'boolean',
         'is_animated' => 'boolean',
         'is_low_poly' => 'boolean',
@@ -155,6 +157,21 @@ class Product extends Model
     public function price(): float
     {
         return $this->price_minor / 100;
+    }
+
+    /** What this model costs under a licence, in minor units, or null when that licence is not sold. */
+    public function priceFor(LicenceTier $tier): ?int
+    {
+        return match ($tier) {
+            LicenceTier::Standard => $this->price_minor,
+            LicenceTier::Extended => $this->extended_price_minor,
+        };
+    }
+
+    /** The licences this model is sold under, Standard first. @return list<\App\Enums\LicenceTier> */
+    public function offeredLicences(): array
+    {
+        return array_values(array_filter(LicenceTier::cases(), fn ($tier) => $this->priceFor($tier) !== null));
     }
 
     public function isFree(): bool

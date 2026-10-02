@@ -12,7 +12,7 @@
             <div class="flex flex-wrap items-start justify-between gap-4 p-6">
                 <div class="min-w-0">
                     <div class="flex flex-wrap items-center gap-3"><h1 class="font-tertiary text-2xl font-semibold text-neutral-900">{{ $product->title }}</h1><x-badge :tone="$product->status->tone()" class="px-2.5 py-0.5 text-xs font-medium">{{ __($product->status->label()) }}</x-badge></div>
-                    <p class="mt-1.5 text-sm text-tertiary">{{ $product->category?->path() ?? __('No category') }} · {{ $product->isFree() ? __('Free') : \App\Support\Money::formatMinor($product->price_minor) }}</p>
+                    <p class="mt-1.5 text-sm text-tertiary">{{ $product->category?->path() ?? __('No category') }} · {{ $product->isFree() ? __('Free') : \App\Support\Money::formatMinor($product->price_minor).($product->extended_price_minor ? ' · '.__('Extended').' '.\App\Support\Money::formatMinor($product->extended_price_minor) : '') }}</p>
                 </div>
                 <div class="flex flex-wrap gap-2">
                     @if ($product->status === \App\Enums\ProductStatus::Published)<x-btn variant="secondary" href="{{ route('models.show', $product) }}" target="_blank">{{ __('Open public page') }}</x-btn>@elseif ($canReview)<x-btn variant="secondary" href="{{ route('models.show', $product) }}" target="_blank">{{ __('Preview') }}</x-btn>@endif

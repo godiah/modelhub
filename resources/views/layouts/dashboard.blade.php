@@ -33,7 +33,7 @@
         <x-sidebar :groups="$menu" />
 
         <div
-            class="flex min-h-screen flex-col transition-[padding] duration-200 ease-out lg:pl-64 lg:[.sidebar-collapsed_&]:pl-[72px]">
+            class="flex min-h-screen flex-col transition-[padding] duration-200 ease-out lg:pl-64 lg:[.sidebar-collapsed_&]:pl-[72px] print:pl-0">
             <x-topbar :crumbs="$breadcrumb" />
 
             <!-- Page toolbar: contextual actions / summary supplied by the page (titles live in the breadcrumb) -->
@@ -49,7 +49,7 @@
                 {{ $slot }}
             </main>
 
-            @include('partials.footer-app')
+            <div class="print:hidden">@include('partials.footer-app')</div>
         </div>
     </div>
     @include('partials.app-scripts')

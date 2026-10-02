@@ -106,7 +106,8 @@
         </x-policy.section>
 
         <x-policy.section id="marketplace" number="11" :title="$sections['marketplace']">
-            <p>{{ __('We plan to add a marketplace where members can sell and buy 3D models. It is not available yet. When it launches, additional terms for sellers and buyers (including licences, refunds and payouts) will apply to it, and you will be asked to accept them before you use it.') }}</p>
+            <p>{{ __('We plan to add a marketplace where members can sell and buy 3D models. It is not available yet. When it launches, additional terms for sellers and buyers (including refunds and payouts) will apply to it, and you will be asked to accept them before you use it.') }}</p>
+            <p>{{ __('Every model will be sold under a licence that says what the buyer may do with it. The current wording is on our') }} <a href="{{ route('legal.licences') }}" class="font-medium text-teal-700 hover:underline">{{ __('licence page') }}</a>.</p>
         </x-policy.section>
 
         <x-policy.section id="ending" number="12" :title="$sections['ending']">

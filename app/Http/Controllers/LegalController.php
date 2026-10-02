@@ -10,6 +10,11 @@ class LegalController extends Controller
         return view('legal.terms');
     }
 
+    public function licences()
+    {
+        return view('legal.licences');
+    }
+
     public function privacy()
     {
         return view('legal.privacy');

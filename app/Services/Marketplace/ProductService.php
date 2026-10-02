@@ -39,6 +39,7 @@ class ProductService
                 'description' => $data['description'] ?? null,
                 'tags' => $data['tags'] ?? [],
                 'price_minor' => $data['price_minor'],
+                'extended_price_minor' => $data['extended_price_minor'] ?? null,
                 'geometry_type' => $data['geometry_type'] ?? null,
                 'polygons' => $data['polygons'] ?? null,
                 'vertices' => $data['vertices'] ?? null,

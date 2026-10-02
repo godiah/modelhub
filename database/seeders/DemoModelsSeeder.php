@@ -316,7 +316,6 @@ class DemoModelsSeeder extends Seeder
             'status' => $status,
             'price_minor' => $prices[$hash % count($prices)] * ($polygons > 20000 ? 2 : 1),
             'currency' => config('marketplace.currency'),
-            'license' => 'standard',
             'geometry_type' => 'polygon_mesh',
             'polygons' => $polygons,
             'vertices' => (int) round($polygons * 0.52),

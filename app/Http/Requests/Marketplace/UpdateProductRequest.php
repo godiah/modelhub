@@ -25,6 +25,7 @@ class UpdateProductRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:20000'],
             'tags' => ['nullable', 'string', 'max:500'],
             'price' => $this->priceRule(),
+            'extended_price' => $this->extendedPriceRule(),
             'geometry_type' => ['nullable', Rule::enum(GeometryType::class)],
             'polygons' => ['nullable', 'integer', 'min:0', 'max:2000000000'],
             'vertices' => ['nullable', 'integer', 'min:0', 'max:2000000000'],
