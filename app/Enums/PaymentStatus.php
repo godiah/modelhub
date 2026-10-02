@@ -23,6 +23,9 @@ enum PaymentStatus: string
     /** Money arrived but could not be turned into a licence (a wrong amount, a duplicate purchase): staff must look at it. */
     case Review = 'review';
 
+    /** Paid, then given back by staff: the licence has ended and the seller's share was taken back. */
+    case Refunded = 'refunded';
+
     public function label(): string
     {
         return match ($this) {
@@ -32,6 +35,18 @@ enum PaymentStatus: string
             self::Cancelled => 'Cancelled',
             self::Expired => 'Expired',
             self::Review => 'Needs review',
+            self::Refunded => 'Refunded',
+        };
+    }
+
+    public function tone(): string
+    {
+        return match ($this) {
+            self::Pending => 'blue',
+            self::Succeeded => 'green',
+            self::Failed, self::Cancelled, self::Expired => 'neutral',
+            self::Review => 'amber',
+            self::Refunded => 'red',
         };
     }
 

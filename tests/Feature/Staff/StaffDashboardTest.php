@@ -89,8 +89,8 @@ it('only builds the queues the person may work', function () {
         ->and($labels(staffWith('Dispute manager')))->toBe(['Disputes'])
         ->and($labels(staffWith('Support')))->toBe(['Disputes'])
         ->and($labels(staffWith('Auditor')))->toBe(['Disputes'])
-        ->and($labels(staffWith('Finance')))->toBe(['Payouts'])
-        ->and($labels(staffWith('Super admin')))->toBe(['Models', 'Applications', 'Reports', 'Disputes', 'Payouts'])
+        ->and($labels(staffWith('Finance')))->toBe(['Payments', 'Payouts'])
+        ->and($labels(staffWith('Super admin')))->toBe(['Models', 'Applications', 'Reports', 'Disputes', 'Payments', 'Payouts'])
         ->and($labels(staffWith()))->toBe([]);
 
     dashboardFor(staffWith('Dispute manager'))->assertDontSee('Model to review');

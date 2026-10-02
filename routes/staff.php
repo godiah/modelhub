@@ -6,10 +6,12 @@ use App\Http\Controllers\Admin\AdminBulkController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminDisputeController;
 use App\Http\Controllers\Admin\AdminEngagementController;
+use App\Http\Controllers\Admin\AdminLedgerController;
 use App\Http\Controllers\Admin\AdminMemberController;
 use App\Http\Controllers\Admin\AdminModelDirectoryController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminOverviewController;
+use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminPayoutController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminProjectController;
@@ -122,6 +124,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:resolve disputes')->group(function () {
             Route::post('disputes/{dispute}/assign', [AdminDisputeController::class, 'assign'])->name('disputes.assign');
             Route::post('disputes/{dispute}/resolve', [AdminDisputeController::class, 'resolve'])->name('disputes.resolve');
+        });
+
+        Route::middleware('can:view payments')->group(function () {
+            Route::get('payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+            Route::get('payments/{payment:reference}', [AdminPaymentController::class, 'show'])->name('payments.show');
+        });
+        Route::middleware('can:refund payments')->post('payments/{payment:reference}/refund', [AdminPaymentController::class, 'refund'])->middleware('throttle:20,1')->name('payments.refund');
+        Route::middleware('can:view ledger')->group(function () {
+            Route::get('ledger', [AdminLedgerController::class, 'index'])->name('ledger.index');
+            Route::get('ledger/{transaction}', [AdminLedgerController::class, 'show'])->whereNumber('transaction')->name('ledger.show');
         });
 
         Route::middleware('can:view payouts')->get('payouts', [AdminPayoutController::class, 'index'])->name('payouts.index');

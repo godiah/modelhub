@@ -21,7 +21,7 @@
             <x-stat-tile :label="__('Available to withdraw')" :value="Money::formatMinor($summary['available'])" :hint="__('Past the hold period')" icon="banknotes" />
             <x-stat-tile :label="__('In the hold period')" :value="Money::formatMinor($summary['pending'])" :hint="__('Becomes available soon')" icon="clock" tone="amber" />
             <x-stat-tile :label="__('Withdrawn')" :value="Money::formatMinor($summary['withdrawn'])" :hint="$summary['in_progress'] > 0 ? __(':amount on its way', ['amount' => Money::formatMinor($summary['in_progress'])]) : __('Sent to your M-Pesa')" icon="cloud-arrow-up" />
-            <x-stat-tile :label="__('Earned in total')" :value="Money::formatMinor($summary['earned'])" :hint="__('Your share of every sale')" icon="coins" />
+            <x-stat-tile :label="__('Earned in total')" :value="Money::formatMinor($summary['earned'])" :hint="__('Your share of every sale')" icon="cash" />
         </section>
 
         <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
