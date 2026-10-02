@@ -33,6 +33,7 @@
                             <input type="hidden" name="price" value="0" x-bind:disabled="!free">
                         </div>
                         @error('price')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
+                        <p class="mt-1.5 text-xs text-tertiary">{{ __('A paid model costs at least :min. The platform keeps :rate of each sale.', ['min' => \App\Support\Money::formatMinor(\App\Support\Settings\FeePolicy::minModelPriceMinor(), 0), 'rate' => rtrim(rtrim(number_format(\App\Support\Settings\FeePolicy::modelsRate(auth()->user()->sellerProfile) * 100, 2), '0'), '.').'%']) }}</p>
                         <label class="mt-2.5 flex items-center gap-2 text-sm text-neutral-700">
                             <input type="checkbox" x-model="free" class="h-4 w-4 rounded border-neutral-300 text-teal-600 focus:ring-teal-600/30">
                             {{ __('This model is free') }}

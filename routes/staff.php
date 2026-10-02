@@ -111,6 +111,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('stores/{seller}', [AdminStoreController::class, 'show'])->name('stores.show');
         });
 
+        Route::patch('stores/{seller}/commission', [AdminStoreController::class, 'commission'])->middleware('super-admin')->name('stores.commission');
+
         Route::middleware('can:view disputes')->group(function () {
             Route::get('disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');
             Route::get('disputes/{cancellation}', [AdminDisputeController::class, 'show'])->name('disputes.show');
@@ -157,6 +159,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::redirect('/', '/admin/settings/security')->name('index');
             Route::get('security', [AdminSettingsController::class, 'security'])->name('security');
             Route::patch('security', [AdminSettingsController::class, 'updateSecurity'])->name('security.update');
+            Route::get('fees', [AdminSettingsController::class, 'fees'])->name('fees');
+            Route::patch('fees', [AdminSettingsController::class, 'updateFees'])->name('fees.update');
         });
 
         Route::middleware('can:manage roles')->group(function () {

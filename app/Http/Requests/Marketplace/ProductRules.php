@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Marketplace;
 
 use App\Models\Category;
+use App\Support\Settings\FeePolicy;
 use Closure;
 
 /** Rules shared by creating and editing a listing. */
@@ -28,7 +29,13 @@ trait ProductRules
     /** Price in whole KES; 0 means free (the form sends 0 when "free" is ticked, so a blank price is a mistake). */
     protected function priceRule(): array
     {
-        return ['required', 'numeric', 'min:0', 'max:1000000'];
+        return ['required', 'numeric', 'min:0', 'max:1000000', function (string $attribute, mixed $value, Closure $fail) {
+            $minimum = FeePolicy::minModelPriceMinor() / 100;
+
+            if ((float) $value > 0 && (float) $value < $minimum) {
+                $fail('A paid model must cost at least KES '.number_format($minimum).', or be free.');
+            }
+        }];
     }
 
     /** The price field in minor units. */

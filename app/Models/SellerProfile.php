@@ -19,6 +19,7 @@ class SellerProfile extends Model
     ];
 
     protected $casts = [
+        'commission_percent' => 'decimal:2',
         'status' => SellerStatus::class,
         'rating_avg' => 'float',
         'rating_count' => 'integer',

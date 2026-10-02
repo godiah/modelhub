@@ -41,6 +41,23 @@
                     </dl>
                     @if (filled($store->review_notes))<p class="mt-3 rounded-xl bg-neutral-50 px-3 py-2 text-sm text-neutral-700">{{ $store->review_notes }}</p>@endif
                 </x-panel>
+                @if (auth()->user()->hasRole(\App\Support\Staff\StaffAccess::SUPER_ADMIN))
+                    <x-panel :title="__('Commission')" :description="__('The platform keeps this share of each model sale. Leave it empty to use the platform rate.')">
+                        <form method="POST" action="{{ route('admin.stores.commission', $store) }}" class="space-y-3">
+                            @csrf @method('PATCH')
+                            <div>
+                                <label for="commission_percent" class="mb-1.5 block text-sm font-medium text-neutral-800">{{ __('This seller\'s rate') }}</label>
+                                <div class="flex items-center gap-2">
+                                    <input id="commission_percent" type="number" name="commission_percent" min="0" max="50" step="0.01" inputmode="decimal" value="{{ old('commission_percent', $store->commission_percent) }}" placeholder="{{ rtrim(rtrim(number_format(\App\Support\Settings\FeePolicy::modelsRate() * 100, 2), '0'), '.') }}" class="block w-28 rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm tabular-nums focus:border-secondary focus:outline-none focus:ring-2 focus:ring-secondary/25">
+                                    <span class="text-sm text-tertiary">%</span>
+                                </div>
+                                @error('commission_percent')<p class="mt-1.5 text-sm text-red-600" role="alert">{{ $message }}</p>@enderror
+                                <p class="mt-1.5 text-xs text-tertiary">{{ $store->commission_percent !== null ? __('A special rate is set for this seller.') : __('Using the platform rate.') }}</p>
+                            </div>
+                            <x-btn type="submit" variant="secondary" size="sm">{{ __('Save rate') }}</x-btn>
+                        </form>
+                    </x-panel>
+                @endif
                 @if ($store->user)
                     <x-panel :title="__('The seller')">
                         <div class="flex items-center gap-3"><x-user-avatar :user="$store->user" size="h-10 w-10" /><div class="min-w-0"><p class="truncate text-sm font-semibold text-neutral-900">{{ $store->user->name }}</p>@can('view members')<a href="{{ route('admin.members.show', $store->user) }}" class="text-xs font-medium text-teal-700 hover:underline">{{ __('Open the member') }}</a>@endcan</div></div>

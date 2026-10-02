@@ -11,6 +11,7 @@
         $staff->can('manage staff') ? ['title' => __('Invite staff'), 'subtitle' => __('Action'), 'url' => route('admin.staff.create'), 'icon' => 'plus'] : null,
         $staff->can('manage roles') ? ['title' => __('New role'), 'subtitle' => __('Action'), 'url' => route('admin.roles.create'), 'icon' => 'plus'] : null,
         $staff->hasRole(\App\Support\Staff\StaffAccess::SUPER_ADMIN) ? ['title' => __('Security settings'), 'subtitle' => __('Settings'), 'url' => route('admin.settings.security'), 'icon' => 'cog-6-tooth'] : null,
+        $staff->hasRole(\App\Support\Staff\StaffAccess::SUPER_ADMIN) ? ['title' => __('Fees and payments'), 'subtitle' => __('Settings'), 'url' => route('admin.settings.fees'), 'icon' => 'banknotes'] : null,
         ['title' => __('Your account'), 'subtitle' => __('Account'), 'url' => route('admin.account.edit'), 'icon' => 'user'],
     ])->filter()->values();
 @endphp
