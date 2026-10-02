@@ -22,7 +22,7 @@ final class PlatformSettings
     /** @return array<string, array<string, mixed>> */
     public static function definitions(): array
     {
-        return SecuritySettings::definitions();
+        return SecuritySettings::definitions() + FeeSettings::definitions();
     }
 
     public static function get(string $key): mixed
@@ -43,6 +43,11 @@ final class PlatformSettings
         return (int) self::get($key);
     }
 
+    public static function float(string $key): float
+    {
+        return (float) self::get($key);
+    }
+
     /** Every setting with its current value. @return array<string, mixed> */
     public static function all(): array
     {
@@ -54,9 +59,11 @@ final class PlatformSettings
     {
         $definition = self::definitions()[$key];
 
-        return $definition['type'] === 'bool'
-            ? ['boolean']
-            : ['required', 'integer', 'min:'.($definition['min'] ?? 0), 'max:'.($definition['max'] ?? PHP_INT_MAX)];
+        return match ($definition['type']) {
+            'bool' => ['boolean'],
+            'float' => ['required', 'numeric', 'min:'.($definition['min'] ?? 0), 'max:'.($definition['max'] ?? PHP_INT_MAX), 'decimal:0,2'],
+            default => ['required', 'integer', 'min:'.($definition['min'] ?? 0), 'max:'.($definition['max'] ?? PHP_INT_MAX)],
+        };
     }
 
     /**
@@ -87,7 +94,7 @@ final class PlatformSettings
 
             StaffAudit::log(
                 "settings.{$area}-updated",
-                'Changed '.trans_choice(':count security setting|:count security settings', count($changes), ['count' => count($changes)]).': '.collect($changes)->map(fn ($c) => $c['label'].' ('.self::display($c['from']).' to '.self::display($c['to']).')')->implode(', '),
+                'Changed '.count($changes).' '.$area.' '.(count($changes) === 1 ? 'setting' : 'settings').': '.collect($changes)->map(fn ($c) => $c['label'].' ('.self::display($c['from']).' to '.self::display($c['to']).')')->implode(', '),
                 details: ['changes' => $changes],
                 staffId: $by->id,
             );
@@ -109,6 +116,10 @@ final class PlatformSettings
 
     private static function cast(array $definition, mixed $value): mixed
     {
-        return $definition['type'] === 'bool' ? filter_var($value, FILTER_VALIDATE_BOOLEAN) : (int) $value;
+        return match ($definition['type']) {
+            'bool' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+            'float' => round((float) $value, 2),
+            default => (int) $value,
+        };
     }
 }

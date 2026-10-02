@@ -84,10 +84,10 @@ it('creates a free model when the price is zero', function () {
 it('validates a new draft', function () {
     $parent = Category::where('slug', 'furniture')->first();
 
-    $this->post(route('seller.models.store'), ['title' => 'Hi', 'category_id' => $this->leaf->id, 'price' => '10'])->assertSessionHasErrors('title');
-    $this->post(route('seller.models.store'), ['title' => 'Valid title here', 'category_id' => '', 'price' => '10'])->assertSessionHasErrors('category_id');
-    $this->post(route('seller.models.store'), ['title' => 'Valid title here', 'category_id' => $parent->id, 'price' => '10'])->assertSessionHasErrors('category_id');
-    $this->post(route('seller.models.store'), ['title' => 'Valid title here', 'category_id' => 999999, 'price' => '10'])->assertSessionHasErrors('category_id');
+    $this->post(route('seller.models.store'), ['title' => 'Hi', 'category_id' => $this->leaf->id, 'price' => '500'])->assertSessionHasErrors('title');
+    $this->post(route('seller.models.store'), ['title' => 'Valid title here', 'category_id' => '', 'price' => '500'])->assertSessionHasErrors('category_id');
+    $this->post(route('seller.models.store'), ['title' => 'Valid title here', 'category_id' => $parent->id, 'price' => '500'])->assertSessionHasErrors('category_id');
+    $this->post(route('seller.models.store'), ['title' => 'Valid title here', 'category_id' => 999999, 'price' => '500'])->assertSessionHasErrors('category_id');
     $this->post(route('seller.models.store'), ['title' => 'Valid title here', 'category_id' => $this->leaf->id])->assertSessionHasErrors('price');
     $this->post(route('seller.models.store'), ['title' => 'Valid title here', 'category_id' => $this->leaf->id, 'price' => '-5'])->assertSessionHasErrors('price');
 
@@ -153,7 +153,7 @@ it('saves the details, tags, features and compatible software', function () {
 
 it('rejects invalid details', function () {
     $product = draftModel();
-    $base = ['title' => 'Valid title here', 'category_id' => $this->leaf->id, 'price' => '10'];
+    $base = ['title' => 'Valid title here', 'category_id' => $this->leaf->id, 'price' => '500'];
 
     $this->patch(route('seller.models.update', $product), $base + ['geometry_type' => 'sculpt'])->assertSessionHasErrors('geometry_type');
     $this->patch(route('seller.models.update', $product), $base + ['polygons' => '-4'])->assertSessionHasErrors('polygons');
@@ -165,7 +165,7 @@ it('caps the number of tags', function () {
     $product = draftModel();
     $tags = implode(',', range(1, 40));
 
-    $this->patch(route('seller.models.update', $product), ['title' => 'Valid title here', 'category_id' => $this->leaf->id, 'price' => '10', 'tags' => $tags]);
+    $this->patch(route('seller.models.update', $product), ['title' => 'Valid title here', 'category_id' => $this->leaf->id, 'price' => '500', 'tags' => $tags]);
 
     expect($product->fresh()->tags)->toHaveCount(config('marketplace.max_tags'));
 });
@@ -333,7 +333,7 @@ it('lets a seller take a listing back, edit it and send it again', function () {
     $this->post(route('seller.models.unpublish', $product))->assertRedirect(route('seller.models.edit', $product));
     expect($product->fresh()->status)->toBe(ProductStatus::Unpublished);
 
-    $this->patch(route('seller.models.update', $product), ['title' => 'Edited after unpublish', 'category_id' => $this->leaf->id, 'price' => '10'])->assertRedirect();
+    $this->patch(route('seller.models.update', $product), ['title' => 'Edited after unpublish', 'category_id' => $this->leaf->id, 'price' => '500'])->assertRedirect();
     expect($product->fresh()->title)->toBe('Edited after unpublish');
 
     $this->post(route('seller.models.unpublish', $product))->assertRedirect()->assertSessionHas('error');
@@ -377,4 +377,30 @@ it('puts My models in the sidebar for approved sellers only', function () {
 
     $this->actingAs(User::factory()->create())->get(route('dashboard'))->assertOk()
         ->assertDontSee(route('seller.models.index'), false)->assertSee(route('models.index'), false);
+});
+
+/** ---------------------------------------------------------------- the minimum price */
+it('lets a model be free or cost at least the platform minimum, and says what the minimum is', function () {
+    $post = fn (string $price) => $this->post(route('seller.models.store'), ['title' => 'Priced chair', 'category_id' => $this->leaf->id, 'price' => $price]);
+
+    $post('50')->assertSessionHasErrors(['price' => 'A paid model must cost at least KES 100, or be free.']);
+    $post('99.99')->assertSessionHasErrors('price');
+    $post('0')->assertSessionHasNoErrors();
+    $post('100')->assertSessionHasNoErrors();
+
+    $this->get(route('seller.models.create'))->assertSee('A paid model costs at least')->assertSee('The platform keeps 15% of each sale.');
+});
+
+it('follows the minimum price and the commission a Super admin sets', function () {
+    setting('fees.min_model_price', 250);
+    setting('fees.models_percent', 12.5);
+
+    $this->post(route('seller.models.store'), ['title' => 'Priced chair', 'category_id' => $this->leaf->id, 'price' => '200'])->assertSessionHasErrors(['price' => 'A paid model must cost at least KES 250, or be free.']);
+    $this->get(route('seller.models.create'))->assertSee('KES 250')->assertSee('keeps 12.5% of each sale');
+});
+
+it('shows the seller their own commission when they have a special rate', function () {
+    $this->seller->sellerProfile->forceFill(['commission_percent' => 8])->save();
+
+    $this->get(route('seller.models.create'))->assertSee('keeps 8% of each sale');
 });
