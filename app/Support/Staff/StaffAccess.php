@@ -53,6 +53,9 @@ final class StaffAccess
                 'resolve disputes' => ['label' => 'Resolve disputes', 'description' => 'Take a dispute on and settle it with a final amount.'],
             ],
             'Payments' => [
+                'view payments' => ['label' => 'View payments', 'description' => 'See every payment for a model: who paid, what for, how it was settled, and any that need a look. Phone numbers stay masked.'],
+                'refund payments' => ['label' => 'Refund payments', 'description' => 'Refund a payment (which ends the buyer\'s licence and takes the money back out of the seller\'s earnings) and settle payments that arrived but could not be matched.'],
+                'view ledger' => ['label' => 'View the ledger', 'description' => 'Read every money movement on the platform, and where the money sits. Read-only.'],
                 'view payouts' => ['label' => 'View withdrawals', 'description' => 'See every withdrawal members have asked for and where each one has got to. Phone numbers stay masked.'],
                 'approve payouts' => ['label' => 'Approve withdrawals', 'description' => 'Approve a withdrawal (which sends the money to the member\'s M-Pesa) or turn it down with a reason. Sees the full phone number.'],
             ],
@@ -84,11 +87,11 @@ final class StaffAccess
                 'view models', 'view sellers', 'view disputes', 'view audit log',
             ]],
             'Auditor' => ['description' => 'Read-only view of the whole platform and the activity log. No actions, no contact details.', 'permissions' => [
-                'view platform overview', 'view members', 'view projects', 'view engagements', 'view models', 'view sellers', 'view disputes', 'view audit log',
+                'view platform overview', 'view members', 'view projects', 'view engagements', 'view models', 'view sellers', 'view disputes', 'view payments', 'view ledger', 'view audit log',
             ]],
             'Marketplace moderator' => ['description' => 'Reviews models and seller applications and moderates reviews.', 'permissions' => ['view models', 'review models', 'view sellers', 'review sellers', 'moderate reviews']],
             'Dispute manager' => ['description' => 'Takes on payment disputes, reads the conversation and resolves them.', 'permissions' => ['view disputes', 'read dispute messages', 'resolve disputes', 'view engagements']],
-            'Finance' => ['description' => 'Approves members\' withdrawals and sees where the money went. Cannot change members, models or staff.', 'permissions' => ['view payouts', 'approve payouts', 'view members', 'view audit log']],
+            'Finance' => ['description' => 'Approves members\' withdrawals, refunds payments and reads the ledger. Cannot change members, models or staff.', 'permissions' => ['view payouts', 'approve payouts', 'view payments', 'refund payments', 'view ledger', 'view members', 'view audit log']],
             'Support' => ['description' => 'Helps members: sees them and their contact details, and can see payment disputes. Read-only.', 'permissions' => ['view members', 'view contact details', 'view disputes']],
         ];
     }

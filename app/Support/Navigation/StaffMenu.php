@@ -3,10 +3,12 @@
 namespace App\Support\Navigation;
 
 use App\Enums\DisputeStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\PayoutStatus;
 use App\Enums\ProductStatus;
 use App\Enums\SellerStatus;
 use App\Models\JobPaymentDispute;
+use App\Models\Payment;
 use App\Models\Payout;
 use App\Models\Product;
 use App\Models\ProductReview;
@@ -92,6 +94,7 @@ final class StaffMenu
             'sellers' => SellerProfile::where('status', SellerStatus::Pending)->count(),
             'reports' => ProductReview::visible()->whereHas('reports', fn ($reports) => $reports->where('status', 'open'))->count(),
             'disputes' => JobPaymentDispute::whereIn('status', [DisputeStatus::Pending, DisputeStatus::UnderReview])->count(),
+            'payments' => Payment::where('status', PaymentStatus::Review)->count(),
             'payouts' => Payout::where('status', PayoutStatus::Requested)->count(),
             'notifications' => $staff?->unreadNotifications()->count() ?? 0,
             default => 0,
@@ -132,7 +135,9 @@ final class StaffMenu
                 'label' => 'Payments',
                 'items' => [
                     ['label' => 'Payment disputes', 'route' => 'admin.disputes.index', 'icon' => 'scale', 'match' => ['admin.disputes.*'], 'can' => 'view disputes', 'badge' => 'disputes'],
+                    ['label' => 'Payments', 'route' => 'admin.payments.index', 'icon' => 'currency-dollar', 'match' => ['admin.payments.*'], 'can' => 'view payments', 'badge' => 'payments'],
                     ['label' => 'Payouts', 'route' => 'admin.payouts.index', 'icon' => 'cash', 'match' => ['admin.payouts.*'], 'can' => 'view payouts', 'badge' => 'payouts'],
+                    ['label' => 'Ledger', 'route' => 'admin.ledger.index', 'icon' => 'calculator', 'match' => ['admin.ledger.*'], 'can' => 'view ledger'],
                 ],
             ],
             [

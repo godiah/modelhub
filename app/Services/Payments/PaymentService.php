@@ -204,7 +204,7 @@ class PaymentService
         $this->ledger->post('sale', "sale:payment:{$payment->id}", $lines, "Sale of \"{$licence->product_title}\" ({$licence->tier->label()} licence)", $payment, ['receipt' => $outcome->receipt, 'licence' => $licence->key]);
 
         $payment->update([
-            'status' => PaymentStatus::Succeeded, 'receipt' => $outcome->receipt, 'completed_at' => now(), 'purchase_id' => $licence->purchase_id, 'failure_reason' => null,
+            'status' => PaymentStatus::Succeeded, 'received_minor' => $paid, 'receipt' => $outcome->receipt, 'completed_at' => now(), 'purchase_id' => $licence->purchase_id, 'failure_reason' => null,
             'release_at' => now()->addDays($payment->hold_days),
         ]);
 
@@ -219,7 +219,7 @@ class PaymentService
             LedgerLine::credit($this->ledger->platformAccount('suspense'), $paid),
         ], "Payment {$payment->reference} received but not allocated", $payment, ['receipt' => $outcome->receipt, 'reason' => $reason]);
 
-        $payment->update(['status' => PaymentStatus::Review, 'receipt' => $outcome->receipt, 'failure_reason' => $reason, 'completed_at' => now()]);
+        $payment->update(['status' => PaymentStatus::Review, 'received_minor' => $paid, 'receipt' => $outcome->receipt, 'failure_reason' => $reason, 'completed_at' => now()]);
 
         Log::warning("Payment {$payment->reference} needs review: {$reason}", ['payment_id' => $payment->id, 'receipt' => $outcome->receipt]);
     }

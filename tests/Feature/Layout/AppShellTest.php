@@ -145,11 +145,11 @@ it('groups the sidebar by product: Models and Projects, with Engagements inside 
         ->and($groups['Projects'])->toBe(['Browse projects', 'My applications', 'Post a project', 'Posted projects', 'Engagements']);
 });
 
-it('swaps "Sell models" for My models and My store once a member is an approved seller, under a Selling sub-label', function () {
+it('swaps "Sell models" for My store, My models and Earnings once a member is an approved seller, under a Selling sub-label', function () {
     $seller = User::factory()->create();
     SellerProfile::factory()->approved()->create(['user_id' => $seller->id]);
 
-    expect(sidebarGroups($seller)['Models'])->toBe(['Browse models', 'Wishlist', 'My licences', 'My models', 'Earnings', 'My store']);
+    expect(sidebarGroups($seller)['Models'])->toBe(['Browse models', 'Wishlist', 'My licences', 'My store', 'My models', 'Earnings']);
 
     $items = collect(SidebarMenu::for($seller))->firstWhere('label', 'Models')['items'];
     expect(collect($items)->pluck('section')->all())->toBe([null, null, null, 'Selling', 'Selling', 'Selling']);

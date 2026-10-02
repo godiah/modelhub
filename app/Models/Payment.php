@@ -11,15 +11,15 @@ use Illuminate\Support\Str;
 class Payment extends Model
 {
     protected $fillable = [
-        'reference', 'user_id', 'seller_id', 'product_id', 'tier', 'amount_minor', 'currency', 'msisdn', 'status', 'gateway', 'gateway_reference', 'receipt',
-        'commission_rate', 'commission_minor', 'seller_share_minor', 'hold_days', 'failure_reason', 'purchase_id', 'expires_at', 'completed_at', 'release_at', 'released_at',
+        'reference', 'user_id', 'seller_id', 'product_id', 'tier', 'amount_minor', 'received_minor', 'currency', 'msisdn', 'status', 'gateway', 'gateway_reference', 'receipt',
+        'commission_rate', 'commission_minor', 'seller_share_minor', 'hold_days', 'failure_reason', 'purchase_id', 'expires_at', 'completed_at', 'release_at', 'released_at', 'refunded_at', 'refunded_by', 'refund_reason',
     ];
 
     protected function casts(): array
     {
         return [
             'status' => PaymentStatus::class, 'tier' => LicenceTier::class, 'amount_minor' => 'integer', 'commission_minor' => 'integer', 'seller_share_minor' => 'integer',
-            'commission_rate' => 'decimal:4', 'hold_days' => 'integer', 'expires_at' => 'datetime', 'completed_at' => 'datetime', 'release_at' => 'datetime', 'released_at' => 'datetime',
+            'commission_rate' => 'decimal:4', 'hold_days' => 'integer', 'expires_at' => 'datetime', 'completed_at' => 'datetime', 'release_at' => 'datetime', 'released_at' => 'datetime', 'refunded_at' => 'datetime', 'received_minor' => 'integer',
         ];
     }
 
@@ -31,6 +31,11 @@ class Payment extends Model
     public function buyer()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function refunder()
+    {
+        return $this->belongsTo(Staff::class, 'refunded_by');
     }
 
     public function seller()

@@ -4,12 +4,14 @@ namespace App\Services\Admin;
 
 use App\Enums\DisputeStatus;
 use App\Enums\EngagementStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\PayoutStatus;
 use App\Enums\ProductStatus;
 use App\Enums\SellerStatus;
 use App\Models\JobEngagement;
 use App\Models\JobPaymentDispute;
 use App\Models\ModelJob;
+use App\Models\Payment;
 use App\Models\Payout;
 use App\Models\Product;
 use App\Models\ProductReview;
@@ -133,6 +135,16 @@ class StaffDashboardService
 
                     $items->push($this->item('scale', 'Payment dispute', $dispute->cancellation->engagement->application->job->title, $handler.($amount !== null ? ' · '.Money::format($amount, 0) : ''), $dispute->created_at, route('admin.disputes.show', $dispute->cancellation_id), $dispute->assignedAdmin ? null : 'Unassigned'));
                 });
+        }
+
+        if ($staff->can('refund payments')) {
+            $count = StaffMenu::count('payments');
+            $late = Payment::where('status', PaymentStatus::Review)->where('completed_at', '<=', $limit)->count();
+            $queues[] = ['key' => 'payments', 'label' => 'Payments', 'title' => 'Payments to review', 'icon' => 'exclamation-triangle', 'count' => $count, 'late' => $late, 'oldest' => $this->oldest(Payment::where('status', PaymentStatus::Review)->min('completed_at')), 'url' => route('admin.payments.index', ['status' => 'review'])];
+            $overdue += $late;
+
+            Payment::with(['buyer:id,name', 'product:id,title'])->where('status', PaymentStatus::Review)->orderBy('completed_at')->limit(self::PER_QUEUE)->get()
+                ->each(fn (Payment $payment) => $items->push($this->item('exclamation-triangle', 'Payment to review', $payment->product?->title ?? $payment->reference, ($payment->buyer?->name ?? __('A buyer')).' · '.Str::limit((string) $payment->failure_reason, 70), $payment->completed_at, route('admin.payments.show', $payment))));
         }
 
         if ($staff->can('approve payouts')) {
