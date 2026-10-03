@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\Auth\StaffLoginController;
 use App\Http\Controllers\Admin\Auth\StaffPasswordController;
 use App\Http\Controllers\Auth\AuthenticatorController;
 use App\Http\Controllers\Auth\TwoFactorChallengeController;
+use App\Support\SupportChat\PreviewTickets;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -202,5 +203,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::middleware('can:view audit log')->group(function () {
             Route::get('activity', [AdminActivityController::class, 'index'])->name('activity.index');
         });
+
+        // Support assistant: visual preview of the staff queue and ticket screen (local only, behind SUPPORT_UI_PREVIEW). Mock data; remove with the preview.
+        if (config('support.ui_preview') && app()->environment('local')) {
+            Route::prefix('dev/support-ui')->name('dev.support.')->group(function () {
+                Route::get('tickets', fn () => view('support.staff.index'))->name('tickets');
+                Route::get('tickets/{ref}', fn (string $ref) => view('support.staff.show', ['t' => PreviewTickets::find($ref) ?? abort(404)]))->name('ticket');
+                Route::get('replies', fn () => view('support.staff.replies'))->name('replies');
+                Route::get('service-levels', fn () => view('support.staff.service-levels'))->name('levels');
+            });
+        }
     });
 });

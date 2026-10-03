@@ -49,9 +49,14 @@
                 {{ $slot }}
             </main>
 
-            <div class="print:hidden">@include('partials.footer-app')</div>
+            <div @class(['print:hidden', 'pb-16' => config('support.ui_preview')])>@include('partials.footer-app')</div>
         </div>
     </div>
+    {{-- Support assistant, visual preview only (SUPPORT_UI_PREVIEW). Scripted answers, no backend. --}}
+    @if (config('support.ui_preview'))
+        <x-support.widget />
+    @endif
+
     @include('partials.app-scripts')
 </body>
 
