@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\PaymentStatus;
 use App\Enums\PayoutStatus;
 use App\Helpers\FlashAlertHelper;
-use App\Models\Payment;
 use App\Models\Payout;
+use App\Services\Payments\EarningsInsights;
 use App\Services\Payments\EarningsService;
 use App\Services\Payments\PayoutService;
 use App\Support\Money;
@@ -18,18 +17,20 @@ class EarningsController extends Controller
 {
     public function __construct(protected EarningsService $earnings, protected PayoutService $payouts) {}
 
-    public function index(Request $request)
+    public function index(Request $request, EarningsInsights $insights)
     {
         $user = $request->user();
-
-        $sales = Payment::with('product:id,slug,title,deleted_at')->where('seller_id', $user->id)->where('status', PaymentStatus::Succeeded)->where('purpose', Payment::PURPOSE_SALE)->latest('completed_at')->latest('id')->paginate(10, ['*'], 'sales');
+        $range = EarningsInsights::range($request->query('range'));
+        $filter = EarningsInsights::filter($request->query('show'));
+        $summary = $this->earnings->summary($user);
 
         return view('earnings.index', [
-            'summary' => $this->earnings->summary($user),
-            'sales' => $sales,
-            'jobPayments' => $this->earnings->jobPayments($user),
-            'showSales' => $user->isApprovedSeller() || $sales->total() > 0,
-            'payouts' => Payout::where('user_id', $user->id)->latest('id')->limit(10)->get(),
+            'summary' => $summary,
+            'range' => $range,
+            'filter' => $filter,
+            'overview' => $insights->overview($user, $range),
+            'incoming' => $insights->incoming($user, $summary['pending']),
+            'feed' => $insights->feed($user, $filter, max(1, $request->integer('activity', 1))),
             'open' => Payout::where('user_id', $user->id)->whereIn('status', [PayoutStatus::Requested, PayoutStatus::Processing])->latest('id')->first(),
         ]);
     }

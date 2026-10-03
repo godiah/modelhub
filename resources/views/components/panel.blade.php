@@ -1,4 +1,4 @@
-@props(['title' => null, 'description' => null, 'danger' => false, 'flush' => false])
+@props(['title' => null, 'description' => null, 'danger' => false, 'flush' => false, 'fill' => false])
 
 {{--
     Settings card: title + description on top, body, optional footer for actions (slot `footer`) and header
@@ -26,7 +26,7 @@
         </header>
     @endif
 
-    <div @class(['px-6 pb-6' => ! $flush, 'overflow-hidden rounded-b-2xl' => $flush, 'pt-5' => $title || isset($actions), 'pt-6' => !$title && !isset($actions)])>
+    <div @class(['flex min-h-0 flex-1 flex-col' => $fill, 'px-6 pb-6' => ! $flush, 'overflow-hidden rounded-b-2xl' => $flush, 'pt-5' => $title || isset($actions), 'pt-6' => !$title && !isset($actions)])>
         {{ $slot }}
     </div>
 

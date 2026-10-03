@@ -29,6 +29,7 @@ new class extends Component {
         [__('Terms of service'), route('legal.terms'), 'document-text'],
         [__('Privacy policy'), route('legal.privacy'), 'shield-check'],
         [__('Cancellation policy'), route('engagements.policy'), 'scale'],
+        [__('Payments & earnings'), route('policies.payments'), 'cash'],
     ];
     $item = 'flex w-full items-center gap-3 px-4 py-2 text-start font-main text-sm text-neutral-700 transition-colors duration-150 hover:bg-neutral-50 hover:text-neutral-900 focus:bg-neutral-50 focus:outline-none';
 @endphp

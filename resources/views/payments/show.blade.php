@@ -50,6 +50,6 @@
             </div>
         </x-card>
 
-        <p class="mt-4 text-center text-xs text-tertiary">{{ __('Payment reference') }} <span class="font-mono">{{ $payment->reference }}</span></p>
+        <p class="mt-4 text-center text-xs text-tertiary">{{ __('Payment reference') }} <span class="font-mono">{{ $payment->reference }}</span> · <a href="{{ route('policies.payments') }}" class="font-medium text-teal-700 hover:underline">{{ __('How payments work') }}</a></p>
     </div>
 </x-app-layout>

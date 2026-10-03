@@ -42,6 +42,7 @@
 
             <footer class="border-t border-neutral-200/70 px-4 py-4 text-xs text-neutral-500 sm:px-6 lg:px-8">
                 {{ config('app.name') }} {{ __('staff portal') }} · {{ __('Your actions here are recorded in the activity log.') }}
+                · <a href="{{ route('admin.handbook.show', 'payments') }}" wire:navigate class="font-medium text-teal-700 hover:underline">{{ __('Payments handbook') }}</a>
             </footer>
         </div>
     </div>

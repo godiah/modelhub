@@ -365,3 +365,31 @@ it('shows a seller their store rating on their profile, apart from their freelan
 
     Volt::actingAs($this->buyer)->test('profile.overview')->assertDontSee('Model store');
 });
+
+/** ---------------------------------------------------------------- the dialogs are roomy enough to write in */
+/** The width class of the dialog that holds a piece of text: the last max-w-* the page sets before it. */
+function dialogWidthBefore(string $html, string $needle): ?string
+{
+    $position = strpos($html, $needle);
+    preg_match_all('/max-w-(sm|md|lg|xl|2xl|3xl|4xl|5xl|6xl)\b/', substr($html, 0, (int) $position), $found);
+
+    return $found[1] ? end($found[1]) : null;
+}
+
+it('gives the reply and report dialogs on a model review room to write in', function () {
+    reviewBy($this->buyer);
+
+    $owner = $this->actingAs($this->seller)->get(route('models.show', $this->product))->assertOk()->assertSee('Reply to this review')->getContent();
+    expect(dialogWidthBefore($owner, 'Reply to this review'))->toBe('2xl');
+
+    $other = $this->actingAs(User::factory()->create())->get(route('models.show', $this->product))->assertOk()->getContent();
+    expect(dialogWidthBefore($other, 'Report this review'))->toBe('xl');
+});
+
+it('gives the moderators\' hide-a-review dialog a roomy width too', function () {
+    $review = reviewBy($this->buyer);
+    $review->reports()->create(['user_id' => User::factory()->create()->id, 'reason' => 'spam', 'status' => 'open']);
+
+    $page = $this->actingAs($this->moderator, 'staff')->get(route('admin.reviews.index'))->assertOk()->assertSee('Hide this review')->getContent();
+    expect(dialogWidthBefore($page, 'Hide this review'))->toBe('xl');
+});

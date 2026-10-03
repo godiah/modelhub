@@ -18,6 +18,7 @@
             [__('Terms of service'), route('legal.terms')],
             [__('Privacy policy'), route('legal.privacy')],
             [__('Cancellation & payment policy'), route('engagements.policy')],
+            [__('Payments & earnings'), route('policies.payments')],
         ],
     ];
 @endphp

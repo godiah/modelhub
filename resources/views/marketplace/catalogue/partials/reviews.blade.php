@@ -128,17 +128,17 @@
                     @endif
 
                     @if ($isOwner)
-                        <x-confirm-dialog bind="replying" title="Reply to this review" icon="chat-bubble-text" tone="primary" confirm-label="Post reply" :action="route('reviews.reply', $review)"
+                        <x-confirm-dialog bind="replying" max-width="2xl" title="Reply to this review" icon="chat-bubble-text" tone="primary" confirm-label="Post reply" :action="route('reviews.reply', $review)"
                             message="Your reply is public and shown under the review. You can edit or remove it later." :state="'reply: '.json_encode($review->seller_reply ?? '')" disabledWhen="reply.trim().length < 2">
                             <label for="reply-{{ $review->id }}" class="sr-only">{{ __('Your reply') }}</label>
-                            <textarea id="reply-{{ $review->id }}" name="reply" x-model="reply" rows="4" maxlength="1000" required class="mt-3 {{ $fieldClass }}"></textarea>
+                            <textarea id="reply-{{ $review->id }}" name="reply" x-model="reply" rows="6" maxlength="1000" required class="mt-3 {{ $fieldClass }}"></textarea>
                         </x-confirm-dialog>
                         <x-confirm-dialog bind="removingReply" title="Remove your reply" confirm-label="Remove" method="DELETE" :action="route('reviews.reply.destroy', $review)" message="The reply disappears from the review." />
                     @endif
                     @if ($mine)
                         <x-confirm-dialog bind="deleting" title="Delete your review" confirm-label="Delete" method="DELETE" :action="route('reviews.destroy', $review)" message="It is removed for good and no longer counts towards the rating. You can write a new one afterwards." />
                     @elseif ($viewer && ! $isOwner)
-                        <x-confirm-dialog bind="reporting" title="Report this review" icon="flag" confirm-label="Send report" :action="route('reviews.report', $review)" message="A reviewer will check it against the review rules. The author is not told who reported it.">
+                        <x-confirm-dialog bind="reporting" max-width="xl" title="Report this review" icon="flag" confirm-label="Send report" :action="route('reviews.report', $review)" message="A reviewer will check it against the review rules. The author is not told who reported it.">
                             <fieldset class="mt-3">
                                 <legend class="sr-only">{{ __('Why are you reporting it?') }}</legend>
                                 @foreach ($reportReasons as $key => $label)

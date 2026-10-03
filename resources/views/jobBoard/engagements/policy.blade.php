@@ -17,6 +17,10 @@
         :intro="__('This policy governs cancellations, payment processing, and dispute resolution for engagements between Clients and Freelancers on :app.', ['app' => $app])"
         :effective="__('May 15, 2025')" :updated="__('May 15, 2025')">
 
+                <x-policy.callout :title="__('Looking for how money is held and returned?')" class="mb-6">
+                    <p>{{ __('This policy covers cancelling an engagement. How escrow, releases, refunds and withdrawals work, with examples, is in') }} <a href="{{ route('policies.payments') }}" class="font-medium text-teal-700 underline">{{ __('Payments & earnings') }}</a>.</p>
+                </x-policy.callout>
+
                 <x-policy.section id="cancellation-overview" number="1" :title="$sections['cancellation-overview']">
                     <p>Either the Client or the Freelancer may cancel an engagement at any time for any reason. All cancellations must include:</p>
                     <x-policy.list :items="[

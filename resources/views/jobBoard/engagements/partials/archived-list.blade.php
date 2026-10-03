@@ -1,17 +1,7 @@
 @if ($archivedEngagements->isEmpty())
-    <!-- Empty State -->
-    <div class="text-center py-16 px-6">
-        <!-- Icon Container -->
-        <div class="relative inline-flex items-center justify-center w-24 h-24 mb-6">
-            <div class="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-full">
-            </div>
-            <div
-                class="relative flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full shadow-lg">
-                <x-icon name="archive-box" class="w-8 h-8 text-white" />
-            </div>
-        </div>
-        <h3 class="text-xl font-semibold font-main text-neutral-900 mb-2">No Current Engagements Found</h3>
-    </div>
+    <x-empty-state :framed="false" icon="archive-box" :title="__('Nothing archived')" :description="__('Engagements you archive from your list are kept here.')">
+        <x-btn variant="secondary" href="{{ route('engagements.index') }}">{{ __('Back to engagements') }}</x-btn>
+    </x-empty-state>
 @else
     <div class="p-6">
         <div class="grid gap-6" id="engagements-grid">
@@ -140,9 +130,7 @@
                     </div>
                 </div>
             @empty
-                <div class="text-center py-8">
-                    <p class="text-neutral-500">No engagements found for the selected filter.</p>
-                </div>
+                <x-empty-state :framed="false" compact icon="magnifying-glass" :title="__('No engagements match')" :description="__('No archived engagements match the selected filter.')" />
             @endforelse
         </div>
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminDisputeController;
 use App\Http\Controllers\Admin\AdminEngagementController;
 use App\Http\Controllers\Admin\AdminEscrowRefundController;
+use App\Http\Controllers\Admin\AdminHandbookController;
 use App\Http\Controllers\Admin\AdminLedgerController;
 use App\Http\Controllers\Admin\AdminMemberController;
 use App\Http\Controllers\Admin\AdminModelDirectoryController;
@@ -62,6 +63,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::patch('account', [AdminAccountController::class, 'update'])->name('account.update');
         Route::patch('account/avatar', [AdminAccountController::class, 'avatar'])->name('account.avatar');
         Route::put('account/password', [AdminAccountController::class, 'password'])->name('account.password');
+        // The staff handbooks: any signed-in staff member can read them
+        Route::get('handbook/{guide}', [AdminHandbookController::class, 'show'])->name('handbook.show');
+
         Route::prefix('account/authenticator')->name('account.authenticator.')->group(function () {
             Route::post('/', [AuthenticatorController::class, 'start'])->middleware('throttle:10,1')->name('start');
             Route::post('confirm', [AuthenticatorController::class, 'confirm'])->middleware('throttle:10,1')->name('confirm');
