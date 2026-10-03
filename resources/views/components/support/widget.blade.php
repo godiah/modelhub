@@ -15,14 +15,39 @@
     use App\Support\SupportChat\PreviewScenarios;
 
     $dock = $mode === 'dock';
-    $context ??= PreviewScenarios::contextFor(request()->route()?->getName());
+    // Live: the real assistant answers (SUPPORT_ENABLED). Otherwise the widget plays the scripted preview.
+    $live = $dock && config('support.enabled');
+    $routeName = request()->route()?->getName();
+    $context ??= PreviewScenarios::contextFor($routeName);
+
+    if ($live) {
+        // Only what the assistant can honestly do today: explain how ModelHub works. It cannot see the member's account yet.
+        $context = [
+            'key' => $context['key'],
+            'label' => $context['label'],
+            'greeting' => __("Hi. I can answer questions about how ModelHub works. I can't see your own payments or account yet, so for anything about those, a person can help."),
+            'cards' => [],
+            'chips' => [
+                ['label' => __('How do licences work?'), 'key' => 'ask'],
+                ['label' => __('What are the fees?'), 'key' => 'ask'],
+                ['label' => __('How do withdrawals work?'), 'key' => 'ask'],
+            ],
+        ];
+    }
+
     $config = [
+        'live' => $live,
+        'endpoint' => $live ? route('support.chat') : null,
+        'userId' => auth()->id(),
+        'supportEmail' => config('mail.support_address'),
+        'routeKey' => $routeName && preg_match('/^[a-z0-9._-]{1,64}$/', $routeName) ? $routeName : null,
         'mode' => $mode,
         'state' => $state,
         'transcript' => $transcript,
         'input' => $input,
         'context' => $context,
-        'scenarios' => PreviewScenarios::all(),
+        // The scripted answers (invented payments and all) are for the design preview only: never shipped in live mode
+        'scenarios' => $live ? [] : PreviewScenarios::all(),
     ];
     $uid = 'support-'.\Illuminate\Support\Str::random(6);
 @endphp
@@ -121,8 +146,11 @@
                             </template>
                         </div>
 
-                        <p x-show="m.first" class="text-xs leading-snug text-neutral-500">
+                        <p x-show="m.first && !live" class="text-xs leading-snug text-neutral-500">
                             {{ __("I'm an AI assistant. I can see your ModelHub account but I can't change anything on it. If you hand a chat to staff, they can read it.") }}
+                        </p>
+                        <p x-show="m.first && live" x-cloak class="text-xs leading-snug text-neutral-500">
+                            {{ __("I'm an AI assistant and I can make mistakes. I can't see or change anything on your account yet.") }}
                         </p>
 
                         {{-- Suggestions only on the latest turn, and only the ones that make sense here --}}
@@ -148,7 +176,7 @@
                 <label for="{{ $uid }}-input" class="sr-only">{{ __('Message') }}</label>
                 <textarea id="{{ $uid }}-input" x-ref="input" x-model="input" rows="1"
                     @input="check(); grow()" @keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); submit() }"
-                    placeholder="{{ __('Ask about your account') }}"
+                    x-bind:placeholder="live ? '{{ __('Ask how ModelHub works') }}' : '{{ __('Ask about your account') }}'"
                     :class="guard ? '!border-red-400 focus:!border-red-500 focus:!ring-red-500' : 'border-neutral-300 focus:border-teal-600 focus:ring-teal-600'"
                     class="max-h-32 min-h-[2.75rem] flex-1 resize-none overflow-y-auto rounded-xl bg-white px-3.5 py-2.5 text-[15px] leading-snug placeholder:text-neutral-400"></textarea>
                 <button type="submit" :disabled="!input.trim() || !!guard || busy" aria-label="{{ __('Send') }}"
@@ -170,11 +198,16 @@
                 </span>
                 <div>
                     <h3 class="font-secondary text-[15px] font-semibold text-neutral-900">{{ __("The assistant isn't available right now") }}</h3>
-                    <p class="mt-1 text-sm leading-snug text-neutral-600">{{ __("Send your question to staff instead. They'll reply by email and in your notifications.") }}</p>
+                    <p x-show="!live" class="mt-1 text-sm leading-snug text-neutral-600">{{ __("Send your question to staff instead. They'll reply by email and in your notifications.") }}</p>
+                    <p x-show="live" x-cloak class="mt-1 text-sm leading-snug text-neutral-600">
+                        <span x-show="supportEmail">{{ __('You can email us instead at') }} <a :href="'mailto:' + supportEmail" class="font-medium text-teal-700 hover:underline" x-text="supportEmail"></a>. {{ __('Say what happened, and include a payment reference if you have one. Never include your PIN.') }}</span>
+                        <span x-show="!supportEmail">{{ __('Please try again in a little while.') }}</span>
+                    </p>
+                    <x-btn type="button" variant="secondary" size="sm" class="mt-3" x-show="live" x-cloak @click="state = 'ready'">{{ __('Try again') }}</x-btn>
                 </div>
             </div>
 
-            <form class="mt-5 space-y-4 rounded-xl border border-neutral-200 bg-white p-4" @submit.prevent>
+            <form x-show="!live" class="mt-5 space-y-4 rounded-xl border border-neutral-200 bg-white p-4" @submit.prevent>
                 <div>
                     <label for="{{ $uid }}-topic" class="block text-sm font-medium text-neutral-700">{{ __('What is it about?') }}</label>
                     <select id="{{ $uid }}-topic" class="mt-1 block w-full rounded-xl border-neutral-300 text-sm focus:border-teal-600 focus:ring-teal-600">
@@ -200,8 +233,10 @@
 @once
     <script>
         /**
-         * Alpine data for the support assistant widget (visual preview). It plays the scripted answers it is given and
-         * makes no network calls. Message shape: { role, text, tool?, cards[], citations[], chips[] }.
+         * Alpine data for the support assistant widget. Two modes:
+         *  - scripted (the design preview and gallery): plays the answers it is given and makes no network calls
+         *  - live (SUPPORT_ENABLED): posts to ModelHub's /support/chat and reads the assistant's reply as it streams
+         * Message shape: { role, text, tool?, cards[], citations[], chips[] }.
          */
         window.supportChat = function (cfg) {
             const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -215,6 +250,11 @@
 
             return {
                 mode: cfg.mode,
+                live: !!cfg.live,
+                endpoint: cfg.endpoint,
+                supportEmail: cfg.supportEmail,
+                routeKey: cfg.routeKey,
+                conversationId: null,
                 state: cfg.state,
                 context: cfg.context,
                 scenarios: cfg.scenarios,
@@ -229,6 +269,7 @@
                     this.messages = cfg.transcript && cfg.transcript.length
                         ? cfg.transcript
                         : [{ role: 'assistant', text: this.context.greeting, tool: null, cards: this.context.cards || [], citations: [], chips: this.context.chips || [], first: true }];
+                    if (this.live) this.restore();
                     if (this.input) this.check();
                     this.$watch('open', (isOpen) => {
                         if (isOpen) this.$nextTick(() => { this.scroll(); if (this.$refs.input) this.$refs.input.focus(); });
@@ -275,14 +316,168 @@
                     if (!text || this.busy || this.guard) return;
                     this.input = '';
                     this.$nextTick(() => this.grow());
+                    if (this.live) return this.sendLive(text);
                     this.send(text, this.match(text));
                 },
 
                 run(key, label) {
                     if (this.busy) return;
+                    if (this.live) return key === 'human' ? this.talkToAPersonLive() : this.sendLive(label);
                     const said = label || ({ human: 'Talk to a person', ask_staff: 'Ask staff to look at this', refund: 'Ask for a refund' }[key]) || key;
                     this.send(said, key);
                 },
+
+                // ---- live mode -------------------------------------------------------------------------------------
+
+                csrf() {
+                    const tag = document.querySelector('meta[name="csrf-token"]');
+                    return tag ? tag.content : '';
+                },
+
+                // Staff requests are not built yet, so say so plainly and give the one real way to reach a person.
+                talkToAPersonLive() {
+                    this.messages.push({ role: 'user', text: 'Talk to a person' });
+                    this.messages.push({
+                        role: 'assistant',
+                        text: this.supportEmail
+                            ? `Staff requests aren't switched on yet. For now, email ${this.supportEmail} and say what happened, with a payment reference if you have one. Never include your M-Pesa PIN or a code from an SMS.`
+                            : "Staff requests aren't switched on yet. Please try again a little later.",
+                        tool: null, cards: [], citations: [], chips: [],
+                    });
+                    this.scroll();
+                    this.persist();
+                },
+
+                async sendLive(text) {
+                    this.messages.push({ role: 'user', text });
+                    const assistant = this.messages[this.messages.push({ role: 'assistant', text: '', tool: null, cards: [], citations: [], chips: [] }) - 1];
+                    this.busy = true;
+                    this.scroll();
+
+                    try {
+                        const response = await fetch(this.endpoint, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'text/event-stream',
+                                'X-CSRF-TOKEN': this.csrf(),
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: JSON.stringify({
+                                message: text,
+                                conversation_id: this.conversationId || undefined,
+                                page_context: this.routeKey ? { route_key: this.routeKey } : undefined,
+                            }),
+                        });
+
+                        if (!response.ok) {
+                            await this.refused(response, text);
+                        } else {
+                            await this.readStream(response, assistant);
+                        }
+                    } catch (e) {
+                        this.dropLastTurn();
+                        this.input = text;
+                        this.guard = "I couldn't reach the assistant. Check your connection and try again.";
+                    } finally {
+                        this.busy = false;
+                        this.persist();
+                        this.scroll();
+                    }
+                },
+
+                // The server turned the message away before answering. Take the turn back out and give the text back to edit.
+                dropLastTurn() {
+                    if (this.messages.length >= 2) this.messages.splice(-2, 2);
+                },
+
+                async refused(response, text) {
+                    let code = '', message = '';
+                    try { const body = await response.json(); code = body.error?.code || ''; message = body.error?.message || ''; } catch (e) { /* not JSON */ }
+
+                    if (response.status === 503) {
+                        this.dropLastTurn();
+                        this.input = text;
+                        this.state = 'unavailable';
+                        return;
+                    }
+
+                    this.dropLastTurn();
+                    this.input = text;
+                    if (response.status === 404 && code === 'conversation_not_found') {
+                        this.conversationId = null;
+                        this.guard = 'That conversation is no longer available. Send your message again to start a new one.';
+                    } else if (response.status === 429) {
+                        this.guard = "You're sending messages quickly. Wait a moment and try again.";
+                    } else if (response.status === 401 || response.status === 419) {
+                        this.guard = 'Your session has ended. Reload the page and sign in again.';
+                    } else if (response.status === 422) {
+                        this.guard = message || "That message couldn't be sent.";
+                    } else {
+                        this.guard = 'Something went wrong. Try again in a moment.';
+                    }
+                },
+
+                async readStream(response, assistant) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    let failed = false;
+
+                    const handle = (block) => {
+                        let event = 'message', data = '';
+                        for (const line of block.split('\n')) {
+                            if (line.startsWith('event:')) event = line.slice(6).trim();
+                            else if (line.startsWith('data:')) data += line.slice(5).trim();
+                        }
+                        if (!data) return;
+                        let payload;
+                        try { payload = JSON.parse(data); } catch (e) { return; }
+
+                        if (event === 'conversation') this.conversationId = payload.conversation_id;
+                        else if (event === 'delta') { assistant.text += payload.text; this.scroll(); }
+                        else if (event === 'error') failed = true;
+                    };
+
+                    for (;;) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+                        buffer = (buffer + decoder.decode(value, { stream: true })).replace(/\r\n/g, '\n');
+                        let end;
+                        while ((end = buffer.indexOf('\n\n')) !== -1) {
+                            handle(buffer.slice(0, end));
+                            buffer = buffer.slice(end + 2);
+                        }
+                    }
+
+                    if (failed || ! assistant.text) {
+                        assistant.text += (assistant.text ? '\n\n' : '') + "Sorry, I couldn't finish that answer. You can ask again, or press \"Talk to a person\".";
+                    }
+                },
+
+                // Keep the conversation across page loads in this tab (it is the member's own words, in their own browser).
+                storageKey() { return 'support.chat.v1.' + (cfg.userId ?? 'anon'); },
+
+                persist() {
+                    if (! this.live) return;
+                    try {
+                        const turns = this.messages.filter((m) => m.text && ! m.first).slice(-30).map((m) => ({ role: m.role, text: m.text }));
+                        sessionStorage.setItem(this.storageKey(), JSON.stringify({ conversationId: this.conversationId, turns }));
+                    } catch (e) { /* storage blocked: the chat still works, it just will not survive a reload */ }
+                },
+
+                restore() {
+                    try {
+                        const saved = JSON.parse(sessionStorage.getItem(this.storageKey()) || 'null');
+                        if (! saved || ! Array.isArray(saved.turns) || ! saved.turns.length) return;
+                        this.conversationId = saved.conversationId || null;
+                        const greeting = { ...this.messages[0], chips: [] };
+                        this.messages = [greeting, ...saved.turns.map((m) => ({ role: m.role, text: m.text, tool: null, cards: [], citations: [], chips: [] }))];
+                    } catch (e) { /* ignore a corrupt value */ }
+                },
+
+                // ---- scripted mode (design preview) -----------------------------------------------------------------
 
                 async send(text, key) {
                     this.messages.push({ role: 'user', text });

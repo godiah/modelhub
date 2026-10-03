@@ -29,6 +29,7 @@
         <env name="SESSION_DRIVER" value="array"/>
         <env name="MARKETPLACE_PURCHASES_ENABLED" value="false"/>
         <env name="SUPPORT_UI_PREVIEW" value="false"/>
+        <env name="SUPPORT_ENABLED" value="false"/>
         <env name="PAYMENTS_FAKE_DELAY" value="0"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
