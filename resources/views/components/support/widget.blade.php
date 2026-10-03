@@ -1,0 +1,323 @@
+@props([
+    // 'dock': launcher + panel fixed to the right edge (the real widget). 'inline': a static panel, used by the design preview.
+    'mode' => 'dock',
+    // 'ready' or 'unavailable' (kill switch / outage: the panel turns into a plain request form).
+    'state' => 'ready',
+    // A transcript to start from (list of messages). Empty = start from the greeting for the current page.
+    'transcript' => [],
+    // Pre-fill the composer (used to show the PIN guard).
+    'input' => '',
+    // Override the page context (see PreviewScenarios::contextFor). Null = work it out from the current route.
+    'context' => null,
+])
+
+@php
+    use App\Support\SupportChat\PreviewScenarios;
+
+    $dock = $mode === 'dock';
+    $context ??= PreviewScenarios::contextFor(request()->route()?->getName());
+    $config = [
+        'mode' => $mode,
+        'state' => $state,
+        'transcript' => $transcript,
+        'input' => $input,
+        'context' => $context,
+        'scenarios' => PreviewScenarios::all(),
+    ];
+    $uid = 'support-'.\Illuminate\Support\Str::random(6);
+@endphp
+
+{{--
+    Support assistant widget. VISUAL PREVIEW: it plays scripted conversations (App\Support\SupportChat\PreviewScenarios)
+    and talks to nothing. The assistant's answers are data (messages with cards), rendered by the card components in
+    components/support/card, so the real assistant can stream the same shapes later without changing this markup.
+--}}
+<div x-data="supportChat(@js($config))" @keydown.escape.window="if (mode === 'dock' && open) open = false" @support-open.window="open = true"
+    @class(['print:hidden' => $dock, 'contents' => $dock])>
+
+    @if ($dock)
+        <button type="button" x-ref="launcher" x-show="!open" x-cloak @click="open = true" aria-haspopup="dialog" aria-controls="{{ $uid }}"
+            class="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-teal-700 py-3 pl-4 pr-5 font-secondary text-sm font-semibold text-white shadow-lg shadow-teal-900/20 transition hover:bg-teal-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-teal-600/40">
+            <x-icon name="chat-bubble-text" class="h-5 w-5" />{{ __('Help') }}
+        </button>
+    @endif
+
+    <section id="{{ $uid }}" role="dialog" aria-label="{{ __('Support assistant') }}"
+        @if ($dock)
+            x-show="open" x-cloak x-trap.noscroll="open && window.innerWidth < 640"
+            x-transition:enter="transition ease-out duration-200 motion-reduce:duration-0" x-transition:enter-start="translate-x-6 opacity-0" x-transition:enter-end="translate-x-0 opacity-100"
+            x-transition:leave="transition ease-in duration-150 motion-reduce:duration-0" x-transition:leave-start="translate-x-0 opacity-100" x-transition:leave-end="translate-x-6 opacity-0"
+        @endif
+        @class([
+            'flex flex-col bg-paper',
+            'fixed inset-y-0 right-0 z-60 w-full border-l border-neutral-200 shadow-2xl sm:w-[26rem]' => $dock,
+            'relative h-[40rem] w-full max-w-[26rem] overflow-hidden rounded-2xl border border-neutral-200 shadow-sm' => !$dock,
+        ])>
+
+        {{-- Header: who this is, the one thing you can always do (talk to a person), and close --}}
+        <header class="flex items-center gap-3 border-b border-neutral-200 bg-white px-4 py-3">
+            <span aria-hidden="true" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-700 text-white">
+                <x-icon name="chat-bubble-text" class="h-5 w-5" />
+            </span>
+            <div class="min-w-0 flex-1 leading-tight">
+                <h2 class="font-secondary text-[15px] font-semibold text-neutral-900">{{ __('Support') }}</h2>
+                <p class="text-xs text-neutral-500">{{ __('AI assistant') }}</p>
+            </div>
+            <button type="button" @click="run('human')" x-show="state === 'ready'"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 font-secondary text-[13px] font-semibold text-neutral-700 transition hover:bg-neutral-50 hover:text-neutral-900 focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-200">
+                <x-icon name="user" class="h-4 w-4 text-neutral-500" />{{ __('Talk to a person') }}
+            </button>
+            @if ($dock)
+                <button type="button" @click="open = false" aria-label="{{ __('Close support') }}"
+                    class="-mr-1 rounded-lg p-2 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900 focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-200">
+                    <x-icon name="x-mark" class="h-5 w-5" />
+                </button>
+            @endif
+        </header>
+
+        {{-- What the assistant can see of the page you are on, so its answers never feel like guesswork --}}
+        <p x-show="state === 'ready' && context.label" class="flex items-center gap-2 border-b border-neutral-200/70 bg-white/60 px-4 py-1.5 text-xs text-neutral-500">
+            <x-icon name="eye" class="h-3.5 w-3.5" />
+            <span>{{ __('Looking at') }} <span class="font-medium text-neutral-700" x-text="context.label"></span></span>
+        </p>
+
+        {{-- Conversation --}}
+        <div x-show="state === 'ready'" x-ref="scroller" aria-live="polite" aria-relevant="additions"
+            class="flex flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-4 py-5 [scrollbar-color:theme(colors.neutral.300)_transparent] [scrollbar-width:thin]">
+            <template x-for="(m, i) in messages" :key="i">
+                <div>
+                    {{-- You --}}
+                    <div x-show="m.role === 'user'" class="flex justify-end">
+                        <p class="max-w-[85%] whitespace-pre-line rounded-2xl rounded-br-md bg-teal-700 px-4 py-2.5 text-[15px] leading-[1.5] text-white" x-text="m.text"></p>
+                    </div>
+
+                    {{-- Assistant: flat text on the page, with cards as the evidence --}}
+                    <div x-show="m.role === 'assistant'" class="flex max-w-[96%] flex-col gap-3">
+                        <p x-show="m.tool" class="flex items-center gap-1.5 text-xs text-neutral-500">
+                            <x-spinner class="h-3.5 w-3.5 text-teal-600 motion-reduce:animate-none" x-show="m.tool && !m.tool.done" />
+                            <x-icon name="check" class="h-3.5 w-3.5 text-teal-600" x-show="m.tool && m.tool.done" />
+                            <span x-text="m.tool ? (m.tool.done ? m.tool.label : m.tool.label.replace(/^Checked/, 'Checking').replace(/^Searched/, 'Searching') + '…') : ''"></span>
+                        </p>
+
+                        <p x-show="m.text" class="whitespace-pre-line text-[15px] leading-[1.55] text-neutral-800" x-text="m.text"></p>
+
+                        <template x-for="(card, ci) in (m.cards || [])" :key="ci">
+                            <div>
+                                <template x-if="card.type === 'trail'"><x-support.card.trail /></template>
+                                <template x-if="card.type === 'blocker'"><x-support.card.blocker /></template>
+                                <template x-if="card.type === 'escrow'"><x-support.card.escrow /></template>
+                                <template x-if="card.type === 'ticket'"><x-support.card.ticket /></template>
+                                <template x-if="card.type === 'approval'"><x-support.card.approval /></template>
+                            </div>
+                        </template>
+
+                        <div x-show="m.citations && m.citations.length" class="flex flex-wrap gap-1.5">
+                            <template x-for="(c, ki) in (m.citations || [])" :key="ki">
+                                <a href="#" class="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-600 transition hover:border-neutral-300 hover:text-neutral-900 focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-200">
+                                    <x-icon name="document-text" class="h-3.5 w-3.5 text-neutral-400" />
+                                    <span class="font-medium" x-text="c.title"></span>
+                                    <span class="text-neutral-400" x-text="'· updated ' + c.updated"></span>
+                                </a>
+                            </template>
+                        </div>
+
+                        <p x-show="m.first" class="text-xs leading-snug text-neutral-500">
+                            {{ __("I'm an AI assistant. I can see your ModelHub account but I can't change anything on it. If you hand a chat to staff, they can read it.") }}
+                        </p>
+
+                        {{-- Suggestions only on the latest turn, and only the ones that make sense here --}}
+                        <div x-show="m.chips && m.chips.length && i === messages.length - 1 && !busy" class="flex flex-wrap gap-2 pt-1">
+                            <template x-for="(chip, hi) in (m.chips || [])" :key="hi">
+                                <button type="button" @click="run(chip.key, chip.label)"
+                                    class="rounded-full border border-teal-200 bg-white px-3.5 py-2 text-left text-sm font-medium text-teal-800 transition hover:border-teal-300 hover:bg-teal-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-teal-600/20"
+                                    x-text="chip.label"></button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        {{-- Composer --}}
+        <form x-show="state === 'ready'" @submit.prevent="submit()" class="border-t border-neutral-200 bg-white px-4 pb-3 pt-3">
+            <p x-show="guard" x-cloak role="alert" class="mb-2 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs leading-snug text-red-800">
+                <x-icon name="exclamation-circle" class="mt-px h-4 w-4 shrink-0" />
+                <span x-text="guard"></span>
+            </p>
+            <div class="flex items-end gap-2">
+                <label for="{{ $uid }}-input" class="sr-only">{{ __('Message') }}</label>
+                <textarea id="{{ $uid }}-input" x-ref="input" x-model="input" rows="1"
+                    @input="check(); grow()" @keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); submit() }"
+                    placeholder="{{ __('Ask about your account') }}"
+                    :class="guard ? '!border-red-400 focus:!border-red-500 focus:!ring-red-500' : 'border-neutral-300 focus:border-teal-600 focus:ring-teal-600'"
+                    class="max-h-32 min-h-[2.75rem] flex-1 resize-none overflow-y-auto rounded-xl bg-white px-3.5 py-2.5 text-[15px] leading-snug placeholder:text-neutral-400"></textarea>
+                <button type="submit" :disabled="!input.trim() || !!guard || busy" aria-label="{{ __('Send') }}"
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-600 text-white transition hover:bg-teal-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-teal-600/40 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-400">
+                    <x-icon name="arrow-up" class="h-5 w-5" />
+                </button>
+            </div>
+            <p class="mt-2 flex items-center gap-1.5 text-xs text-neutral-500">
+                <x-icon name="shield-check" class="h-3.5 w-3.5 shrink-0 text-teal-600" />
+                {{ __('Never type your M-Pesa PIN or a code from an SMS.') }}
+            </p>
+        </form>
+
+        {{-- Unavailable: kill switch or outage. Never a dead end: the same question goes to staff as a request. --}}
+        <div x-show="state === 'unavailable'" x-cloak class="flex-1 overflow-y-auto px-4 py-6">
+            <div class="flex items-start gap-3">
+                <span aria-hidden="true" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+                    <x-icon name="exclamation-triangle" class="h-5 w-5" />
+                </span>
+                <div>
+                    <h3 class="font-secondary text-[15px] font-semibold text-neutral-900">{{ __("The assistant isn't available right now") }}</h3>
+                    <p class="mt-1 text-sm leading-snug text-neutral-600">{{ __("Send your question to staff instead. They'll reply by email and in your notifications.") }}</p>
+                </div>
+            </div>
+
+            <form class="mt-5 space-y-4 rounded-xl border border-neutral-200 bg-white p-4" @submit.prevent>
+                <div>
+                    <label for="{{ $uid }}-topic" class="block text-sm font-medium text-neutral-700">{{ __('What is it about?') }}</label>
+                    <select id="{{ $uid }}-topic" class="mt-1 block w-full rounded-xl border-neutral-300 text-sm focus:border-teal-600 focus:ring-teal-600">
+                        <option>{{ __('A payment') }}</option>
+                        <option>{{ __('A withdrawal') }}</option>
+                        <option>{{ __('One of my models') }}</option>
+                        <option>{{ __('A job or engagement') }}</option>
+                        <option>{{ __('My account') }}</option>
+                        <option>{{ __('Something else') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="{{ $uid }}-message" class="block text-sm font-medium text-neutral-700">{{ __('What happened?') }}</label>
+                    <textarea id="{{ $uid }}-message" rows="4" class="mt-1 block w-full rounded-xl border-neutral-300 text-sm leading-snug focus:border-teal-600 focus:ring-teal-600"></textarea>
+                    <p class="mt-1 text-xs text-neutral-500">{{ __('Include a payment reference or M-Pesa receipt code if you have one. Never include your PIN.') }}</p>
+                </div>
+                <x-btn type="button" block>{{ __('Send to staff') }}</x-btn>
+            </form>
+        </div>
+    </section>
+</div>
+
+@once
+    <script>
+        /**
+         * Alpine data for the support assistant widget (visual preview). It plays the scripted answers it is given and
+         * makes no network calls. Message shape: { role, text, tool?, cards[], citations[], chips[] }.
+         */
+        window.supportChat = function (cfg) {
+            const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+            const tones = {
+                amber: 'bg-amber-100 text-amber-800',
+                green: 'bg-green-100 text-green-800',
+                teal: 'bg-teal-100 text-teal-800',
+                red: 'bg-red-100 text-red-800',
+                neutral: 'bg-neutral-100 text-neutral-700',
+            };
+
+            return {
+                mode: cfg.mode,
+                state: cfg.state,
+                context: cfg.context,
+                scenarios: cfg.scenarios,
+                open: cfg.mode === 'inline',
+                messages: [],
+                input: cfg.input || '',
+                guard: '',
+                busy: false,
+                reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+
+                init() {
+                    this.messages = cfg.transcript && cfg.transcript.length
+                        ? cfg.transcript
+                        : [{ role: 'assistant', text: this.context.greeting, tool: null, cards: this.context.cards || [], citations: [], chips: this.context.chips || [], first: true }];
+                    if (this.input) this.check();
+                    this.$watch('open', (isOpen) => {
+                        if (isOpen) this.$nextTick(() => { this.scroll(); if (this.$refs.input) this.$refs.input.focus(); });
+                        else if (this.mode === 'dock') this.$nextTick(() => { if (this.$refs.launcher) this.$refs.launcher.focus(); });
+                    });
+                },
+
+                tone(name) { return tones[name] || tones.neutral; },
+
+                // Stops a PIN, an SMS code or a card number leaving the browser. Heuristics are deliberately narrow so an
+                // amount like "Ksh1500" or a year is never blocked; the real guard needs tuning against real messages.
+                check() {
+                    const t = this.input;
+                    const sensitive = /\b(pin|otp|password|code)\b\D{0,15}\d{4,8}/i.test(t) || /^\s*\d{4,8}\s*$/.test(t) || /\b(?:\d[ -]?){13,19}\b/.test(t);
+                    this.guard = sensitive ? "That looks like a PIN or a code, so it wasn't sent. Never type your M-Pesa PIN or SMS codes here." : '';
+                },
+
+                grow() {
+                    const el = this.$refs.input;
+                    if (!el) return;
+                    el.style.height = 'auto';
+                    el.style.height = Math.min(el.scrollHeight, 128) + 'px';
+                },
+
+                scroll() {
+                    this.$nextTick(() => {
+                        const el = this.$refs.scroller;
+                        if (el) el.scrollTo({ top: el.scrollHeight, behavior: this.reduced ? 'auto' : 'smooth' });
+                    });
+                },
+
+                match(text) {
+                    if (/\b(human|person|agent|someone|staff)\b/i.test(text)) return 'human';
+                    if (/useless|not helping|stupid|nonsense|scam|nimechoka|wezi|!!!/i.test(text)) return 'frustrated';
+                    if (/withdraw|payout|balance|hold/i.test(text)) return 'blocker';
+                    if (/refund|money back/i.test(text)) return 'policy';
+                    if (/escrow|client|freelancer|deliverable/i.test(text)) return 'escrow';
+                    if (/paid|mpesa|m-pesa|licen[cs]e|download|payment/i.test(text)) return 'paid_nothing';
+                    return 'unknown';
+                },
+
+                submit() {
+                    const text = this.input.trim();
+                    if (!text || this.busy || this.guard) return;
+                    this.input = '';
+                    this.$nextTick(() => this.grow());
+                    this.send(text, this.match(text));
+                },
+
+                run(key, label) {
+                    if (this.busy) return;
+                    const said = label || ({ human: 'Talk to a person', ask_staff: 'Ask staff to look at this', refund: 'Ask for a refund' }[key]) || key;
+                    this.send(said, key);
+                },
+
+                async send(text, key) {
+                    this.messages.push({ role: 'user', text });
+                    this.busy = true;
+                    this.scroll();
+
+                    const script = this.scenarios[key] || this.scenarios.unknown;
+                    await wait(this.reduced ? 0 : 350);
+
+                    // Mutate through the reactive proxy, not the object we pushed, or Alpine never sees the changes.
+                    const m = this.messages[this.messages.push({ role: 'assistant', text: '', tool: script.tool ? { label: script.tool, done: false } : null, cards: [], citations: [], chips: [] }) - 1];
+                    this.scroll();
+
+                    if (script.tool) { await wait(this.reduced ? 0 : 800); m.tool.done = true; }
+
+                    if (this.reduced) {
+                        m.text = script.text;
+                    } else {
+                        const words = script.text.split(' ');
+                        for (let i = 0; i < words.length; i++) {
+                            m.text += (i ? ' ' : '') + words[i];
+                            if (i % 4 === 0) this.scroll();
+                            await wait(22);
+                        }
+                    }
+
+                    m.cards = script.cards || [];
+                    this.scroll();
+                    await wait(this.reduced ? 0 : 150);
+                    m.citations = script.citations || [];
+                    m.chips = script.chips || [];
+                    this.busy = false;
+                    this.scroll();
+                },
+            };
+        };
+    </script>
+@endonce

@@ -78,6 +78,11 @@ return [
         'attrs' => ['fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '2', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round'],
         'd' => 'M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14',
     ],
+    'arrow-up' => [
+        'viewBox' => '0 0 24 24',
+        'attrs' => ['fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '2', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round'],
+        'd' => 'M5 10l7-7m0 0l7 7m-7-7v18',
+    ],
     'arrow-uturn-down' => [
         'viewBox' => '0 0 24 24',
         'attrs' => ['fill' => 'none', 'stroke' => 'currentColor', 'stroke-width' => '2', 'stroke-linecap' => 'round', 'stroke-linejoin' => 'round'],

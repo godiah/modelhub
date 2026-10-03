@@ -33,6 +33,7 @@ use App\Http\Controllers\SellerProductFileController;
 use App\Http\Controllers\SellerStoreController;
 use App\Http\Controllers\SellerStorefrontController;
 use App\Http\Controllers\WishlistController;
+use App\Support\SupportChat\PreviewTickets;
 use Illuminate\Support\Facades\Route;
 
 // Signed-in users go straight to the app shell; the landing page is for guests.
@@ -275,5 +276,23 @@ Route::middleware(['auth'])->prefix('chat')->group(function () {
     Route::post('/engagements/{engagement}/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::patch('/engagements/{engagement}/messages/read', [MessageController::class, 'markAsRead'])->name('messages.read');
 });
+
+// Support assistant: visual design preview (local only, behind SUPPORT_UI_PREVIEW). Scripted, no backend; remove once the real assistant lands.
+if (config('support.ui_preview') && app()->environment('local')) {
+    Route::middleware(['auth'])->group(function () {
+        Route::get('dev/support-ui', fn () => view('support.preview'))->name('dev.support-ui');
+        Route::get('dev/support-ui/requests', fn () => view('support.requests.index'))->name('dev.support.requests');
+        Route::get('dev/support-ui/requests/{ref}', fn (string $ref) => view('support.requests.show', ['t' => PreviewTickets::find($ref) ?? abort(404)]))->name('dev.support.request');
+    });
+
+    // The public contact form needs no sign-in
+    Route::get('dev/support-ui/contact', fn () => view('support.contact'))->name('dev.support.contact');
+    Route::get('dev/support-ui/emails', fn () => view('support.emails'))->name('dev.support.emails');
+    Route::get('dev/support-ui/emails/{key}', function (string $key) {
+        abort_unless(in_array($key, ['received', 'replied', 'needs_you', 'resolved', 'refund_approved', 'refund_declined', 'identity_check'], true), 404);
+
+        return view('support.emails.'.$key);
+    })->name('dev.support.email');
+}
 
 require __DIR__.'/auth.php';

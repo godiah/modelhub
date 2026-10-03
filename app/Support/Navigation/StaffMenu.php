@@ -121,6 +121,12 @@ final class StaffMenu
                     ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'clipboard-check', 'match' => ['admin.models.*'], 'can' => 'review models', 'badge' => 'models'],
                     ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'clipboard-list', 'match' => ['admin.sellers.*'], 'can' => 'review sellers', 'badge' => 'sellers'],
                     ['label' => 'Review reports', 'route' => 'admin.reviews.index', 'icon' => 'flag', 'match' => ['admin.reviews.*'], 'can' => 'moderate reviews', 'badge' => 'reports'],
+                    // Visual preview of the support queue (SUPPORT_UI_PREVIEW); mock data
+                    ...(config('support.ui_preview') && app()->environment('local') ? [
+                        ['label' => 'Support requests', 'route' => 'admin.dev.support.tickets', 'icon' => 'inbox', 'match' => ['admin.dev.support.tickets', 'admin.dev.support.ticket']],
+                        ['label' => 'Saved replies', 'route' => 'admin.dev.support.replies', 'icon' => 'chat-bubble-text', 'match' => ['admin.dev.support.replies']],
+                        ['label' => 'Service levels', 'route' => 'admin.dev.support.levels', 'icon' => 'clock', 'match' => ['admin.dev.support.levels']],
+                    ] : []),
                 ],
             ],
             [
