@@ -32,6 +32,7 @@ use App\Http\Controllers\SellerProductController;
 use App\Http\Controllers\SellerProductFileController;
 use App\Http\Controllers\SellerStoreController;
 use App\Http\Controllers\SellerStorefrontController;
+use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\WishlistController;
 use App\Support\SupportChat\PreviewTickets;
 use Illuminate\Support\Facades\Route;
@@ -276,6 +277,9 @@ Route::middleware(['auth'])->prefix('chat')->group(function () {
     Route::post('/engagements/{engagement}/messages', [MessageController::class, 'store'])->name('messages.store');
     Route::patch('/engagements/{engagement}/messages/read', [MessageController::class, 'markAsRead'])->name('messages.read');
 });
+
+// Support assistant: the chat panel's endpoint. Off unless SUPPORT_ENABLED; signs the request and vouches for the signed-in member.
+Route::middleware(['auth', 'throttle:30,1'])->post('support/chat', [SupportChatController::class, 'store'])->name('support.chat');
 
 // Support assistant: visual design preview (local only, behind SUPPORT_UI_PREVIEW). Scripted, no backend; remove once the real assistant lands.
 if (config('support.ui_preview') && app()->environment('local')) {
