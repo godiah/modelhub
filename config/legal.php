@@ -25,6 +25,9 @@ return [
     // Whose law governs the terms and which courts hear disputes
     'jurisdiction' => env('LEGAL_JURISDICTION', 'Kenya'),
 
+    // When the payments and earnings guide (resources/policies/payments.md) was last changed in substance (Y-m-d): change it with the text
+    'payments_policy_updated' => env('LEGAL_PAYMENTS_POLICY_UPDATED', '2026-10-02'),
+
     // When the current Terms and Privacy Policy took effect (Y-m-d)
     'effective' => env('LEGAL_EFFECTIVE_DATE', '2026-10-01'),
 

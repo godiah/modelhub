@@ -89,7 +89,7 @@
                             <p class="mt-3 text-xs text-tertiary">{{ __('Hidden :date by :name', ['date' => $review->hidden_at?->format('M j, Y'), 'name' => $review->hiddenBy?->name ?? __('a reviewer')]) }} · <span class="text-neutral-700">{{ $review->hidden_reason }}</span></p>
                         @endunless
 
-                        <x-confirm-dialog bind="hiding" title="Hide this review" confirm-label="Hide review" state="reason: ''" disabledWhen="reason.trim().length < 5"
+                        <x-confirm-dialog bind="hiding" max-width="xl" title="Hide this review" confirm-label="Hide review" state="reason: ''" disabledWhen="reason.trim().length < 5"
                             :action="route('admin.reviews.hide', $review)" message="It stops counting towards the rating and disappears from the model page. The author is shown your reason.">
                             <label for="hide-{{ $review->id }}" class="sr-only">{{ __('Reason') }}</label>
                             <textarea id="hide-{{ $review->id }}" name="reason" x-model="reason" rows="3" maxlength="500" required placeholder="{{ __('Why it is being hidden') }}"

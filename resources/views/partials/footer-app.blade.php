@@ -7,6 +7,7 @@
             <a href="{{ route('legal.terms') }}" wire:navigate class="font-medium text-neutral-600 transition-colors duration-200 hover:text-teal-700">{{ __('Terms') }}</a>
             <a href="{{ route('legal.privacy') }}" wire:navigate class="font-medium text-neutral-600 transition-colors duration-200 hover:text-teal-700">{{ __('Privacy') }}</a>
             <a href="{{ route('engagements.policy') }}" wire:navigate class="font-medium text-neutral-600 transition-colors duration-200 hover:text-teal-700">{{ __('Cancellation & payment policy') }}</a>
+            <a href="{{ route('policies.payments') }}" wire:navigate class="font-medium text-neutral-600 transition-colors duration-200 hover:text-teal-700">{{ __('Payments & earnings') }}</a>
         </nav>
     </div>
 </footer>

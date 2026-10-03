@@ -136,7 +136,7 @@
                             </div>
                         @endif
                     @empty
-                        <p class="text-sm text-tertiary">{{ __('This project did not receive any applications.') }}</p>
+                        <x-empty-state :framed="false" compact icon="users" :title="__('No applications')" :description="__('This project did not receive any applications.')" />
                     @endforelse
                 </x-panel>
 

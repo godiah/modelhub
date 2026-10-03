@@ -1,5 +1,5 @@
 <!-- Review Modal (single instance; opened with $dispatch('open-modal', { name: 'review-engagement', id, status })) -->
-<x-modal name="review-engagement" focusable>
+<x-modal name="review-engagement" max-width="4xl" focusable>
     <x-modal.header title="Leave a Review" icon="chat-bubble-text" />
 
     <div class="p-6 font-main" x-data="{ rating: 0, reviewText: '', tags: [], isPublic: true }">
@@ -51,7 +51,7 @@
                     <!-- Review Text -->
                     <div class="mb-3">
                         <label for="engagement-review" class="block text-neutral-700 font-medium mb-1">Review</label>
-                        <textarea id="engagement-review" name="review" x-model="reviewText" rows="4"
+                        <textarea id="engagement-review" name="review" x-model="reviewText" rows="6"
                             class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-secondary focus:border-secondary transition-colors"
                             placeholder="Share your experience working on this project..." required></textarea>
                         <div class="text-xs text-neutral-500 mt-1 flex justify-between">

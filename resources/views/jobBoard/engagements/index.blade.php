@@ -62,25 +62,16 @@
 
         <div id="engagementsContainer">
             @if ($engagements->isEmpty() && !$hasFilters)
-                <x-card class="rounded-2xl p-12 text-center">
-                    <span class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 text-neutral-500">
-                        <x-icon name="chat-bubble-left-right" class="h-8 w-8" />
-                    </span>
-                    <h3 class="mt-5 font-tertiary text-lg font-semibold text-neutral-900">{{ __('No engagements yet') }}</h3>
-                    <p class="mx-auto mt-2 max-w-md text-sm text-tertiary">
-                        {{ __('When an offer is made or accepted, the work shows up here with its deliverables, deadlines and messages.') }}
-                    </p>
-                    <div class="mt-6 flex flex-wrap justify-center gap-3">
-                        <x-btn href="{{ route('jobs.browse') }}">
-                            <x-icon name="magnifying-glass" class="h-4 w-4" />
-                            {{ __('Browse projects') }}
-                        </x-btn>
-                        <x-btn variant="secondary" href="{{ route('jobs.create') }}">
-                            <x-icon name="plus" class="h-4 w-4" />
-                            {{ __('Post a project') }}
-                        </x-btn>
-                    </div>
-                </x-card>
+                <x-empty-state icon="chat-bubble-left-right" :title="__('No engagements yet')" :description="__('When an offer is made or accepted, the work shows up here with its deliverables, deadlines and messages.')">
+                    <x-btn href="{{ route('jobs.browse') }}">
+                        <x-icon name="magnifying-glass" class="h-4 w-4" />
+                        {{ __('Browse projects') }}
+                    </x-btn>
+                    <x-btn variant="secondary" href="{{ route('jobs.create') }}">
+                        <x-icon name="plus" class="h-4 w-4" />
+                        {{ __('Post a project') }}
+                    </x-btn>
+                </x-empty-state>
             @else
                 @include('jobBoard.engagements.partials.engagements-list')
             @endif

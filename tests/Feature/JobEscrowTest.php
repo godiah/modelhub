@@ -651,8 +651,8 @@ it('shows a freelancer what jobs have paid them, in their balance and in the tot
     approveDeliverable($engagement, 1);
 
     $page = $this->actingAs($this->freelancer)->get(route('earnings.index'))->assertOk();
-    $page->assertSee('Job payments')->assertSee('Villa render')->assertSee('2 of 3 deliverables approved')->assertSee('Ksh333.33')->assertSee('Ksh333.34')->assertSee('Ksh666.67')
-        ->assertSee(route('engagements.show', $engagement), false)->assertSee('Ready to take out')->assertDontSee('Your sales')->assertDontSee('No sales yet');
+    $page->assertSee('Activity')->assertSee('Villa render')->assertSee('2 of 3 deliverables approved')->assertSee('Ksh333.33')->assertSee('Ksh333.34')->assertSee('Ksh666.67')
+        ->assertSee(route('engagements.show', $engagement), false)->assertSee('Withdraw to M-Pesa')->assertDontSee('No earnings yet')->assertDontSee('A deleted model');
     expect(app(EarningsService::class)->summary($this->freelancer))->toMatchArray(['available' => 66667, 'pending' => 0, 'earned' => 66667]);
 });
 
@@ -690,7 +690,7 @@ it('shows a seller who is also paid for jobs both their sales and their job paym
     $engagement = JobEngagement::where('escrow_minor', '>', 0)->first();
     approveDeliverable($engagement, 0);
 
-    $this->actingAs($seller)->get(route('earnings.index'))->assertOk()->assertSee('Your sales')->assertSee('Oak armchair')->assertSee('Job payments')->assertSee('Villa render');
+    $this->actingAs($seller)->get(route('earnings.index'))->assertOk()->assertSee('Oak armchair')->assertSee('Villa render')->assertSee('Model sales')->assertSee('Where it comes from');
     // 1,020.00 from the sale (held) and 333.33 from the job: the sale is not counted twice
     expect(app(EarningsService::class)->summary($seller))->toMatchArray(['earned' => 102000 + 33333, 'available' => 33333, 'pending' => 102000]);
 });

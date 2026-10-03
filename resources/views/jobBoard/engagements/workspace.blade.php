@@ -119,7 +119,7 @@
                         @csrf
                         <div class="min-w-0 max-w-xl">
                             <h2 id="fund-title" class="font-tertiary text-lg font-semibold text-neutral-900">{{ __('Fund this job to start work') }}</h2>
-                            <p class="mt-1 text-sm text-neutral-700">{{ __(':freelancer accepted your offer. Pay :amount by M-Pesa to start. It is held in escrow and released to them only as you approve each deliverable.', ['freelancer' => $summary['counterpart'], 'amount' => Money::format($engagement->agreed_amount)]) }}</p>
+                            <p class="mt-1 text-sm text-neutral-700">{{ __(':freelancer accepted your offer. Pay :amount by M-Pesa to start. It is held in escrow and released to them only as you approve each deliverable.', ['freelancer' => $summary['counterpart'], 'amount' => Money::format($engagement->agreed_amount)]) }} <a href="{{ route('policies.payments') }}" class="font-medium text-teal-700 hover:underline">{{ __('How escrow works') }}</a></p>
                         </div>
                         <div class="flex w-full flex-col gap-3 sm:flex-row sm:items-end lg:w-auto">
                             <div class="sm:w-60">

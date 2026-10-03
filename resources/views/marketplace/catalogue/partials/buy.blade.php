@@ -55,7 +55,7 @@
                 <label for="buy-phone" class="mb-1.5 block text-sm font-medium text-neutral-800">{{ __('M-Pesa number') }}</label>
                 <input id="buy-phone" type="tel" name="phone" value="{{ $phone }}" inputmode="tel" autocomplete="tel" required placeholder="0712 345 678" class="block w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2 {{ $errors->has('phone') ? 'border-red-400 focus:ring-red-200' : 'border-neutral-300 focus:border-secondary focus:ring-secondary/25' }}">
                 @error('phone')<p class="mt-1.5 text-xs text-red-600" role="alert">{{ $message }}</p>@enderror
-                <p class="mt-1.5 text-xs text-tertiary">{{ __('You will get a prompt on this phone to enter your M-Pesa PIN.') }}</p>
+                <p class="mt-1.5 text-xs text-tertiary">{{ __('You will get a prompt on this phone to enter your M-Pesa PIN.') }} <a href="{{ route('policies.payments') }}" class="font-medium text-teal-700 hover:underline">{{ __('How payments and refunds work') }}</a></p>
             </div>
 
             <x-btn block size="lg" type="submit"><span x-text="'{{ __('Pay') }} ' + prices[tier] + ' {{ __('with M-Pesa') }}'">{{ __('Pay with M-Pesa') }}</span></x-btn>

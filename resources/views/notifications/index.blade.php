@@ -57,23 +57,17 @@
                             </ul>
                         </section>
                     @empty
-                        <div class="flex flex-col items-center px-6 py-16 text-center">
-                            @if ($counts['all'] === 0)
-                                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100 text-neutral-500"><x-icon name="bell" class="h-7 w-7" /></span>
-                                <p class="mt-4 font-semibold text-neutral-900">{{ __('No notifications yet') }}</p>
-                                <p class="mt-1 max-w-sm text-sm text-tertiary">{{ __('Offers, messages, payments and reviews will show up here as they happen.') }}</p>
-                            @elseif ($filter === 'unread')
-                                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-teal-50 text-teal-700"><x-icon name="check-circle" class="h-7 w-7" /></span>
-                                <p class="mt-4 font-semibold text-neutral-900">{{ __("You're all caught up") }}</p>
-                                <p class="mt-1 max-w-sm text-sm text-tertiary">{{ __('There is nothing unread.') }}</p>
-                                <x-btn class="mt-5" variant="secondary" size="sm" href="{{ route('notifications.index') }}" wire:navigate>{{ __('View all notifications') }}</x-btn>
-                            @else
-                                <span class="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100 text-neutral-500"><x-icon :name="$activeCategory?->icon() ?? 'bell'" class="h-7 w-7" /></span>
-                                <p class="mt-4 font-semibold text-neutral-900">{{ __('Nothing here') }}</p>
-                                <p class="mt-1 max-w-sm text-sm text-tertiary">{{ __('You have no notifications in this category.') }}</p>
-                                <x-btn class="mt-5" variant="secondary" size="sm" href="{{ route('notifications.index') }}" wire:navigate>{{ __('View all notifications') }}</x-btn>
-                            @endif
-                        </div>
+                        @if ($counts['all'] === 0)
+                            <x-empty-state :framed="false" icon="bell" :title="__('No notifications yet')" :description="__('Offers, messages, payments and reviews will show up here as they happen.')" />
+                        @elseif ($filter === 'unread')
+                            <x-empty-state :framed="false" icon="check-circle" :title="__('You\'re all caught up')" :description="__('There is nothing unread.')">
+                                <x-btn variant="secondary" size="sm" href="{{ route('notifications.index') }}" wire:navigate>{{ __('View all notifications') }}</x-btn>
+                            </x-empty-state>
+                        @else
+                            <x-empty-state :framed="false" :icon="$activeCategory?->icon() ?? 'bell'" :title="__('Nothing here')" :description="__('You have no notifications in this category.')">
+                                <x-btn variant="secondary" size="sm" href="{{ route('notifications.index') }}" wire:navigate>{{ __('View all notifications') }}</x-btn>
+                            </x-empty-state>
+                        @endif
                     @endforelse
 
                     <x-pager :paginator="$notifications" :footer="true" :navigate="true" />

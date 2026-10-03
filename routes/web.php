@@ -21,6 +21,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PartialPaymentController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentsPolicyController;
 use App\Http\Controllers\PayoutCallbackController;
 use App\Http\Controllers\PayoutTimeoutController;
 use App\Http\Controllers\PolicyManagementController;
@@ -240,6 +241,7 @@ Route::middleware(['auth', 'seller'])->prefix('sell/models')->name('seller.model
 
 // Public documents: readable by guests and signed-in users alike
 Route::get('/engagements/policies/cancellation', [PolicyManagementController::class, 'index'])->name('engagements.policy');
+Route::get('/payments-and-earnings', PaymentsPolicyController::class)->name('policies.payments');
 Route::get('/terms', [LegalController::class, 'terms'])->name('legal.terms');
 Route::get('/privacy', [LegalController::class, 'privacy'])->name('legal.privacy');
 Route::get('/licence-terms', [LegalController::class, 'licences'])->name('legal.licences');
