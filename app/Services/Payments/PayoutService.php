@@ -33,7 +33,10 @@ use Throwable;
  */
 class PayoutService
 {
-    public function __construct(protected PayoutGateway $gateway, protected LedgerService $ledger) {}
+    public function __construct(protected PayoutGateway $gateway, protected LedgerService $ledger, protected ?PayoutEligibility $eligibility = null)
+    {
+        $this->eligibility ??= new PayoutEligibility($ledger);
+    }
 
     /** Ask to withdraw. Returns the request, or why it cannot be made. The fee is taken from the amount asked for. */
     public function request(User $user, int $amountMinor, string $phone): Payout|string
@@ -42,28 +45,17 @@ class PayoutService
             return 'Enter a valid Safaricom number, for example 0712 345 678.';
         }
 
-        if ($amountMinor <= 0 || $amountMinor % 100 !== 0) {
-            return 'Withdraw a whole number of shillings.';
+        // The rules about the amount and about one request at a time live in PayoutEligibility, which the support assistant reads too
+        if ($problem = $this->eligibility->amountProblem($amountMinor)) {
+            return $problem;
         }
 
-        if ($amountMinor < FeePolicy::minPayoutMinor()) {
-            return 'The smallest withdrawal is '.Money::formatMinor(FeePolicy::minPayoutMinor(), 0).'.';
+        if ($this->eligibility->openWithdrawal($user) !== null) {
+            return 'You already have a withdrawal in progress. Wait for it to finish, or cancel it.';
         }
 
         $fee = FeePolicy::payoutFeeMinor();
         $net = $amountMinor - $fee;
-
-        if ($net <= 0) {
-            return 'That is not enough to cover the withdrawal fee of '.Money::formatMinor($fee, 0).'.';
-        }
-
-        if ($net / 100 > config('payments.max_kes')) {
-            return 'M-Pesa sends up to KES '.number_format(config('payments.max_kes')).' at a time. Withdraw a smaller amount.';
-        }
-
-        if (Payout::where('user_id', $user->id)->whereIn('status', [PayoutStatus::Requested, PayoutStatus::Processing])->exists()) {
-            return 'You already have a withdrawal in progress. Wait for it to finish, or cancel it.';
-        }
 
         try {
             $payout = DB::transaction(function () use ($user, $amountMinor, $fee, $net, $msisdn) {

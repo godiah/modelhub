@@ -17,6 +17,17 @@ final class SupportRequestRejected extends RuntimeException
         parent::__construct($reason, $status, $previous);
     }
 
+    /** Thrown from a controller (a limit reached while reading) it is answered the same way as from the middleware, and is not an error to report. */
+    public function render(): JsonResponse
+    {
+        return $this->toResponse();
+    }
+
+    public function report(): bool
+    {
+        return false;
+    }
+
     public function toResponse(): JsonResponse
     {
         $word = match ($this->status) {

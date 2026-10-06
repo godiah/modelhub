@@ -41,13 +41,16 @@
             ],
         ];
 
-        // Where the assistant may look at the member's own records, the first suggestion is that, and it skips guessing what was meant.
-        // Four at most, so it takes the place of the last general question.
-        if (\App\Services\Support\SupportReads::withdrawalsAvailableTo(auth()->user())) {
-            $context['chips'] = [
-                ['label' => __('Check my latest withdrawal'), 'key' => 'ask', 'action' => 'withdrawal'],
-                ...array_slice($context['chips'], 0, 3),
-            ];
+        // Where the assistant may look at the member's own records, the first suggestions are those, and each skips guessing what was meant.
+        // Four at most, so they take the place of the general questions at the end.
+        $accountChips = collect([
+            ['capability' => 'withdrawals', 'label' => __('Check my latest withdrawal'), 'action' => 'withdrawal'],
+            ['capability' => 'payments', 'label' => __('Check my last payment'), 'action' => 'payment'],
+        ])->filter(fn ($chip) => \App\Services\Support\SupportReads::availableTo(auth()->user(), $chip['capability']))
+            ->map(fn ($chip) => ['label' => $chip['label'], 'key' => 'ask', 'action' => $chip['action']])->values()->all();
+
+        if ($accountChips !== []) {
+            $context['chips'] = array_slice([...$accountChips, ...$context['chips']], 0, 4);
         }
     }
 
@@ -63,7 +66,7 @@
         'input' => $input,
         'context' => $context,
         // Where a card's allow-listed link key goes. Nothing the assistant sends is ever used as an address directly.
-        'links' => $live ? ['earnings.index' => route('earnings.index')] : [],
+        'links' => $live ? ['earnings.index' => route('earnings.index'), 'licences.index' => route('licences.index')] : [],
         // The scripted answers (invented payments and all) are for the design preview only: never shipped in live mode
         'scenarios' => $live ? [] : PreviewScenarios::all(),
         // Chat history (live only). The id placeholder is filled in by the browser.
@@ -182,6 +185,9 @@
                                 <template x-if="card.type === 'ticket'"><x-support.card.ticket /></template>
                                 <template x-if="card.type === 'approval'"><x-support.card.approval /></template>
                                 <template x-if="card.type === 'withdrawal'"><x-support.card.withdrawal /></template>
+                                <template x-if="card.type === 'payment'"><x-support.card.payment /></template>
+                                <template x-if="card.type === 'balance'"><x-support.card.balance /></template>
+                                <template x-if="card.type === 'licences'"><x-support.card.licences /></template>
                             </div>
                         </template>
 
@@ -236,7 +242,7 @@
                 <label for="{{ $uid }}-input" class="sr-only">{{ __('Message') }}</label>
                 <textarea id="{{ $uid }}-input" x-ref="input" x-model="input" rows="1"
                     @input="check(); grow()" @keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); submit() }"
-                    x-bind:placeholder="live ? '{{ __('Ask how ModelHub works') }}' : '{{ __('Ask about your account') }}'"
+                    x-bind:placeholder="live ? '{{ __('Ask a question') }}' : '{{ __('Ask about your account') }}'"
                     :class="guard ? '!border-red-400 focus:!border-red-500 focus:!ring-red-500' : 'border-neutral-300 focus:border-teal-600 focus:ring-teal-600'"
                     class="max-h-32 min-h-[2.75rem] flex-1 resize-none overflow-y-auto rounded-xl bg-white px-3.5 py-2.5 text-[15px] leading-snug placeholder:text-neutral-400"></textarea>
                 <button type="submit" :disabled="!input.trim() || !!guard || busy" aria-label="{{ __('Send') }}"
@@ -742,7 +748,9 @@
                 // amount like "Ksh1500" or a year is never blocked; the real guard needs tuning against real messages.
                 check() {
                     const t = this.input;
-                    const sensitive = /\b(pin|otp|password|code)\b\D{0,15}\d{4,8}/i.test(t) || /^\s*\d{4,8}\s*$/.test(t) || /\b(?:\d[ -]?){13,19}\b/.test(t);
+                    // An M-Pesa receipt (ten letters and digits, e.g. QWE5678RTY) is not a secret: members quote it so a payment can be found.
+                    const plain = t.replace(/\b(?=[A-Z0-9]*\d)(?=[A-Z0-9]*[A-Z])[A-Z0-9]{10}\b/gi, ' ');
+                    const sensitive = /\b(pin|otp|password|code)\b\D{0,15}\d{4,8}/i.test(plain) || /^\s*\d{4,8}\s*$/.test(plain) || /\b(?:\d[ -]?){13,19}\b/.test(plain);
                     this.guard = sensitive ? "That looks like a PIN or a code, so it wasn't sent. Never type your M-Pesa PIN or SMS codes here." : '';
                 },
 

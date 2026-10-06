@@ -16,13 +16,18 @@ final class SupportReads
         };
     }
 
-    /** Used by the panel to decide whether to offer "Check my latest withdrawal". The read API enforces the same rules itself. */
-    public static function withdrawalsAvailableTo(?User $member): bool
+    /** Used by the panel to decide which quick actions to offer. The read API enforces the same rules itself. */
+    public static function availableTo(?User $member, string $capability): bool
     {
         return $member !== null
             && config('support.enabled')
             && config('support.reads.enabled')
-            && config('support.reads.capabilities.withdrawals')
+            && config("support.reads.capabilities.{$capability}")
             && self::inStage($member);
+    }
+
+    public static function withdrawalsAvailableTo(?User $member): bool
+    {
+        return self::availableTo($member, 'withdrawals');
     }
 }

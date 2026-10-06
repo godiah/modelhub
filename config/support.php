@@ -76,9 +76,14 @@ return [
         'max_skew' => 60,
         'nonce_store' => env('SUPPORT_READS_NONCE_STORE'),
         'throttle_per_minute' => (int) env('SUPPORT_READS_THROTTLE_PER_MINUTE', 60),
+        // Looking a payment up by M-Pesa code is the one read worth guessing at, so it has its own, lower limit per member
+        'code_lookups_per_minute' => (int) env('SUPPORT_READS_CODE_LOOKUPS_PER_MINUTE', 10),
         // One switch per kind of read, each on by default once reads are on, so a single read can be turned off on its own
         'capabilities' => [
             'withdrawals' => (bool) env('SUPPORT_READS_WITHDRAWALS', true),
+            'payments' => (bool) env('SUPPORT_READS_PAYMENTS', true),
+            'balance' => (bool) env('SUPPORT_READS_BALANCE', true),
+            'licences' => (bool) env('SUPPORT_READS_LICENCES', true),
         ],
         'claim_audience' => 'support-reads',
         'claim_scope' => 'support:read:self',

@@ -430,3 +430,17 @@ test('a second question starts the wait again from zero rather than carrying the
     assert.equal(timers.ticks.length, 2);  // one counter per question
 });
 
+
+test('the secrets guard blocks a PIN or SMS code but lets an M-Pesa receipt through, so a payment can be looked up', () => {
+    const { data } = boot(async () => ({ ok: true, json: async () => ({}) }));
+    const blocked = (text) => { data.input = text; data.check(); return data.guard !== ''; };
+
+    assert.equal(blocked('my pin is 4821'), true);
+    assert.equal(blocked('the otp 482913'), true);
+    assert.equal(blocked('4111 1111 1111 1111'), true);
+    assert.equal(blocked('my receipt is QWE5678RTY and my pin is 4821'), true);  // a receipt does not hide a real PIN
+
+    assert.equal(blocked('check payment with code QWE5678RTY'), false);
+    assert.equal(blocked('my M-Pesa code is shk3x92lmn'), false);
+    assert.equal(blocked('I paid Ksh1500 and it is stuck'), false);
+});
