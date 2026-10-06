@@ -144,3 +144,15 @@ it('reserves no blank band under the footer, and marks the footer so the Help bu
         ->not->toContain('class="print:hidden pb-16"')
         ->toContain(":style=\"{ bottom: 'calc(1.25rem + ' + lift + 'px)' }\"");
 });
+
+it('labels the sources under an answer, opens each one as an article, and shows no date', function () {
+    $html = liveWidgetHtml();
+
+    expect($html)
+        ->toContain('Sources')
+        ->toContain('@click="openArticle(c, m.text)"')
+        ->toContain('Back to chat')
+        ->toMatch('~support[\\\\/]+articles[\\\\/]+__slug__~')   // the article address is given to the script, with a placeholder
+        ->not->toContain('updated ')                                     // the old "· updated 3 Oct 2026" is gone
+        ->not->toContain('x-text="\'· updated');
+});

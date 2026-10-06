@@ -16,6 +16,7 @@ function boot(fetchImpl, { footer = null } = {}) {
     const listeners = [];  // every scroll/resize listener the panel registers, so a test can fire them
     const ctx = {
         console,
+        TextDecoder,  // the panel decodes the answer's stream with it
         innerHeight: 800,
         requestAnimationFrame: (fn) => fn(),
         addEventListener: (type, fn) => listeners.push([type, fn]),
@@ -35,7 +36,7 @@ function boot(fetchImpl, { footer = null } = {}) {
     const chips = ['A?', 'B?', 'C?', 'D?'].map((label) => ({ label, key: 'ask' }));
     const data = ctx.window.supportChat({
         mode: 'dock', live: true, state: 'ready', userId: 29, transcript: [], input: '',
-        endpoints: { list: '/support/conversations', show: '/support/conversations/__id__', destroy: '/support/conversations/__id__' },
+        endpoints: { list: '/support/conversations', show: '/support/conversations/__id__', destroy: '/support/conversations/__id__', article: '/support/articles/__slug__' },
         context: { greeting: 'Hi Kevin, how may we help you today?', cards: [], chips, label: 'Profile' },
     });
     data.$nextTick = (f) => f();
@@ -116,7 +117,7 @@ test('Opening an earlier chat shows its messages and citations, and the next mes
         id: 'c-today', title: 'Licences',
         messages: [
             { role: 'user', text: 'Standard vs Extended licence?', citations: [] },
-            { role: 'assistant', text: 'Sure.', citations: [{ slug: 'licences', title: 'Licences', heading: 'Licences', updated: '3 Oct 2026' }] },
+            { role: 'assistant', text: 'Sure.', citations: [{ slug: 'licences', title: 'Licences', heading: 'Licences', updated: '3 Oct 2026', chunk_id: 'chunk-1' }] },
         ],
     };
     let next = json({ conversations: SAVED });
@@ -129,7 +130,7 @@ test('Opening an earlier chat shows its messages and citations, and the next mes
     assert.equal(data.conversationId, 'c-today');
     assert.equal(data.messages.length, 3);  // the greeting, then the two turns
     assert.equal(data.messages[0].chips.length, 0);  // no suggestions on a chat that is already under way
-    assert.deepEqual(plain(data.messages[2].citations), [{ title: 'Licences', updated: '3 Oct 2026' }]);
+    assert.deepEqual(plain(data.messages[2].citations), [{ title: 'Licences', slug: 'licences', chunk_id: 'chunk-1' }]);  // enough to open the article; no date
 
     // sending now continues THAT conversation
     calls.length = 0;
@@ -273,5 +274,123 @@ test('with no footer on the page the Help button is left alone and nothing is li
     data.followFooter();
     assert.equal(data.lift, 0);
     assert.equal(listeners.length, 0);
+});
+
+// ---- sources: opening the article behind an answer ---------------------------------------------------------------------------------------------------
+
+const ARTICLE = {
+    slug: 'selling-a-model', title: 'Selling a model',
+    sections: [
+        { heading: 'Becoming a seller', level: 2, text: 'Apply on the Sell page.', cited: false },
+        { heading: 'Review', level: 2, text: 'Staff publish the model or send it back.', cited: true },
+    ],
+};
+
+test('a source opens its article with a plain GET carrying the passage to mark, and shows it', async () => {
+    const { data, calls } = boot(() => json(ARTICLE));
+    await data.openArticle({ title: 'Selling a model', slug: 'selling-a-model', chunk_id: 'chunk-1' });
+
+    assert.equal(calls[0].url, '/support/articles/selling-a-model?chunk=chunk-1');
+    assert.equal(calls[0].options.method, undefined);  // a GET
+    assert.equal(data.view, 'article');
+    assert.equal(data.articleState, 'ready');
+    assert.equal(data.article.sections.filter((s) => s.cited).length, 1);
+});
+
+test('a source without a passage id opens the whole article, unmarked', async () => {
+    const { data, calls } = boot(() => json(ARTICLE));
+    await data.openArticle({ title: 'Selling a model', slug: 'selling-a-model' });
+    assert.equal(calls[0].url, '/support/articles/selling-a-model');
+});
+
+test('an unknown source (no article id) does nothing, and the member stays in the chat', async () => {
+    const { data, calls } = boot(() => json(ARTICLE));
+    await data.openArticle({ title: 'Old chat source' });
+    await data.openArticle(null);
+    assert.equal(calls.length, 0);
+    assert.equal(data.view, 'chat');
+});
+
+test('an article that is gone says so, and one that fails says so without switching the whole assistant off', async () => {
+    let boots = boot(() => json({ error: { code: 'article_not_found' } }, 404));
+    await boots.data.openArticle({ slug: 'gone' });
+    assert.equal(boots.data.articleState, 'missing');
+
+    boots = boot(() => json({ error: { code: 'assistant_unavailable' } }, 503));
+    await boots.data.openArticle({ slug: 'selling-a-model' });
+    assert.equal(boots.data.articleState, 'error');
+    assert.equal(boots.data.state, 'ready');  // the panel is not turned into the "assistant unavailable" screen over one article
+
+    boots = boot(() => { throw new Error('offline'); });
+    await boots.data.openArticle({ slug: 'selling-a-model' });
+    assert.equal(boots.data.articleState, 'error');
+});
+
+test('going back from an article returns to the conversation at the place the member was reading', async () => {
+    const { data } = boot(() => json(ARTICLE));
+    const scroller = { scrollTop: 340 };
+    data.$refs = { scroller };
+    await data.openArticle({ slug: 'selling-a-model' });
+    scroller.scrollTop = 0;  // the hidden panel loses its place
+
+    data.backToChat();
+    assert.equal(data.view, 'chat');
+    assert.equal(scroller.scrollTop, 340);
+});
+
+test('an article id is never pasted raw into the address', async () => {
+    const { data, calls } = boot(() => json({}, 404));
+    await data.openArticle({ slug: '../../v1/chat', chunk_id: 'a&b=c' });
+    assert.equal(calls[0].url, '/support/articles/..%2F..%2Fv1%2Fchat?chunk=a%26b%3Dc');
+});
+
+test('a live answer keeps its sources with the article id and passage id, and no date', async () => {
+    const sse = 'event: conversation\ndata: {"conversation_id": "c-9"}\n\n'
+        + 'event: delta\ndata: {"text": "Staff review each model."}\n\n'
+        + 'event: done\ndata: {"message_id": "m-1", "citations": [{"slug": "selling-a-model", "title": "Selling a model", "heading": "Selling a model > Review", "updated": "3 Oct 2026", "chunk_id": "chunk-7"}]}\n\n';
+    const bytes = new TextEncoder().encode(sse);
+    let sent = false;
+    const response = { ok: true, status: 200, body: { getReader: () => ({ read: async () => (sent ? { done: true } : ((sent = true), { value: bytes, done: false })) }) } };
+    const { data } = boot(() => response);
+    await data.sendLive('How long does approval take?');
+
+    const answer = data.messages.at(-1);
+    assert.equal(answer.text, 'Staff review each model.');
+    assert.deepEqual(plain(answer.citations), [{ title: 'Selling a model', slug: 'selling-a-model', chunk_id: 'chunk-7' }]);
+});
+
+// ---- the highlighted part of an article is narrowed to what the answer used ---------------------------------------------------------------
+
+const PACKED = [
+    { heading: 'Upload limits', level: 2, text: 'Up to 20 files of up to 50 MB each, up to 10 images, and up to 15 tags.', cited: true },
+    { heading: 'Review', level: 2, text: 'Staff publish the model or send it back with a reason. A rejected model shows "Needs changes" with the reason.', cited: true },
+    { heading: 'Your store name', level: 2, text: 'You can rename your store once every 30 days. The store address does not change.', cited: true },
+    { heading: 'Becoming a seller', level: 2, text: 'Apply on the Sell page. Staff review each application.', cited: false },
+];
+const APPROVAL = 'Staff review models and can publish them or send them back with reasons. A rejected model shows "Needs changes" with the specific reasons.';
+
+test('only the marked section the answer draws on stays highlighted', () => {
+    const { ctx } = boot(() => json({}));
+    const narrowed = plain(ctx.window.supportNarrowCited(PACKED, APPROVAL));
+    assert.deepEqual(narrowed.map((s) => [s.heading, s.cited]), [['Upload limits', false], ['Review', true], ['Your store name', false], ['Becoming a seller', false]]);
+});
+
+test('a section the server did not mark is never marked, and a single marked section is left alone', () => {
+    const { ctx } = boot(() => json({}));
+    assert.equal(ctx.window.supportNarrowCited(PACKED, 'Apply on the Sell page. Staff review each application.')[3].cited, false);
+    const one = [{ heading: 'A', text: 'x', cited: true }, { heading: 'B', text: 'y', cited: false }];
+    assert.equal(ctx.window.supportNarrowCited(one, 'unrelated words'), one);
+});
+
+test('when the answer shares nothing with the marked sections the server marking is kept', () => {
+    const { ctx } = boot(() => json({}));
+    const narrowed = ctx.window.supportNarrowCited(PACKED, "I don't have that information.");
+    assert.deepEqual(plain(narrowed.map((s) => s.cited)), [true, true, true, false]);
+});
+
+test('opening a source from an answer narrows the highlight using that answer', async () => {
+    const { data } = boot(() => json({ slug: 'selling-a-model', title: 'Selling a model', sections: PACKED }));
+    await data.openArticle({ slug: 'selling-a-model', chunk_id: 'chunk-1' }, APPROVAL);
+    assert.deepEqual(plain(data.article.sections.filter((s) => s.cited).map((s) => s.heading)), ['Review']);
 });
 
