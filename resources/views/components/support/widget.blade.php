@@ -60,6 +60,7 @@
             'list' => route('support.conversations.index'),
             'show' => route('support.conversations.show', '__id__'),
             'destroy' => route('support.conversations.destroy', '__id__'),
+            'article' => route('support.articles.show', '__slug__'),
         ] : null,
     ];
     $uid = 'support-'.\Illuminate\Support\Str::random(6);
@@ -121,7 +122,7 @@
                     class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-secondary text-[13px] font-medium text-teal-700 transition hover:bg-teal-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/30 disabled:cursor-not-allowed disabled:opacity-50">
                     <x-icon name="plus" class="h-4 w-4" />{{ __('New chat') }}
                 </button>
-                <button type="button" @click="view === 'history' ? (view = 'chat') : showHistory()" :disabled="busy" :aria-pressed="view === 'history'"
+                <button type="button" @click="view === 'history' ? backToChat() : showHistory()" :disabled="busy" :aria-pressed="view === 'history'"
                     :class="view === 'history' ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'"
                     class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-secondary text-[13px] font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 disabled:cursor-not-allowed disabled:opacity-50">
                     <x-icon name="clock" class="h-4 w-4" /><span x-text="view === 'history' ? '{{ __('Back to chat') }}' : '{{ __('History') }}'"></span>
@@ -166,14 +167,18 @@
                             </div>
                         </template>
 
-                        <div x-show="m.citations && m.citations.length" class="flex flex-wrap gap-1.5">
-                            <template x-for="(c, ki) in (m.citations || [])" :key="ki">
-                                <a href="#" @click.prevent class="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-600 transition hover:border-neutral-300 hover:text-neutral-900 focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-200">
-                                    <x-icon name="document-text" class="h-3.5 w-3.5 text-neutral-400" />
-                                    <span class="font-medium" x-text="c.title"></span>
-                                    <span class="text-neutral-400" x-text="'· updated ' + c.updated"></span>
-                                </a>
-                            </template>
+                        {{-- Sources: the help articles the answer was built from. Each one opens, with the passage used marked. --}}
+                        <div x-show="m.citations && m.citations.length" class="flex flex-col gap-1.5">
+                            <p class="text-xs font-medium text-neutral-500">{{ __('Sources') }}</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                <template x-for="(c, ki) in (m.citations || [])" :key="ki">
+                                    <button type="button" @click="openArticle(c, m.text)" :disabled="!live || !c.slug" :title="live && c.slug ? '{{ __('Open this article') }}' : null"
+                                        class="inline-flex max-w-full items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-600 transition enabled:hover:border-teal-300 enabled:hover:bg-teal-50 enabled:hover:text-teal-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/30 disabled:cursor-default">
+                                        <x-icon name="document-text" class="h-3.5 w-3.5 shrink-0 text-neutral-400" />
+                                        <span class="truncate font-medium" x-text="c.title"></span>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
 
                         <p x-show="m.first && !live" class="text-xs leading-snug text-neutral-500">
@@ -255,6 +260,35 @@
                             </div>
                         </template>
                     </div>
+                </template>
+            </div>
+        @endif
+
+        {{-- Article: a help article opened from a source, with the passage the answer was built from marked --}}
+        @if ($live)
+            <div x-show="state === 'ready' && view === 'article'" x-cloak x-ref="article" class="flex flex-1 flex-col overflow-y-auto px-4 py-3 [scrollbar-color:theme(colors.neutral.300)_transparent] [scrollbar-width:thin]">
+                <button type="button" @click="backToChat()" class="mb-3 inline-flex items-center gap-1.5 self-start rounded-md py-1 text-[13px] font-medium text-teal-700 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/30">
+                    <x-icon name="arrow-left" class="h-4 w-4" />{{ __('Back to chat') }}
+                </button>
+
+                <p x-show="articleState === 'loading'" class="flex items-center gap-2 py-3 text-sm text-neutral-500"><x-spinner class="h-4 w-4 text-teal-600" />{{ __('Opening the article…') }}</p>
+                <p x-show="articleState === 'missing'" x-cloak class="py-3 text-sm text-neutral-600">{{ __("That article isn't available any more.") }}</p>
+                <div x-show="articleState === 'error'" x-cloak class="py-3 text-sm text-neutral-600">
+                    <p>{{ __("Couldn't open that article right now.") }}</p>
+                </div>
+
+                <template x-if="articleState === 'ready' && article">
+                    <article>
+                        <h3 class="font-secondary text-base font-semibold text-neutral-900" x-text="article.title"></h3>
+                        <p x-show="article.sections.some((s) => s.cited)" class="mt-2 rounded-lg bg-teal-50 px-3 py-2 text-xs leading-snug text-teal-800">{{ __('The highlighted part is what this answer was built from.') }}</p>
+                        <template x-for="(section, si) in article.sections" :key="si">
+                            <section class="mt-4" :data-cited="section.cited ? '1' : null"
+                                :style="section.cited ? 'border-left:3px solid #0d9488;background:#f0fdfa;padding:.5rem .75rem;border-radius:.5rem' : ''">
+                                <h4 x-show="section.heading" class="mb-1 font-secondary text-sm font-semibold text-neutral-900" x-text="section.heading"></h4>
+                                <div class="text-[15px] leading-[1.55] text-neutral-800" x-html="supportRender(section.text)"></div>
+                            </section>
+                        </template>
+                    </article>
                 </template>
             </div>
         @endif
@@ -405,6 +439,29 @@
         };
         // end supportRender
 
+        /**
+         * The server marks every section of the passage the answer was retrieved from, and small sections are packed together, so that can be
+         * four sections when the answer only drew on one. Keep the marked sections whose own words the answer actually uses; if none of them
+         * stand out (or only one is marked) leave the marking as the server gave it. Never marks a section the server did not.
+         */
+        window.supportNarrowCited = function (sections, answer) {
+            const stop = new Set('a an the and or of to in on for with is are be can you your it its this that as at by from if not do does how i my me we our they them there their will would should could may might have has had was were been than then so such into about up out all any more most some no yes also just only'.split(' '));
+            const words = (t) => (String(t || '').toLowerCase().replace(/\u2019/g, "'").match(/[a-z0-9']+/g) || []);
+            const inAnswer = new Set(words(answer));
+            const marked = (sections || []).filter((s) => s.cited);
+            if (marked.length <= 1) return sections;
+
+            const coverage = (section) => {
+                const content = [...new Set(words(section.heading + ' ' + section.text).filter((w) => ! stop.has(w) && w.length > 2))];
+                return content.length ? content.filter((w) => inAnswer.has(w)).length / content.length : 0;
+            };
+            const scores = new Map(marked.map((s) => [s, coverage(s)]));
+            const best = Math.max(...scores.values());
+            if (best === 0) return sections;
+            return sections.map((s) => (s.cited ? { ...s, cited: scores.get(s) >= best * 0.6 } : s));
+        };
+        // end supportNarrowCited
+
         /** Groups chats (newest first) under Today / Yesterday / Previous 7 days / Earlier, by the member's own calendar days. */
         window.supportGroupChats = function (chats, now) {
             const day = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
@@ -467,6 +524,10 @@
                 confirming: null,
                 opening: null,
                 notice: '',
+                // An article opened from a source
+                article: null,
+                articleState: 'idle',
+                chatScroll: 0,
                 reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 
                 init() {
@@ -512,7 +573,37 @@
                     return { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': this.csrf() };
                 },
 
-                url(kind, id) { return this.endpoints[kind].replace('__id__', encodeURIComponent(id)); },
+                url(kind, id) { return this.endpoints[kind].replace(/__id__|__slug__/, encodeURIComponent(id)); },
+
+                // Back from an article or the history to the conversation, where the member was reading
+                backToChat() {
+                    this.view = 'chat';
+                    this.$nextTick(() => { if (this.$refs.scroller) this.$refs.scroller.scrollTop = this.chatScroll; });
+                },
+
+                // Open the help article behind a source. The passage the answer was built from comes marked.
+                async openArticle(citation, answer = '') {
+                    if (! citation || ! citation.slug || ! this.endpoints) return;
+                    if (this.$refs.scroller) this.chatScroll = this.$refs.scroller.scrollTop;
+                    this.view = 'article';
+                    this.article = null;
+                    this.articleState = 'loading';
+                    try {
+                        const query = citation.chunk_id ? '?chunk=' + encodeURIComponent(citation.chunk_id) : '';
+                        const response = await fetch(this.url('article', citation.slug) + query, { credentials: 'same-origin', headers: this.headers() });
+                        if (response.status === 404) { this.articleState = 'missing'; return; }
+                        if (! response.ok) throw new Error('article failed');  // one article failing is not the whole assistant being off
+                        const article = await response.json();
+                        this.article = { ...article, sections: window.supportNarrowCited(article.sections, answer) };
+                        this.articleState = 'ready';
+                        this.$nextTick(() => {
+                            const marked = this.$refs.article ? this.$refs.article.querySelector('[data-cited]') : null;
+                            if (marked) marked.scrollIntoView({ block: 'center', behavior: this.reduced ? 'auto' : 'smooth' });
+                        });
+                    } catch (e) {
+                        this.articleState = 'error';
+                    }
+                },
 
                 // A new chat: back to the greeting and the suggestions. The chat you leave stays in History.
                 newChat() {
@@ -565,7 +656,7 @@
                         this.conversationId = chat.id;
                         this.messages = [{ ...this.greeting(), chips: [] }, ...(chat.messages || []).map((m) => ({
                             role: m.role, text: m.text, tool: null, cards: [], chips: [],
-                            citations: (m.citations || []).map((c) => ({ title: c.title, updated: c.updated })),
+                            citations: (m.citations || []).map((c) => ({ title: c.title, slug: c.slug, chunk_id: c.chunk_id })),
                         }))];
                         this.view = 'chat';
                         this.persist();
@@ -751,7 +842,7 @@
 
                         if (event === 'conversation') this.conversationId = payload.conversation_id;
                         else if (event === 'delta') { assistant.text += payload.text; this.scroll(); }
-                        else if (event === 'done') assistant.citations = (payload.citations || []).map((c) => ({ title: c.title, updated: c.updated }));
+                        else if (event === 'done') assistant.citations = (payload.citations || []).map((c) => ({ title: c.title, slug: c.slug, chunk_id: c.chunk_id }));
                         else if (event === 'error') failed = true;
                     };
 
