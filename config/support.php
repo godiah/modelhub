@@ -74,7 +74,8 @@ return [
             (string) env('SUPPORT_READS_HMAC_PREVIOUS_KEY_ID', 'previous') => env('SUPPORT_READS_HMAC_PREVIOUS_SECRET'),
         ]),
         'max_skew' => 60,
-        'nonce_store' => env('SUPPORT_READS_NONCE_STORE'),
+        // An empty value (as in .env.example) means "the default cache store", not a store with no name
+        'nonce_store' => env('SUPPORT_READS_NONCE_STORE') ?: null,
         'throttle_per_minute' => (int) env('SUPPORT_READS_THROTTLE_PER_MINUTE', 60),
         // Looking a payment up by M-Pesa code is the one read worth guessing at, so it has its own, lower limit per member
         'code_lookups_per_minute' => (int) env('SUPPORT_READS_CODE_LOOKUPS_PER_MINUTE', 10),

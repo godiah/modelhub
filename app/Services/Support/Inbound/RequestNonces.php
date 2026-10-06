@@ -15,7 +15,7 @@ class RequestNonces
     public function claim(string $key, int $ttlSeconds): bool
     {
         try {
-            return Cache::store(config('support.reads.nonce_store'))->add('support-reads:nonce:'.$key, 1, $ttlSeconds);
+            return Cache::store(config('support.reads.nonce_store') ?: null)->add('support-reads:nonce:'.$key, 1, $ttlSeconds);
         } catch (Throwable $e) {
             throw new SupportRequestRejected('nonce_store_unavailable', 503, $e);
         }

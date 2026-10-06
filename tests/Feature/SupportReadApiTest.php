@@ -266,3 +266,9 @@ it('accepts a hand-made claim that is right on every count, so the cases above f
 
     call($this, readCall(over: ['claim' => $input.'.'.b64u(sodium_crypto_sign_detached($input, $this->secretKey))]))->assertOk();
 });
+
+it('uses the default cache store when the nonce store is left empty, as .env.example leaves it', function () {
+    config(['support.reads.nonce_store' => '']);
+
+    call($this, readCall(over: ['claim' => claimFor($this->member)]))->assertOk();
+});
