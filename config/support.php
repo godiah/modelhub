@@ -76,6 +76,10 @@ return [
         'max_skew' => 60,
         'nonce_store' => env('SUPPORT_READS_NONCE_STORE'),
         'throttle_per_minute' => (int) env('SUPPORT_READS_THROTTLE_PER_MINUTE', 60),
+        // One switch per kind of read, each on by default once reads are on, so a single read can be turned off on its own
+        'capabilities' => [
+            'withdrawals' => (bool) env('SUPPORT_READS_WITHDRAWALS', true),
+        ],
         'claim_audience' => 'support-reads',
         'claim_scope' => 'support:read:self',
     ],

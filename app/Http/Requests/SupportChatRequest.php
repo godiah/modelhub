@@ -19,6 +19,8 @@ class SupportChatRequest extends FormRequest
         return [
             'message' => ['required', 'string', 'max:4000', 'regex:/\S/'],
             'conversation_id' => ['nullable', 'uuid'],
+            // A quick-action chip ("look up my withdrawals") or the member's "I just have a question" answer; nothing else is forwarded
+            'action' => ['nullable', 'string', 'in:withdrawal,answer'],
             // Where the member is in the app: a hint for the opening of a chat, never used to decide what they may see
             'page_context' => ['nullable', 'array'],
             'page_context.route_key' => ['required_with:page_context', 'string', 'max:64', 'regex:/^[a-z0-9._-]+$/'],

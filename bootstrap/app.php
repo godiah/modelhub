@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsureStaffActive;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\ResetDefaultGuard;
 use App\Http\Middleware\Support\AuditSupportRead;
+use App\Http\Middleware\Support\RequireSupportCapability;
 use App\Http\Middleware\Support\SupportReadsGate;
 use App\Http\Middleware\Support\VerifySupportMember;
 use App\Http\Middleware\Support\VerifySupportSignature;
@@ -50,6 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
+            'support.capability' => RequireSupportCapability::class,
             'verify-engagement-ownership' => VerifyJobEngagementOwnership::class,
             'seller' => EnsureApprovedSeller::class,
             'staff.active' => EnsureStaffActive::class,

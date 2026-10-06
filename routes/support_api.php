@@ -9,3 +9,8 @@ use Illuminate\Support\Facades\Route;
  */
 
 Route::get('ping', [SupportReadController::class, 'ping'])->name('ping');
+
+Route::middleware('support.capability:withdrawals')->group(function () {
+    Route::get('withdrawals', [SupportReadController::class, 'withdrawals'])->name('withdrawals.index');
+    Route::get('withdrawals/{reference}', [SupportReadController::class, 'withdrawal'])->name('withdrawals.show');
+});

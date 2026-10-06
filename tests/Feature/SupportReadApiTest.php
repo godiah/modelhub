@@ -2,14 +2,12 @@
 
 use App\Models\SupportReadAudit;
 use App\Models\User;
-use App\Services\Support\AgentRequestSigner;
 use App\Services\Support\Inbound\RequestNonces;
 use App\Services\Support\Inbound\SupportRequestRejected;
 use App\Services\Support\SupportAgentClient;
 use App\Services\Support\UserContextMinter;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 
 /*
  * The read API the support assistant calls (/api/support/v1): every call must pass the switch, the caller's address, the request signature,
@@ -17,63 +15,9 @@ use Illuminate\Support\Facades\RateLimiter;
  * The endpoint here is `ping`; the real reads (withdrawals, payments, ...) sit behind exactly these checks.
  */
 
-const READS_PATH = '/api/support/v1/ping';
+require_once __DIR__.'/Support/ReadApiHelpers.php';
 
-/** Headers for a call as the assistant would make it. */
-function readCall(string $path = READS_PATH, array $over = []): array
-{
-    $secret = $over['secret'] ?? 'reads-secret';
-    $signed = (new AgentRequestSigner($over['key_id'] ?? 'current', $secret))->sign(
-        $over['method'] ?? 'GET',
-        $over['signed_path'] ?? $path,
-        '',
-        $over['timestamp'] ?? null,
-        $over['nonce'] ?? null,
-    );
-
-    $headers = $signed + ['X-Request-ID' => 'req-1'];
-
-    if (($over['claim'] ?? true) !== false) {
-        $headers['X-Support-Read-Claim'] = $over['claim'];
-    }
-
-    return $headers;
-}
-
-function claimFor(User $user, ?int $now = null): string
-{
-    return UserContextMinter::fromConfig()->mintRead($user, $now);
-}
-
-function b64u(string $raw): string
-{
-    return rtrim(strtr(base64_encode($raw), '+/', '-_'), '=');
-}
-
-beforeEach(function () {
-    $keypair = sodium_crypto_sign_keypair();
-    $this->secretKey = sodium_crypto_sign_secretkey($keypair);
-    $this->member = User::factory()->create();
-
-    config([
-        'support.agent.context_private_key' => base64_encode($this->secretKey),
-        'support.agent.hmac_secret' => 'chat-secret',
-        'support.reads.enabled' => true,
-        'support.reads.stage' => 'pilot',
-        'support.reads.pilot_member_ids' => [$this->member->id],
-        'support.reads.allowed_ips' => ['127.0.0.1'],
-        'support.reads.hmac_keys' => ['current' => 'reads-secret', 'previous' => 'old-secret'],
-        'support.reads.throttle_per_minute' => 60,
-    ]);
-
-    RateLimiter::clear('support-reads:member:'.$this->member->id);
-});
-
-function call(object $test, array $headers, string $path = READS_PATH)
-{
-    // a plain GET: getJson() would send a "[]" body, which the assistant never does and the signature covers
-    return $test->withHeaders($headers)->get($path);
-}
+beforeEach(fn () => setUpReadApi($this));
 
 it('is switched off by default and then looks like nothing is there', function () {
     config(['support.reads.enabled' => false]);
@@ -101,12 +45,6 @@ it('records who read what, never the values', function () {
         ->and($audit->request_id)->toBe('req-1')
         ->and(array_keys($audit->getAttributes()))->not->toContain('path', 'query', 'payload');
 });
-
-/** The caller sees one answer; the log must show the real reason, or a test could pass for the wrong one. */
-function expectRefusalLogged(string $reason): void
-{
-    Log::shouldHaveReceived('warning')->withArgs(fn ($message, $context = []) => $message === 'Support read refused' && ($context['reason'] ?? null) === $reason)->once();
-}
 
 it('refuses every kind of bad signature with the same answer, so the caller learns nothing about which check failed', function (array $over, string $reason) {
     Log::spy();

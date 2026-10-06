@@ -26,7 +26,7 @@ class SupportChatController extends Controller
             return $this->error('assistant_disabled', __('The assistant is switched off.'), Response::HTTP_SERVICE_UNAVAILABLE);
         }
 
-        $payload = array_filter($request->safe()->only(['message', 'conversation_id', 'page_context']), fn ($value) => $value !== null);
+        $payload = array_filter($request->safe()->only(['message', 'conversation_id', 'page_context', 'action']), fn ($value) => $value !== null);
         $requestId = (string) Str::uuid();
 
         try {

@@ -5,6 +5,7 @@ namespace App\Http\Middleware\Support;
 use App\Models\User;
 use App\Services\Support\Inbound\ReadClaimVerifier;
 use App\Services\Support\Inbound\SupportRequestRejected;
+use App\Services\Support\SupportReads;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -40,13 +41,7 @@ class VerifySupportMember
 
     private function ensureInStage(User $member): void
     {
-        $allowed = match (config('support.reads.stage')) {
-            'all' => true,
-            'pilot' => in_array($member->getKey(), (array) config('support.reads.pilot_member_ids'), true),
-            default => false, // an unknown stage is closed, not open
-        };
-
-        if (! $allowed) {
+        if (! SupportReads::inStage($member)) {
             throw new SupportRequestRejected('member_not_in_stage', 403);
         }
     }
