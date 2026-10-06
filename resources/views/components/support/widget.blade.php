@@ -22,15 +22,22 @@
 
     if ($live) {
         // Only what the assistant can honestly do today: explain how ModelHub works. It cannot see the member's account yet.
+        // The panel opens with a short greeting by first name, then the frequently asked questions. It claims nothing about what the
+        // assistant can see. Each pill's label is sent as the question, so each one is worded to be answered from the help articles
+        // (the topics members ask about most: withdrawing, licences, refunds, sign-in). Four at most, so they stay a glance, not a menu.
+        $firstName = \Illuminate\Support\Str::of((string) auth()->user()?->name)->trim()->before(' ')->toString();
         $context = [
             'key' => $context['key'],
             'label' => $context['label'],
-            'greeting' => __("Hi. I can answer questions about how ModelHub works. I can't see your own payments or account yet, so for anything about those, a person can help."),
+            'greeting' => $firstName !== ''
+                ? __('Hi :name, how may we help you today?', ['name' => $firstName])
+                : __('Hi, how may we help you today?'),
             'cards' => [],
             'chips' => [
-                ['label' => __('How do licences work?'), 'key' => 'ask'],
-                ['label' => __('What are the fees?'), 'key' => 'ask'],
-                ['label' => __('How do withdrawals work?'), 'key' => 'ask'],
+                ['label' => __('What fee do I pay to withdraw?'), 'key' => 'ask'],
+                ['label' => __('Standard vs Extended licence?'), 'key' => 'ask'],
+                ['label' => __('Can I get a refund?'), 'key' => 'ask'],
+                ['label' => __('How do I reset my password?'), 'key' => 'ask'],
             ],
         ];
     }
@@ -124,7 +131,8 @@
                             <span x-text="m.tool ? (m.tool.done ? m.tool.label : m.tool.label.replace(/^Checked/, 'Checking').replace(/^Searched/, 'Searching') + '…') : ''"></span>
                         </p>
 
-                        <p x-show="m.text" class="whitespace-pre-line text-[15px] leading-[1.55] text-neutral-800" x-text="m.text"></p>
+                        {{-- The assistant's text is rendered (bold, italics, lists, links) by supportRender(), which escapes it first --}}
+                        <div x-show="m.text" class="text-[15px] leading-[1.55] text-neutral-800" x-html="supportRender(m.text)"></div>
 
                         <template x-for="(card, ci) in (m.cards || [])" :key="ci">
                             <div>
@@ -149,17 +157,16 @@
                         <p x-show="m.first && !live" class="text-xs leading-snug text-neutral-500">
                             {{ __("I'm an AI assistant. I can see your ModelHub account but I can't change anything on it. If you hand a chat to staff, they can read it.") }}
                         </p>
-                        <p x-show="m.first && live" x-cloak class="text-xs leading-snug text-neutral-500">
-                            {{ __("I'm an AI assistant and I can make mistakes. I can't see or change anything on your account yet.") }}
-                        </p>
-
                         {{-- Suggestions only on the latest turn, and only the ones that make sense here --}}
-                        <div x-show="m.chips && m.chips.length && i === messages.length - 1 && !busy" class="flex flex-wrap gap-2 pt-1">
-                            <template x-for="(chip, hi) in (m.chips || [])" :key="hi">
-                                <button type="button" @click="run(chip.key, chip.label)"
-                                    class="rounded-full border border-teal-200 bg-white px-3.5 py-2 text-left text-sm font-medium text-teal-800 transition hover:border-teal-300 hover:bg-teal-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-teal-600/20"
-                                    x-text="chip.label"></button>
-                            </template>
+                        <div x-show="m.chips && m.chips.length && i === messages.length - 1 && !busy" class="flex flex-col gap-2">
+                            <p x-show="m.first && live" class="text-xs font-medium text-neutral-500">{{ __('Frequently asked questions') }}</p>
+                            <div class="flex flex-wrap gap-1.5">
+                                <template x-for="(chip, hi) in (m.chips || [])" :key="hi">
+                                    <button type="button" @click="run(chip.key, chip.label)"
+                                        class="rounded-full border border-teal-200 bg-white px-2.5 py-1 text-left text-xs font-medium text-teal-800 transition hover:border-teal-300 hover:bg-teal-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/30"
+                                        x-text="chip.label"></button>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -184,10 +191,7 @@
                     <x-icon name="arrow-up" class="h-5 w-5" />
                 </button>
             </div>
-            <p class="mt-2 flex items-center gap-1.5 text-xs text-neutral-500">
-                <x-icon name="shield-check" class="h-3.5 w-3.5 shrink-0 text-teal-600" />
-                {{ __('Never type your M-Pesa PIN or a code from an SMS.') }}
-            </p>
+            <p class="mt-2 text-center text-xs leading-snug text-neutral-500">{{ __('AI can make mistakes. Please double-check important information.') }}</p>
         </form>
 
         {{-- Unavailable: kill switch or outage. Never a dead end: the same question goes to staff as a request. --}}
@@ -238,6 +242,58 @@
          *  - live (SUPPORT_ENABLED): posts to ModelHub's /support/chat and reads the assistant's reply as it streams
          * Message shape: { role, text, tool?, cards[], citations[], chips[] }.
          */
+        /**
+         * Turns the assistant's text (light Markdown) into safe HTML: bold, italics, inline code, bullet and numbered lists, headings,
+         * and links (underlined, http/https only). The text is HTML-escaped FIRST and only then given tags, so nothing the model
+         * writes can inject markup or a script. Styled inline so it needs no CSS rebuild. Half-written text (while streaming) is fine.
+         */
+        window.supportRender = function (text) {
+            const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const inline = (s) => esc(s)
+                .replace(/`([^`\n]+)`/g, '<code style="background:#f3f4f6;border-radius:4px;padding:1px 5px;font-size:.9em">$1</code>')
+                .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/__([^_\n]+?)__/g, '<strong>$1</strong>')
+                .replace(/(^|[^*\w])\*([^*\s][^*\n]*?)\*(?![*\w])/g, '$1<em>$2</em>')
+                .replace(/(^|[^_\w])_([^_\s][^_\n]*?)_(?![_\w])/g, '$1<em>$2</em>')
+                .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">$1</a>');
+
+            const out = [];
+            let para = [];
+            let list = null;
+            const flushPara = () => {
+                if (para.length) out.push('<p style="margin:0 0 .5rem">' + para.map(inline).join('<br>') + '</p>');
+                para = [];
+            };
+            const flushList = () => {
+                if (list) out.push('<' + list.tag + ' style="list-style:' + list.style + ';padding-left:1.25rem;margin:0 0 .5rem">' + list.items.map((i) => '<li style="margin:.15rem 0">' + inline(i) + '</li>').join('') + '</' + list.tag + '>');
+                list = null;
+            };
+            const item = (tag, style, body) => {
+                // A bullet that is only a bold label ("**Standard licence:**") is a sub-heading for the bullets after it
+                if (tag === 'ul' && /^\*\*[^*]+:\*\*$/.test(body.trim())) {
+                    flushPara(); flushList();
+                    out.push('<p style="margin:.25rem 0 .25rem">' + inline(body.trim()) + '</p>');
+                    return;
+                }
+                flushPara();
+                if (!list || list.tag !== tag) { flushList(); list = { tag, style, items: [] }; }
+                list.items.push(body);
+            };
+
+            for (const raw of String(text == null ? '' : text).replace(/\r\n/g, '\n').split('\n')) {
+                const line = raw.trimEnd();
+                let m;
+                if (!line.trim()) { flushPara(); flushList(); }
+                else if ((m = line.match(/^\s*[-*\u2022]\s+(.*)$/))) item('ul', 'disc', m[1]);
+                else if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) item('ol', 'decimal', m[1]);
+                else if ((m = line.match(/^#{1,6}\s+(.*)$/))) { flushPara(); flushList(); out.push('<p style="margin:0 0 .5rem"><strong>' + inline(m[1]) + '</strong></p>'); }
+                else { flushList(); para.push(line); }
+            }
+            flushPara(); flushList();
+            return out.join('');
+        };
+        // end supportRender
+
         window.supportChat = function (cfg) {
             const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
             const tones = {
