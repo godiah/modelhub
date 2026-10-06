@@ -33,6 +33,7 @@ use App\Http\Controllers\SellerProductFileController;
 use App\Http\Controllers\SellerStoreController;
 use App\Http\Controllers\SellerStorefrontController;
 use App\Http\Controllers\SupportChatController;
+use App\Http\Controllers\SupportConversationController;
 use App\Http\Controllers\WishlistController;
 use App\Support\SupportChat\PreviewTickets;
 use Illuminate\Support\Facades\Route;
@@ -280,6 +281,13 @@ Route::middleware(['auth'])->prefix('chat')->group(function () {
 
 // Support assistant: the chat panel's endpoint. Off unless SUPPORT_ENABLED; signs the request and vouches for the signed-in member.
 Route::middleware(['auth', 'throttle:30,1'])->post('support/chat', [SupportChatController::class, 'store'])->name('support.chat');
+
+// The panel's chat history: the member's past chats, one chat's messages, and hiding a chat. Same checks as the chat itself.
+Route::middleware(['auth', 'throttle:60,1'])->prefix('support/conversations')->name('support.conversations.')->group(function () {
+    Route::get('/', [SupportConversationController::class, 'index'])->name('index');
+    Route::get('{conversation}', [SupportConversationController::class, 'show'])->whereUuid('conversation')->name('show');
+    Route::delete('{conversation}', [SupportConversationController::class, 'destroy'])->whereUuid('conversation')->name('destroy');
+});
 
 // Support assistant: visual design preview (local only, behind SUPPORT_UI_PREVIEW). Scripted, no backend; remove once the real assistant lands.
 if (config('support.ui_preview') && app()->environment('local')) {

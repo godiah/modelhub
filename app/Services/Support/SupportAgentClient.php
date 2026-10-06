@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
 /**
- * Sends one chat message to the support assistant service on behalf of a signed-in member.
+ * Talks to the support assistant service on behalf of a signed-in member: sends a chat message, and lists, opens and archives their
+ * past chats.
  *
  * Every call carries two proofs: the request is signed (so it came from this app, unchanged, once) and a 60-second user context says who
  * is asking. The reply is returned still open, so the controller can pass the stream straight on to the browser.
@@ -17,6 +18,11 @@ use RuntimeException;
 class SupportAgentClient
 {
     private const CHAT_PATH = '/v1/chat';
+
+    private const CONVERSATIONS_PATH = '/v1/conversations';
+
+    /** Listing and opening chats are quick lookups, unlike an answer, so they do not wait as long. */
+    private const HISTORY_TIMEOUT = 15;
 
     /**
      * @param  array{message: string, conversation_id?: string, page_context?: array<string, string>}  $payload
@@ -42,5 +48,43 @@ class SupportAgentClient
             ->timeout((int) config('support.agent.timeout'))
             ->withBody($body, 'application/json')
             ->post(rtrim((string) config('support.agent.url'), '/').self::CHAT_PATH);
+    }
+
+    /** The member's chats, most recent first. */
+    public function conversations(User $user, string $sessionId, ?string $requestId = null): Response
+    {
+        return $this->history('GET', self::CONVERSATIONS_PATH, $user, $sessionId, $requestId);
+    }
+
+    /** One of the member's chats with all its messages. The service answers "not found" for a chat that is not theirs. */
+    public function conversation(User $user, string $sessionId, string $conversationId, ?string $requestId = null): Response
+    {
+        return $this->history('GET', self::CONVERSATIONS_PATH.'/'.$conversationId, $user, $sessionId, $requestId);
+    }
+
+    /** Hide one of the member's chats from them. The service keeps the record. */
+    public function archive(User $user, string $sessionId, string $conversationId, ?string $requestId = null): Response
+    {
+        return $this->history('DELETE', self::CONVERSATIONS_PATH.'/'.$conversationId, $user, $sessionId, $requestId);
+    }
+
+    /**
+     * Same two proofs as a chat message. There is no body and no query string: the member is named by the signed claim and nothing
+     * the browser sends can change whose chats are asked for.
+     */
+    private function history(string $method, string $path, User $user, string $sessionId, ?string $requestId): Response
+    {
+        $headers = AgentRequestSigner::fromConfig()->sign($method, $path, '') + [
+            'X-Support-User-Context' => UserContextMinter::fromConfig()->mint($user, $sessionId),
+            'Accept' => 'application/json',
+        ];
+
+        if ($requestId !== null) {
+            $headers['X-Request-ID'] = $requestId;
+        }
+
+        return Http::withHeaders($headers)
+            ->timeout(self::HISTORY_TIMEOUT)
+            ->send($method, rtrim((string) config('support.agent.url'), '/').$path);
     }
 }
