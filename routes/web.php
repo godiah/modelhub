@@ -32,6 +32,7 @@ use App\Http\Controllers\SellerProductController;
 use App\Http\Controllers\SellerProductFileController;
 use App\Http\Controllers\SellerStoreController;
 use App\Http\Controllers\SellerStorefrontController;
+use App\Http\Controllers\SupportArticleController;
 use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\SupportConversationController;
 use App\Http\Controllers\WishlistController;
@@ -288,6 +289,10 @@ Route::middleware(['auth', 'throttle:60,1'])->prefix('support/conversations')->n
     Route::get('{conversation}', [SupportConversationController::class, 'show'])->whereUuid('conversation')->name('show');
     Route::delete('{conversation}', [SupportConversationController::class, 'destroy'])->whereUuid('conversation')->name('destroy');
 });
+
+// Open the help article behind a source under an answer (the slug is limited to letters, digits and hyphens)
+Route::middleware(['auth', 'throttle:60,1'])->get('support/articles/{slug}', [SupportArticleController::class, 'show'])
+    ->where('slug', '[a-z0-9-]{1,80}')->name('support.articles.show');
 
 // Support assistant: visual design preview (local only, behind SUPPORT_UI_PREVIEW). Scripted, no backend; remove once the real assistant lands.
 if (config('support.ui_preview') && app()->environment('local')) {

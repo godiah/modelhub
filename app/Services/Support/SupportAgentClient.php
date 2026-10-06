@@ -21,6 +21,8 @@ class SupportAgentClient
 
     private const CONVERSATIONS_PATH = '/v1/conversations';
 
+    private const ARTICLES_PATH = '/v1/articles';
+
     /** Listing and opening chats are quick lookups, unlike an answer, so they do not wait as long. */
     private const HISTORY_TIMEOUT = 15;
 
@@ -68,13 +70,22 @@ class SupportAgentClient
         return $this->history('DELETE', self::CONVERSATIONS_PATH.'/'.$conversationId, $user, $sessionId, $requestId);
     }
 
-    /**
-     * Same two proofs as a chat message. There is no body and no query string: the member is named by the signed claim and nothing
-     * the browser sends can change whose chats are asked for.
-     */
-    private function history(string $method, string $path, User $user, string $sessionId, ?string $requestId): Response
+    /** A help article, with today's numbers. `$chunk` (from a citation) marks the passage an answer was built from. */
+    public function article(User $user, string $sessionId, string $slug, ?string $chunk = null, ?string $requestId = null): Response
     {
-        $headers = AgentRequestSigner::fromConfig()->sign($method, $path, '') + [
+        // The query string is part of what is signed, so it is built once and used for both the signature and the address
+        $pathAndQuery = self::ARTICLES_PATH.'/'.$slug.($chunk !== null ? '?chunk='.$chunk : '');
+
+        return $this->history('GET', $pathAndQuery, $user, $sessionId, $requestId);
+    }
+
+    /**
+     * Same two proofs as a chat message. There is no body, and no query string except the one the article call builds itself: the member
+     * is named by the signed claim and nothing the browser sends can change whose chats are asked for.
+     */
+    private function history(string $method, string $pathAndQuery, User $user, string $sessionId, ?string $requestId): Response
+    {
+        $headers = AgentRequestSigner::fromConfig()->sign($method, $pathAndQuery, '') + [
             'X-Support-User-Context' => UserContextMinter::fromConfig()->mint($user, $sessionId),
             'Accept' => 'application/json',
         ];
@@ -85,6 +96,6 @@ class SupportAgentClient
 
         return Http::withHeaders($headers)
             ->timeout(self::HISTORY_TIMEOUT)
-            ->send($method, rtrim((string) config('support.agent.url'), '/').$path);
+            ->send($method, rtrim((string) config('support.agent.url'), '/').$pathAndQuery);
     }
 }
