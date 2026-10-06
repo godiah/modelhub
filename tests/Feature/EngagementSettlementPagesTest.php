@@ -345,7 +345,12 @@ it('renders the cancellation policy with its table of contents and every section
 
     $response->assertSee('Deliverables that have already been approved are considered')
         ->assertSee('final and eligible for payment')
-        ->assertSee('within 7–14 business days')
+        // What the page used to promise and the platform never did: a fixed dispute window and a fixed decision time
+        ->assertDontSee('7–14 business days')
+        ->assertDontSee('within 5 days')
+        ->assertDontSee('3-5 business days')
+        ->assertSee('no fixed time in which it will be decided')
+        ->assertSee('There is no automatic approval')
         ->assertSee(config('app.name').' reserves the right to');
 });
 

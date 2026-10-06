@@ -30,9 +30,13 @@
                         Type</x-form.label>
                     <select id="cancellation_type" name="cancellation_type" required
                         class="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-neutral-300 focus:outline-none focus:ring-secondary focus:border-secondary rounded-md shadow-sm font-main">
+                        {{-- Each side is offered only the cancellation it can make: its own, a mutual one, or a dispute --}}
                         <option value="mutual">Mutual Agreement</option>
-                        <option value="client_initiated">Client Initiated</option>
-                        <option value="freelancer_initiated">Freelancer Initiated</option>
+                        @if (auth()->id() === $engagement->application->poster_id)
+                            <option value="client_initiated">Client Initiated</option>
+                        @else
+                            <option value="freelancer_initiated">Freelancer Initiated</option>
+                        @endif
                         <option value="dispute">Dispute (Requires Review)</option>
                     </select>
                 </div>

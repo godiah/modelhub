@@ -262,7 +262,7 @@
                 <p class="mt-1">{{ __('While the dispute is open, no further actions, payments or deliverables can be processed.') }}</p>
             </div>
             <ul class="list-disc space-y-1.5 pl-5">
-                <li>{{ __('An administrator reviews every dispute, usually within 3-5 business days.') }}</li>
+                <li>{{ __('An administrator reviews every dispute. We do not state a time for a decision.') }}</li>
                 <li>{{ __('You can only withdraw a dispute with the administrator\'s approval.') }}</li>
                 <li>{{ __('Give a clear reason and, if you have it, supporting evidence.') }}</li>
                 <li>{{ __('The disputed amount stays in escrow until the decision.') }}</li>

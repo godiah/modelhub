@@ -138,7 +138,7 @@
 
                         <div x-show="m.citations && m.citations.length" class="flex flex-wrap gap-1.5">
                             <template x-for="(c, ki) in (m.citations || [])" :key="ki">
-                                <a href="#" class="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-600 transition hover:border-neutral-300 hover:text-neutral-900 focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-200">
+                                <a href="#" @click.prevent class="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-2.5 py-1 text-xs text-neutral-600 transition hover:border-neutral-300 hover:text-neutral-900 focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-200">
                                     <x-icon name="document-text" class="h-3.5 w-3.5 text-neutral-400" />
                                     <span class="font-medium" x-text="c.title"></span>
                                     <span class="text-neutral-400" x-text="'· updated ' + c.updated"></span>
@@ -437,6 +437,7 @@
 
                         if (event === 'conversation') this.conversationId = payload.conversation_id;
                         else if (event === 'delta') { assistant.text += payload.text; this.scroll(); }
+                        else if (event === 'done') assistant.citations = (payload.citations || []).map((c) => ({ title: c.title, updated: c.updated }));
                         else if (event === 'error') failed = true;
                     };
 
@@ -462,7 +463,7 @@
                 persist() {
                     if (! this.live) return;
                     try {
-                        const turns = this.messages.filter((m) => m.text && ! m.first).slice(-30).map((m) => ({ role: m.role, text: m.text }));
+                        const turns = this.messages.filter((m) => m.text && ! m.first).slice(-30).map((m) => ({ role: m.role, text: m.text, citations: m.citations || [] }));
                         sessionStorage.setItem(this.storageKey(), JSON.stringify({ conversationId: this.conversationId, turns }));
                     } catch (e) { /* storage blocked: the chat still works, it just will not survive a reload */ }
                 },
@@ -473,7 +474,7 @@
                         if (! saved || ! Array.isArray(saved.turns) || ! saved.turns.length) return;
                         this.conversationId = saved.conversationId || null;
                         const greeting = { ...this.messages[0], chips: [] };
-                        this.messages = [greeting, ...saved.turns.map((m) => ({ role: m.role, text: m.text, tool: null, cards: [], citations: [], chips: [] }))];
+                        this.messages = [greeting, ...saved.turns.map((m) => ({ role: m.role, text: m.text, tool: null, cards: [], citations: Array.isArray(m.citations) ? m.citations : [], chips: [] }))];
                     } catch (e) { /* ignore a corrupt value */ }
                 },
 

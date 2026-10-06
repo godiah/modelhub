@@ -7,6 +7,7 @@ use App\Enums\LicenceTier;
 use App\Enums\PaymentStatus;
 use App\Models\EscrowRefund;
 use App\Models\JobApplication;
+use App\Models\JobCancellation;
 use App\Models\JobDeliverable;
 use App\Models\JobEngagement;
 use App\Models\LedgerTransaction;
@@ -693,4 +694,71 @@ it('shows a seller who is also paid for jobs both their sales and their job paym
     $this->actingAs($seller)->get(route('earnings.index'))->assertOk()->assertSee('Oak armchair')->assertSee('Villa render')->assertSee('Model sales')->assertSee('Where it comes from');
     // 1,020.00 from the sale (held) and 333.33 from the job: the sale is not counted twice
     expect(app(EarningsService::class)->summary($seller))->toMatchArray(['earned' => 102000 + 33333, 'available' => 33333, 'pending' => 102000]);
+});
+
+/** ---------------------------------------------------------------- cancellation rules: who may cancel as what, and cancelling as a dispute */
+it('lets each side choose only the cancellation it can honestly make', function (string $who, string $type, bool $allowed) {
+    $engagement = fundedJob();
+    $by = $who === 'client' ? $this->client : $this->freelancer;
+
+    cancelJob($engagement, $by, $type);
+
+    $engagement->refresh();
+    expect($engagement->cancellation()->exists())->toBe($allowed)
+        ->and($engagement->status === EngagementStatus::Active)->toBe(! $allowed);
+})->with([
+    'client: their own' => ['client', 'client_initiated', true],
+    'client: by agreement' => ['client', 'mutual', true],
+    'client: as the freelancer' => ['client', 'freelancer_initiated', false],
+    'freelancer: their own' => ['freelancer', 'freelancer_initiated', true],
+    'freelancer: by agreement' => ['freelancer', 'mutual', true],
+    'freelancer: as the client' => ['freelancer', 'client_initiated', false],
+]);
+
+it('does not let a client skip the review window by cancelling as the freelancer', function () {
+    $engagement = fundedJob();
+
+    cancelJob($engagement, $this->client, 'freelancer_initiated');
+
+    // Nothing happened: no cancellation, and no refund made due at once
+    expect($engagement->fresh()->escrow_refund_due_at)->toBeNull()->and(JobEngagement::escrowRefundDue()->count())->toBe(0);
+});
+
+it('opens a real dispute for staff when someone cancels as a dispute, and holds the escrow until they decide', function () {
+    $engagement = fundedJob();
+
+    cancelJob($engagement, $this->client, 'dispute');
+
+    $engagement->refresh();
+    $dispute = $engagement->cancellation->dispute;
+    expect($engagement->status)->toBe(EngagementStatus::Disputed)
+        ->and($dispute)->not->toBeNull()
+        ->and($dispute->disputed_by)->toBe($this->client->id)
+        ->and($dispute->dispute_reason)->toBe('other')
+        // Nothing held in escrow becomes the client's to have back while the dispute is open, however long it takes
+        ->and($engagement->escrow_refund_due_at)->toBeNull();
+
+    // The link in staff's new-dispute notification goes somewhere (it used to be a 404), and the dispute is in their queue
+    $this->actingAs(staffWith('Dispute manager'), 'staff')->get(route('admin.disputes.show', $engagement->cancellation))->assertOk();
+    $this->get(route('admin.disputes.index'))->assertOk()->assertSee('Villa render');
+
+    $this->travel(30)->days();
+    expect(JobEngagement::escrowRefundDue()->count())->toBe(0);
+});
+
+it('does not let anyone cancel again once an engagement is in dispute', function () {
+    $engagement = fundedJob();
+    cancelJob($engagement, $this->client, 'dispute');
+
+    cancelJob($engagement, $this->freelancer, 'mutual');
+
+    expect($engagement->fresh()->status)->toBe(EngagementStatus::Disputed)
+        ->and(JobCancellation::where('engagement_id', $engagement->id)->count())->toBe(1);
+});
+
+it('offers each side only the cancellation types it can choose', function () {
+    $engagement = fundedJob();
+
+    $this->actingAs($this->client)->get(route('engagements.show', $engagement))->assertOk()->assertSee('Client Initiated')->assertDontSee('Freelancer Initiated');
+    $this->actingAs($this->freelancer)->get(route('engagements.show', $engagement))->assertOk()->assertSee('Freelancer Initiated')->assertDontSee('Client Initiated');
 });
