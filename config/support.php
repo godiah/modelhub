@@ -44,4 +44,40 @@ return [
         'context_ttl' => 60,
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Support assistant: read-only lookups of the member's own records (Phase 2)
+    |--------------------------------------------------------------------------
+    |
+    | The other direction: the agent calls /api/support/v1/* here to read a member's own withdrawals, payments, licences and balance.
+    | Every call must pass, in order: the switch, the caller's address, the request signature (its own secret, not the one above),
+    | a read claim naming the member, the member being active and in the current stage, and a per-member rate limit. Failing any of
+    | them answers the same way, so a caller learns nothing about which check it failed.
+    |
+    | enabled          The kill switch for reads. Off by default; separate from `enabled` above so chat can run without reads.
+    | stage            pilot = only pilot_member_ids (staff's own test members); all = every active member. Anything else denies.
+    | allowed_ips      The addresses (or CIDR blocks) the agent calls from, matched against the connecting address only. Never
+    |                  X-Forwarded-For. Empty denies everything, except in `local`, where loopback and private ranges are allowed.
+    | hmac_keys        key id => secret, two valid at once during rotation.
+    | nonce_store      The cache store that remembers used nonces. Pin a shared one (redis) in production. If it is down, calls are
+    |                  refused: replay protection is never silently dropped.
+    |
+    */
+
+    'reads' => [
+        'enabled' => (bool) env('SUPPORT_READS_ENABLED', false),
+        'stage' => env('SUPPORT_READS_STAGE', 'pilot'),
+        'pilot_member_ids' => array_values(array_filter(array_map('intval', explode(',', (string) env('SUPPORT_READS_PILOT_MEMBER_IDS', ''))))),
+        'allowed_ips' => array_values(array_filter(array_map('trim', explode(',', (string) env('SUPPORT_READS_ALLOWED_IPS', ''))))),
+        'hmac_keys' => array_filter([
+            (string) env('SUPPORT_READS_HMAC_KEY_ID', 'current') => env('SUPPORT_READS_HMAC_SECRET'),
+            (string) env('SUPPORT_READS_HMAC_PREVIOUS_KEY_ID', 'previous') => env('SUPPORT_READS_HMAC_PREVIOUS_SECRET'),
+        ]),
+        'max_skew' => 60,
+        'nonce_store' => env('SUPPORT_READS_NONCE_STORE'),
+        'throttle_per_minute' => (int) env('SUPPORT_READS_THROTTLE_PER_MINUTE', 60),
+        'claim_audience' => 'support-reads',
+        'claim_scope' => 'support:read:self',
+    ],
+
 ];

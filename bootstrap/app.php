@@ -8,6 +8,10 @@ use App\Http\Middleware\EnsureMemberActive;
 use App\Http\Middleware\EnsureStaffActive;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\ResetDefaultGuard;
+use App\Http\Middleware\Support\AuditSupportRead;
+use App\Http\Middleware\Support\SupportReadsGate;
+use App\Http\Middleware\Support\VerifySupportMember;
+use App\Http\Middleware\Support\VerifySupportSignature;
 use App\Http\Middleware\VerifyJobEngagementOwnership;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -21,6 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         then: function () {
             // The staff portal: its own routes, its own sign-in, under /admin
             Route::middleware('web')->group(base_path('routes/staff.php'));
+
+            // The support assistant's read API: its own middleware group, not `web` (no session or CSRF) and not `api`
+            Route::middleware('support.reads')->prefix('api/support/v1')->name('support.api.')->group(base_path('routes/support_api.php'));
         },
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
@@ -33,6 +40,14 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: ['webhooks/*']);
 
         $middleware->web(prepend: [ResetDefaultGuard::class, ApplySessionSettings::class], append: [EnforceSessionRules::class, EnsureMemberActive::class]);
+
+        // Order matters: switch and address, then audit wrapping the rest, then signature, then who the call is about
+        $middleware->group('support.reads', [
+            SupportReadsGate::class,
+            AuditSupportRead::class,
+            VerifySupportSignature::class,
+            VerifySupportMember::class,
+        ]);
 
         $middleware->alias([
             'verify-engagement-ownership' => VerifyJobEngagementOwnership::class,
