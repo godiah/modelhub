@@ -13,7 +13,8 @@ const script = blade.slice(blade.indexOf('<script>') + 8, blade.lastIndexOf('</s
 function boot(fetchImpl, { footer = null } = {}) {
     const store = new Map();
     const calls = [];
-    const listeners = [];  // every scroll/resize listener the panel registers, so a test can fire them
+    const listeners = [];
+    const timers = { ticks: [], cleared: [] };  // the panel's wait counter: a test fires the ticks itself  // every scroll/resize listener the panel registers, so a test can fire them
     const ctx = {
         console,
         TextDecoder,  // the panel decodes the answer's stream with it
@@ -27,6 +28,8 @@ function boot(fetchImpl, { footer = null } = {}) {
         sessionStorage: { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => store.set(k, v) },
         fetch: async (url, options = {}) => { calls.push({ url, options }); return fetchImpl(url, options); },
         setTimeout,
+        setInterval: (fn) => { timers.ticks.push(fn); return timers.ticks.length; },
+        clearInterval: (id) => { timers.cleared.push(id); },
     };
     ctx.window = ctx;
     ctx.matchMedia = () => ({ matches: false });
@@ -43,7 +46,7 @@ function boot(fetchImpl, { footer = null } = {}) {
     data.$refs = {};
     data.messages = [data.greeting()];
     const fire = (type) => listeners.filter(([t]) => t === type).forEach(([, fn]) => fn());
-    return { data, calls, store, ctx, listeners, fire };
+    return { data, calls, store, ctx, listeners, fire, timers };
 }
 
 // Objects made inside the sandbox have a different prototype from this file's, so compare their JSON form
@@ -392,5 +395,38 @@ test('opening a source from an answer narrows the highlight using that answer', 
     const { data } = boot(() => json({ slug: 'selling-a-model', title: 'Selling a model', sections: PACKED }));
     await data.openArticle({ slug: 'selling-a-model', chunk_id: 'chunk-1' }, APPROVAL);
     assert.deepEqual(plain(data.article.sections.filter((s) => s.cited).map((s) => s.heading)), ['Review']);
+});
+
+// ---- waiting for an answer -----------------------------------------------------------------------------------------------------------------------
+
+test('the wait is counted while an answer is being prepared, the label changes when it runs long, and it stops when the answer fails', async () => {
+    let finish;
+    const gate = new Promise((resolve) => { finish = resolve; });
+    const { data, timers } = boot(async () => { await gate; return json({ error: { code: 'x' } }, 422); });
+
+    const pending = data.sendLive('How long does approval take?');
+    assert.equal(data.busy, true);
+    assert.equal(timers.ticks.length, 1);                      // a counter started
+    assert.equal(data.waitingLabel, 'Thinking…');
+
+    for (let i = 0; i < 9; i++) timers.ticks[0]();
+    assert.equal(data.waitingLabel, 'Thinking…');  // 9 seconds: still the first message
+    timers.ticks[0]();
+    assert.match(data.waitingLabel, /Still thinking/);          // 10 seconds: say it can take a while
+
+    finish();
+    await pending;
+    assert.equal(data.busy, false);
+    assert.deepEqual(plain(timers.cleared), [1]);              // the counter was stopped...
+    assert.equal(data.waited, 0);                              // ...and reset
+});
+
+test('a second question starts the wait again from zero rather than carrying the old count', async () => {
+    const { data, timers } = boot(() => json({ error: { code: 'x' } }, 422));
+    data.waited = 42;
+    await data.sendLive('first');
+    await data.sendLive('second');
+    assert.equal(data.waited, 0);
+    assert.equal(timers.ticks.length, 2);  // one counter per question
 });
 

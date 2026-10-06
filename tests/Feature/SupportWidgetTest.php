@@ -156,3 +156,9 @@ it('labels the sources under an answer, opens each one as an article, and shows 
         ->not->toContain('updated ')                                     // the old "· updated 3 Oct 2026" is gone
         ->not->toContain('x-text="\'· updated');
 });
+
+it('shows a working-on-it line while an answer is being prepared', function () {
+    expect(liveWidgetHtml())
+        ->toContain('x-show="live && busy && !m.text && i === messages.length - 1"')
+        ->toContain('waitingLabel');
+});

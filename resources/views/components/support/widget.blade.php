@@ -154,6 +154,12 @@
                             <span x-text="m.tool ? (m.tool.done ? m.tool.label : m.tool.label.replace(/^Checked/, 'Checking').replace(/^Searched/, 'Searching') + '…') : ''"></span>
                         </p>
 
+                        {{-- While the answer is being prepared. Replies are held until they have been checked, so this can take up to a minute --}}
+                        <p x-show="live && busy && !m.text && i === messages.length - 1" x-cloak class="flex items-center gap-2 text-sm text-neutral-500">
+                            <x-spinner class="h-4 w-4 shrink-0 text-teal-600 motion-reduce:animate-none" />
+                            <span x-text="waitingLabel"></span>
+                        </p>
+
                         {{-- The assistant's text is rendered (bold, italics, lists, links) by supportRender(), which escapes it first --}}
                         <div x-show="m.text" class="text-[15px] leading-[1.55] text-neutral-800" x-html="supportRender(m.text)"></div>
 
@@ -514,6 +520,9 @@
                 input: cfg.input || '',
                 guard: '',
                 busy: false,
+                // Seconds spent waiting for the current answer (counted while it is being prepared)
+                waited: 0,
+                waitTimer: null,
                 // How far the Help button is raised so it never sits over the footer (0 until the footer scrolls into view)
                 lift: 0,
                 // Chat history (live mode): which screen is showing, the member's chats, and what is in flight
@@ -558,6 +567,23 @@
                     document.addEventListener('scroll', queue, { passive: true, capture: true });
                     window.addEventListener('resize', queue);
                     measure();
+                },
+
+                // What to say while the answer is being prepared: just "Thinking…", then that it can take a while
+                get waitingLabel() {
+                    return this.waited < 10 ? 'Thinking…' : 'Still thinking… the first answer can take up to a minute.';
+                },
+
+                startWaiting() {
+                    this.stopWaiting();
+                    this.waited = 0;
+                    this.waitTimer = setInterval(() => { this.waited++; }, 1000);
+                },
+
+                stopWaiting() {
+                    if (this.waitTimer) clearInterval(this.waitTimer);
+                    this.waitTimer = null;
+                    this.waited = 0;
                 },
 
                 greeting() {
@@ -757,6 +783,7 @@
                     this.messages.push({ role: 'user', text });
                     const assistant = this.messages[this.messages.push({ role: 'assistant', text: '', tool: null, cards: [], citations: [], chips: [] }) - 1];
                     this.busy = true;
+                    this.startWaiting();
                     this.scroll();
 
                     try {
@@ -787,6 +814,7 @@
                         this.guard = "I couldn't reach the assistant. Check your connection and try again.";
                     } finally {
                         this.busy = false;
+                        this.stopWaiting();
                         this.persist();
                         this.scroll();
                     }
