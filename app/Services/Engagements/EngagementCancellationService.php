@@ -42,6 +42,22 @@ class EngagementCancellationService
             ];
         }
 
+        // Already in a dispute or settled: there is nothing left to cancel, and a second cancellation would reopen a decision
+        if (in_array($engagement->status, [EngagementStatus::Disputed, EngagementStatus::Settled], true)) {
+            return [
+                'success' => false,
+                'error' => 'This engagement can no longer be cancelled.',
+            ];
+        }
+
+        // A client cannot cancel "as the freelancer" (that makes the escrow refund due at once, skipping the review window), or the reverse
+        if (! $this->typeAllowedFor($engagement, $user, $cancellationData['cancellation_type'])) {
+            return [
+                'success' => false,
+                'error' => 'That kind of cancellation is not available to you.',
+            ];
+        }
+
         // Check for existing cancellation
         if ($this->hasExistingCancellation($engagement, $user)) {
             return [
@@ -65,8 +81,13 @@ class EngagementCancellationService
             // Money held in escrow for the job is now the client's to have back (after their review window, unless the freelancer walked away)
             app(EscrowService::class)->onCancelled($engagement, $cancellationData['cancellation_type']);
 
-            // Handle dispute notifications
+            // Cancelling as a dispute opens a real dispute for staff to decide (so the link in their notification works), and nothing
+            // held in escrow is returned until they have
             if ($cancellationData['cancellation_type'] === 'dispute') {
+                $cancellation->createDispute($cancellationData['reason_category'], $cancellationData['cancellation_reason'], $user->id);
+                $engagement->markAsDisputed();
+                app(EscrowService::class)->freeze($engagement);
+
                 EngagementNotificationHelper::sendDisputeNotification($engagement, $cancellation);
             }
 
@@ -89,6 +110,20 @@ class EngagementCancellationService
                 'error' => 'Failed to cancel engagement: '.$e->getMessage(),
             ];
         }
+    }
+
+    // Which kinds of cancellation this person may choose: their own, a mutual one, or a dispute
+    protected function typeAllowedFor(JobEngagement $engagement, User $user, string $type): bool
+    {
+        $application = $engagement->application;
+
+        $allowed = match (true) {
+            $user->id === $application->poster_id => ['mutual', 'client_initiated', 'dispute'],
+            $user->id === $application->applicant_id => ['mutual', 'freelancer_initiated', 'dispute'],
+            default => [],
+        };
+
+        return in_array($type, $allowed, true);
     }
 
     // Create cancellation record

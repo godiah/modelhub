@@ -50,7 +50,7 @@ The rates above are the current defaults. The rate that applies to a particular 
 
 ## 4. Selling models
 
-- When someone buys your model, **your share** (the price less the commission) is credited to your account and **held for 7 days**. During the hold it shows as "in the hold period" on your Earnings page; after it, it becomes **available to withdraw**. **[CONFIRM: the hold length is a platform setting, currently 7 days.]**
+- When someone buys your model, **your share** (the price less the commission) is credited to your account and **held for 7 days**. During the hold it shows as "in the hold period" on your Earnings page; after it, it becomes **available to withdraw**. The hold length is a platform setting (currently 7 days). A change applies to new sales, not to ones already made.
 - You are told about each sale and what your share is. Your Earnings page lists every sale, whether it is still held, and when it is released.
 - If a sale is **refunded** (section 5) your share of it is taken back and you are told.
 - You are responsible for your listing being accurate and the files working. Repeated refunds for the same reason may affect your store.
@@ -59,13 +59,14 @@ The rates above are the current defaults. The rate that applies to a particular 
 
 ## 5. Refunds for models
 
-Digital files cannot be handed back once you have them, so refunds are limited:
+Digital files cannot be handed back once you have them, so refunds are limited, and our staff decide each one:
 
 - **When you can ask:** the file is **broken** (does not open, is corrupt, is missing parts) or is **not as described** on the listing. Ask within the **7 days** after your purchase.
 - **When we will not refund:** you changed your mind, or you downloaded files that work and match the listing.
-- **How to ask:** contact support with your payment reference (shown on your payment page and in your receipt) and say what is wrong. **[CONFIRM: there is no "request a refund" button yet; today this goes through support.]**
+- **Who decides:** our staff look at each request, including when you bought it and whether the files were downloaded, and decide. The 7 days and the download point are our policy, not an automatic rule: no system grants or refuses a refund on its own, and we cannot promise an outcome before staff have looked.
+- **How to ask:** contact support with your payment reference (shown on your payment page and in your receipt) and say what is wrong. There is no "request a refund" button yet: refunds go through support.
 - **What happens if we refund:** your licence ends, the files are no longer available to you, and the money is returned to **your M-Pesa**. Our finance team sends it by hand to the number you paid from, so it may take a little while after we confirm. The seller's share and our commission are reversed.
-- If the seller has already withdrawn the money, we cannot take it back from their earnings automatically; in that case our team will look at it individually. **[CONFIRM: wording and whether the platform covers it.]**
+- If the seller has already withdrawn the money, we cannot take it back from their earnings automatically; in that case our team will look at it individually.
 
 ---
 
@@ -100,7 +101,7 @@ Digital files cannot be handed back once you have them, so refunds are limited:
 
 Clients are expected to review submitted deliverables promptly. A deliverable can be approved, or sent back with a reason so the freelancer can fix it and resubmit.
 
-**[CONFIRM: there is no automatic approval today. If a client does not respond, the freelancer should message them and, failing that, contact support. We may want a rule such as "work is treated as approved if the client has not responded within N days".]**
+There is no automatic approval of submitted work. If a client does not respond, the freelancer should message them and, failing that, contact support.
 
 ---
 
@@ -112,9 +113,9 @@ Either side can cancel a project (see the Cancellation policy for the process). 
 2. **Work submitted but not yet reviewed:** the client should approve or reject it first. Approving it releases its share, as usual.
 3. **What is left in escrow** is then dealt with according to who cancelled:
    - **The freelancer cancels:** the rest goes back to the client.
-   - **The client cancels:** the client has a **7-day review window** in which they can still **pay extra for work that was never approved**, by sending a payment (any amount up to what is left for the freelancer; they may also choose to pay nothing more). The freelancer **accepts** it or **disputes** it. After the window closes without a payment, the rest goes back to the client. **[CONFIRM: window length, currently 7 days.]**
+   - **The client cancels:** the client has a **7-day review window** in which they can still **pay extra for work that was never approved**, by sending a payment (any amount up to what is left for the freelancer; they may also choose to pay nothing more). The freelancer **accepts** it or **disputes** it. After the window closes without a payment, the rest goes back to the client. The window length is a platform setting (currently 7 days). A cancellation by mutual agreement gets the same window; a cancellation opened as a dispute holds the money until staff decide.
 4. While a payment or dispute is open, **the remaining money stays in escrow**; it is not returned to anyone until it is settled.
-5. **Disputes.** If the freelancer disputes an amount, our staff review the evidence both sides give and decide a final amount, which is paid to the freelancer out of what is left in escrow; the rest goes back to the client. Staff cannot award more than what is left in escrow for the freelancer. The decision is final on the platform. **[CONFIRM: appeal/escalation path, and the target time for a decision (the dispute page currently says 3-5 business days).]**
+5. **Disputes.** If the freelancer disputes an amount, our staff review the evidence both sides give and decide a final amount, which is paid to the freelancer out of what is left in escrow; the rest goes back to the client. Staff cannot award more than what is left in escrow for the freelancer. The decision is final on the platform. There is no appeal path inside the platform, and we do not state a time for a decision: staff review each dispute as it comes.
 6. **Returning money to the client.** When money is due back to a client, our finance team records it and sends it by M-Pesa to the number the client paid from. The client is notified.
 
 If a project was **never funded**, nothing is paid or returned; nobody has paid anything.
@@ -127,7 +128,7 @@ If a project was **never funded**, nothing is paid or returned; nobody has paid 
 - **Minimum KES 500; fee KES 30 [CONFIRM]**; the fee is taken from the amount you withdraw, and the page shows what you will receive before you confirm. Whole shillings only, and at most KES 150,000 can be sent at a time.
 - **One withdrawal at a time.** Wait for it to finish, or cancel it while it is still waiting.
 - The amount **leaves your balance when you ask**, so it cannot be asked for twice.
-- **Our staff approve each withdrawal** before it is sent. **[CONFIRM: how quickly we aim to review them.]** You can cancel while it is waiting for approval. If we turn it down, you are given the reason and the money goes back to your balance.
+- **Our staff approve each withdrawal** before it is sent. We do not publish a review time. If a withdrawal has been waiting longer than you expect, contact support and quote the withdrawal reference. You can cancel while it is waiting for approval. If we turn it down, you are given the reason and the money goes back to your balance.
 - When it is approved the money is sent to the M-Pesa number you gave. If the transfer fails, the money returns to your balance and you are told.
 - **Check the number carefully.** M-Pesa transfers cannot be recalled. We send to the number you give us.
 - In rare cases M-Pesa does not confirm a transfer by itself. Our staff check it against the M-Pesa records and settle it; you will be told the outcome. Please do not ask for the same money again in the meantime.
