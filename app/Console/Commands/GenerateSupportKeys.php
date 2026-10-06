@@ -19,17 +19,20 @@ class GenerateSupportKeys extends Command
     {
         $secretKey = sodium_crypto_sign_secretkey(sodium_crypto_sign_keypair());
         $hmacSecret = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        $readsSecret = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
         $pem = str_replace("\n", '\n', trim(UserContextMinter::publicKeyPem($secretKey)));
 
         $this->line('Put these in ModelHub\'s .env:');
         $this->newLine();
         $this->line('SUPPORT_HMAC_SECRET='.$hmacSecret);
+        $this->line('SUPPORT_READS_HMAC_SECRET='.$readsSecret.'   # the other direction (the assistant calling the read API): its own secret');
         $this->line('SUPPORT_CONTEXT_PRIVATE_KEY='.base64_encode($secretKey));
         $this->newLine();
         $this->line('Put these in the support service\'s .env (modelhub-support):');
         $this->newLine();
         $this->line('APP_HMAC_KEYS=current:'.$hmacSecret);
         $this->line('APP_USER_CONTEXT_PUBLIC_KEY='.$pem);
+        $this->line('(and the reads secret above, under the name the service gives it when it starts calling the read API)');
         $this->newLine();
         $this->warn('These are shown once and not saved. The private key must never leave this app.');
 

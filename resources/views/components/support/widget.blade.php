@@ -40,6 +40,18 @@
                 ['label' => __('How do I reset my password?'), 'key' => 'ask'],
             ],
         ];
+
+        // Where the assistant may look at the member's own records, the first suggestions are those, and each skips guessing what was meant.
+        // Four at most, so they take the place of the general questions at the end.
+        $accountChips = collect([
+            ['capability' => 'withdrawals', 'label' => __('Check my latest withdrawal'), 'action' => 'withdrawal'],
+            ['capability' => 'payments', 'label' => __('Check my last payment'), 'action' => 'payment'],
+        ])->filter(fn ($chip) => \App\Services\Support\SupportReads::availableTo(auth()->user(), $chip['capability']))
+            ->map(fn ($chip) => ['label' => $chip['label'], 'key' => 'ask', 'action' => $chip['action']])->values()->all();
+
+        if ($accountChips !== []) {
+            $context['chips'] = array_slice([...$accountChips, ...$context['chips']], 0, 4);
+        }
     }
 
     $config = [
@@ -53,6 +65,8 @@
         'transcript' => $transcript,
         'input' => $input,
         'context' => $context,
+        // Where a card's allow-listed link key goes. Nothing the assistant sends is ever used as an address directly.
+        'links' => $live ? ['earnings.index' => route('earnings.index'), 'licences.index' => route('licences.index')] : [],
         // The scripted answers (invented payments and all) are for the design preview only: never shipped in live mode
         'scenarios' => $live ? [] : PreviewScenarios::all(),
         // Chat history (live only). The id placeholder is filled in by the browser.
@@ -170,8 +184,20 @@
                                 <template x-if="card.type === 'escrow'"><x-support.card.escrow /></template>
                                 <template x-if="card.type === 'ticket'"><x-support.card.ticket /></template>
                                 <template x-if="card.type === 'approval'"><x-support.card.approval /></template>
+                                <template x-if="card.type === 'withdrawal'"><x-support.card.withdrawal /></template>
+                                <template x-if="card.type === 'payment'"><x-support.card.payment /></template>
+                                <template x-if="card.type === 'balance'"><x-support.card.balance /></template>
+                                <template x-if="card.type === 'licences'"><x-support.card.licences /></template>
                             </div>
                         </template>
+
+                        {{-- "Look it up, or how does it work?": the member's own choice when it was unclear what they meant. Latest turn only. --}}
+                        <div x-show="m.choices && m.choices.length && i === messages.length - 1 && !busy" class="flex flex-wrap gap-1.5">
+                            <template x-for="(choice, chi) in (m.choices || [])" :key="chi">
+                                <button type="button" @click="sendLive(choice.message, choice.action)" x-text="choice.label"
+                                    class="rounded-full border border-teal-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-teal-800 transition hover:border-teal-300 hover:bg-teal-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/30"></button>
+                            </template>
+                        </div>
 
                         {{-- Sources: the help articles the answer was built from. Each one opens, with the passage used marked. --}}
                         <div x-show="m.citations && m.citations.length" class="flex flex-col gap-1.5">
@@ -195,7 +221,7 @@
                             <p x-show="m.first && live" class="text-xs font-medium text-neutral-500">{{ __('Frequently asked questions') }}</p>
                             <div class="flex flex-wrap gap-1.5">
                                 <template x-for="(chip, hi) in (m.chips || [])" :key="hi">
-                                    <button type="button" @click="run(chip.key, chip.label)"
+                                    <button type="button" @click="run(chip.key, chip.label, chip.action)"
                                         class="rounded-full border border-teal-200 bg-white px-2.5 py-1 text-left text-xs font-medium text-teal-800 transition hover:border-teal-300 hover:bg-teal-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/30"
                                         x-text="chip.label"></button>
                                 </template>
@@ -216,7 +242,7 @@
                 <label for="{{ $uid }}-input" class="sr-only">{{ __('Message') }}</label>
                 <textarea id="{{ $uid }}-input" x-ref="input" x-model="input" rows="1"
                     @input="check(); grow()" @keydown.enter="if (!$event.shiftKey) { $event.preventDefault(); submit() }"
-                    x-bind:placeholder="live ? '{{ __('Ask how ModelHub works') }}' : '{{ __('Ask about your account') }}'"
+                    x-bind:placeholder="live ? '{{ __('Ask a question') }}' : '{{ __('Ask about your account') }}'"
                     :class="guard ? '!border-red-400 focus:!border-red-500 focus:!ring-red-500' : 'border-neutral-300 focus:border-teal-600 focus:ring-teal-600'"
                     class="max-h-32 min-h-[2.75rem] flex-1 resize-none overflow-y-auto rounded-xl bg-white px-3.5 py-2.5 text-[15px] leading-snug placeholder:text-neutral-400"></textarea>
                 <button type="submit" :disabled="!input.trim() || !!guard || busy" aria-label="{{ __('Send') }}"
@@ -511,6 +537,7 @@
                 endpoint: cfg.endpoint,
                 supportEmail: cfg.supportEmail,
                 routeKey: cfg.routeKey,
+                links: cfg.links || {},
                 conversationId: null,
                 state: cfg.state,
                 context: cfg.context,
@@ -551,6 +578,13 @@
                 },
 
                 tone(name) { return tones[name] || tones.neutral; },
+
+                // A time from a card, shown in the member's local (Nairobi) time. Empty if it is missing or not a date.
+                when(iso) {
+                    if (! iso) return '';
+                    const d = new Date(iso);
+                    return isNaN(d) ? '' : d.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi' });
+                },
 
                 // Keep the launcher just above the footer once the footer scrolls into view, instead of reserving a blank band
                 // under it. Any scroll (the page or an inner container) and any resize re-measures, at most once per frame.
@@ -681,7 +715,7 @@
                         const chat = await response.json();
                         this.conversationId = chat.id;
                         this.messages = [{ ...this.greeting(), chips: [] }, ...(chat.messages || []).map((m) => ({
-                            role: m.role, text: m.text, tool: null, cards: [], chips: [],
+                            role: m.role, text: m.text, tool: null, cards: Array.isArray(m.cards) ? m.cards : [], chips: [], choices: Array.isArray(m.choices) ? m.choices : [],
                             citations: (m.citations || []).map((c) => ({ title: c.title, slug: c.slug, chunk_id: c.chunk_id })),
                         }))];
                         this.view = 'chat';
@@ -714,7 +748,9 @@
                 // amount like "Ksh1500" or a year is never blocked; the real guard needs tuning against real messages.
                 check() {
                     const t = this.input;
-                    const sensitive = /\b(pin|otp|password|code)\b\D{0,15}\d{4,8}/i.test(t) || /^\s*\d{4,8}\s*$/.test(t) || /\b(?:\d[ -]?){13,19}\b/.test(t);
+                    // An M-Pesa receipt (ten letters and digits, e.g. QWE5678RTY) is not a secret: members quote it so a payment can be found.
+                    const plain = t.replace(/\b(?=[A-Z0-9]*\d)(?=[A-Z0-9]*[A-Z])[A-Z0-9]{10}\b/gi, ' ');
+                    const sensitive = /\b(pin|otp|password|code)\b\D{0,15}\d{4,8}/i.test(plain) || /^\s*\d{4,8}\s*$/.test(plain) || /\b(?:\d[ -]?){13,19}\b/.test(plain);
                     this.guard = sensitive ? "That looks like a PIN or a code, so it wasn't sent. Never type your M-Pesa PIN or SMS codes here." : '';
                 },
 
@@ -751,9 +787,9 @@
                     this.send(text, this.match(text));
                 },
 
-                run(key, label) {
+                run(key, label, action) {
                     if (this.busy) return;
-                    if (this.live) return key === 'human' ? this.talkToAPersonLive() : this.sendLive(label);
+                    if (this.live) return key === 'human' ? this.talkToAPersonLive() : this.sendLive(label, action);
                     const said = label || ({ human: 'Talk to a person', ask_staff: 'Ask staff to look at this', refund: 'Ask for a refund' }[key]) || key;
                     this.send(said, key);
                 },
@@ -779,9 +815,9 @@
                     this.persist();
                 },
 
-                async sendLive(text) {
+                async sendLive(text, action) {
                     this.messages.push({ role: 'user', text });
-                    const assistant = this.messages[this.messages.push({ role: 'assistant', text: '', tool: null, cards: [], citations: [], chips: [] }) - 1];
+                    const assistant = this.messages[this.messages.push({ role: 'assistant', text: '', tool: null, cards: [], citations: [], chips: [], choices: [] }) - 1];
                     this.busy = true;
                     this.startWaiting();
                     this.scroll();
@@ -800,6 +836,7 @@
                                 message: text,
                                 conversation_id: this.conversationId || undefined,
                                 page_context: this.routeKey ? { route_key: this.routeKey } : undefined,
+                                action: action || undefined,
                             }),
                         });
 
@@ -870,7 +907,14 @@
 
                         if (event === 'conversation') this.conversationId = payload.conversation_id;
                         else if (event === 'delta') { assistant.text += payload.text; this.scroll(); }
-                        else if (event === 'done') assistant.citations = (payload.citations || []).map((c) => ({ title: c.title, slug: c.slug, chunk_id: c.chunk_id }));
+                        else if (event === 'done') {
+                            assistant.citations = (payload.citations || []).map((c) => ({ title: c.title, slug: c.slug, chunk_id: c.chunk_id }));
+                            // What a lookup of the member's own records showed, and the buttons offered when it was unclear what they meant
+                            assistant.cards = Array.isArray(payload.cards) ? payload.cards : [];
+                            assistant.choices = Array.isArray(payload.choices) ? payload.choices : [];
+                            // The cards and buttons only exist now, so scroll once they are on the page
+                            this.$nextTick(() => this.scroll());
+                        }
                         else if (event === 'error') failed = true;
                     };
 
@@ -896,7 +940,7 @@
                 persist() {
                     if (! this.live) return;
                     try {
-                        const turns = this.messages.filter((m) => m.text && ! m.first).slice(-30).map((m) => ({ role: m.role, text: m.text, citations: m.citations || [] }));
+                        const turns = this.messages.filter((m) => m.text && ! m.first).slice(-30).map((m) => ({ role: m.role, text: m.text, citations: m.citations || [], cards: m.cards || [], choices: m.choices || [] }));
                         sessionStorage.setItem(this.storageKey(), JSON.stringify({ conversationId: this.conversationId, turns }));
                     } catch (e) { /* storage blocked: the chat still works, it just will not survive a reload */ }
                 },
@@ -907,7 +951,7 @@
                         if (! saved || ! Array.isArray(saved.turns) || ! saved.turns.length) return;
                         this.conversationId = saved.conversationId || null;
                         const greeting = { ...this.messages[0], chips: [] };  // (kept as it was: the greeting without its suggestions)
-                        this.messages = [greeting, ...saved.turns.map((m) => ({ role: m.role, text: m.text, tool: null, cards: [], citations: Array.isArray(m.citations) ? m.citations : [], chips: [] }))];
+                        this.messages = [greeting, ...saved.turns.map((m) => ({ role: m.role, text: m.text, tool: null, cards: Array.isArray(m.cards) ? m.cards : [], citations: Array.isArray(m.citations) ? m.citations : [], chips: [], choices: Array.isArray(m.choices) ? m.choices : [] }))];
                     } catch (e) { /* ignore a corrupt value */ }
                 },
 

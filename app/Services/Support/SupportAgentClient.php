@@ -41,6 +41,11 @@ class SupportAgentClient
             'Accept' => 'text/event-stream',
         ];
 
+        // The claim the assistant uses to read this member's own records during this answer; not sent unless reads are switched on
+        if (config('support.reads.enabled')) {
+            $headers['X-Support-Read-Claim'] = UserContextMinter::fromConfig()->mintRead($user);
+        }
+
         if ($requestId !== null) {
             $headers['X-Request-ID'] = $requestId;
         }
