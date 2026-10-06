@@ -108,3 +108,39 @@ it("renders the assistant's text (bold, lists) instead of printing the raw Markd
         ->toContain('window.supportRender = function')
         ->toContain('x-text="m.text"'); // the member's own message bubble
 });
+
+it('has History and New chat in the live panel, wired to the history routes', function () {
+    $html = liveWidgetHtml();
+
+    expect($html)
+        ->toContain('New chat')
+        ->toContain('Your chats')
+        ->toContain('@click="newChat()"')
+        // The three history routes are given to the script, with a placeholder for the chat id
+        // (the page writes the config as escaped JSON, so slashes may arrive as \/ or \\/)
+        ->toMatch('~support[\\\\/]+conversations~')
+        ->toContain('__id__');
+});
+
+it('has no history controls in the scripted preview, which has nothing to remember', function () {
+    config(['support.enabled' => false, 'support.ui_preview' => true]);
+
+    $html = $this->actingAs(User::factory()->create())->get(route('dashboard'))->assertOk()->getContent();
+
+    expect($html)->not->toContain('Your chats')->not->toContain('support\/conversations');
+});
+
+it('puts New chat on the left and History on the right', function () {
+    $html = liveWidgetHtml();
+
+    expect(strpos($html, '@click="newChat()"'))->toBeLessThan(strpos($html, 'showHistory()'));
+});
+
+it('reserves no blank band under the footer, and marks the footer so the Help button can rise above it', function () {
+    $html = liveWidgetHtml();
+
+    expect($html)
+        ->toContain('data-app-footer')
+        ->not->toContain('class="print:hidden pb-16"')
+        ->toContain(":style=\"{ bottom: 'calc(1.25rem + ' + lift + 'px)' }\"");
+});

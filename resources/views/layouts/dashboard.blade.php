@@ -49,7 +49,8 @@
                 {{ $slot }}
             </main>
 
-            <div @class(['print:hidden', 'pb-16' => config('support.ui_preview') || config('support.enabled')])>@include('partials.footer-app')</div>
+            {{-- data-app-footer: the Help button rises above this when it scrolls into view (no blank band is reserved under it) --}}
+            <div class="print:hidden" data-app-footer>@include('partials.footer-app')</div>
         </div>
     </div>
     {{-- Support assistant, visual preview only (SUPPORT_UI_PREVIEW). Scripted answers, no backend. --}}

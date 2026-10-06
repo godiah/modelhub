@@ -55,6 +55,12 @@
         'context' => $context,
         // The scripted answers (invented payments and all) are for the design preview only: never shipped in live mode
         'scenarios' => $live ? [] : PreviewScenarios::all(),
+        // Chat history (live only). The id placeholder is filled in by the browser.
+        'endpoints' => $live ? [
+            'list' => route('support.conversations.index'),
+            'show' => route('support.conversations.show', '__id__'),
+            'destroy' => route('support.conversations.destroy', '__id__'),
+        ] : null,
     ];
     $uid = 'support-'.\Illuminate\Support\Str::random(6);
 @endphp
@@ -69,6 +75,7 @@
 
     @if ($dock)
         <button type="button" x-ref="launcher" x-show="!open" x-cloak @click="open = true" aria-haspopup="dialog" aria-controls="{{ $uid }}"
+            :style="{ bottom: 'calc(1.25rem + ' + lift + 'px)' }"
             class="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-teal-700 py-3 pl-4 pr-5 font-secondary text-sm font-semibold text-white shadow-lg shadow-teal-900/20 transition hover:bg-teal-800 focus:outline-none focus-visible:ring-4 focus-visible:ring-teal-600/40">
             <x-icon name="chat-bubble-text" class="h-5 w-5" />{{ __('Help') }}
         </button>
@@ -107,14 +114,29 @@
             @endif
         </header>
 
+        {{-- History and New chat (live mode): earlier chats are kept for the member, like any chat assistant --}}
+        @if ($live)
+            <div x-show="state === 'ready'" class="flex items-center justify-between gap-2 border-b border-neutral-200/70 bg-white px-3 py-1.5">
+                <button type="button" @click="newChat()" :disabled="busy"
+                    class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-secondary text-[13px] font-medium text-teal-700 transition hover:bg-teal-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/30 disabled:cursor-not-allowed disabled:opacity-50">
+                    <x-icon name="plus" class="h-4 w-4" />{{ __('New chat') }}
+                </button>
+                <button type="button" @click="view === 'history' ? (view = 'chat') : showHistory()" :disabled="busy" :aria-pressed="view === 'history'"
+                    :class="view === 'history' ? 'bg-neutral-100 text-neutral-900' : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'"
+                    class="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 font-secondary text-[13px] font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300 disabled:cursor-not-allowed disabled:opacity-50">
+                    <x-icon name="clock" class="h-4 w-4" /><span x-text="view === 'history' ? '{{ __('Back to chat') }}' : '{{ __('History') }}'"></span>
+                </button>
+            </div>
+        @endif
+
         {{-- What the assistant can see of the page you are on, so its answers never feel like guesswork --}}
-        <p x-show="state === 'ready' && context.label" class="flex items-center gap-2 border-b border-neutral-200/70 bg-white/60 px-4 py-1.5 text-xs text-neutral-500">
+        <p x-show="state === 'ready' && view === 'chat' && context.label" class="flex items-center gap-2 border-b border-neutral-200/70 bg-white/60 px-4 py-1.5 text-xs text-neutral-500">
             <x-icon name="eye" class="h-3.5 w-3.5" />
             <span>{{ __('Looking at') }} <span class="font-medium text-neutral-700" x-text="context.label"></span></span>
         </p>
 
         {{-- Conversation --}}
-        <div x-show="state === 'ready'" x-ref="scroller" aria-live="polite" aria-relevant="additions"
+        <div x-show="state === 'ready' && view === 'chat'" x-ref="scroller" aria-live="polite" aria-relevant="additions"
             class="flex flex-1 flex-col gap-5 overflow-y-auto overscroll-contain px-4 py-5 [scrollbar-color:theme(colors.neutral.300)_transparent] [scrollbar-width:thin]">
             <template x-for="(m, i) in messages" :key="i">
                 <div>
@@ -174,7 +196,7 @@
         </div>
 
         {{-- Composer --}}
-        <form x-show="state === 'ready'" @submit.prevent="submit()" class="border-t border-neutral-200 bg-white px-4 pb-3 pt-3">
+        <form x-show="state === 'ready' && view === 'chat'" @submit.prevent="submit()" class="border-t border-neutral-200 bg-white px-4 pb-3 pt-3">
             <p x-show="guard" x-cloak role="alert" class="mb-2 flex items-start gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs leading-snug text-red-800">
                 <x-icon name="exclamation-circle" class="mt-px h-4 w-4 shrink-0" />
                 <span x-text="guard"></span>
@@ -193,6 +215,49 @@
             </div>
             <p class="mt-2 text-center text-xs leading-snug text-neutral-500">{{ __('AI can make mistakes. Please double-check important information.') }}</p>
         </form>
+
+        {{-- History: the member's earlier chats, newest first, grouped by day --}}
+        @if ($live)
+            <div x-show="state === 'ready' && view === 'history'" x-cloak class="flex flex-1 flex-col gap-1 overflow-y-auto px-2 py-3 [scrollbar-color:theme(colors.neutral.300)_transparent] [scrollbar-width:thin]">
+                <h3 class="px-2.5 pb-1 font-secondary text-xs font-semibold uppercase tracking-wide text-neutral-500">{{ __('Your chats') }}</h3>
+
+                <p x-show="chatsState === 'loading'" class="flex items-center gap-2 px-2.5 py-3 text-sm text-neutral-500"><x-spinner class="h-4 w-4 text-teal-600" />{{ __('Loading your chats…') }}</p>
+                <div x-show="chatsState === 'error'" x-cloak class="px-2.5 py-3 text-sm text-neutral-600">
+                    <p>{{ __("Couldn't load your chats.") }}</p>
+                    <button type="button" @click="loadChats()" class="mt-2 inline-flex items-center gap-1.5 font-medium text-teal-700 hover:underline"><x-icon name="arrow-path" class="h-4 w-4" />{{ __('Try again') }}</button>
+                </div>
+                <p x-show="chatsState === 'ready' && !chats.length" x-cloak class="px-2.5 py-3 text-sm text-neutral-500">{{ __('No earlier chats yet. Ask a question and it will appear here.') }}</p>
+                <p x-show="notice" x-cloak x-text="notice" class="mx-2.5 mb-1 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800"></p>
+
+                <template x-for="group in groups" :key="group.label">
+                    <div class="pt-2">
+                        <h4 class="px-2.5 pb-1 text-xs font-medium text-neutral-500" x-text="group.label"></h4>
+                        <template x-for="c in group.chats" :key="c.id">
+                            <div class="group relative">
+                                <div x-show="confirming !== c.id" class="flex items-center gap-1 rounded-lg" :class="c.id === conversationId ? 'bg-teal-50' : 'hover:bg-neutral-50'">
+                                    <button type="button" @click="openChat(c.id)" :disabled="opening === c.id"
+                                        class="min-w-0 flex-1 rounded-lg px-2.5 py-2 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600/30 disabled:opacity-60">
+                                        <span class="block truncate text-sm font-medium text-neutral-900" x-text="c.title"></span>
+                                        <span class="block text-xs text-neutral-500" x-text="chatTime(c.updated_at)"></span>
+                                    </button>
+                                    <button type="button" @click="confirming = c.id" aria-label="{{ __('Delete chat') }}"
+                                        class="mr-1 rounded-md p-1.5 text-neutral-400 opacity-60 transition hover:bg-neutral-100 hover:text-red-600 hover:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300">
+                                        <x-icon name="trash" class="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <div x-show="confirming === c.id" x-cloak class="flex items-center justify-between gap-2 rounded-lg bg-red-50 px-2.5 py-2">
+                                    <span class="min-w-0 truncate text-sm text-red-800">{{ __('Delete this chat?') }}</span>
+                                    <span class="flex shrink-0 gap-1.5">
+                                        <button type="button" @click="confirming = null" class="rounded-md px-2 py-1 text-xs font-medium text-neutral-700 hover:bg-white">{{ __('Keep') }}</button>
+                                        <button type="button" @click="archiveChat(c.id)" class="rounded-md bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700">{{ __('Delete') }}</button>
+                                    </span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        @endif
 
         {{-- Unavailable: kill switch or outage. Never a dead end: the same question goes to staff as a request. --}}
         <div x-show="state === 'unavailable'" x-cloak class="flex-1 overflow-y-auto px-4 py-6">
@@ -237,12 +302,6 @@
 @once
     <script>
         /**
-         * Alpine data for the support assistant widget. Two modes:
-         *  - scripted (the design preview and gallery): plays the answers it is given and makes no network calls
-         *  - live (SUPPORT_ENABLED): posts to ModelHub's /support/chat and reads the assistant's reply as it streams
-         * Message shape: { role, text, tool?, cards[], citations[], chips[] }.
-         */
-        /**
          * Turns the assistant's text (light Markdown) into safe HTML: bold, italics, inline code, bullet and numbered lists, headings,
          * and links (underlined, http/https only). The text is HTML-escaped FIRST and only then given tags, so nothing the model
          * writes can inject markup or a script. Styled inline so it needs no CSS rebuild. Half-written text (while streaming) is fine.
@@ -257,43 +316,122 @@
                 .replace(/(^|[^_\w])_([^_\s][^_\n]*?)_(?![_\w])/g, '$1<em>$2</em>')
                 .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">$1</a>');
 
+            const lines = String(text == null ? '' : text).replace(/\r\n/g, '\n').split('\n').map((l) => l.trimEnd());
+            // A list line: "- x", "* x", "• x", "1. x" or "1) x", with how far it is indented (that is what makes a bullet belong to the item above)
+            const itemOf = (line) => {
+                const m = line.match(/^(\s*)([-*•]|\d+[.)])\s+(.*)$/);
+                return m ? { indent: m[1].replace(/\t/g, '    ').length, ordered: /\d/.test(m[2]), number: parseInt(m[2], 10), body: m[3] } : null;
+            };
+            const nextItem = (from) => {
+                for (let j = from + 1; j < lines.length; j++) if (lines[j].trim()) return itemOf(lines[j]);
+                return null;
+            };
+            const newList = (item) => ({ tag: item.ordered ? 'ol' : 'ul', indent: item.indent, start: item.ordered ? item.number : 1, items: [] });
+
             const out = [];
             let para = [];
-            let list = null;
+            let root = null;   // the outermost list being built
+            let stack = [];    // the lists currently open, outermost first (a nested list sits inside the last item of the one before it)
+
             const flushPara = () => {
                 if (para.length) out.push('<p style="margin:0 0 .5rem">' + para.map(inline).join('<br>') + '</p>');
                 para = [];
             };
-            const flushList = () => {
-                if (list) out.push('<' + list.tag + ' style="list-style:' + list.style + ';padding-left:1.25rem;margin:0 0 .5rem">' + list.items.map((i) => '<li style="margin:.15rem 0">' + inline(i) + '</li>').join('') + '</' + list.tag + '>');
-                list = null;
+            const renderList = (list, nested) => {
+                const start = list.tag === 'ol' && list.start > 1 ? ' start="' + list.start + '"' : '';
+                const style = 'list-style:' + (list.tag === 'ol' ? 'decimal' : 'disc') + ';padding-left:1.25rem;margin:' + (nested ? '.15rem 0 .25rem' : '0 0 .5rem');
+                return '<' + list.tag + start + ' style="' + style + '">'
+                    + list.items.map((i) => '<li style="margin:.15rem 0">' + i.html + i.children.map((c) => renderList(c, true)).join('') + '</li>').join('')
+                    + '</' + list.tag + '>';
             };
-            const item = (tag, style, body) => {
-                // A bullet that is only a bold label ("**Standard licence:**") is a sub-heading for the bullets after it
-                if (tag === 'ul' && /^\*\*[^*]+:\*\*$/.test(body.trim())) {
-                    flushPara(); flushList();
-                    out.push('<p style="margin:.25rem 0 .25rem">' + inline(body.trim()) + '</p>');
-                    return;
-                }
-                flushPara();
-                if (!list || list.tag !== tag) { flushList(); list = { tag, style, items: [] }; }
-                list.items.push(body);
+            const flushList = () => {
+                if (root) out.push(renderList(root, false));
+                root = null;
+                stack = [];
+            };
+            const attach = (list) => {   // put a new list inside the last item of the list that is open
+                const parent = stack[stack.length - 1].items[stack[stack.length - 1].items.length - 1];
+                parent.children.push(list);
+                stack.push(list);
             };
 
-            for (const raw of String(text == null ? '' : text).replace(/\r\n/g, '\n').split('\n')) {
-                const line = raw.trimEnd();
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
                 let m;
-                if (!line.trim()) { flushPara(); flushList(); }
-                else if ((m = line.match(/^\s*[-*\u2022]\s+(.*)$/))) item('ul', 'disc', m[1]);
-                else if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) item('ol', 'decimal', m[1]);
-                else if ((m = line.match(/^#{1,6}\s+(.*)$/))) { flushPara(); flushList(); out.push('<p style="margin:0 0 .5rem"><strong>' + inline(m[1]) + '</strong></p>'); }
-                else { flushList(); para.push(line); }
+
+                // A blank line does NOT end a list: models often put one between numbered items, and the numbering must carry on
+                if (! line.trim()) { if (! root) flushPara(); continue; }
+
+                const item = itemOf(line);
+                if (item) {
+                    // A bullet that is only a bold label ("**Standard licence:**") followed by bullets at the SAME level is a sub-heading
+                    const following = nextItem(i);
+                    if (! item.ordered && /^\*\*[^*]+:\*\*$/.test(item.body.trim()) && following && ! following.ordered && following.indent === item.indent) {
+                        flushPara(); flushList();
+                        out.push('<p style="margin:.25rem 0 .25rem">' + inline(item.body.trim()) + '</p>');
+                        continue;
+                    }
+
+                    flushPara();
+                    while (stack.length && stack[stack.length - 1].indent > item.indent) stack.pop();   // back out of deeper lists
+                    let list = stack[stack.length - 1];
+
+                    if (! list) {                                    // no list open: start one
+                        flushList();
+                        list = root = newList(item);
+                        stack = [root];
+                    } else if (list.indent < item.indent) {          // more indented than the open list: a list inside the last item
+                        list = newList(item);
+                        attach(list);
+                    } else if (list.tag !== (item.ordered ? 'ol' : 'ul')) {   // same level, other kind of list
+                        stack.pop();
+                        list = newList(item);
+                        if (stack.length) attach(list); else { flushList(); root = list; stack = [list]; }
+                    }
+                    list.items.push({ html: inline(item.body), children: [] });
+                } else if ((m = line.match(/^#{1,6}\s+(.*)$/))) {
+                    flushPara(); flushList();
+                    out.push('<p style="margin:0 0 .5rem"><strong>' + inline(m[1]) + '</strong></p>');
+                } else if (root && /^\s/.test(line)) {               // an indented line under a list item carries on that item
+                    const open = stack[stack.length - 1];
+                    open.items[open.items.length - 1].html += '<br>' + inline(line.trim());
+                } else {
+                    flushList();
+                    para.push(line);
+                }
             }
             flushPara(); flushList();
             return out.join('');
         };
         // end supportRender
 
+        /** Groups chats (newest first) under Today / Yesterday / Previous 7 days / Earlier, by the member's own calendar days. */
+        window.supportGroupChats = function (chats, now) {
+            const day = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+            const today = day(now), DAY = 86400000;
+            const buckets = [['Today', []], ['Yesterday', []], ['Previous 7 days', []], ['Earlier', []]];
+            for (const c of chats || []) {
+                const ago = Math.round((today - day(new Date(c.updated_at))) / DAY);
+                buckets[ago <= 0 ? 0 : ago === 1 ? 1 : ago <= 7 ? 2 : 3][1].push(c);
+            }
+            return buckets.filter(([, list]) => list.length).map(([label, list]) => ({ label, chats: list }));
+        };
+
+        /** "10:16" for today, otherwise "6 Oct" (and the year when it is not this year). */
+        window.supportChatTime = function (iso, now) {
+            const d = new Date(iso);
+            if (isNaN(d)) return '';
+            if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', ...(d.getFullYear() !== now.getFullYear() ? { year: 'numeric' } : {}) });
+        };
+        // end supportGroupChats
+
+        /**
+         * Alpine data for the support assistant widget. Two modes:
+         *  - scripted (the design preview and gallery): plays the answers it is given and makes no network calls
+         *  - live (SUPPORT_ENABLED): posts to ModelHub's /support/chat and reads the assistant's reply as it streams
+         * Message shape: { role, text, tool?, cards[], citations[], chips[] }.
+         */
         window.supportChat = function (cfg) {
             const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
             const tones = {
@@ -319,13 +457,22 @@
                 input: cfg.input || '',
                 guard: '',
                 busy: false,
+                // How far the Help button is raised so it never sits over the footer (0 until the footer scrolls into view)
+                lift: 0,
+                // Chat history (live mode): which screen is showing, the member's chats, and what is in flight
+                view: 'chat',
+                endpoints: cfg.endpoints,
+                chats: [],
+                chatsState: 'idle',
+                confirming: null,
+                opening: null,
+                notice: '',
                 reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
 
                 init() {
-                    this.messages = cfg.transcript && cfg.transcript.length
-                        ? cfg.transcript
-                        : [{ role: 'assistant', text: this.context.greeting, tool: null, cards: this.context.cards || [], citations: [], chips: this.context.chips || [], first: true }];
+                    this.messages = cfg.transcript && cfg.transcript.length ? cfg.transcript : [this.greeting()];
                     if (this.live) this.restore();
+                    if (this.mode === 'dock') this.followFooter();
                     if (this.input) this.check();
                     this.$watch('open', (isOpen) => {
                         if (isOpen) this.$nextTick(() => { this.scroll(); if (this.$refs.input) this.$refs.input.focus(); });
@@ -334,6 +481,117 @@
                 },
 
                 tone(name) { return tones[name] || tones.neutral; },
+
+                // Keep the launcher just above the footer once the footer scrolls into view, instead of reserving a blank band
+                // under it. Any scroll (the page or an inner container) and any resize re-measures, at most once per frame.
+                followFooter() {
+                    const footer = document.querySelector('[data-app-footer]');
+                    if (! footer) return;
+                    let queued = false;
+                    const measure = () => {
+                        queued = false;
+                        const visible = window.innerHeight - footer.getBoundingClientRect().top;  // how much of the footer is on screen
+                        this.lift = Math.round(Math.min(Math.max(visible, 0), window.innerHeight / 2));
+                    };
+                    const queue = () => { if (! queued) { queued = true; requestAnimationFrame(measure); } };
+                    document.addEventListener('scroll', queue, { passive: true, capture: true });
+                    window.addEventListener('resize', queue);
+                    measure();
+                },
+
+                greeting() {
+                    return { role: 'assistant', text: this.context.greeting, tool: null, cards: this.context.cards || [], citations: [], chips: this.context.chips || [], first: true };
+                },
+
+                get groups() { return window.supportGroupChats(this.chats, new Date()); },
+                chatTime(iso) { return window.supportChatTime(iso, new Date()); },
+
+                // ---- chat history (live mode) ------------------------------------------------------------------------
+
+                headers() {
+                    return { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': this.csrf() };
+                },
+
+                url(kind, id) { return this.endpoints[kind].replace('__id__', encodeURIComponent(id)); },
+
+                // A new chat: back to the greeting and the suggestions. The chat you leave stays in History.
+                newChat() {
+                    if (this.busy) return;
+                    this.conversationId = null;
+                    this.messages = [this.greeting()];
+                    this.input = '';
+                    this.guard = '';
+                    this.view = 'chat';
+                    this.persist();
+                    this.$nextTick(() => { if (this.$refs.input) this.$refs.input.focus(); });
+                },
+
+                async showHistory() {
+                    if (this.busy) return;
+                    this.view = 'history';
+                    this.confirming = null;
+                    this.notice = '';
+                    await this.loadChats();
+                },
+
+                async loadChats() {
+                    this.chatsState = 'loading';
+                    try {
+                        const response = await fetch(this.url('list'), { credentials: 'same-origin', headers: this.headers() });
+                        if (response.status === 503) { this.state = 'unavailable'; return; }
+                        if (! response.ok) throw new Error('list failed');
+                        this.chats = (await response.json()).conversations || [];
+                        this.chatsState = 'ready';
+                    } catch (e) {
+                        this.chatsState = 'error';
+                    }
+                },
+
+                // Open an earlier chat: its messages (with the citations its answers were built from) replace the screen, and the next
+                // message carries on in that same chat.
+                async openChat(id) {
+                    if (this.busy || this.opening) return;
+                    this.opening = id;
+                    this.notice = '';
+                    try {
+                        const response = await fetch(this.url('show', id), { credentials: 'same-origin', headers: this.headers() });
+                        if (response.status === 404) {
+                            this.chats = this.chats.filter((c) => c.id !== id);
+                            this.notice = "That chat isn't available any more.";
+                            return;
+                        }
+                        if (! response.ok) throw new Error('open failed');
+                        const chat = await response.json();
+                        this.conversationId = chat.id;
+                        this.messages = [{ ...this.greeting(), chips: [] }, ...(chat.messages || []).map((m) => ({
+                            role: m.role, text: m.text, tool: null, cards: [], chips: [],
+                            citations: (m.citations || []).map((c) => ({ title: c.title, updated: c.updated })),
+                        }))];
+                        this.view = 'chat';
+                        this.persist();
+                        this.scroll();
+                    } catch (e) {
+                        this.notice = "Couldn't open that chat. Try again.";
+                    } finally {
+                        this.opening = null;
+                    }
+                },
+
+                async archiveChat(id) {
+                    this.confirming = null;
+                    try {
+                        const response = await fetch(this.url('destroy', id), { method: 'DELETE', credentials: 'same-origin', headers: this.headers() });
+                        if (! response.ok && response.status !== 404) throw new Error('delete failed');
+                        this.chats = this.chats.filter((c) => c.id !== id);
+                        if (id === this.conversationId) {  // the chat that was open is gone: start from a clean one
+                            this.conversationId = null;
+                            this.messages = [this.greeting()];
+                            this.persist();
+                        }
+                    } catch (e) {
+                        this.notice = "Couldn't delete that chat. Try again.";
+                    }
+                },
 
                 // Stops a PIN, an SMS code or a card number leaving the browser. Heuristics are deliberately narrow so an
                 // amount like "Ksh1500" or a year is never blocked; the real guard needs tuning against real messages.
@@ -529,7 +787,7 @@
                         const saved = JSON.parse(sessionStorage.getItem(this.storageKey()) || 'null');
                         if (! saved || ! Array.isArray(saved.turns) || ! saved.turns.length) return;
                         this.conversationId = saved.conversationId || null;
-                        const greeting = { ...this.messages[0], chips: [] };
+                        const greeting = { ...this.messages[0], chips: [] };  // (kept as it was: the greeting without its suggestions)
                         this.messages = [greeting, ...saved.turns.map((m) => ({ role: m.role, text: m.text, tool: null, cards: [], citations: Array.isArray(m.citations) ? m.citations : [], chips: [] }))];
                     } catch (e) { /* ignore a corrupt value */ }
                 },
