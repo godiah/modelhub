@@ -1,0 +1,224 @@
+openapi: 3.1.0
+info:
+  title: ModelHub support read API
+  version: 1.0.0
+  description: >
+    What the support assistant (the modelhub-support service) may read about a member's OWN records. Read-only, GET only, about the member named
+    by the signed read claim: no id in the address ever selects whose data is returned. The same file is kept in both repositories
+    (ModelHub: docs/support-read-api.openapi.yaml; modelhub-support: contracts/modelhub-support-api.openapi.yaml). Each repo's tests hold its
+    side to it, and both pin the file's hash, so changing it means changing both on purpose.
+
+
+    Every call carries (1) a signature made with the reads secret: X-Support-Key-Id, X-Support-Timestamp (unix seconds, 60 s of skew),
+    X-Support-Nonce (used once), X-Support-Signature = hex HMAC-SHA256 over METHOD, path with query, timestamp, nonce and the SHA-256 of the
+    body (empty), joined by newlines; and (2) X-Support-Read-Claim, a 60-second Ed25519 token with audience support-reads and scope
+    support:read:self. Whatever fails, the caller sees only a status and one fixed word (Error), never which check failed.
+servers:
+  - url: /api/support/v1
+paths:
+  /ping:
+    get:
+      summary: Prove the plumbing without reading any record
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/Ping"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+  /withdrawals:
+    get:
+      summary: The member's withdrawals, those needing attention first, at most three, with a count of all
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/WithdrawalList"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+  /withdrawals/{reference}:
+    get:
+      summary: One withdrawal by reference. Someone else's, a missing and a malformed reference all answer 404 not_found, identically.
+      parameters: [{name: reference, in: path, required: true, schema: {type: string}}]
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/WithdrawalOne"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+  /payments:
+    get:
+      summary: The member's payments (purchases and job funding), needing attention first, at most three, with a count of all
+      parameters:
+        - {name: mpesa_code, in: query, required: false, schema: {type: string}, description: "Finds only the member's own payment with this M-Pesa receipt; its own, lower rate limit"}
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/PaymentList"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+  /payments/{reference}:
+    get:
+      summary: One payment by reference (same 404 rule as withdrawals)
+      parameters: [{name: reference, in: path, required: true, schema: {type: string}}]
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/PaymentOne"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+  /balance:
+    get:
+      summary: Where the member stands on withdrawing, by the same rules a withdrawal request is checked against
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/BalanceOne"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+  /licences:
+    get:
+      summary: The member's licences, in force first, at most five, with counts
+      parameters:
+        - {name: q, in: query, required: false, schema: {type: string}, description: "Up to three words (letters and digits, two or more characters) that must all appear in the model title, among the member's own licences only"}
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/LicenceList"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+components:
+  responses:
+    Refused:
+      description: Refused. The word is fixed; the reason is in ModelHub's log only. 404 also means the read is switched off.
+      content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error: {type: string, enum: [unauthorized, forbidden, not_found, rate_limited, unavailable]}
+    Ping:
+      type: object
+      additionalProperties: false
+      required: [status, as_of]
+      properties:
+        status: {type: string, enum: [ok]}
+        as_of: {type: string}
+    Withdrawal:
+      type: object
+      additionalProperties: false
+      required: [reference, status, status_label, is_open, amount_minor, fee_minor, net_minor, currency, amount_display, net_display, phone_last3, requested_at, approved_at, completed_at, receipt, reason, not_confirmed, not_confirmed_after_hours]
+      properties:
+        reference: {type: string}
+        status: {type: string, enum: [requested, processing, paid, failed, rejected, cancelled]}
+        status_label: {type: string}
+        is_open: {type: boolean}
+        amount_minor: {type: integer}
+        fee_minor: {type: integer}
+        net_minor: {type: integer}
+        currency: {type: string}
+        amount_display: {type: string}
+        net_display: {type: string}
+        phone_last3: {type: string}
+        requested_at: {type: [string, "null"]}
+        approved_at: {type: [string, "null"]}
+        completed_at: {type: [string, "null"]}
+        receipt: {type: [string, "null"]}
+        reason: {type: [string, "null"]}
+        not_confirmed: {type: boolean}
+        not_confirmed_after_hours: {type: integer}
+    WithdrawalList:
+      type: object
+      additionalProperties: false
+      required: [data, total, as_of]
+      properties:
+        data: {type: array, items: {$ref: "#/components/schemas/Withdrawal"}}
+        total: {type: integer}
+        as_of: {type: string}
+    WithdrawalOne:
+      type: object
+      additionalProperties: false
+      required: [data, as_of]
+      properties:
+        data: {$ref: "#/components/schemas/Withdrawal"}
+        as_of: {type: string}
+    Payment:
+      type: object
+      additionalProperties: false
+      required: [reference, purpose, status, status_label, amount_minor, amount_display, received_display, currency, tier, tier_label, phone_last3, requested_at, expires_at, completed_at, pending_past_expiry, receipt, reason, licence]
+      properties:
+        reference: {type: string}
+        purpose: {type: string, enum: [model_sale, escrow]}
+        status: {type: string, enum: [pending, succeeded, failed, cancelled, expired, review, refunded]}
+        status_label: {type: string}
+        amount_minor: {type: integer}
+        amount_display: {type: string}
+        received_display: {type: [string, "null"]}
+        currency: {type: string}
+        tier: {type: [string, "null"]}
+        tier_label: {type: [string, "null"]}
+        phone_last3: {type: string}
+        requested_at: {type: [string, "null"]}
+        expires_at: {type: [string, "null"]}
+        completed_at: {type: [string, "null"]}
+        pending_past_expiry: {type: boolean}
+        receipt: {type: [string, "null"]}
+        reason: {type: [string, "null"]}
+        licence: {type: string, enum: [active, ended, none, not_applicable]}
+    PaymentList:
+      type: object
+      additionalProperties: false
+      required: [data, total, as_of]
+      properties:
+        data: {type: array, items: {$ref: "#/components/schemas/Payment"}}
+        total: {type: integer}
+        as_of: {type: string}
+    PaymentOne:
+      type: object
+      additionalProperties: false
+      required: [data, as_of]
+      properties:
+        data: {$ref: "#/components/schemas/Payment"}
+        as_of: {type: string}
+    OpenWithdrawal:
+      type: object
+      additionalProperties: false
+      required: [reference, status, status_label]
+      properties:
+        reference: {type: string}
+        status: {type: string}
+        status_label: {type: string}
+    Balance:
+      type: object
+      additionalProperties: false
+      required: [available_minor, pending_minor, min_withdrawal_minor, fee_minor, max_per_withdrawal_minor, withdrawable_minor, can_withdraw, blockers, open_withdrawal, held_payments, held_minor, overdue_payments, next_release_at, available_display, pending_display, min_withdrawal_display, fee_display, max_per_withdrawal_display, withdrawable_display, held_display]
+      properties:
+        available_minor: {type: integer}
+        pending_minor: {type: integer}
+        min_withdrawal_minor: {type: integer}
+        fee_minor: {type: integer}
+        max_per_withdrawal_minor: {type: integer}
+        withdrawable_minor: {type: integer}
+        can_withdraw: {type: boolean}
+        blockers: {type: array, items: {type: string, enum: [open_withdrawal, below_minimum, nothing_available]}}
+        open_withdrawal: {oneOf: [{type: "null"}, {$ref: "#/components/schemas/OpenWithdrawal"}]}
+        held_payments: {type: integer}
+        held_minor: {type: integer}
+        overdue_payments: {type: integer}
+        next_release_at: {type: [string, "null"]}
+        available_display: {type: string}
+        pending_display: {type: string}
+        min_withdrawal_display: {type: string}
+        fee_display: {type: string}
+        max_per_withdrawal_display: {type: string}
+        withdrawable_display: {type: string}
+        held_display: {type: string}
+    BalanceOne:
+      type: object
+      additionalProperties: false
+      required: [data, as_of]
+      properties:
+        data: {$ref: "#/components/schemas/Balance"}
+        as_of: {type: string}
+    Licence:
+      type: object
+      additionalProperties: false
+      required: [tier, tier_label, title, status, issued_at, ended_at, reason, price_display]
+      properties:
+        tier: {type: string}
+        tier_label: {type: string}
+        title: {type: string, description: "Written by the seller: shortened, and only ever drawn as plain text in a card, never in stored message text"}
+        status: {type: string, enum: [active, ended]}
+        issued_at: {type: [string, "null"]}
+        ended_at: {type: [string, "null"]}
+        reason: {type: [string, "null"]}
+        price_display: {type: string}
+    LicenceList:
+      type: object
+      additionalProperties: false
+      required: [data, total, active, matching, as_of]
+      properties:
+        data: {type: array, items: {$ref: "#/components/schemas/Licence"}}
+        total: {type: integer}
+        active: {type: integer}
+        matching: {type: [string, "null"]}
+        as_of: {type: string}
