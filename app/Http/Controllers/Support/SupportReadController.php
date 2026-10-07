@@ -171,11 +171,20 @@ class SupportReadController extends Controller
         return response()->json(['data' => $summary, 'as_of' => now()->toIso8601String()]);
     }
 
-    /** The licences the member holds, those in force first and the newest first within each, at most five, with a count of all. */
+    /**
+     * The licences the member holds, those in force first and the newest first within each, at most five, with a count of all.
+     * `?q=` narrows them to those whose model title contains every word given (up to three), among THEIR licences only: it can find nothing
+     * of anyone else's, and an empty or odd value is simply no filter.
+     */
     public function licences(Request $request): JsonResponse
     {
         $member = $this->member($request);
         $query = IssuedLicence::where('user_id', $member->getKey());
+
+        $words = $this->titleWords($request->query('q'));
+        foreach ($words as $word) {
+            $query->where('product_title', 'like', '%'.addcslashes($word, '\\%_').'%');
+        }
 
         $shown = (clone $query)->with('product')->orderByRaw('revoked_at IS NOT NULL')->latest('issued_at')->latest('id')->limit(5)->get();
 
@@ -183,7 +192,25 @@ class SupportReadController extends Controller
             'data' => LicenceResource::collection($shown)->resolve(),
             'total' => $query->count(),
             'active' => (clone $query)->whereNull('revoked_at')->count(),
+            'matching' => $words === [] ? null : implode(' ', $words),
             'as_of' => now()->toIso8601String(),
         ]);
+    }
+
+    /**
+     * The words of a title search: letters and digits only, each at least two characters, three at most. Anything else (wildcards, quotes,
+     * very long text, an array) is dropped rather than refused, so a clumsy search finds less, never more.
+     *
+     * @return list<string>
+     */
+    private function titleWords(mixed $raw): array
+    {
+        if (! is_string($raw)) {
+            return [];
+        }
+
+        $words = preg_split('/[^\p{L}\p{N}]+/u', mb_substr($raw, 0, 60), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        return array_slice(array_values(array_filter($words, fn (string $w) => mb_strlen($w) >= 2)), 0, 3);
     }
 }

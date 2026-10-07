@@ -91,3 +91,51 @@ it('can be switched off on its own', function () {
 
     readLicences($this, $this->member)->assertNotFound()->assertExactJson(['error' => 'not_found']);
 });
+
+function searchLicences(object $test, User $member, string $query): TestResponse
+{
+    return call($test, readCall($path = '/api/support/v1/licences?'.$query, ['claim' => claimFor($member)]), $path);
+}
+
+it('narrows to the licences whose title has every word asked for, in either case, and says what it matched', function () {
+    grantTo($this->member, 'Robot Walker Rigged');
+    grantTo($this->member, 'Castle Door');
+    grantTo($this->member, 'Robot Arm');
+
+    $one = searchLicences($this, $this->member, 'q=ROBOT')->assertOk();
+    $two = searchLicences($this, $this->member, 'q=robot+walker')->assertOk();
+
+    expect($one->json('total'))->toBe(2)->and($one->json('matching'))->toBe('ROBOT')
+        ->and($two->json('total'))->toBe(1)->and($two->json('data.0.title'))->toBe('Robot Walker Rigged')
+        ->and($two->json('matching'))->toBe('robot walker');
+});
+
+it('finds nothing of anyone else\'s by title, and says so as plainly as for a title that does not exist', function () {
+    grantTo(User::factory()->create(), 'Secret Spaceship');
+    grantTo($this->member, 'Mine');
+
+    $theirs = searchLicences($this, $this->member, 'q=spaceship');
+    $made_up = searchLicences($this, $this->member, 'q=nonexistentthing');
+
+    expect($theirs->json('total'))->toBe(0)->and($theirs->json('data'))->toBe([])
+        ->and($theirs->json('data'))->toBe($made_up->json('data'))->and($theirs->json('total'))->toBe($made_up->json('total'));
+});
+
+it('takes only letters and digits from the search: wildcards and odd values never widen it past the member\'s own licences', function (string $query) {
+    grantTo($this->member, 'Plain model');
+    grantTo(User::factory()->create(), 'Plain model too');
+
+    $response = searchLicences($this, $this->member, $query)->assertOk();
+
+    // odd input never widens: at most the member's own one licence, never the other member's
+    expect($response->json('total'))->toBeLessThanOrEqual(1)
+        ->and(collect($response->json('data'))->pluck('title')->diff(['Plain model'])->all())->toBe([]);
+})->with(['q=%25', 'q=_', 'q=%27%20OR%201%3D1%20--', 'q%5B%5D=a', 'q=', 'q=a']);
+
+it('uses at most three words and ignores one-letter words', function () {
+    grantTo($this->member, 'Alpha Beta Gamma Delta');
+
+    $response = searchLicences($this, $this->member, 'q=alpha+beta+gamma+nomatch+x')->assertOk();
+
+    expect($response->json('matching'))->toBe('alpha beta gamma')->and($response->json('total'))->toBe(1);
+});
