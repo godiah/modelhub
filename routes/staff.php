@@ -25,6 +25,8 @@ use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\AdminStoreController;
 use App\Http\Controllers\Admin\AdminSupportAttachmentController;
+use App\Http\Controllers\Admin\AdminSupportReplyController;
+use App\Http\Controllers\Admin\AdminSupportServiceLevelsController;
 use App\Http\Controllers\Admin\AdminSupportTicketController;
 use App\Http\Controllers\Admin\AdminSupportTranscriptController;
 use App\Http\Controllers\Admin\Auth\StaffLoginController;
@@ -124,6 +126,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::patch('stores/{seller}/commission', [AdminStoreController::class, 'commission'])->middleware('super-admin')->name('stores.commission');
+
+        // These come before support/{ticket}, which would otherwise take "replies" and "service-levels" for a ticket reference
+        Route::middleware(['can:manage support tickets', 'throttle:60,1'])->prefix('support/replies')->name('support.replies.')->group(function () {
+            Route::get('/', [AdminSupportReplyController::class, 'index'])->name('index');
+            Route::post('/', [AdminSupportReplyController::class, 'store'])->name('store');
+            Route::put('{reply}', [AdminSupportReplyController::class, 'update'])->whereNumber('reply')->name('update');
+            Route::delete('{reply}', [AdminSupportReplyController::class, 'destroy'])->whereNumber('reply')->name('destroy');
+        });
+        Route::get('support/service-levels', [AdminSupportServiceLevelsController::class, 'show'])->middleware('can:view support tickets')->name('support.levels');
 
         Route::middleware('can:view support tickets')->group(function () {
             Route::get('support', [AdminSupportTicketController::class, 'index'])->name('support.tickets.index');

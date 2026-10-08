@@ -8,10 +8,12 @@ use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\SellerProfile;
 use App\Models\Staff;
+use App\Models\SupportTicket;
 use App\Models\User;
 use App\Services\Marketplace\ProductRatingService;
 use App\Services\Marketplace\ProductReviewService;
 use App\Services\Marketplace\SellerOnboardingService;
+use App\Services\Support\Tickets\TicketService;
 use App\Support\Staff\BulkActions;
 use App\Support\Staff\StaffAudit;
 use Illuminate\Database\Eloquent\Model;
@@ -31,6 +33,7 @@ class BulkActionService
         protected MemberManagementService $members,
         protected ProjectModerationService $projects,
         protected StaffManagementService $staff,
+        protected TicketService $tickets,
     ) {}
 
     /**
@@ -88,6 +91,7 @@ class BulkActionService
             'review.dismiss' => $this->dismissReports($item, $actor),
             'review.hide' => $this->hideReview($item, $actor, $reason),
             'dispute.assign' => $this->assignDispute($item, $actor),
+            'support.assign' => $this->assignTicket($item, $actor),
             'member.suspend' => $this->members->suspend($item, $actor, $reason),
             'member.reinstate' => $this->members->reinstate($item, $actor),
             'project.takedown' => $this->projects->takeDown($item, $actor, $reason),
@@ -174,6 +178,26 @@ class BulkActionService
         return null;
     }
 
+    /** Like disputes: a request a colleague is already handling is left to them, and one that is finished is not taken on. */
+    private function assignTicket(SupportTicket $ticket, Staff $actor): ?string
+    {
+        if (! $ticket->status->isActive()) {
+            return 'It is already finished.';
+        }
+
+        if ($ticket->assignee_id === $actor->id) {
+            return 'You are already handling it.';
+        }
+
+        if ($ticket->assignee_id !== null) {
+            return ($ticket->assignee?->name ?? 'A colleague').' is already handling it.';
+        }
+
+        $this->tickets->assign($ticket, $actor, $actor);
+
+        return null;
+    }
+
     private function reactivate(Staff $account): ?string
     {
         if ($account->is_active) {
@@ -192,6 +216,7 @@ class BulkActionService
             $item instanceof SellerProfile => $item->display_name,
             $item instanceof ProductReview => 'Review of "'.($item->product?->title ?? 'a model').'"',
             $item instanceof JobPaymentDispute => 'Dispute #'.$item->id.' · '.($item->cancellation?->engagement?->application?->job?->title ?? 'a project'),
+            $item instanceof SupportTicket => $item->reference,
             $item instanceof User, $item instanceof Staff => $item->name,
             default => '#'.$item->getKey(),
         };

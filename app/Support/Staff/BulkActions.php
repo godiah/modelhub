@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\SellerProfile;
 use App\Models\Staff;
+use App\Models\SupportTicket;
 use App\Models\User;
 
 /**
@@ -34,6 +35,7 @@ final class BulkActions
             'review.dismiss' => ['label' => 'Dismiss reports', 'noun' => 'review|reviews', 'past' => 'cleared of reports', 'permission' => 'moderate reviews', 'reason' => null, 'tone' => 'primary', 'model' => ProductReview::class, 'with' => ['product', 'author']],
             'review.hide' => ['label' => 'Hide reviews', 'noun' => 'review|reviews', 'past' => 'hidden', 'permission' => 'moderate reviews', 'reason' => 'Why are these reviews hidden? The authors are shown this.', 'tone' => 'danger', 'model' => ProductReview::class, 'with' => ['product', 'author']],
             'dispute.assign' => ['label' => 'Assign to me', 'noun' => 'dispute|disputes', 'past' => 'taken on', 'permission' => 'resolve disputes', 'reason' => null, 'tone' => 'primary', 'model' => JobPaymentDispute::class, 'with' => ['cancellation.engagement.application.job:id,title', 'assignedAdmin:id,name']],
+            'support.assign' => ['label' => 'Assign to me', 'noun' => 'request|requests', 'past' => 'taken on', 'permission' => 'manage support tickets', 'reason' => null, 'tone' => 'primary', 'model' => SupportTicket::class, 'with' => ['assignee:id,name']],
             'member.suspend' => ['label' => 'Suspend', 'noun' => 'member|members', 'past' => 'suspended', 'permission' => 'manage members', 'reason' => 'Why are these accounts suspended? They are emailed this.', 'tone' => 'danger', 'model' => User::class, 'with' => []],
             'member.reinstate' => ['label' => 'Reinstate', 'noun' => 'member|members', 'past' => 'reinstated', 'permission' => 'manage members', 'reason' => null, 'tone' => 'primary', 'model' => User::class, 'with' => []],
             'project.takedown' => ['label' => 'Take down', 'noun' => 'project|projects', 'past' => 'taken down', 'permission' => 'moderate projects', 'reason' => 'Why are these projects taken down? The posters are shown this.', 'tone' => 'danger', 'model' => ModelJob::class, 'with' => ['user']],
@@ -53,6 +55,7 @@ final class BulkActions
         'sellers' => ['seller.approve', 'seller.reject'],
         'reviews' => ['review.dismiss', 'review.hide'],
         'disputes' => ['dispute.assign'],
+        'tickets' => ['support.assign'],
         'notifications' => ['notification.read'],
     ];
 

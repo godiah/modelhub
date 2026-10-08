@@ -19,6 +19,7 @@ use App\Models\ReviewReport;
 use App\Models\SellerProfile;
 use App\Models\Staff;
 use App\Models\StaffActivity;
+use App\Models\SupportTicket;
 use App\Models\User;
 use App\Models\WishlistItem;
 use App\Support\Money;
@@ -137,6 +138,17 @@ class StaffDashboardService
                 });
         }
 
+        if ($staff->can('view support tickets')) {
+            $count = StaffMenu::count('tickets');
+            $late = SupportTicket::needingStaff()->where('created_at', '<=', $limit)->count();
+            $queues[] = ['key' => 'tickets', 'label' => 'Requests', 'title' => 'Support requests', 'icon' => 'inbox', 'count' => $count, 'late' => $late, 'oldest' => $this->oldest(SupportTicket::needingStaff()->min('created_at')), 'url' => route('admin.support.tickets.index')];
+            $overdue += $late;
+
+            // Never the member's own words here: who, how urgent and who has it. The words are on the ticket.
+            SupportTicket::with(['requester:id,name', 'assignee:id,name'])->needingStaff()->orderBy('created_at')->limit(self::PER_QUEUE)->get()
+                ->each(fn (SupportTicket $ticket) => $items->push($this->item('inbox', 'Support request', $ticket->reference.' · '.__($ticket->category->label()), ($ticket->requester?->name ?? __('A deleted account')).' · '.__($ticket->severity->label()).' · '.($ticket->assignee ? ($ticket->assignee->is($staff) ? __('You have it') : __(':name has it', ['name' => $ticket->assignee->name])) : __('Nobody has it yet')), $ticket->created_at, route('admin.support.tickets.show', $ticket), $ticket->isOverdue() ? 'Overdue' : ($ticket->assignee_id === null ? 'Unassigned' : null))));
+        }
+
         if ($staff->can('refund payments')) {
             $count = StaffMenu::count('payments');
             $late = Payment::where('status', PaymentStatus::Review)->where('completed_at', '<=', $limit)->count();
@@ -187,7 +199,7 @@ class StaffDashboardService
 
     /* ---------------------------------------------------------------- your work */
 
-    /** @return array{disputes: Collection, week: array<string, int>, recent: Collection} */
+    /** @return array{disputes: Collection, tickets: Collection, week: array<string, int>, recent: Collection} */
     private function myWork(Staff $staff): array
     {
         // Two weeks of this person's decisions: this week for the numbers, last week for the trend
@@ -198,6 +210,9 @@ class StaffDashboardService
         return [
             'disputes' => $staff->can('view disputes')
                 ? JobPaymentDispute::where('admin_assigned', $staff->id)->where('status', DisputeStatus::UnderReview)->with('cancellation.engagement.application.job:id,title')->latest()->limit(5)->get()
+                : collect(),
+            'tickets' => $staff->can('view support tickets')
+                ? SupportTicket::active()->where('assignee_id', $staff->id)->with('requester:id,name')->orderByRaw("case severity when 'urgent' then 0 when 'high' then 1 when 'normal' then 2 else 3 end")->orderBy('created_at')->limit(5)->get()
                 : collect(),
             'week' => $thisWeek->pluck('action')->countBy(fn ($action) => explode('.', $action)[0])->sortDesc()->all(),
             'total' => $thisWeek->count(),

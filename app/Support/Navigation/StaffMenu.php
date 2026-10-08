@@ -124,11 +124,13 @@ final class StaffMenu
                     ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'clipboard-list', 'match' => ['admin.sellers.*'], 'can' => 'review sellers', 'badge' => 'sellers'],
                     ['label' => 'Review reports', 'route' => 'admin.reviews.index', 'icon' => 'flag', 'match' => ['admin.reviews.*'], 'can' => 'moderate reviews', 'badge' => 'reports'],
                     ['label' => 'Support requests', 'route' => 'admin.support.tickets.index', 'icon' => 'inbox', 'match' => ['admin.support.tickets.*'], 'can' => 'view support tickets', 'badge' => 'tickets'],
+                    ['label' => 'Saved replies', 'route' => 'admin.support.replies.index', 'icon' => 'chat-bubble-text', 'match' => ['admin.support.replies.*'], 'can' => 'manage support tickets'],
+                    ['label' => 'Service levels', 'route' => 'admin.support.levels', 'icon' => 'clock', 'match' => ['admin.support.levels'], 'can' => 'view support tickets'],
                     // Visual preview of the support screens (SUPPORT_UI_PREVIEW); mock data, kept for design reference
                     ...(config('support.ui_preview') && app()->environment('local') ? [
                         ['label' => 'Support requests (design preview)', 'route' => 'admin.dev.support.tickets', 'icon' => 'inbox', 'match' => ['admin.dev.support.tickets', 'admin.dev.support.ticket']],
-                        ['label' => 'Saved replies', 'route' => 'admin.dev.support.replies', 'icon' => 'chat-bubble-text', 'match' => ['admin.dev.support.replies']],
-                        ['label' => 'Service levels', 'route' => 'admin.dev.support.levels', 'icon' => 'clock', 'match' => ['admin.dev.support.levels']],
+                        ['label' => 'Saved replies (design preview)', 'route' => 'admin.dev.support.replies', 'icon' => 'chat-bubble-text', 'match' => ['admin.dev.support.replies']],
+                        ['label' => 'Service levels (design preview)', 'route' => 'admin.dev.support.levels', 'icon' => 'clock', 'match' => ['admin.dev.support.levels']],
                     ] : []),
                 ],
             ],

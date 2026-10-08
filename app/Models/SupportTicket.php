@@ -80,6 +80,24 @@ class SupportTicket extends Model
         return $query->whereIn('status', [SupportTicketStatus::Open->value, SupportTicketStatus::PendingStaff->value]);
     }
 
+    /** Waiting on staff and already past its due time (the first reply until there is one, then the resolution). The one definition the queue, the dashboard and the service levels all use. */
+    public function scopeOverdue(Builder $query): Builder
+    {
+        return $query->needingStaff()->where(fn (Builder $q) => $q
+            ->where(fn (Builder $a) => $a->whereNull('first_responded_at')->where('first_response_due_at', '<', now()))
+            ->orWhere(fn (Builder $b) => $b->whereNotNull('first_responded_at')->where('resolution_due_at', '<', now())));
+    }
+
+    /** Waiting on staff, not yet late, but due within the next `$minutes`. */
+    public function scopeDueSoon(Builder $query, int $minutes = 120): Builder
+    {
+        $until = now()->addMinutes($minutes);
+
+        return $query->needingStaff()->where(fn (Builder $q) => $q
+            ->where(fn (Builder $a) => $a->whereNull('first_responded_at')->whereBetween('first_response_due_at', [now(), $until]))
+            ->orWhere(fn (Builder $b) => $b->whereNotNull('first_responded_at')->whereBetween('resolution_due_at', [now(), $until])));
+    }
+
     public function isOverdue(): bool
     {
         if (! $this->status->needsStaff()) {
