@@ -416,13 +416,24 @@
          */
         window.supportRender = function (text) {
             const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            // The address's own host, with nothing before an "@" (that is a user name, so "modelhub.test:x@evil.com" is evil.com) and no port
+            const onThisSite = (url) => {
+                const authority = (url.match(/^https?:\/\/([^\/?#]+)/i) || [])[1];
+                if (! authority || authority.indexOf('@') !== -1 || typeof location === 'undefined') return false;
+                return authority.replace(/:\d+$/, '').toLowerCase() === String(location.hostname).toLowerCase();
+            };
             const inline = (s) => esc(s)
                 .replace(/`([^`\n]+)`/g, '<code style="background:#f3f4f6;border-radius:4px;padding:1px 5px;font-size:.9em">$1</code>')
                 .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>')
                 .replace(/__([^_\n]+?)__/g, '<strong>$1</strong>')
                 .replace(/(^|[^*\w])\*([^*\s][^*\n]*?)\*(?![*\w])/g, '$1<em>$2</em>')
                 .replace(/(^|[^_\w])_([^_\s][^_\n]*?)_(?![_\w])/g, '$1<em>$2</em>')
-                .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">$1</a>');
+                // A picture is only ever its description. A link becomes a link only if it goes to THIS site: the assistant has no reason to send a member
+                // anywhere else, and a misled model could put "verify your account" pointing at a stranger inside ModelHub's own window.
+                .replace(/!\[([^\]\n]*)\]\([^)\n]*\)/g, '$1')
+                .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (whole, label, url) => (onThisSite(url)
+                    ? '<a href="' + url + '" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">' + label + '</a>'
+                    : label));
 
             const lines = String(text == null ? '' : text).replace(/\r\n/g, '\n').split('\n').map((l) => l.trimEnd());
             // A list line: "- x", "* x", "• x", "1. x" or "1) x", with how far it is indented (that is what makes a bullet belong to the item above)

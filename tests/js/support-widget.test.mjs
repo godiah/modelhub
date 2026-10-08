@@ -10,7 +10,7 @@ process.env.TZ = 'Africa/Nairobi';
 const blade = fs.readFileSync(new URL('../../resources/views/components/support/widget.blade.php', import.meta.url), 'utf8');
 const script = blade.slice(blade.indexOf('<script>') + 8, blade.lastIndexOf('</script>'));
 
-function boot(fetchImpl, { footer = null } = {}) {
+function boot(fetchImpl, { footer = null, location = { hostname: 'modelhub.test' } } = {}) {
     const store = new Map();
     const calls = [];
     const listeners = [];
@@ -19,6 +19,7 @@ function boot(fetchImpl, { footer = null } = {}) {
         console,
         TextDecoder,  // the panel decodes the answer's stream with it
         innerHeight: 800,
+        ...(location ? { location } : {}),  // the page's own address: the only site the panel will make a link to
         requestAnimationFrame: (fn) => fn(),
         addEventListener: (type, fn) => listeners.push([type, fn]),
         document: {
@@ -604,4 +605,90 @@ test('the Talk to a person button and the card buttons open the same flow', asyn
     await new Promise((r) => setTimeout(r, 0));
 
     assert.equal(calls[0].url, '/support/handoff');
+});
+
+
+// ---- what the assistant's text can become on the page (docs/07 section 8, scenario 2) -------------------------------------------------------------------
+
+const render = (text, options) => boot(() => json({}), options).ctx.supportRender(text);
+
+test('markup in the assistant\'s text is shown as text and never becomes markup', () => {
+    const html = render('<script>alert(1)</script> <img src=x onerror=alert(1)> <a href="https://evil.test">x</a> "quoted" & done');
+
+    assert.doesNotMatch(html, /<script|<img|<a href/);
+    assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+    assert.match(html, /&lt;img src=x onerror=alert\(1\)&gt;/);
+    assert.match(html, /&amp; done/);
+});
+
+test('a link to this site is a link, opened safely in a new tab', () => {
+    const html = render('See [your licences](https://modelhub.test/licences?tab=active&page=2) for the files.');
+
+    assert.match(html, /<a href="https:\/\/modelhub\.test\/licences\?tab=active&amp;page=2" target="_blank" rel="noopener noreferrer"/);
+    assert.match(html, />your licences<\/a>/);
+});
+
+test('a link anywhere else is only its words: no address, no anchor', () => {
+    const html = render('Please [verify your account](https://evil.test/login?member=42&code=secret) to continue.');
+
+    assert.doesNotMatch(html, /<a |href|evil\.test|secret/);
+    assert.match(html, /verify your account to continue/);
+});
+
+test('a picture is only its description, so nothing is fetched and nothing is linked', () => {
+    for (const markdown of ['![logo](https://evil.test/p.png?d=secret)', '![logo](https://modelhub.test/p.png)']) {
+        const html = render('Look: ' + markdown);
+
+        assert.doesNotMatch(html, /<img|<a |href|evil\.test|p\.png|!/);
+        assert.match(html, /Look: logo/);
+    }
+});
+
+test('addresses made to look like this site are not this site', () => {
+    const lookalikes = [
+        'https://modelhub.test:x@evil.test/',           // everything before @ is a user name
+        'https://modelhub.test@evil.test/',
+        'https://modelhub.test.evil.test/',             // this site is only a prefix of the real host
+        'https://evil-modelhub.test/',
+        'https://evil.test/https://modelhub.test/',
+        'https://modelhub.test%2f@evil.test/',
+        'http://modelhub.tests/',
+    ];
+
+    for (const url of lookalikes) {
+        const html = render('[go](' + url + ')');
+
+        assert.doesNotMatch(html, /<a |href/, url);
+        assert.equal(html.replace(/<[^>]+>/g, '').trim(), 'go', url);
+    }
+});
+
+test('this site is recognised whatever the letter case or port, and only over http or https', () => {
+    for (const url of ['https://MODELHUB.test/x', 'https://modelhub.test:8443/x', 'http://modelhub.test/x']) {
+        assert.match(render('[ok](' + url + ')'), /<a href=/, url);
+    }
+    for (const markdown of ['[x](javascript:alert(1))', '[x](data:text/html;base64,AAAA)', '[x](ftp://modelhub.test/x)', '[x](//modelhub.test/x)']) {
+        const html = render(markdown);
+
+        assert.doesNotMatch(html, /<a |href="javascript|href="data/, markdown);
+    }
+});
+
+test('when the page\'s own address is unknown no link is made at all', () => {
+    const html = render('[your licences](https://modelhub.test/licences)', { location: null });
+
+    assert.doesNotMatch(html, /<a |href/);
+    assert.match(html, /your licences/);
+});
+
+test('a quote inside a link to this site cannot break out of the address and add an event handler', () => {
+    const html = render('[x](https://modelhub.test/a"onmouseover="alert(1)) and [y](https://modelhub.test/b\'onfocus=\'alert(2))');
+    const tags = html.match(/<a [^>]*>/g) || [];
+
+    assert.equal(tags.length, 2);
+    for (const tag of tags) {
+        // exactly the four attributes the panel writes, the address being one quoted value with its quotes escaped: nothing else can be in the tag
+        assert.match(tag, /^<a href="[^"]*" target="_blank" rel="noopener noreferrer" style="text-decoration:underline">$/);
+    }
+    assert.match(tags[0], /href="https:\/\/modelhub\.test\/a&quot;onmouseover=&quot;alert\(1"/);
 });
