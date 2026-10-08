@@ -36,6 +36,11 @@ use App\Notifications\SaleRefundedNotification;
 use App\Notifications\SellerApplicationSubmittedNotification;
 use App\Notifications\SellerReviewedNotification;
 use App\Notifications\StoreNameChangedNotification;
+use App\Notifications\SupportTicketMemberRepliedNotification;
+use App\Notifications\SupportTicketOpenedNotification;
+use App\Notifications\SupportTicketReceivedNotification;
+use App\Notifications\SupportTicketRepliedNotification;
+use App\Notifications\SupportTicketResolvedNotification;
 
 /**
  * The filter groups on the notifications page. Each notification class belongs to exactly one;
@@ -50,6 +55,7 @@ enum NotificationCategory: string
     case Reviews = 'reviews';
     case Projects = 'projects';
     case Marketplace = 'marketplace';
+    case Support = 'support';
     case Other = 'other';
 
     public function label(): string
@@ -62,6 +68,7 @@ enum NotificationCategory: string
             self::Reviews => 'Reviews',
             self::Projects => 'Projects',
             self::Marketplace => 'Marketplace',
+            self::Support => 'Support requests',
             self::Other => 'Other',
         };
     }
@@ -76,6 +83,7 @@ enum NotificationCategory: string
             self::Reviews => 'star',
             self::Projects => 'clipboard-list',
             self::Marketplace => 'cube',
+            self::Support => 'chat-bubble-left-right',
             self::Other => 'bell',
         };
     }
@@ -95,6 +103,7 @@ enum NotificationCategory: string
             self::Reviews => [ReviewSubmittedNotification::class],
             self::Projects => [JobPostedNotification::class, JobAwaitingFundingNotification::class, JobFundedNotification::class, JobFundedReceiptNotification::class, JobEarningReleasedNotification::class, EscrowRefundedNotification::class, ProjectTakenDownNotification::class, ProjectRestoredNotification::class],
             self::Marketplace => [SellerApplicationSubmittedNotification::class, SellerReviewedNotification::class, ProductSubmittedNotification::class, ProductReviewedNotification::class, StoreNameChangedNotification::class, ModelReviewedNotification::class, ModelReviewReplyNotification::class, ModelReviewHiddenNotification::class, ModelPurchasedNotification::class, ModelSoldNotification::class, PayoutPaidNotification::class, PayoutNotSentNotification::class, PayoutRequestedNotification::class, PayoutNotConfirmedNotification::class, PaymentRefundedNotification::class, SaleRefundedNotification::class],
+            self::Support => [SupportTicketOpenedNotification::class, SupportTicketMemberRepliedNotification::class, SupportTicketReceivedNotification::class, SupportTicketRepliedNotification::class, SupportTicketResolvedNotification::class],
             self::Other => [],
         };
     }

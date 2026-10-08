@@ -114,3 +114,14 @@ it('accepts each quick action and refuses anything else', function (string $acti
 
     $this->actingAs($this->member)->postJson(route('support.chat'), ['message' => 'hello', 'action' => $action])->assertStatus($status);
 })->with([['withdrawal', 200], ['payment', 200], ['balance', 200], ['licence', 200], ['answer', 200], ['refund', 422], ['admin', 422]]);
+
+it('gives the panel the address for "Talk to a person" and draws its confirmation as text only', function () {
+    $html = panelHtml($this->member);
+    $widget = file_get_contents(resource_path('views/components/support/widget.blade.php'));
+
+    expect($html)->toContain('\u0022handoff\u0022:');
+    // the confirmation is bound with x-text / x-model: nothing the member typed, or ModelHub sent back, is drawn as markup
+    $start = strpos($widget, 'x-if="m.handoff"');
+    $block = substr($widget, $start, strpos($widget, '{{-- "Look it up, or how does it work?"') - $start);
+    expect($block)->toContain('x-text="m.handoff.reference"')->toContain('x-model="m.handoff.summary"')->not->toContain('x-html');
+});

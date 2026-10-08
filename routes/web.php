@@ -33,8 +33,11 @@ use App\Http\Controllers\SellerProductFileController;
 use App\Http\Controllers\SellerStoreController;
 use App\Http\Controllers\SellerStorefrontController;
 use App\Http\Controllers\SupportArticleController;
+use App\Http\Controllers\SupportAttachmentController;
 use App\Http\Controllers\SupportChatController;
 use App\Http\Controllers\SupportConversationController;
+use App\Http\Controllers\SupportHandoffController;
+use App\Http\Controllers\SupportRequestController;
 use App\Http\Controllers\WishlistController;
 use App\Support\SupportChat\PreviewTickets;
 use Illuminate\Support\Facades\Route;
@@ -288,6 +291,20 @@ Route::middleware(['auth', 'throttle:60,1'])->prefix('support/conversations')->n
     Route::get('/', [SupportConversationController::class, 'index'])->name('index');
     Route::get('{conversation}', [SupportConversationController::class, 'show'])->whereUuid('conversation')->name('show');
     Route::delete('{conversation}', [SupportConversationController::class, 'destroy'])->whereUuid('conversation')->name('destroy');
+});
+
+// "Talk to a person" from the chat panel: suggest a category and summary, then file the ticket. Works even when the assistant is off or down.
+Route::middleware(['auth'])->prefix('support/handoff')->name('support.handoff.')->group(function () {
+    Route::get('/', [SupportHandoffController::class, 'prepare'])->middleware('throttle:30,1')->name('prepare');
+    Route::post('/', [SupportHandoffController::class, 'store'])->middleware('throttle:10,1')->name('store');
+});
+
+// "My requests": the member's own support tickets, and replying to staff. Off with the assistant (the same switch).
+Route::middleware(['auth', 'throttle:60,1'])->prefix('support/requests')->name('support.requests.')->group(function () {
+    Route::get('/', [SupportRequestController::class, 'index'])->name('index');
+    Route::get('{reference}', [SupportRequestController::class, 'show'])->where('reference', 'SUP-[0-9]{4,10}')->name('show');
+    Route::get('{reference}/attachments/{attachment}', [SupportAttachmentController::class, 'show'])->where('reference', 'SUP-[0-9]{4,10}')->whereNumber('attachment')->name('attachments.show');
+    Route::post('{reference}/reply', [SupportRequestController::class, 'reply'])->where('reference', 'SUP-[0-9]{4,10}')->middleware('throttle:20,1')->name('reply');
 });
 
 // Open the help article behind a source under an answer (the slug is limited to letters, digits and hyphens)

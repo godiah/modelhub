@@ -39,7 +39,7 @@ function boot(fetchImpl, { footer = null } = {}) {
     const chips = ['A?', 'B?', 'C?', 'D?'].map((label) => ({ label, key: 'ask' }));
     const data = ctx.window.supportChat({
         mode: 'dock', live: true, state: 'ready', userId: 29, transcript: [], input: '',
-        endpoints: { list: '/support/conversations', show: '/support/conversations/__id__', destroy: '/support/conversations/__id__', article: '/support/articles/__slug__' },
+        endpoints: { list: '/support/conversations', show: '/support/conversations/__id__', destroy: '/support/conversations/__id__', article: '/support/articles/__slug__', handoff: '/support/handoff' },
         context: { greeting: 'Hi Kevin, how may we help you today?', cards: [], chips, label: 'Profile' },
     });
     data.$nextTick = (f) => f();
@@ -443,4 +443,141 @@ test('the secrets guard blocks a PIN or SMS code but lets an M-Pesa receipt thro
     assert.equal(blocked('check payment with code QWE5678RTY'), false);
     assert.equal(blocked('my M-Pesa code is shk3x92lmn'), false);
     assert.equal(blocked('I paid Ksh1500 and it is stuck'), false);
+});
+
+// ---- "Talk to a person" -------------------------------------------------------------------------------------------------
+
+const SUGGESTION = { categories: [{ value: 'payment_issue', label: 'A payment or licence' }, { value: 'other', label: 'Something else' }], category: 'payment_issue', summary: 'Payment MHX: Needs review.', aim: 'We aim to reply within 4 business hours.', existing: null };
+
+test('Talk to a person asks ModelHub for a suggestion, for this chat, and shows a form to confirm', async () => {
+    const { data, calls } = boot(() => json(SUGGESTION));
+    data.conversationId = 'c-today';
+
+    await data.talkToAPersonLive();
+
+    assert.equal(calls[0].url, '/support/handoff?conversation_id=c-today');
+    assert.equal(data.messages.at(-2).text, 'Talk to a person');
+    const m = data.messages.at(-1);
+    assert.equal(m.handoff.state, 'form');
+    assert.equal(m.handoff.category, 'payment_issue');
+    assert.equal(m.handoff.summary, 'Payment MHX: Needs review.');
+    assert.equal(m.handoff.categories.length, 2);
+});
+
+test('with no chat yet it asks without a conversation id', async () => {
+    const { data, calls } = boot(() => json({ ...SUGGESTION, category: 'other', summary: '' }));
+
+    await data.talkToAPersonLive();
+
+    assert.equal(calls[0].url, '/support/handoff');
+    assert.equal(data.messages.at(-1).handoff.summary, '');
+});
+
+test('confirming files the request with only the category, the summary and the chat id, then shows the reference', async () => {
+    const { data, calls } = boot((url, options) => (options.method === 'POST' ? json({ reference: 'SUP-1042', url: '/support/requests/SUP-1042', aim: 'We aim to reply within 4 business hours.', existing: false }, 201) : json(SUGGESTION)));
+    data.conversationId = 'c-today';
+    await data.talkToAPersonLive();
+    const m = data.messages.at(-1);
+    m.handoff.summary = '  My payment never gave me a licence  ';
+    m.handoff.category = 'other';
+
+    await data.confirmHandoff(m);
+
+    const post = calls.find((c) => c.options.method === 'POST');
+    assert.deepEqual(plain(JSON.parse(post.options.body)), { conversation_id: 'c-today', category: 'other', summary: 'My payment never gave me a licence' });
+    assert.equal(post.options.headers['X-CSRF-TOKEN'], 'csrf-token-123');
+    assert.equal(m.handoff.state, 'done');
+    assert.equal(m.handoff.reference, 'SUP-1042');
+    assert.equal(m.handoff.url, '/support/requests/SUP-1042');
+});
+
+test('a summary that is too short is not sent', async () => {
+    const { data, calls } = boot(() => json(SUGGESTION));
+    await data.talkToAPersonLive();
+    const m = data.messages.at(-1);
+    m.handoff.summary = 'hi';
+
+    await data.confirmHandoff(m);
+
+    assert.equal(calls.filter((c) => c.options.method === 'POST').length, 0);
+    assert.match(m.handoff.error, /Tell us a little/);
+    assert.equal(m.handoff.state, 'form');
+});
+
+test('a refusal from ModelHub is shown in its own words and the form stays, so nothing typed is lost', async () => {
+    const { data } = boot((url, options) => (options.method === 'POST' ? json({ error: { code: 'ticket_refused', message: 'You already have several open requests.' } }, 422) : json(SUGGESTION)));
+    await data.talkToAPersonLive();
+    const m = data.messages.at(-1);
+    m.handoff.summary = 'Something I typed carefully';
+
+    await data.confirmHandoff(m);
+
+    assert.equal(m.handoff.state, 'form');
+    assert.equal(m.handoff.error, 'You already have several open requests.');
+    assert.equal(m.handoff.summary, 'Something I typed carefully');
+    assert.equal(m.handoff.sending, false);
+});
+
+test('a lost connection while sending keeps the form and says so', async () => {
+    const { data } = boot((url, options) => { if (options.method === 'POST') throw new Error('offline'); return json(SUGGESTION); });
+    await data.talkToAPersonLive();
+    const m = data.messages.at(-1);
+
+    await data.confirmHandoff(m);
+
+    assert.equal(m.handoff.state, 'form');
+    assert.match(m.handoff.error, /couldn't reach ModelHub/);
+    assert.equal(m.handoff.sending, false);
+});
+
+test('sending twice quickly files it once', async () => {
+    const { data, calls } = boot((url, options) => (options.method === 'POST' ? new Promise((r) => setTimeout(() => r(json({ reference: 'SUP-1', url: '/u', aim: '' }, 201)), 20)) : json(SUGGESTION)));
+    await data.talkToAPersonLive();
+    const m = data.messages.at(-1);
+
+    await Promise.all([data.confirmHandoff(m), data.confirmHandoff(m)]);
+
+    assert.equal(calls.filter((c) => c.options.method === 'POST').length, 1);
+});
+
+test('when this chat already has a request it points at it instead of asking again', async () => {
+    const { data } = boot(() => json({ ...SUGGESTION, existing: { reference: 'SUP-1042', url: '/support/requests/SUP-1042' } }));
+    data.conversationId = 'c-today';
+
+    await data.talkToAPersonLive();
+
+    const m = data.messages.at(-1);
+    assert.equal(m.handoff.state, 'existing');
+    assert.equal(m.handoff.reference, 'SUP-1042');
+});
+
+test('cancelling sends nothing and says so', async () => {
+    const { data, calls } = boot(() => json(SUGGESTION));
+    await data.talkToAPersonLive();
+    const m = data.messages.at(-1);
+
+    data.cancelHandoff(m);
+
+    assert.equal(m.handoff, null);
+    assert.match(m.text, /nothing was sent/);
+    assert.equal(calls.filter((c) => c.options.method === 'POST').length, 0);
+});
+
+test('when ModelHub cannot prepare it, the member is given the email address as before', async () => {
+    const { data } = boot(() => json({}, 500));
+
+    await data.talkToAPersonLive();
+
+    const m = data.messages.at(-1);
+    assert.equal(m.handoff, null);
+    assert.match(m.text, /couldn't set that up/);
+});
+
+test('the Talk to a person button and the card buttons open the same flow', async () => {
+    const { data, calls } = boot(() => json(SUGGESTION));
+
+    data.run('human');
+    await new Promise((r) => setTimeout(r, 0));
+
+    assert.equal(calls[0].url, '/support/handoff');
 });

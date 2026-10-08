@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\ProductReview;
 use App\Models\SellerProfile;
 use App\Models\Staff;
+use App\Models\SupportTicket;
 use App\Support\Staff\StaffAccess;
 
 /**
@@ -98,6 +99,7 @@ final class StaffMenu
             'payments' => Payment::where('status', PaymentStatus::Review)->count(),
             'payouts' => Payout::where('status', PayoutStatus::Requested)->count(),
             'escrow' => JobEngagement::escrowRefundDue()->count(),
+            'tickets' => SupportTicket::needingStaff()->count(),
             'notifications' => $staff?->unreadNotifications()->count() ?? 0,
             default => 0,
         };
@@ -121,9 +123,10 @@ final class StaffMenu
                     ['label' => 'Model reviews', 'route' => 'admin.models.index', 'icon' => 'clipboard-check', 'match' => ['admin.models.*'], 'can' => 'review models', 'badge' => 'models'],
                     ['label' => 'Seller applications', 'route' => 'admin.sellers.index', 'icon' => 'clipboard-list', 'match' => ['admin.sellers.*'], 'can' => 'review sellers', 'badge' => 'sellers'],
                     ['label' => 'Review reports', 'route' => 'admin.reviews.index', 'icon' => 'flag', 'match' => ['admin.reviews.*'], 'can' => 'moderate reviews', 'badge' => 'reports'],
-                    // Visual preview of the support queue (SUPPORT_UI_PREVIEW); mock data
+                    ['label' => 'Support requests', 'route' => 'admin.support.tickets.index', 'icon' => 'inbox', 'match' => ['admin.support.tickets.*'], 'can' => 'view support tickets', 'badge' => 'tickets'],
+                    // Visual preview of the support screens (SUPPORT_UI_PREVIEW); mock data, kept for design reference
                     ...(config('support.ui_preview') && app()->environment('local') ? [
-                        ['label' => 'Support requests', 'route' => 'admin.dev.support.tickets', 'icon' => 'inbox', 'match' => ['admin.dev.support.tickets', 'admin.dev.support.ticket']],
+                        ['label' => 'Support requests (design preview)', 'route' => 'admin.dev.support.tickets', 'icon' => 'inbox', 'match' => ['admin.dev.support.tickets', 'admin.dev.support.ticket']],
                         ['label' => 'Saved replies', 'route' => 'admin.dev.support.replies', 'icon' => 'chat-bubble-text', 'match' => ['admin.dev.support.replies']],
                         ['label' => 'Service levels', 'route' => 'admin.dev.support.levels', 'icon' => 'clock', 'match' => ['admin.dev.support.levels']],
                     ] : []),
