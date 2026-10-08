@@ -2,7 +2,7 @@
 
 /*
  * A small checker for the part of JSON Schema the support read API contract uses (docs/support-read-api.openapi.yaml), so the contract can be
- * enforced without another dependency. Supported: type (one or a list), enum, properties, required, additionalProperties: false, items, oneOf
+ * enforced without another dependency. It serves both contracts (the read API, and the hand-off/transcript API in docs/support-agent-api.openapi.yaml). Supported: type (one or a list), enum, properties, required, additionalProperties: false, items, oneOf
  * and local $ref. Anything else in a schema is reported rather than silently ignored, so the contract cannot start using a feature this
  * checker does not understand. The same file and the same rules are kept in modelhub-support (tests/contract.py).
  */
@@ -10,10 +10,11 @@
 use Symfony\Component\Yaml\Yaml;
 
 const SUPPORT_CONTRACT = __DIR__.'/../../../docs/support-read-api.openapi.yaml';
+const SUPPORT_AGENT_CONTRACT = __DIR__.'/../../../docs/support-agent-api.openapi.yaml';
 
-function supportContract(): array
+function supportContract(string $file = SUPPORT_CONTRACT): array
 {
-    return Yaml::parse(file_get_contents(SUPPORT_CONTRACT));
+    return Yaml::parse(file_get_contents($file));
 }
 
 function supportSchema(string $name, ?array $contract = null): array
