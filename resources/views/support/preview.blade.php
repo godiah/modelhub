@@ -75,23 +75,12 @@
             </p>
         </header>
 
-        <nav aria-label="{{ __('Other support screens') }}" class="mt-6 grid max-w-4xl gap-4 sm:grid-cols-2">
+        <nav aria-label="{{ __('Other support screens') }}" class="mt-6 max-w-2xl">
             <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-                <h3 class="font-secondary text-sm font-semibold text-neutral-900">{{ __('What a member sees') }}</h3>
+                <h3 class="font-secondary text-sm font-semibold text-neutral-900">{{ __('Designs with no real screen yet') }}</h3>
                 <ul class="mt-3 space-y-2 text-sm">
-                    <li><a href="{{ route('dev.support.requests') }}" class="font-medium text-teal-700 hover:underline">{{ __('Your requests') }}</a> <span class="text-neutral-500">· <a href="{{ route('dev.support.requests', ['state' => 'empty']) }}" class="hover:underline">{{ __('empty') }}</a></span></li>
-                    <li><a href="{{ route('dev.support.request', 'SUP-1042') }}" class="font-medium text-teal-700 hover:underline">{{ __('A request: staff replied') }}</a> <span class="text-neutral-500">· <a href="{{ route('dev.support.request', 'SUP-1031') }}" class="hover:underline">{{ __('resolved') }}</a></span></li>
                     <li><a href="{{ route('dev.support.contact') }}" class="font-medium text-teal-700 hover:underline">{{ __('Contact form') }}</a> <span class="text-neutral-500">· {{ __('no sign-in needed') }}</span></li>
-                    <li><a href="{{ route('dev.support.emails') }}" class="font-medium text-teal-700 hover:underline">{{ __('Emails and notifications') }}</a> <span class="text-neutral-500">· {{ __('seven emails') }}</span></li>
-                </ul>
-            </div>
-            <div class="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-                <h3 class="font-secondary text-sm font-semibold text-neutral-900">{{ __('What staff see') }} <span class="font-normal text-neutral-500">({{ __('needs a staff sign-in at /admin/login') }})</span></h3>
-                <ul class="mt-3 space-y-2 text-sm">
-                    <li><a href="{{ route('admin.dev.support.tickets') }}" class="font-medium text-teal-700 hover:underline">{{ __('Support queue') }}</a></li>
-                    <li><a href="{{ route('admin.dev.support.ticket', 'SUP-1043') }}" class="font-medium text-teal-700 hover:underline">{{ __('Refund request: approve or decline') }}</a></li>
-                    <li><a href="{{ route('admin.dev.support.replies') }}" class="font-medium text-teal-700 hover:underline">{{ __('Saved replies') }}</a> <span class="text-neutral-500">· <a href="{{ route('admin.dev.support.levels') }}" class="hover:underline">{{ __('service levels') }}</a></span></li>
-                    <li><a href="{{ route('admin.dev.support.ticket', 'SUP-1051') }}" class="font-medium text-teal-700 hover:underline">{{ __('Unverified lock-out request') }}</a> <span class="text-neutral-500">· <a href="{{ route('admin.dev.support.ticket', 'SUP-1042') }}" class="hover:underline">{{ __('payment issue') }}</a></span></li>
+                    <li><a href="{{ route('dev.support.emails') }}" class="font-medium text-teal-700 hover:underline">{{ __('Emails and notifications') }}</a> <span class="text-neutral-500">· {{ __('seven designs, three are real') }}</span></li>
                 </ul>
             </div>
         </nav>

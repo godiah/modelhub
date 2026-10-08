@@ -39,7 +39,6 @@ use App\Http\Controllers\SupportConversationController;
 use App\Http\Controllers\SupportHandoffController;
 use App\Http\Controllers\SupportRequestController;
 use App\Http\Controllers\WishlistController;
-use App\Support\SupportChat\PreviewTickets;
 use Illuminate\Support\Facades\Route;
 
 // Signed-in users go straight to the app shell; the landing page is for guests.
@@ -311,12 +310,11 @@ Route::middleware(['auth', 'throttle:60,1'])->prefix('support/requests')->name('
 Route::middleware(['auth', 'throttle:60,1'])->get('support/articles/{slug}', [SupportArticleController::class, 'show'])
     ->where('slug', '[a-z0-9-]{1,80}')->name('support.articles.show');
 
-// Support assistant: visual design preview (local only, behind SUPPORT_UI_PREVIEW). Scripted, no backend; remove once the real assistant lands.
+// Support assistant: design gallery of the chat panel's states, plus the contact form and email previews that have no real screen yet (local only,
+// behind SUPPORT_UI_PREVIEW). Scripted, no backend. The staff and member request screens are real now and their previews are gone.
 if (config('support.ui_preview') && app()->environment('local')) {
     Route::middleware(['auth'])->group(function () {
         Route::get('dev/support-ui', fn () => view('support.preview'))->name('dev.support-ui');
-        Route::get('dev/support-ui/requests', fn () => view('support.requests.index'))->name('dev.support.requests');
-        Route::get('dev/support-ui/requests/{ref}', fn (string $ref) => view('support.requests.show', ['t' => PreviewTickets::find($ref) ?? abort(404)]))->name('dev.support.request');
     });
 
     // The public contact form needs no sign-in
