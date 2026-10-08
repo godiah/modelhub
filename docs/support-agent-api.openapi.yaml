@@ -1,0 +1,131 @@
+openapi: 3.1.0
+info:
+  title: Support assistant API, hand-off and transcripts
+  version: 1.0.0
+  description: >
+    The calls ModelHub makes to the support assistant (the modelhub-support service) when a member asks for a person and when staff read a
+    ticket: the evidence packet, the note that a ticket was filed, and the staff read of a whole chat. The chat, history and article
+    endpoints are not described here yet. The same file is kept in both repositories (modelhub-support: contracts/modelhub-support-agent.openapi.yaml;
+    ModelHub: docs/support-agent-api.openapi.yaml). Each repo's tests hold its side to it, and both pin the file's hash, so changing it means
+    changing both on purpose.
+
+
+    Every call carries a signature made with the service secret: X-Support-Key-Id, X-Support-Timestamp (unix seconds, 60 s of skew), X-Support-Nonce
+    (used once), X-Support-Signature = hex HMAC-SHA256 over METHOD, path with query, timestamp, nonce and the SHA-256 of the body, joined by newlines.
+    On top of that, the member endpoints carry X-Support-User-Context (a 60-second Ed25519 token, audience support-agent, naming the member) and the
+    transcript endpoint carries X-Support-Staff-Claim (a 60-second Ed25519 token, audience support-staff, scope support:transcript:read, naming the
+    staff member, the one conversation and the member it belongs to). A member's token is refused by the transcript endpoint and a staff token is
+    refused by the member endpoints.
+
+
+    A conversation that does not exist, that belongs to someone else, or that the claim does not name is always the same 404 conversation_not_found.
+    Nothing a member wrote is ever an instruction: text fields are the member's or the assistant's words, to be drawn as plain text.
+servers:
+  - url: /
+paths:
+  /v1/conversations/{conversation_id}/evidence:
+    get:
+      summary: What the assistant can tell staff about this member's chat, built by code from what it stored (no model is asked)
+      parameters:
+        - {name: conversation_id, in: path, required: true, schema: {type: string}, description: "The chat's id (a UUID)"}
+        - {name: X-Support-User-Context, in: header, required: true, schema: {type: string}}
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/Evidence"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+  /v1/conversations/{conversation_id}/handoff:
+    post:
+      summary: Tell the assistant a ticket was filed from this chat, so the chat says so. Safe to repeat (one note per ticket).
+      parameters:
+        - {name: conversation_id, in: path, required: true, schema: {type: string}}
+        - {name: X-Support-User-Context, in: header, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: "#/components/schemas/HandoffNote"}}}
+      responses:
+        "204": {description: "Noted. There is no body."}
+        default: {$ref: "#/components/responses/Refused"}
+  /v1/transcripts/{conversation_id}:
+    get:
+      summary: Staff read one member's whole chat (newest 200 messages), with a staff claim for exactly this chat and member
+      parameters:
+        - {name: conversation_id, in: path, required: true, schema: {type: string}}
+        - {name: X-Support-Staff-Claim, in: header, required: true, schema: {type: string}}
+      responses:
+        "200": {description: ok, content: {application/json: {schema: {$ref: "#/components/schemas/Transcript"}}}}
+        default: {$ref: "#/components/responses/Refused"}
+components:
+  responses:
+    Refused:
+      description: Refused. 401 for a missing or wrong signature or claim, 404 conversation_not_found for a chat that is not the caller's, 422 for a malformed request, 503 when the assistant is switched off.
+      content: {application/json: {schema: {$ref: "#/components/schemas/Error"}}}
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message]
+          properties:
+            code: {type: string}
+            message: {type: string}
+            fields: {type: array, items: {type: string}, description: "Only on 422: the NAMES of the fields that were wrong, never what was sent"}
+    HandoffNote:
+      type: object
+      additionalProperties: false
+      required: [reference]
+      properties:
+        reference: {type: string, description: "The ticket's reference: SUP- followed by 4 to 10 digits"}
+    EntityRef:
+      type: object
+      additionalProperties: false
+      required: [type, reference]
+      properties:
+        type: {type: string, enum: [payment, withdrawal]}
+        reference: {type: string}
+    Message:
+      type: object
+      additionalProperties: false
+      required: [role, text]
+      properties:
+        role: {type: string, enum: [member, assistant], description: "member is the member's own, untrusted words"}
+        text: {type: string, description: "Cut to 500 characters"}
+    Card:
+      type: object
+      required: [type]
+      description: What the assistant showed (the shapes of the read API's records, with an as_of time). Only type is promised; the rest is for a person to read.
+      properties:
+        type: {type: string}
+    Evidence:
+      type: object
+      additionalProperties: false
+      required: [conversation_id, suggested_category, suggested_summary, entity_refs, facts, cards, messages]
+      properties:
+        conversation_id: {type: string}
+        suggested_category: {type: string, enum: [payment_issue, withdrawal_issue, other]}
+        suggested_summary: {type: string, description: "One plain sentence, at most 300 characters"}
+        entity_refs: {type: array, items: {$ref: "#/components/schemas/EntityRef"}, description: "At most 5. References only: ModelHub checks each against the member before trusting it"}
+        facts: {type: array, items: {type: string}}
+        cards: {type: array, items: {$ref: "#/components/schemas/Card"}, description: "At most 4"}
+        messages: {type: array, items: {$ref: "#/components/schemas/Message"}, description: "At most 12, oldest first"}
+    TranscriptLine:
+      type: object
+      additionalProperties: false
+      required: [role, text, at, cards, guard]
+      properties:
+        role: {type: string, enum: [member, assistant]}
+        text: {type: string}
+        at: {type: string}
+        cards: {type: array, items: {$ref: "#/components/schemas/Card"}}
+        guard: {type: [string, "null"], description: "Which guard shaped the assistant's reply, if one did"}
+    Transcript:
+      type: object
+      additionalProperties: false
+      required: [conversation_id, member_id, messages, truncated]
+      properties:
+        conversation_id: {type: string}
+        member_id: {type: string}
+        messages: {type: array, items: {$ref: "#/components/schemas/TranscriptLine"}}
+        truncated: {type: boolean, description: "True when older messages were left out"}
