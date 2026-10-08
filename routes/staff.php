@@ -24,6 +24,9 @@ use App\Http\Controllers\Admin\AdminSellerController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminStaffController;
 use App\Http\Controllers\Admin\AdminStoreController;
+use App\Http\Controllers\Admin\AdminSupportAttachmentController;
+use App\Http\Controllers\Admin\AdminSupportTicketController;
+use App\Http\Controllers\Admin\AdminSupportTranscriptController;
 use App\Http\Controllers\Admin\Auth\StaffLoginController;
 use App\Http\Controllers\Admin\Auth\StaffPasswordController;
 use App\Http\Controllers\Auth\AuthenticatorController;
@@ -121,6 +124,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::patch('stores/{seller}/commission', [AdminStoreController::class, 'commission'])->middleware('super-admin')->name('stores.commission');
+
+        Route::middleware('can:view support tickets')->group(function () {
+            Route::get('support', [AdminSupportTicketController::class, 'index'])->name('support.tickets.index');
+            Route::get('support/{ticket}', [AdminSupportTicketController::class, 'show'])->name('support.tickets.show');
+            Route::get('support/{ticket}/attachments/{attachment}', [AdminSupportAttachmentController::class, 'show'])->whereNumber('attachment')->name('support.tickets.attachments.show');
+        });
+        Route::middleware(['can:view support tickets', 'can:read support transcripts', 'throttle:20,1'])->get('support/{ticket}/transcript', [AdminSupportTranscriptController::class, 'show'])->name('support.tickets.transcript');
+        Route::middleware(['can:manage support tickets', 'throttle:60,1'])->prefix('support/{ticket}')->name('support.tickets.')->group(function () {
+            Route::post('reply', [AdminSupportTicketController::class, 'reply'])->name('reply');
+            Route::post('note', [AdminSupportTicketController::class, 'note'])->name('note');
+            Route::post('assign', [AdminSupportTicketController::class, 'assign'])->name('assign');
+            Route::post('severity', [AdminSupportTicketController::class, 'severity'])->name('severity');
+            Route::post('resolve', [AdminSupportTicketController::class, 'resolve'])->name('resolve');
+            Route::post('close', [AdminSupportTicketController::class, 'close'])->name('close');
+        });
 
         Route::middleware('can:view disputes')->group(function () {
             Route::get('disputes', [AdminDisputeController::class, 'index'])->name('disputes.index');

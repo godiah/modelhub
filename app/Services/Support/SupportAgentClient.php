@@ -2,6 +2,7 @@
 
 namespace App\Services\Support;
 
+use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
@@ -82,6 +83,50 @@ class SupportAgentClient
         $pathAndQuery = self::ARTICLES_PATH.'/'.$slug.($chunk !== null ? '?chunk='.$chunk : '');
 
         return $this->history('GET', $pathAndQuery, $user, $sessionId, $requestId);
+    }
+
+    /** What the assistant can tell staff about this chat, built by code from what it stored. 404 if the chat is not the member's. */
+    public function evidence(User $user, string $sessionId, string $conversationId, ?string $requestId = null): Response
+    {
+        return $this->history('GET', self::CONVERSATIONS_PATH.'/'.$conversationId.'/evidence', $user, $sessionId, $requestId);
+    }
+
+    /** Tell the assistant a ticket was filed from this chat, so the chat says so. Safe to repeat. */
+    public function handedOff(User $user, string $sessionId, string $conversationId, string $reference, ?string $requestId = null): Response
+    {
+        $path = self::CONVERSATIONS_PATH.'/'.$conversationId.'/handoff';
+        $body = json_encode(['reference' => $reference], JSON_UNESCAPED_SLASHES);
+
+        $headers = AgentRequestSigner::fromConfig()->sign('POST', $path, $body) + [
+            'X-Support-User-Context' => UserContextMinter::fromConfig()->mint($user, $sessionId),
+            'Accept' => 'application/json',
+        ];
+
+        if ($requestId !== null) {
+            $headers['X-Request-ID'] = $requestId;
+        }
+
+        return Http::withHeaders($headers)->timeout(self::HISTORY_TIMEOUT)->withBody($body, 'application/json')->post(rtrim((string) config('support.agent.url'), '/').$path);
+    }
+
+    /**
+     * The whole of a member's chat, for a staff member reading their ticket. Signed like every call, and carrying a staff claim for this one
+     * chat and this one member instead of a member's context. The caller has already checked the staff member's permission and logged the read.
+     */
+    public function transcript(Staff $staff, string $conversationId, User $member, ?string $requestId = null): Response
+    {
+        $path = '/v1/transcripts/'.$conversationId;
+
+        $headers = AgentRequestSigner::fromConfig()->sign('GET', $path, '') + [
+            'X-Support-Staff-Claim' => UserContextMinter::fromConfig()->mintStaffTranscript($staff, $conversationId, $member),
+            'Accept' => 'application/json',
+        ];
+
+        if ($requestId !== null) {
+            $headers['X-Request-ID'] = $requestId;
+        }
+
+        return Http::withHeaders($headers)->timeout(self::HISTORY_TIMEOUT)->get(rtrim((string) config('support.agent.url'), '/').$path);
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Services\Support;
 
+use App\Models\Staff;
 use App\Models\User;
 use RuntimeException;
 
@@ -21,6 +22,8 @@ final class UserContextMinter
         private readonly int $ttlSeconds = 60,
         private readonly string $readAudience = 'support-reads',
         private readonly string $readScope = 'support:read:self',
+        private readonly string $staffAudience = 'support-staff',
+        private readonly string $staffScope = 'support:transcript:read',
     ) {}
 
     public static function fromConfig(): self
@@ -39,6 +42,8 @@ final class UserContextMinter
             (int) config('support.agent.context_ttl'),
             (string) config('support.reads.claim_audience'),
             (string) config('support.reads.claim_scope'),
+            (string) config('support.agent.staff_claim_audience'),
+            (string) config('support.agent.staff_claim_scope'),
         );
     }
 
@@ -74,6 +79,28 @@ final class UserContextMinter
             'aud' => $this->readAudience,
             'scope' => $this->readScope,
             'sub' => (string) $user->getKey(),
+            'jti' => bin2hex(random_bytes(16)),
+            'iat' => $now,
+            'exp' => $now + $this->ttlSeconds,
+        ]);
+    }
+
+    /**
+     * The claim that lets ONE staff member read ONE member's chat: names the staff member, the conversation and the member it belongs to, and
+     * lives a minute. Its own audience and scope, so neither a member's claim nor a read claim can open a transcript, and this one is no use
+     * anywhere else. The assistant checks the chat really is that member's.
+     */
+    public function mintStaffTranscript(Staff $staff, string $conversationId, User $member, ?int $now = null): string
+    {
+        $now ??= time();
+
+        return $this->sign(['alg' => 'EdDSA', 'typ' => 'JWT'], [
+            'iss' => $this->issuer,
+            'aud' => $this->staffAudience,
+            'scope' => $this->staffScope,
+            'sub' => (string) $staff->getKey(),
+            'conv' => $conversationId,
+            'member' => (string) $member->getKey(),
             'jti' => bin2hex(random_bytes(16)),
             'iat' => $now,
             'exp' => $now + $this->ttlSeconds,

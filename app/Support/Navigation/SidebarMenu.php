@@ -149,8 +149,9 @@ final class SidebarMenu
                 'items' => [
                     ['label' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'squares-2x2', 'match' => ['dashboard']],
                     ['label' => 'Notifications', 'route' => 'notifications.index', 'icon' => 'bell', 'match' => ['notifications.*'], 'badge' => 'unread-notifications'],
-                    // Visual preview of "My requests" (SUPPORT_UI_PREVIEW); mock data
-                    ...(config('support.ui_preview') && app()->environment('local') ? [['label' => 'My requests', 'route' => 'dev.support.requests', 'icon' => 'inbox', 'match' => ['dev.support.request', 'dev.support.requests']]] : []),
+                    ...(config('support.enabled') ? [['label' => 'My requests', 'route' => 'support.requests.index', 'icon' => 'inbox', 'match' => ['support.requests.*']]] : []),
+                    // Visual preview of "My requests" (SUPPORT_UI_PREVIEW); mock data, kept for design reference
+                    ...(config('support.ui_preview') && app()->environment('local') ? [['label' => 'My requests (design preview)', 'route' => 'dev.support.requests', 'icon' => 'inbox', 'match' => ['dev.support.request', 'dev.support.requests']]] : []),
                 ],
             ],
             // One group per product, each with its buying and selling sides together. A `section` adds a small

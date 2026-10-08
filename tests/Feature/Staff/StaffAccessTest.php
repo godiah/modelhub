@@ -24,7 +24,7 @@ it('creates every permission and the default roles, with Super admin holding eve
 
     $super = Role::findByName('Super admin', 'staff');
     expect($super->permissions)->toHaveCount(count(StaffAccess::permissions()))->and($super->description)->not->toBeEmpty();
-    expect(Role::findByName('Support', 'staff')->permissions->pluck('name')->sort()->values()->all())->toBe(['view contact details', 'view disputes', 'view members']);
+    expect(Role::findByName('Support', 'staff')->permissions->pluck('name')->sort()->values()->all())->toBe(['manage support tickets', 'view contact details', 'view disputes', 'view members', 'view support tickets']);
     expect(Role::findByName('Auditor', 'staff')->permissions->pluck('name')->contains('manage members'))->toBeFalse()
         ->and(Role::findByName('Auditor', 'staff')->permissions->pluck('name')->contains('view contact details'))->toBeFalse();
 });
@@ -60,7 +60,7 @@ it('does not overwrite a default role that was edited', function () {
 
     StaffAccess::sync();
 
-    expect(Role::findByName('Support', 'staff')->permissions->pluck('name')->sort()->values()->all())->toBe(['review models', 'view contact details', 'view disputes', 'view members']);
+    expect(Role::findByName('Support', 'staff')->permissions->pluck('name')->sort()->values()->all())->toBe(['manage support tickets', 'review models', 'view contact details', 'view disputes', 'view members', 'view support tickets']);
 });
 
 it('gives a person the combined permissions of all their roles', function () {

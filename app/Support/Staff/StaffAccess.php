@@ -59,6 +59,11 @@ final class StaffAccess
                 'view payouts' => ['label' => 'View withdrawals', 'description' => 'See every withdrawal members have asked for and where each one has got to. Phone numbers stay masked.'],
                 'approve payouts' => ['label' => 'Approve withdrawals', 'description' => 'Approve a withdrawal (which sends the money to the member\'s M-Pesa) or turn it down with a reason. Sees the full phone number.'],
             ],
+            'Support tickets' => [
+                'view support tickets' => ['label' => 'View support tickets', 'description' => 'See the support queue and open a ticket: what the member asked, what the assistant showed them, and the thread. Cannot reply.'],
+                'manage support tickets' => ['label' => 'Answer support tickets', 'description' => 'Reply to members, keep internal notes, assign tickets, change their urgency and resolve them.'],
+                'read support transcripts' => ['label' => 'Read assistant conversations', 'description' => 'Read the whole chat a member had with the assistant before asking for a person. Each time is recorded in the activity log.'],
+            ],
             'Access' => [
                 'manage staff' => ['label' => 'Manage staff', 'description' => 'Invite staff, give them roles and deactivate their accounts.'],
                 'manage roles' => ['label' => 'Manage roles', 'description' => 'Create and edit roles and what each one allows.'],
@@ -92,7 +97,7 @@ final class StaffAccess
             'Marketplace moderator' => ['description' => 'Reviews models and seller applications and moderates reviews.', 'permissions' => ['view models', 'review models', 'view sellers', 'review sellers', 'moderate reviews']],
             'Dispute manager' => ['description' => 'Takes on payment disputes, reads the conversation and resolves them.', 'permissions' => ['view disputes', 'read dispute messages', 'resolve disputes', 'view engagements']],
             'Finance' => ['description' => 'Approves members\' withdrawals, refunds payments and reads the ledger. Cannot change members, models or staff.', 'permissions' => ['view payouts', 'approve payouts', 'view payments', 'refund payments', 'view ledger', 'view members', 'view audit log']],
-            'Support' => ['description' => 'Helps members: sees them and their contact details, and can see payment disputes. Read-only.', 'permissions' => ['view members', 'view contact details', 'view disputes']],
+            'Support' => ['description' => 'Helps members: sees them and their contact details, can see payment disputes, and answers their support tickets.', 'permissions' => ['view members', 'view contact details', 'view disputes', 'view support tickets', 'manage support tickets']],
         ];
     }
 

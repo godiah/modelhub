@@ -8,6 +8,7 @@ use App\Models\ModelJob;
 use App\Models\Product;
 use App\Models\SellerProfile;
 use App\Models\Staff;
+use App\Models\SupportTicket;
 use App\Models\User;
 use App\Support\Staff\Masking;
 
@@ -63,6 +64,12 @@ class StaffSearchService
             $groups[] = $this->group('Stores', 'tag', SellerProfile::with('user:id,name')->where(fn ($q) => $q->where('display_name', 'like', $like)->orWhereHas('user', fn ($u) => $u->where('name', 'like', $like)))
                 ->latest()->limit(self::PER_GROUP)->get(),
                 fn (SellerProfile $store) => [$store->display_name, ($store->user?->name ?? '—').' · '.ucfirst($store->status->value), route('admin.stores.show', $store)]);
+        }
+
+        if ($staff->can('view support tickets')) {
+            $groups[] = $this->group('Support requests', 'inbox', SupportTicket::with('requester:id,name')->where(fn ($q) => $q->where('reference', 'like', $like)->orWhere('summary', 'like', $like)->orWhereHas('requester', fn ($u) => $u->where('name', 'like', $like)))
+                ->latest()->limit(self::PER_GROUP)->get(),
+                fn (SupportTicket $ticket) => [$ticket->reference.' · '.$ticket->category->label(), ($ticket->requester?->name ?? '—').' · '.$ticket->status->label(), route('admin.support.tickets.show', $ticket)]);
         }
 
         if ($staff->can('view disputes')) {

@@ -75,6 +75,8 @@
             'show' => route('support.conversations.show', '__id__'),
             'destroy' => route('support.conversations.destroy', '__id__'),
             'article' => route('support.articles.show', '__slug__'),
+            // "Talk to a person": GET suggests a category and summary, POST files the request (same address)
+            'handoff' => route('support.handoff.prepare'),
         ] : null,
     ];
     $uid = 'support-'.\Illuminate\Support\Str::random(6);
@@ -188,6 +190,46 @@
                                 <template x-if="card.type === 'payment'"><x-support.card.payment /></template>
                                 <template x-if="card.type === 'balance'"><x-support.card.balance /></template>
                                 <template x-if="card.type === 'licences'"><x-support.card.licences /></template>
+                            </div>
+                        </template>
+
+                        {{-- "Talk to a person": confirm what goes to staff. Plain text only; the member's words are never drawn as markup. --}}
+                        <template x-if="m.handoff">
+                            <div class="rounded-xl border border-neutral-200 bg-white p-4">
+                                <p x-show="m.handoff.state === 'loading'" class="flex items-center gap-2 text-sm text-neutral-500"><x-spinner class="h-4 w-4 text-teal-600" />{{ __('Getting this ready…') }}</p>
+
+                                <div x-show="m.handoff.state === 'existing'" class="space-y-2 text-sm">
+                                    <p class="text-neutral-800">{{ __('You already handed this chat to staff.') }} <span class="font-mono font-semibold" x-text="m.handoff.reference"></span></p>
+                                    <a :href="m.handoff.url" class="inline-flex font-medium text-teal-700 hover:underline">{{ __('Open your request') }}</a>
+                                </div>
+
+                                <form x-show="m.handoff.state === 'form'" @submit.prevent="confirmHandoff(m)" class="space-y-3 text-sm">
+                                    <p class="font-semibold text-neutral-900">{{ __('Send this to staff?') }}</p>
+                                    <p class="text-xs text-neutral-500">{{ __('They can see this chat, so you do not have to explain again. Change anything that is not right.') }}</p>
+                                    <div>
+                                        <label class="mb-1 block text-xs font-medium text-neutral-600">{{ __('What is it about?') }}</label>
+                                        <select x-model="m.handoff.category" class="block w-full rounded-lg border-neutral-300 text-sm focus:border-teal-600 focus:ring-teal-600">
+                                            <template x-for="c in (m.handoff.categories || [])" :key="c.value"><option :value="c.value" x-text="c.label" :selected="c.value === m.handoff.category"></option></template>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="mb-1 block text-xs font-medium text-neutral-600">{{ __('In a sentence or two, what happened?') }}</label>
+                                        <textarea x-model="m.handoff.summary" rows="3" maxlength="2000" class="block w-full rounded-lg border-neutral-300 text-sm leading-snug focus:border-teal-600 focus:ring-teal-600"></textarea>
+                                        <p class="mt-1 text-xs text-neutral-500">{{ __('Never include your M-Pesa PIN or a code from an SMS.') }}</p>
+                                    </div>
+                                    <p x-show="m.handoff.aim" class="text-xs text-neutral-500" x-text="m.handoff.aim"></p>
+                                    <p x-show="m.handoff.error" role="alert" class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-800" x-text="m.handoff.error"></p>
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <button type="submit" :disabled="m.handoff.sending" class="rounded-lg bg-teal-700 px-3.5 py-1.5 text-[13px] font-semibold text-white transition hover:bg-teal-800 disabled:opacity-60">{{ __('Send to staff') }}</button>
+                                        <button type="button" @click="cancelHandoff(m)" :disabled="m.handoff.sending" class="rounded-lg border border-neutral-300 bg-white px-3.5 py-1.5 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50">{{ __('Cancel') }}</button>
+                                    </div>
+                                </form>
+
+                                <div x-show="m.handoff.state === 'done'" class="space-y-2 text-sm">
+                                    <p class="font-semibold text-neutral-900">{{ __('Sent to staff') }} · <span class="font-mono" x-text="m.handoff.reference"></span></p>
+                                    <p class="text-neutral-700" x-text="m.handoff.aim"></p>
+                                    <a :href="m.handoff.url" class="inline-flex font-medium text-teal-700 hover:underline">{{ __('See your request and replies') }}</a>
+                                </div>
                             </div>
                         </template>
 
@@ -802,17 +844,70 @@
                 },
 
                 // Staff requests are not built yet, so say so plainly and give the one real way to reach a person.
-                talkToAPersonLive() {
+                // "Talk to a person": a confirmation in the chat. The category and summary are suggested by code from what the assistant showed; the member
+                // confirms or changes them, and ModelHub files the request. What staff see of the chat comes from the assistant, never from this page.
+                async talkToAPersonLive() {
+                    if (this.busy) return;
                     this.messages.push({ role: 'user', text: 'Talk to a person' });
-                    this.messages.push({
-                        role: 'assistant',
-                        text: this.supportEmail
-                            ? `Staff requests aren't switched on yet. For now, email ${this.supportEmail} and say what happened, with a payment reference if you have one. Never include your M-Pesa PIN or a code from an SMS.`
-                            : "Staff requests aren't switched on yet. Please try again a little later.",
-                        tool: null, cards: [], citations: [], chips: [],
-                    });
+                    const m = this.messages[this.messages.push({ role: 'assistant', text: '', tool: null, cards: [], citations: [], chips: [], choices: [], handoff: { state: 'loading' } }) - 1];
                     this.scroll();
-                    this.persist();
+
+                    try {
+                        const query = this.conversationId ? '?conversation_id=' + encodeURIComponent(this.conversationId) : '';
+                        const response = await fetch(this.endpoints.handoff + query, { credentials: 'same-origin', headers: this.headers() });
+                        if (! response.ok) throw new Error('prepare failed');
+                        const d = await response.json();
+
+                        m.handoff = d.existing
+                            ? { state: 'existing', reference: d.existing.reference, url: d.existing.url }
+                            : { state: 'form', categories: d.categories || [], category: d.category || 'other', summary: d.summary || '', aim: d.aim || '', error: '', sending: false };
+                    } catch (e) {
+                        m.handoff = null;
+                        m.text = this.supportEmail
+                            ? `I couldn't set that up just now. You can email ${this.supportEmail} and say what happened, with a payment reference if you have one. Never include your M-Pesa PIN or a code from an SMS.`
+                            : "I couldn't set that up just now. Please try again in a moment.";
+                    }
+
+                    // The form only exists once it has been drawn: scroll to it then, not before
+                    this.$nextTick(() => this.scroll());
+                },
+
+                async confirmHandoff(m) {
+                    const h = m.handoff;
+                    if (! h || h.sending) return;
+                    if (h.summary.trim().length < 5) { h.error = 'Tell us a little about what happened, so the person who picks this up knows where to start.'; return; }
+
+                    h.sending = true;
+                    h.error = '';
+
+                    try {
+                        const response = await fetch(this.endpoints.handoff, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: { ...this.headers(), 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ conversation_id: this.conversationId || undefined, category: h.category, summary: h.summary.trim() }),
+                        });
+                        const d = await response.json().catch(() => ({}));
+
+                        if (! response.ok) {
+                            h.error = (d.error && d.error.message) || (d.errors && d.errors.summary && d.errors.summary[0]) || 'That could not be sent. Please try again.';
+                            h.sending = false;
+                            return;
+                        }
+
+                        m.handoff = { state: 'done', reference: d.reference, url: d.url, aim: d.aim || '', again: !! d.existing };
+                    } catch (e) {
+                        h.error = "I couldn't reach ModelHub. Check your connection and try again.";
+                        h.sending = false;
+                    }
+
+                    this.$nextTick(() => this.scroll());
+                },
+
+                cancelHandoff(m) {
+                    m.handoff = null;
+                    m.text = 'No problem, nothing was sent. Ask me anything else, or press "Talk to a person" whenever you want a person.';
+                    this.scroll();
                 },
 
                 async sendLive(text, action) {

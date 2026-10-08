@@ -42,6 +42,9 @@ return [
         'context_issuer' => 'modelhub',
         'context_audience' => 'support-agent',
         'context_ttl' => 60,
+        // The claim that lets a staff member read ONE member's assistant chat for a ticket (T6): its own audience and scope
+        'staff_claim_audience' => 'support-staff',
+        'staff_claim_scope' => 'support:transcript:read',
     ],
 
     /*
@@ -88,6 +91,50 @@ return [
         ],
         'claim_audience' => 'support-reads',
         'claim_scope' => 'support:read:self',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Support tickets: what members are told, and the clocks staff work to
+    |--------------------------------------------------------------------------
+    |
+    | PROVISIONAL (O-11): the hours and the targets below are placeholders from modelhub-support/docs/09 until the owner decides the real ones. They are
+    | kept here, in one place, so changing a number never means changing code. Times are minutes of BUSINESS time, counted in the business hours.
+    | Members are shown them as "we aim to reply within...", never as a promise.
+    |
+    */
+
+    'tickets' => [
+        'timezone' => 'Africa/Nairobi',
+        'business_days' => [1, 2, 3, 4, 5], // Monday to Friday (ISO)
+        'business_hours' => ['start' => '08:00', 'end' => '18:00'],
+        // severity => [first reply, resolution], in business minutes; null resolution = best effort
+        'targets' => [
+            'urgent' => ['first_response' => 60, 'resolution' => 600],
+            'high' => ['first_response' => 240, 'resolution' => 600],
+            'normal' => ['first_response' => 600, 'resolution' => 1800],
+            'low' => ['first_response' => 1200, 'resolution' => null],
+        ],
+        // A member reply on a resolved ticket reopens it for this long; after that they start a new one
+        'reopen_days' => 14,
+        // Per member
+        'max_open' => 5,
+        'max_per_day' => 5,
+        'max_replies_per_hour' => 20,
+        // Files members and staff attach to a message. Images are JPEG or PNG only (this PHP build cannot re-encode WebP or HEIC), and every image is decoded
+        // and written out again, which drops metadata (location, device) and anything hidden after the picture. PDFs are checked, never opened or previewed.
+        'attachments' => [
+            'disk' => env('SUPPORT_ATTACHMENTS_DISK', 'local'), // private: nothing here is ever served by the web server
+            'max_files' => 5, // per message
+            'max_bytes' => 5 * 1024 * 1024, // per file
+            'max_per_ticket' => 25,
+            'max_per_member_per_day' => 30,
+            'max_pixels' => 25_000_000, // a picture claiming to be bigger is refused before it is decoded (a decompression bomb)
+        ],
+        // How long a ticket keeps the assistant's evidence snapshot after it is resolved (PROVISIONAL, part of O-04). The thread is kept; only the snapshot goes.
+        'evidence_retention_days' => (int) env('SUPPORT_TICKET_EVIDENCE_DAYS', 90),
+        // Words that make a ticket high severity whatever the records say
+        'urgent_words' => ['scam', 'scammed', 'fraud', 'police', 'lawyer', 'court', 'stolen', 'hacked'],
     ],
 
 ];
