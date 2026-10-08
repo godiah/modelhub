@@ -397,6 +397,30 @@ test('opening a source from an answer narrows the highlight using that answer', 
     assert.deepEqual(plain(data.article.sections.filter((s) => s.cited).map((s) => s.heading)), ['Review']);
 });
 
+// ---- when the assistant says "wait" --------------------------------------------------------------------------------------------------------------
+
+test('a 429 from the assistant shows its own words, hands the message back, and does not switch the whole panel off', async () => {
+    const { data } = boot(() => json({ error: { code: 'busy', message: 'I am still answering your last message. Please wait for it to finish.' } }, 429));
+
+    await data.sendLive('and my refund?');
+
+    assert.equal(data.guard, 'I am still answering your last message. Please wait for it to finish.');
+    assert.equal(data.input, 'and my refund?');               // the text is given back to send again
+    assert.equal(data.state, 'ready');                        // the panel is not "unavailable"
+    assert.equal(data.messages.some((m) => m.role === 'user'), false);  // the turn was taken back out (the greeting stays)
+    assert.equal(data.busy, false);
+});
+
+test('a 429 that is not the assistant\'s own (the site\'s throttle) keeps the standard wording, never a raw server message', async () => {
+    const { data } = boot(() => json({ message: 'Too Many Attempts.' }, 429));
+
+    await data.sendLive('hello');
+
+    assert.match(data.guard, /sending messages quickly/);
+    assert.doesNotMatch(data.guard, /Too Many Attempts/);
+    assert.equal(data.state, 'ready');
+});
+
 // ---- waiting for an answer -----------------------------------------------------------------------------------------------------------------------
 
 test('the wait is counted while an answer is being prepared, the label changes when it runs long, and it stops when the answer fails', async () => {

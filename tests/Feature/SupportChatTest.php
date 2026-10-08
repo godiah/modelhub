@@ -181,6 +181,25 @@ it('passes on answers the member can act on, and keeps its own failures private'
     'the service crashed' => [500, ['error' => 'boom'], 503, 'assistant_unavailable'],
 ]);
 
+it('passes on "too fast" and "still answering" with their wait time, in the assistant\'s own words, and nothing else a 429 carries', function (array $agentBody, string $retryAfter, ?string $expectedRetry, string $code) {
+    Http::fake(['agent.test/*' => Http::response($agentBody, 429, ['Retry-After' => $retryAfter])]);
+
+    $response = $this->actingAs(User::factory()->create())->postJson(route('support.chat'), ['message' => 'hi'])
+        ->assertStatus($code === 'assistant_unavailable' ? 503 : 429)
+        ->assertJsonPath('error.code', $code);
+
+    if ($expectedRetry !== null) {
+        expect($response->headers->get('Retry-After'))->toBe($expectedRetry)->and($response->json('error.message'))->toBe($agentBody['error']['message']);
+    }
+    expect($response->getContent())->not->toContain('internal-detail');
+})->with([
+    'sending too quickly' => [['error' => ['code' => 'rate_limited', 'message' => 'You are sending messages too quickly.']], '30', '30', 'rate_limited'],
+    'still answering the last message' => [['error' => ['code' => 'busy', 'message' => 'I am still answering your last message.']], '5', '5', 'busy'],
+    'a wait that is absurd is capped' => [['error' => ['code' => 'rate_limited', 'message' => 'Slow down.']], '99999', '300', 'rate_limited'],
+    'a wait that is missing becomes thirty seconds' => [['error' => ['code' => 'rate_limited', 'message' => 'Slow down.']], '', '30', 'rate_limited'],
+    'some other 429 stays private' => [['error' => ['code' => 'quota', 'message' => 'internal-detail']], '10', null, 'assistant_unavailable'],
+]);
+
 it('says the assistant is unavailable when the service cannot be reached or is not configured', function () {
     $user = User::factory()->create();
 
