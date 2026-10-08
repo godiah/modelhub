@@ -1,3 +1,8 @@
+@php
+    $eligible = $tickets->filter(fn ($t) => $t->status->isActive() && $t->assignee_id === null);
+    $actions = $eligible->isNotEmpty() ? \App\Support\Staff\BulkActions::forPage('tickets', auth()->user()) : [];
+    $bulkIds = $eligible->pluck('id')->all();
+@endphp
 <x-staff-layout :title="__('Support requests')">
     <div class="container mx-auto max-w-7xl px-4 py-8">
         <x-staff.header :title="__('Support requests')" :description="__('What members have handed to staff from the assistant. The most urgent are first; a red time means the reply is already late.')" />
@@ -31,13 +36,17 @@
         @if ($tickets->isEmpty())
             <x-empty-state icon="inbox" :title="$tab === 'overdue' ? __('Nothing is overdue') : __('Nothing here')" :description="$tab === 'overdue' ? __('Every request is inside the reply time for its urgency.') : __('No support requests match this view.')" />
         @else
+            <x-staff.bulk :actions="$actions" :ids="$bulkIds">
+            @if ($actions)<x-staff.bulk-selectall />@endif
             <div class="space-y-3">
                 @foreach ($tickets as $ticket)
                     @php
                         $due = $ticket->first_responded_at === null ? $ticket->first_response_due_at : $ticket->resolution_due_at;
                         $late = $ticket->isOverdue();
                     @endphp
-                    <a href="{{ route('admin.support.tickets.show', $ticket) }}" class="block rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:border-neutral-300 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
+                    <div class="flex items-start gap-3">
+                    @if ($actions && $ticket->status->isActive() && $ticket->assignee_id === null)<div class="pt-6"><x-staff.bulk-check :value="$ticket->id" :label="__('Select request :ref', ['ref' => $ticket->reference])" /></div>@elseif ($actions)<div class="w-4 shrink-0"></div>@endif
+                    <a href="{{ route('admin.support.tickets.show', $ticket) }}" class="block min-w-0 flex-1 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:border-neutral-300 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="min-w-0">
                                 <div class="flex flex-wrap items-center gap-2">
@@ -57,8 +66,10 @@
                             @endif
                         </div>
                     </a>
+                    </div>
                 @endforeach
             </div>
+            </x-staff.bulk>
             <div class="mt-6">{{ $tickets->links() }}</div>
         @endif
     </div>

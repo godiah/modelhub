@@ -80,10 +80,27 @@
 
                 @if ($canManage && ! $closed)
                     <x-card class="rounded-2xl">
-                        <form method="POST" action="{{ route('admin.support.tickets.reply', $ticket) }}" enctype="multipart/form-data" class="space-y-3 p-6">
+                        <form method="POST" action="{{ route('admin.support.tickets.reply', $ticket) }}" enctype="multipart/form-data" class="space-y-3 p-6"
+                            x-data="{ replies: @js($savedReplies), chosen: '', used: @js(old('saved_reply')),
+                                insert() { const r = this.replies.find(x => String(x.id) === this.chosen); if (! r) return; const el = this.$refs.reply; el.value = el.value.trim() === '' ? r.body : el.value.replace(/\s+$/, '') + '\n\n' + r.body; this.used = r.id; this.chosen = ''; el.focus(); } }">
                             @csrf
-                            <label for="reply-body" class="block text-sm font-semibold text-neutral-900">{{ __('Reply to the member') }}</label>
-                            <textarea id="reply-body" name="body" rows="4" maxlength="{{ \App\Services\Support\Tickets\TicketService::BODY_MAX }}" class="block w-full rounded-xl border-neutral-300 text-sm focus:border-teal-600 focus:ring-teal-600">{{ old('body') }}</textarea>
+                            <input type="hidden" name="saved_reply" :value="used">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <label for="reply-body" class="block text-sm font-semibold text-neutral-900">{{ __('Reply to the member') }}</label>
+                                @if ($savedReplies !== [])
+                                    <div class="flex items-center gap-2">
+                                        <label for="saved-reply" class="sr-only">{{ __('Insert a saved reply') }}</label>
+                                        <select id="saved-reply" x-model="chosen" @change="insert()" class="rounded-xl border-neutral-300 py-1.5 text-sm focus:border-teal-600 focus:ring-teal-600">
+                                            <option value="">{{ __('Insert a saved reply…') }}</option>
+                                            @foreach (collect($savedReplies)->groupBy('topic') as $topic => $items)
+                                                <optgroup label="{{ __($topic) }}">@foreach ($items as $reply)<option value="{{ $reply['id'] }}">{{ $reply['title'] }}</option>@endforeach</optgroup>
+                                            @endforeach
+                                        </select>
+                                        <a href="{{ route('admin.support.replies.index') }}" class="text-xs font-medium text-teal-700 hover:underline">{{ __('Manage') }}</a>
+                                    </div>
+                                @endif
+                            </div>
+                            <textarea id="reply-body" name="body" x-ref="reply" rows="6" maxlength="{{ \App\Services\Support\Tickets\TicketService::BODY_MAX }}" class="block w-full rounded-xl border-neutral-300 text-sm focus:border-teal-600 focus:ring-teal-600">{{ old('body') }}</textarea>
                             @error('body')<p class="text-xs text-red-700">{{ $message }}</p>@enderror
                             <label class="block text-sm text-neutral-600">{{ __('Attach files') }} <span class="text-tertiary">{{ __('(JPEG, PNG or PDF)') }}</span>
                                 <input type="file" name="files[]" multiple accept="image/jpeg,image/png,application/pdf" class="mt-1 block w-full text-sm">

@@ -8,7 +8,9 @@ use App\Enums\SupportTicketStatus;
 use App\Helpers\FlashAlertHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
+use App\Models\SupportSavedReply;
 use App\Models\SupportTicket;
+use App\Services\Support\Tickets\SavedReplies;
 use App\Services\Support\Tickets\TicketService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -32,8 +34,7 @@ class AdminSupportTicketController extends Controller
             'queue' => $query->needingStaff(),
             'mine' => $query->active()->where('assignee_id', auth()->id()),
             'waiting' => $query->where('status', SupportTicketStatus::PendingMember->value),
-            'overdue' => $query->needingStaff()->where(fn ($q) => $q->where(fn ($a) => $a->whereNull('first_responded_at')->where('first_response_due_at', '<', now()))
-                ->orWhere(fn ($b) => $b->whereNotNull('first_responded_at')->where('resolution_due_at', '<', now()))),
+            'overdue' => $query->overdue(),
             'resolved' => $query->whereIn('status', [SupportTicketStatus::Resolved->value, SupportTicketStatus::Closed->value]),
             default => $query,
         };
@@ -51,14 +52,20 @@ class AdminSupportTicketController extends Controller
         return view('admin.support.tickets.index', ['tickets' => $tickets, 'tab' => $tab, 'tabs' => $tabs, 'counts' => $counts, 'search' => $search]);
     }
 
-    public function show(SupportTicket $ticket)
+    public function show(Request $request, SupportTicket $ticket, SavedReplies $replies)
     {
+        $staff = $request->user();
         $ticket->load(['requester:id,name,email', 'assignee:id,name', 'messages.member:id,name', 'messages.staff:id,name', 'messages.attachments']);
 
         return view('admin.support.tickets.show', [
             'ticket' => $ticket,
             'team' => Staff::permission('manage support tickets')->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'tags' => SupportResolutionTag::cases(),
+            // The team's replies and the person's own, already filled in for THIS ticket (who it is to, its reference, the live numbers)
+            'savedReplies' => $staff->can('manage support tickets')
+                ? SupportSavedReply::visibleTo($staff)->orderBy('topic')->orderBy('title')->get()
+                    ->map(fn (SupportSavedReply $r) => ['id' => $r->id, 'title' => $r->title, 'topic' => $r->topic, 'body' => $replies->render($r->body, $ticket, $staff)])->all()
+                : [],
         ]);
     }
 
@@ -68,9 +75,17 @@ class AdminSupportTicketController extends Controller
             'body' => ['nullable', 'string', 'max:'.TicketService::BODY_MAX],
             'files' => ['nullable', 'array', 'max:'.(int) config('support.tickets.attachments.max_files')],
             'files.*' => ['file'],
+            'saved_reply' => ['nullable', 'integer'],
         ]);
 
-        return $this->done($this->tickets->staffReply($ticket, $request->user(), (string) ($data['body'] ?? ''), $request->file('files', [])), 'Reply sent', 'The member has been told.');
+        $result = $this->tickets->staffReply($ticket, $request->user(), (string) ($data['body'] ?? ''), $request->file('files', []));
+
+        // Count a saved reply as used only once a reply that began from it was really sent, and only if this person may use it
+        if (! is_string($result) && ($data['saved_reply'] ?? null)) {
+            SupportSavedReply::visibleTo($request->user())->whereKey($data['saved_reply'])->increment('uses');
+        }
+
+        return $this->done($result, 'Reply sent', 'The member has been told.');
     }
 
     public function note(Request $request, SupportTicket $ticket)

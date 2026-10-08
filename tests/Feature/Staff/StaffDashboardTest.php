@@ -87,10 +87,10 @@ it('only builds the queues the person may work', function () {
 
     expect($labels(staffWith('Marketplace moderator')))->toBe(['Models', 'Applications', 'Reports'])
         ->and($labels(staffWith('Dispute manager')))->toBe(['Disputes'])
-        ->and($labels(staffWith('Support')))->toBe(['Disputes'])
+        ->and($labels(staffWith('Support')))->toBe(['Disputes', 'Requests'])
         ->and($labels(staffWith('Auditor')))->toBe(['Disputes'])
         ->and($labels(staffWith('Finance')))->toBe(['Payments', 'Escrow refunds', 'Payouts'])
-        ->and($labels(staffWith('Super admin')))->toBe(['Models', 'Applications', 'Reports', 'Disputes', 'Payments', 'Escrow refunds', 'Payouts'])
+        ->and($labels(staffWith('Super admin')))->toBe(['Models', 'Applications', 'Reports', 'Disputes', 'Requests', 'Payments', 'Escrow refunds', 'Payouts'])
         ->and($labels(staffWith()))->toBe([]);
 
     dashboardFor(staffWith('Dispute manager'))->assertDontSee('Model to review');

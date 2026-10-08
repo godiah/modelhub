@@ -10,20 +10,41 @@ use App\Enums\SupportTicketSeverity;
  */
 final class TicketTargets
 {
+    /** "within 4 business hours" */
     public static function firstReply(SupportTicketSeverity $severity): string
     {
+        return __('within :amount', ['amount' => self::firstReplyAmount($severity)]);
+    }
+
+    /** "4 business hours": the same target without the "within", for a sentence that supplies its own words. */
+    public static function firstReplyAmount(SupportTicketSeverity $severity): string
+    {
         $minutes = (int) config("support.tickets.targets.{$severity->value}.first_response");
+
+        return self::amount($minutes);
+    }
+
+    /** The resolution target, for staff ("1 business day", or "Best effort" when there is none). */
+    public static function resolutionAmount(SupportTicketSeverity $severity): string
+    {
+        $minutes = config("support.tickets.targets.{$severity->value}.resolution");
+
+        return $minutes === null ? __('Best effort') : self::amount((int) $minutes);
+    }
+
+    private static function amount(int $minutes): string
+    {
         $day = self::dayMinutes();
 
         if ($minutes >= $day && $minutes % $day === 0) {
             $days = intdiv($minutes, $day);
 
-            return trans_choice('within :count business day|within :count business days', $days, ['count' => $days]);
+            return trans_choice(':count business day|:count business days', $days, ['count' => $days]);
         }
 
         $hours = max(1, (int) round($minutes / 60));
 
-        return trans_choice('within :count business hour|within :count business hours', $hours, ['count' => $hours]);
+        return trans_choice(':count business hour|:count business hours', $hours, ['count' => $hours]);
     }
 
     /** "weekdays, 8am to 6pm EAT" */

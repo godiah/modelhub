@@ -2,7 +2,7 @@
     // area (the part of an action before its dot) => [singular|plural label, icon]
     $areas = [
         'model' => ['model|models', 'cube'], 'seller' => ['store|stores', 'tag'], 'review' => ['review|reviews', 'flag'], 'dispute' => ['dispute|disputes', 'scale'],
-        'project' => ['project|projects', 'briefcase'], 'member' => ['member|members', 'user-group'], 'role' => ['role|roles', 'shield-check'], 'settings' => ['setting|settings', 'cog-6-tooth'],
+        'project' => ['project|projects', 'briefcase'], 'support' => ['request|requests', 'inbox'], 'member' => ['member|members', 'user-group'], 'role' => ['role|roles', 'shield-check'], 'settings' => ['setting|settings', 'cog-6-tooth'],
     ];
     $max = max(1, collect($work['daily'])->max('count'));
     $delta = $work['total'] - $work['previous'];
@@ -75,6 +75,31 @@
                                         <span class="block text-xs text-tertiary">{{ __('filed :when', ['when' => $dispute->created_at->diffForHumans()]) }}@if ($amount !== null) · {{ \App\Support\Money::format($amount, 0) }}@endif</span>
                                     </span>
                                     <span @class(['shrink-0 text-xs font-medium tabular-nums', 'text-red-700' => $tone === 'red', 'text-amber-700' => $tone === 'amber', 'text-tertiary' => $tone === 'neutral'])>{{ $days < 1 ? __('today') : trans_choice(':count day|:count days', $days, ['count' => $days]) }}</span>
+                                    <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-neutral-300 transition-colors group-hover:text-teal-600" />
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if ($work['tickets']->isNotEmpty())
+                <div>
+                    <h3 class="mb-2 text-xs font-semibold uppercase tracking-wider text-neutral-400">{{ __('Support requests you have') }}</h3>
+                    <ul class="space-y-2">
+                        @foreach ($work['tickets'] as $ticket)
+                            @php
+                                $late = $ticket->isOverdue();
+                                $tone = $late ? 'red' : \App\Services\Admin\StaffDashboardService::tone($ticket->created_at);
+                            @endphp
+                            <li>
+                                <a href="{{ route('admin.support.tickets.show', $ticket) }}" class="group flex items-center gap-3 rounded-xl border border-neutral-200 px-3.5 py-3 transition-colors hover:border-teal-300 hover:bg-teal-50/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary/40">
+                                    <span @class(['flex h-9 w-9 shrink-0 items-center justify-center rounded-full', 'bg-red-50 text-red-700' => $tone === 'red', 'bg-amber-50 text-amber-700' => $tone === 'amber', 'bg-teal-50 text-teal-700' => $tone === 'neutral'])><x-icon name="inbox" class="h-5 w-5" /></span>
+                                    <span class="min-w-0 flex-1">
+                                        <span class="block truncate text-sm font-semibold text-neutral-900"><span class="font-mono">{{ $ticket->reference }}</span> · {{ __($ticket->category->label()) }}</span>
+                                        <span class="block text-xs text-tertiary">{{ $ticket->requester?->name ?? __('A deleted account') }} · {{ __($ticket->severity->label()) }} · {{ __($ticket->status->label()) }}</span>
+                                    </span>
+                                    @if ($late)<span class="shrink-0 text-xs font-medium text-red-700">{{ __('Overdue') }}</span>@endif
                                     <x-icon name="chevron-right" class="h-4 w-4 shrink-0 text-neutral-300 transition-colors group-hover:text-teal-600" />
                                 </a>
                             </li>
