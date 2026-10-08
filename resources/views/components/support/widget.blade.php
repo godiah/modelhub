@@ -974,7 +974,8 @@
                         this.conversationId = null;
                         this.guard = 'That conversation is no longer available. Send your message again to start a new one.';
                     } else if (response.status === 429) {
-                        this.guard = "You're sending messages quickly. Wait a moment and try again.";
+                        // The assistant's own words when it was the one that said wait ("still answering your last message"); otherwise ours
+                        this.guard = (code === 'busy' || code === 'rate_limited') && message ? message : "You're sending messages quickly. Wait a moment and try again.";
                     } else if (response.status === 401 || response.status === 419) {
                         this.guard = 'Your session has ended. Reload the page and sign in again.';
                     } else if (response.status === 422) {

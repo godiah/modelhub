@@ -63,6 +63,13 @@ class SupportChatController extends Controller
             return response()->json($reply->json() ?? [], $reply->status());
         }
 
+        // Sending too fast, or while the last answer is still being written: the member can act on that, so it is passed on with its wait time.
+        // Only the two codes the assistant uses are passed, with its own words, never whatever else a 429 might carry.
+        if ($reply->status() === Response::HTTP_TOO_MANY_REQUESTS && in_array($reply->json('error.code'), ['rate_limited', 'busy'], true)) {
+            return $this->error((string) $reply->json('error.code'), Str::limit((string) $reply->json('error.message'), 200), Response::HTTP_TOO_MANY_REQUESTS)
+                ->withHeaders(['Retry-After' => (string) max(1, min(300, (int) $reply->header('Retry-After') ?: 30))]);
+        }
+
         // Anything else (rejected signature, a crash on their side) is our problem, not the member's, and says nothing about why.
         Log::error('Support assistant refused or failed', ['request_id' => $requestId, 'status' => $reply->status(), 'body' => Str::limit($reply->body(), 300)]);
 
