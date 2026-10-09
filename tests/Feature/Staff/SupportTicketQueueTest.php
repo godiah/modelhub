@@ -260,3 +260,103 @@ it('leaves the audit trail of what staff did', function () {
 
     expect($actions)->toBe(['support.ticket.replied', 'support.ticket.resolved']);
 });
+
+// ---- the ticket screen reads as one history ---------------------------------------------------------------------
+
+it('shows what was done to a request in the order it happened, between the messages', function () {
+    $ticket = makeTicket();
+    $grace = actingAsStaff('Support');
+    $service = app(TicketService::class);
+    $service->assign($ticket, $grace, $grace);
+    $this->travel(1)->minutes();
+    $service->staffReply($ticket, $grace, 'We are looking into it now.');
+    $this->travel(1)->minutes();
+    $service->setSeverity($ticket, $grace, SupportTicketSeverity::Urgent);
+
+    $this->get(route('admin.support.tickets.show', $ticket))->assertOk()
+        ->assertSeeInOrder(['I paid but I have no licence', 'Assigned '.$ticket->reference.' to '.$grace->name, 'We are looking into it now.', 'Changed '.$ticket->reference.' from', 'by '.$grace->name]);
+});
+
+it('says how the clock stands: overdue, due, or waiting for the member', function () {
+    $ticket = makeTicket();
+    $grace = actingAsStaff('Support');
+
+    $ticket->update(['first_response_due_at' => now()->addHours(5)]);
+    $this->get(route('admin.support.tickets.show', $ticket))->assertSee('First reply due in')->assertDontSee('overdue by');
+
+    $ticket->update(['first_response_due_at' => now()->subHours(3)]);
+    $this->get(route('admin.support.tickets.show', $ticket))->assertSee('First reply overdue by');
+
+    app(TicketService::class)->staffReply($ticket, $grace, 'Hello.');
+    $this->get(route('admin.support.tickets.show', $ticket->refresh()))->assertSee('Waiting for the member')->assertDontSee('overdue by');
+});
+
+it('offers "Take it" to a person who answers requests, until they have it', function () {
+    $ticket = makeTicket();
+    $grace = actingAsStaff('Support');
+
+    $this->get(route('admin.support.tickets.show', $ticket))->assertSee('Take it')->assertSee('Nobody has it yet');
+
+    $this->post(route('admin.support.tickets.assign', $ticket), ['assignee_id' => $grace->id])->assertRedirect();
+    $this->get(route('admin.support.tickets.show', $ticket->refresh()))->assertDontSee('Take it')->assertSee('With '.$grace->name);
+
+    // someone who can only look is never offered it
+    $this->actingAs(viewOnlyStaff(), 'staff')->get(route('admin.support.tickets.show', $ticket))->assertOk()->assertDontSee('Take it');
+});
+
+it('puts what the assistant read under the record it is about, with the time the way a person reads it', function () {
+    $ticket = makeTicket();
+    $ticket->forceFill([
+        'entity_refs' => ['withdrawal:PO123ABC'],
+        'evidence' => ['facts' => ['Withdrawal PO123ABC: Being sent, Ksh15,000 (as of 2026-10-07T22:36:47+03:00)', 'The member has asked twice.']],
+    ])->save();
+    actingAsStaff('Support');
+
+    $html = $this->get(route('admin.support.tickets.show', $ticket))->assertOk()
+        ->assertSeeInOrder(['Records this is about', 'PO123ABC', 'Withdrawal PO123ABC: Being sent, Ksh15,000', 'As the assistant saw it at Oct 7, 10:36 PM', 'What the assistant showed', 'The member has asked twice.'])->getContent();
+
+    expect($html)->not->toContain('2026-10-07T22:36:47');
+});
+
+it('keeps the person on the tab they were using when a note or a resolution is refused', function () {
+    $ticket = makeTicket();
+    actingAsStaff('Support');
+
+    $this->from(route('admin.support.tickets.show', $ticket))->post(route('admin.support.tickets.resolve', $ticket), ['tag' => 'not-a-tag', 'tab' => 'resolve'])->assertRedirect();
+    $html = $this->get(route('admin.support.tickets.show', $ticket))->getContent();
+
+    expect($html)->toContain("tab: 'resolve'");
+});
+
+it('draws people in the history with their own avatar, not a letter', function () {
+    $member = User::factory()->create(['name' => 'Wanjiru Kamau']);
+    $ticket = makeTicket($member);
+    $grace = actingAsStaff('Support');
+    app(TicketService::class)->staffReply($ticket, $grace, 'On it.');
+    app(TicketService::class)->note($ticket, $grace, 'Checked the gateway.');
+
+    $html = $this->get(route('admin.support.tickets.show', $ticket))->assertOk()->getContent();
+
+    expect($html)->toContain($member->avatarUrl())->toContain($grace->avatarUrl())
+        ->and(substr_count($html, $member->avatarUrl()))->toBeGreaterThanOrEqual(2) // the history and the side card
+        ->and($html)->not->toContain('>W</span>');
+});
+
+it('does nothing, and writes nothing to the history, when the assignee or the urgency is not really changed', function () {
+    $ticket = makeTicket();
+    $grace = actingAsStaff('Support');
+    $service = app(TicketService::class);
+    $service->assign($ticket, $grace, $grace);
+    $logged = fn () => StaffActivity::where('subject_type', 'SupportTicket')->where('subject_id', $ticket->id)->count();
+    $before = $logged();
+
+    $this->post(route('admin.support.tickets.assign', $ticket), ['assignee_id' => $grace->id])->assertRedirect();
+    $this->post(route('admin.support.tickets.severity', $ticket), ['severity' => $ticket->refresh()->severity->value])->assertRedirect();
+    $service->assign($ticket->refresh(), $grace, $grace);
+    $service->setSeverity($ticket, $grace, $ticket->severity);
+
+    expect($logged())->toBe($before);
+
+    $this->post(route('admin.support.tickets.assign', $ticket), ['assignee_id' => ''])->assertRedirect();
+    expect($logged())->toBe($before + 1)->and($ticket->refresh()->assignee_id)->toBeNull();
+});

@@ -8,6 +8,7 @@ use App\Enums\SupportTicketStatus;
 use App\Helpers\FlashAlertHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Staff;
+use App\Models\StaffActivity;
 use App\Models\SupportSavedReply;
 use App\Models\SupportTicket;
 use App\Services\Support\Tickets\SavedReplies;
@@ -55,10 +56,16 @@ class AdminSupportTicketController extends Controller
     public function show(Request $request, SupportTicket $ticket, SavedReplies $replies)
     {
         $staff = $request->user();
-        $ticket->load(['requester:id,name,email', 'assignee:id,name', 'messages.member:id,name', 'messages.staff:id,name', 'messages.attachments']);
+        $ticket->load(['requester:id,name,email,avatar', 'assignee:id,name,avatar', 'messages.member:id,name,avatar', 'messages.staff:id,name,avatar', 'messages.attachments']);
+
+        // Replies and notes are messages already; what else happened to the request (assigned, urgency changed, resolved, closed) comes from the
+        // activity log, so the page reads as one history
+        $events = StaffActivity::with('staff:id,name,avatar')->where('subject_type', 'SupportTicket')->where('subject_id', $ticket->getKey())
+            ->whereIn('action', ['support.ticket.assigned', 'support.ticket.severity', 'support.ticket.resolved', 'support.ticket.closed'])->orderBy('id')->get();
 
         return view('admin.support.tickets.show', [
             'ticket' => $ticket,
+            'events' => $events,
             'team' => Staff::permission('manage support tickets')->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'tags' => SupportResolutionTag::cases(),
             // The team's replies and the person's own, already filled in for THIS ticket (who it is to, its reference, the live numbers)
@@ -104,6 +111,10 @@ class AdminSupportTicketController extends Controller
             return back()->with(FlashAlertHelper::error('Cannot assign', 'That person does not answer support tickets.'));
         }
 
+        if ($ticket->assignee_id === $to?->id) {
+            return back()->with(FlashAlertHelper::info('Nothing changed', $to ? "{$to->name} already has this request." : 'Nobody had this request.'));
+        }
+
         $this->tickets->assign($ticket, $request->user(), $to);
 
         return back()->with(FlashAlertHelper::success($to ? "Assigned to {$to->name}" : 'Unassigned'));
@@ -112,7 +123,13 @@ class AdminSupportTicketController extends Controller
     public function severity(Request $request, SupportTicket $ticket)
     {
         $data = $request->validate(['severity' => ['required', Rule::enum(SupportTicketSeverity::class)]]);
-        $this->tickets->setSeverity($ticket, $request->user(), SupportTicketSeverity::from($data['severity']));
+        $severity = SupportTicketSeverity::from($data['severity']);
+
+        if ($ticket->severity === $severity) {
+            return back()->with(FlashAlertHelper::info('Nothing changed', 'It is already '.$severity->value.'.'));
+        }
+
+        $this->tickets->setSeverity($ticket, $request->user(), $severity);
 
         return back()->with(FlashAlertHelper::success('Urgency changed', 'The reply times were worked out again from when it was filed.'));
     }
