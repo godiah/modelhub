@@ -27,12 +27,14 @@ class AdminSupportTicketController extends Controller
 
     public function index(Request $request)
     {
-        $tabs = ['queue' => 'Needs staff', 'mine' => 'Mine', 'waiting' => 'Waiting for member', 'overdue' => 'Overdue', 'resolved' => 'Resolved', 'all' => 'All'];
+        $tabs = ['queue' => 'Needs staff', 'unassigned' => 'Nobody has it', 'soon' => 'Due soon', 'mine' => 'Mine', 'waiting' => 'Waiting for member', 'overdue' => 'Overdue', 'resolved' => 'Resolved', 'all' => 'All'];
         $tab = array_key_exists($request->query('tab'), $tabs) ? $request->query('tab') : 'queue';
         $search = trim((string) $request->query('q'));
 
         $apply = fn ($query, string $key) => match ($key) {
             'queue' => $query->needingStaff(),
+            'unassigned' => $query->needingStaff()->whereNull('assignee_id'),
+            'soon' => $query->dueSoon(120),
             'mine' => $query->active()->where('assignee_id', auth()->id()),
             'waiting' => $query->where('status', SupportTicketStatus::PendingMember->value),
             'overdue' => $query->overdue(),

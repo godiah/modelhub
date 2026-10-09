@@ -12,6 +12,7 @@ use App\Services\Admin\StaffDashboardService;
 use App\Services\Support\Tickets\TicketService;
 use App\Support\Staff\BulkActions;
 use App\Support\Staff\StaffAccess;
+use Carbon\CarbonImmutable;
 use Spatie\Permission\Models\Role;
 
 /*
@@ -241,4 +242,50 @@ it('resolves tickets the usual way so the resolved ones leave every count', func
     app(TicketService::class)->resolve($ticket, $staff, SupportResolutionTag::Other);
 
     expect(SupportTicket::needingStaff()->count())->toBe(0)->and(SupportTicket::overdue()->count())->toBe(0);
+});
+
+// ---- the service levels page leads to the work ----------------------------------------------------------------------
+
+it('links each of the four figures to the queue it counts', function () {
+    $html = $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.support.levels'))->assertOk()->getContent();
+
+    foreach (['queue', 'overdue', 'soon', 'unassigned'] as $tab) {
+        expect($html)->toContain(e(route('admin.support.tickets.index', ['tab' => $tab])));
+    }
+});
+
+it('lists exactly what each figure counted when you follow it', function () {
+    $mine = staffWith('Support');
+    $late = toolsTicket();
+    $late->update(['first_response_due_at' => now()->subHour(), 'assignee_id' => $mine->id]);
+    $soon = toolsTicket();
+    $soon->update(['first_response_due_at' => now()->addMinutes(20)]);
+    $later = toolsTicket();
+    $later->update(['first_response_due_at' => now()->addDays(2), 'assignee_id' => $mine->id]);
+
+    $refs = fn (string $tab) => collect($this->actingAs($mine, 'staff')->get(route('admin.support.tickets.index', ['tab' => $tab]))->assertOk()->viewData('tickets')->items())->pluck('reference')->sort()->values()->all();
+
+    expect($refs('overdue'))->toBe([$late->reference])
+        ->and($refs('soon'))->toBe([$soon->reference])
+        ->and($refs('unassigned'))->toBe(collect([$soon->reference])->all())
+        ->and($refs('queue'))->toHaveCount(3);
+});
+
+it('says whether support is open right now, and when it opens again', function () {
+    // each look is a fresh sign-in: the days jumped between them would otherwise time the first session out
+    $page = fn () => tap($this->flushSession())->actingAs(staffWith('Support'), 'staff')->get(route('admin.support.levels'))->assertOk();
+
+    $this->travelTo(CarbonImmutable::parse('2026-10-07 11:00', 'Africa/Nairobi')); // a Wednesday morning
+    $page()->assertSee('Open now')->assertDontSee('Closed now')->assertDontSee('Opens again');
+
+    $this->travelTo(CarbonImmutable::parse('2026-10-10 11:00', 'Africa/Nairobi')); // a Saturday
+    $page()->assertSee('Closed now')->assertSee('Opens again Monday at 8:00 AM');
+});
+
+it('draws the week from the configured days', function () {
+    config(['support.tickets.business_days' => [1, 2, 3, 4, 5, 6]]);
+    $this->travelTo(CarbonImmutable::parse('2026-10-07 11:00', 'Africa/Nairobi'));
+
+    $this->actingAs(staffWith('Support'), 'staff')->get(route('admin.support.levels'))->assertOk()
+        ->assertViewHas('week', fn ($week) => collect($week)->where('open', true)->count() === 6 && collect($week)->firstWhere('name', 'Sun')['open'] === false && collect($week)->firstWhere('name', 'Wed')['today'] === true);
 });
