@@ -243,8 +243,13 @@ class TicketService
         return $message;
     }
 
+    /** Hand the ticket to someone (or to nobody). Handing it to whoever already has it changes nothing and is not logged. */
     public function assign(SupportTicket $ticket, Staff $by, ?Staff $to): SupportTicket
     {
+        if ($ticket->assignee_id === $to?->id) {
+            return $ticket;
+        }
+
         $ticket->update(['assignee_id' => $to?->id]);
         StaffAudit::log('support.ticket.assigned', $to ? "Assigned {$ticket->reference} to {$to->name}" : "Unassigned {$ticket->reference}", $ticket, ['assignee_id' => $to?->id], $by->id);
 
@@ -255,6 +260,11 @@ class TicketService
     public function setSeverity(SupportTicket $ticket, Staff $by, SupportTicketSeverity $severity): SupportTicket
     {
         $from = $ticket->severity;
+
+        if ($from === $severity) {
+            return $ticket;
+        }
+
         $ticket->update(['severity' => $severity] + $this->clocks($severity, $ticket->created_at));
         StaffAudit::log('support.ticket.severity', "Changed {$ticket->reference} from {$from->value} to {$severity->value}", $ticket, ['from' => $from->value, 'to' => $severity->value], $by->id);
 
